@@ -37,7 +37,7 @@ ob_start();
 	class="mint-cta-lime mint-inline-flex mint-h-[38px] mint-items-center mint-justify-center mint-gap-2 mint-rounded-md mint-border-0 mint-px-[15px] mint-text-[15px] mint-font-semibold mint-no-underline focus-visible:mint-outline-none"
 >
 	<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M10 4.5v11M4.5 10h11"/></svg>
-	<?php esc_html_e( 'Add New Question', 'mint-lms' ); ?>
+	<?php esc_html_e( 'Add Question', 'mint-lms' ); ?>
 </a>
 <?php
 $headerActions = ob_get_clean();

@@ -75,9 +75,12 @@
   --mint-r-full: 999px;
 
   /* Focus — always visible, never removed */
-  --mint-focus: 0 0 0 3px rgba(63, 0, 255, 0.32);
+  --mint-focus: 0 0 0 3px rgba(63, 0, 255, 0.32); /* purple — selected chrome / non-field controls */
   --mint-focus-tight: 0 0 0 2px rgba(63, 0, 255, 0.32);  /* on rows */
   --mint-focus-danger: 0 0 0 3px rgba(194, 43, 43, 0.26);
+  /* Text / box hover+focus — soft mint glow (no dark #0B4F3F border) */
+  --mint-field-border: #98FBCB;
+  --mint-field-focus: 0 0 0 3px rgba(152, 251, 203, 0.45);
 
   /* Float shadows only */
   --mint-shadow-menu: 0 6px 16px rgba(15, 14, 26, 0.08);

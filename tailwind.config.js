@@ -39,6 +39,7 @@ module.exports = {
           900: '#0F0E1A',
         },
         accent: { DEFAULT: '#3F00FF', hover: '#3200CC', wash: '#EFEBFF' },
+        'mint-blue': '#98FBCB',
         cta: { DEFAULT: '#98FB98', hover: '#7FE87F', ink: '#0B4F3F' },
         bg: { DEFAULT: '#FFFFFF', hover: '#FAFAFC', subtle: '#F4F3F8', track: '#E7E4F3', ink: '#0F0E1A' },
         ink: { DEFAULT: '#0F0E1A', 2: '#33334A', 3: '#5C5C77' },
@@ -103,8 +104,8 @@ module.exports = {
         full: '999px',
       },
       boxShadow: {
-        focus: '0 0 0 3px rgba(63,0,255,.32)',
-        'focus-tight': '0 0 0 2px rgba(63,0,255,.32)',
+        focus: '0 0 0 3px rgba(152,251,203,.45)',
+        'focus-tight': '0 0 0 2px rgba(152,251,203,.45)',
         'focus-danger': '0 0 0 3px rgba(194,43,43,.26)',
         card: '0 8px 28px rgba(28,20,80,.07)',
         menu: '0 6px 16px rgba(15,14,26,.08)',

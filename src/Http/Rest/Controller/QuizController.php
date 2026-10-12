@@ -877,6 +877,46 @@ final class QuizController {
 			'releaseYear'                 => '',
 			'releaseHour'                 => '',
 			'releaseMinute'               => '',
+			'releaseDate'                 => '',
+			'externalQuiz'                => false,
+			'prerequisiteQuizId'          => 0,
+			'allowedRegisteredOnly'       => false,
+			'certificate'                 => 'none',
+			'materialsEnabled'            => false,
+			'materialsContent'            => '',
+			'autostart'                   => false,
+			'questionDisplay'             => 'one',
+			'resultsMode'                 => 'end',
+			'displayBackButton'           => false,
+			'questionOverview'            => false,
+			'quizSummary'                 => false,
+			'skipQuestion'                => false,
+			'customOrdering'              => false,
+			'sortByCategory'              => false,
+			'randomizeOrder'              => false,
+			'randomizeMode'               => 'all',
+			'randomizeCount'              => 0,
+			'customElements'              => false,
+			'showPointValue'              => false,
+			'showCategory'                => false,
+			'showPosition'                => false,
+			'showNumbering'               => false,
+			'numberAnswers'               => false,
+			'randomizeAnswers'            => false,
+			'showQuizTitle'               => true,
+			'resultMessagesEnabled'       => false,
+			'resultMessages'              => array(),
+			'restartButton'               => false,
+			'customResults'               => false,
+			'showAverageScore'            => false,
+			'showCategoryScore'           => false,
+			'showOverallScore'            => true,
+			'showCorrectCount'            => false,
+			'showTimeSpent'               => false,
+			'customAnswerFeedback'        => false,
+			'correctIncorrectMessages'    => false,
+			'correctIncorrectMarks'       => false,
+			'viewQuestionsButton'         => false,
 		);
 	}
 
@@ -941,13 +981,87 @@ final class QuizController {
 			'releaseMinute'              => '' === trim( (string) ( $settings['releaseMinute'] ?? '' ) )
 				? ''
 				: $this->sanitizeTimePart( $settings['releaseMinute'] ),
+			'releaseDate'                => sanitize_text_field( (string) ( $settings['releaseDate'] ?? '' ) ),
+			'externalQuiz'               => ! empty( $settings['externalQuiz'] ),
+			'prerequisiteQuizId'         => absint( $settings['prerequisiteQuizId'] ?? 0 ),
+			'allowedRegisteredOnly'      => ! empty( $settings['allowedRegisteredOnly'] ),
+			'certificate'                => sanitize_key( (string) ( $settings['certificate'] ?? 'none' ) ),
+			'materialsEnabled'           => ! empty( $settings['materialsEnabled'] ),
+			'materialsContent'           => wp_kses_post( (string) ( $settings['materialsContent'] ?? '' ) ),
+			'autostart'                  => ! empty( $settings['autostart'] ),
+			'questionDisplay'            => sanitize_key( (string) ( $settings['questionDisplay'] ?? 'one' ) ),
+			'resultsMode'                => sanitize_key( (string) ( $settings['resultsMode'] ?? 'end' ) ),
+			'displayBackButton'          => ! empty( $settings['displayBackButton'] ),
+			'questionOverview'           => ! empty( $settings['questionOverview'] ),
+			'quizSummary'                => ! empty( $settings['quizSummary'] ),
+			'skipQuestion'               => ! empty( $settings['skipQuestion'] ),
+			'customOrdering'             => ! empty( $settings['customOrdering'] ),
+			'sortByCategory'             => ! empty( $settings['sortByCategory'] ),
+			'randomizeOrder'             => ! empty( $settings['randomizeOrder'] ),
+			'randomizeMode'              => sanitize_key( (string) ( $settings['randomizeMode'] ?? 'all' ) ),
+			'randomizeCount'             => absint( $settings['randomizeCount'] ?? 0 ),
+			'customElements'             => ! empty( $settings['customElements'] ),
+			'showPointValue'             => ! empty( $settings['showPointValue'] ),
+			'showCategory'               => ! empty( $settings['showCategory'] ),
+			'showPosition'               => ! empty( $settings['showPosition'] ),
+			'showNumbering'              => ! empty( $settings['showNumbering'] ),
+			'numberAnswers'              => ! empty( $settings['numberAnswers'] ),
+			'randomizeAnswers'           => ! empty( $settings['randomizeAnswers'] ),
+			'showQuizTitle'              => ! empty( $settings['showQuizTitle'] ),
+			'resultMessagesEnabled'      => ! empty( $settings['resultMessagesEnabled'] ),
+			'resultMessages'             => $this->sanitizeQuizResultMessages( $settings['resultMessages'] ?? array() ),
+			'restartButton'              => ! empty( $settings['restartButton'] ),
+			'customResults'              => ! empty( $settings['customResults'] ),
+			'showAverageScore'           => ! empty( $settings['showAverageScore'] ),
+			'showCategoryScore'          => ! empty( $settings['showCategoryScore'] ),
+			'showOverallScore'           => ! empty( $settings['showOverallScore'] ),
+			'showCorrectCount'           => ! empty( $settings['showCorrectCount'] ),
+			'showTimeSpent'              => ! empty( $settings['showTimeSpent'] ),
+			'customAnswerFeedback'       => ! empty( $settings['customAnswerFeedback'] ),
+			'correctIncorrectMessages'   => ! empty( $settings['correctIncorrectMessages'] ),
+			'correctIncorrectMarks'      => ! empty( $settings['correctIncorrectMarks'] ),
+			'viewQuestionsButton'        => ! empty( $settings['viewQuestionsButton'] ),
 		);
 
 		if ( ! in_array( $clean['retriesApplicableTo'], array( 'all' ), true ) ) {
 			$clean['retriesApplicableTo'] = 'all';
 		}
+		if ( ! in_array( $clean['certificate'], array( 'none', 'default' ), true ) ) {
+			$clean['certificate'] = 'none';
+		}
+		if ( ! in_array( $clean['questionDisplay'], array( 'one', 'all' ), true ) ) {
+			$clean['questionDisplay'] = 'one';
+		}
+		if ( ! in_array( $clean['resultsMode'], array( 'end', 'each' ), true ) ) {
+			$clean['resultsMode'] = 'end';
+		}
+		if ( ! in_array( $clean['randomizeMode'], array( 'all', 'subset' ), true ) ) {
+			$clean['randomizeMode'] = 'all';
+		}
 
 		update_post_meta( $quizId, PostTypes::META_QUIZ_SETTINGS, array_merge( $defaults, $clean ) );
+	}
+
+	/**
+	 * @param mixed $messages
+	 * @return list<array{from:int,message:string,open:bool}>
+	 */
+	private function sanitizeQuizResultMessages( mixed $messages ): array {
+		if ( ! is_array( $messages ) ) {
+			return array();
+		}
+		$out = array();
+		foreach ( $messages as $row ) {
+			if ( ! is_array( $row ) ) {
+				continue;
+			}
+			$out[] = array(
+				'from'    => absint( $row['from'] ?? 0 ),
+				'message' => wp_kses_post( (string) ( $row['message'] ?? '' ) ),
+				'open'    => ! isset( $row['open'] ) || ! empty( $row['open'] ),
+			);
+		}
+		return $out;
 	}
 
 	private function sanitizeTimePart( mixed $value ): string {

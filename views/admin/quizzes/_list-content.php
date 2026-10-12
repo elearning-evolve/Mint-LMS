@@ -130,7 +130,7 @@ $addNewUrl = $addNewUrl ?? admin_url( 'post-new.php?post_type=mint-quiz' );
 				<a
 					href="<?php echo esc_url( $addNewUrl ); ?>"
 					class="mint-cta-lime mint-mt-6 mint-inline-flex mint-h-12 mint-items-center mint-justify-center mint-rounded-[10px] mint-border-0 mint-px-[22px] mint-text-base mint-font-bold mint-no-underline"
-				><?php esc_html_e( 'Add New Quiz', 'mint-lms' ); ?></a>
+				><?php esc_html_e( 'Add Quiz', 'mint-lms' ); ?></a>
 			</div>
 		</template>
 

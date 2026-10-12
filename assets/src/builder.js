@@ -126,7 +126,29 @@ function courseBuilder(courseId, opts = {}) {
     overviewPageSize: 10,
     /** Full-page Quiz Settings (rules / progression) — opened from Quiz builder. */
     quizSettingsView: false,
+    /** Full-page Lesson Settings — opened from Lesson builder. */
+    lessonSettingsView: false,
+    settingsAccordion: {
+      lessonDisplay: true,
+      lessonAccess: true,
+      quizAccess: true,
+      quizProgression: true,
+      quizDisplay: true,
+      quizResults: true,
+    },
+    settingsDropdowns: {
+      prereq: false,
+      cert: false,
+      apply: false,
+      disp: false,
+    },
     addingCourseQuiz: false,
+    /** Inline “Quiz title + Save” row inside lesson Quizzes card. */
+    lessonQuizDraftOpen: false,
+    lessonQuizDraftTitle: '',
+    /** Inline “Question title + Save” row inside quiz Questions card. */
+    quizQuestionDraftOpen: false,
+    quizQuestionDraftTitle: '',
     /** Inline create row on Course Hierarchy full page: { kind:'lesson', sectionId } */
     treePageInlineAdd: null,
     treePageInlineTitle: '',
@@ -284,7 +306,295 @@ function courseBuilder(courseId, opts = {}) {
 
     closeQuizSettings() {
       this.quizSettingsView = false;
+      this.lessonSettingsView = false;
       this.refreshPreviewUrl();
+    },
+
+    openLessonSettings() {
+      if (!this.selectedLesson?.id) {
+        window.MintLMS?.toast?.error?.('Save the lesson first, then open Lesson Settings.');
+        return;
+      }
+      this.ensureLessonSettings(this.selectedLesson);
+      this.lessonSettingsView = true;
+      this.refreshPreviewUrl();
+    },
+
+    closeLessonSettings() {
+      this.lessonSettingsView = false;
+      this.refreshPreviewUrl();
+    },
+
+    emptyLessonSettings() {
+      return {
+        materialsEnabled: false,
+        materialsContent: '',
+        videoProgression: false,
+        videoUrl: '',
+        videoTiming: 'before',
+        videoAutoplay: false,
+        videoControls: true,
+        videoPauseHidden: false,
+        videoResume: false,
+        assignmentUploads: false,
+        allowedFileTypes: '',
+        maxFileSize: '',
+        awardPoints: false,
+        awardPointsValue: 10,
+        grading: 'auto',
+        maxFiles: 1,
+        allowDeleteFiles: false,
+        minTimeEnabled: false,
+        minTimeHours: '00',
+        minTimeMinutes: '00',
+        minTimeSeconds: '00',
+        sampleLesson: false,
+        releaseSchedule: 'immediately',
+        releaseDays: 0,
+        releaseDate: '',
+        externalLesson: false,
+        externalType: 'virtual',
+        requireAttendance: 'no',
+      };
+    },
+
+    mergeLessonSettings(raw, lesson = null) {
+      const base = this.emptyLessonSettings();
+      const incoming = raw && typeof raw === 'object' ? raw : {};
+      const merged = { ...base, ...incoming };
+      if (lesson) {
+        if (lesson.videoUrl && !merged.videoUrl) merged.videoUrl = lesson.videoUrl;
+        merged.sampleLesson = !!lesson.isPreview;
+        const days = lesson.availableAfterDays;
+        if (days !== null && days !== undefined && Number(days) > 0 && !incoming.releaseSchedule) {
+          merged.releaseSchedule = 'enrollment';
+          merged.releaseDays = Number(days);
+        }
+      }
+      return merged;
+    },
+
+    ensureLessonSettings(lesson) {
+      if (!lesson) return;
+      const base = this.emptyLessonSettings();
+      const incoming = lesson.settings && typeof lesson.settings === 'object' ? lesson.settings : {};
+      lesson.settings = { ...base, ...incoming };
+      if (lesson.videoUrl && !lesson.settings.videoUrl) {
+        lesson.settings.videoUrl = lesson.videoUrl;
+      }
+      lesson.settings.sampleLesson = !!lesson.isPreview;
+      const days = lesson.availableAfterDays;
+      if (days !== null && days !== undefined && Number(days) > 0) {
+        lesson.settings.releaseSchedule = lesson.settings.releaseSchedule === 'specific_date'
+          ? 'specific_date'
+          : 'enrollment';
+        lesson.settings.releaseDays = Number(days);
+      } else if (!incoming.releaseSchedule) {
+        lesson.settings.releaseSchedule = 'immediately';
+      }
+    },
+
+    setLessonReleaseSchedule(schedule) {
+      if (!this.selectedLesson) return;
+      this.ensureLessonSettings(this.selectedLesson);
+      this.selectedLesson.settings.releaseSchedule = schedule;
+      if (schedule === 'immediately') {
+        this.selectedLesson.availableAfterDays = null;
+      } else if (schedule === 'enrollment') {
+        const days = Number(this.selectedLesson.settings.releaseDays || this.selectedLesson.availableAfterDays || 0);
+        this.selectedLesson.availableAfterDays = days > 0 ? days : 0;
+        this.selectedLesson.settings.releaseDays = this.selectedLesson.availableAfterDays;
+      }
+      this.debouncedSaveLesson(this.selectedLesson);
+    },
+
+    onLessonDripInput() {
+      if (!this.selectedLesson) return;
+      this.ensureLessonSettings(this.selectedLesson);
+      const days = this.selectedLesson.availableAfterDays;
+      if (days === null || days === undefined || days === '' || Number(days) <= 0) {
+        this.selectedLesson.settings.releaseSchedule = 'immediately';
+        this.selectedLesson.settings.releaseDays = 0;
+      } else {
+        this.selectedLesson.settings.releaseSchedule = 'enrollment';
+        this.selectedLesson.settings.releaseDays = Number(days);
+      }
+      this.debouncedSaveLesson(this.selectedLesson);
+    },
+
+    quizzesForSelectedLesson() {
+      const lessonId = Number(this.selectedLesson?.id || 0);
+      if (!lessonId) return [];
+      return (this.courseQuizzes || []).filter((quiz) => Number(quiz.lessonId) === lessonId);
+    },
+
+    lessonQuizBadge() {
+      return 'Quiz';
+    },
+
+    /** Label for the lesson-quiz row question chip (? icon + text). */
+    lessonQuizQuestionLabel(quiz) {
+      const fromSidebar = this.sidebarQuestionsForQuiz(quiz).length;
+      const fromMeta = Number(quiz?.questionCount);
+      const n = Math.max(
+        fromSidebar,
+        Number.isFinite(fromMeta) && fromMeta > 0 ? fromMeta : 0
+      );
+      if (n <= 0) return 'No question yet';
+      return n === 1 ? '1 question' : `${n} questions`;
+    },
+
+    addNewQuizToLesson() {
+      if (!this.selectedLesson?.id) {
+        window.MintLMS?.toast?.error?.('Save the lesson first, then add a quiz.');
+        return;
+      }
+      this.lessonQuizDraftOpen = true;
+      this.lessonQuizDraftTitle = '';
+      this.$nextTick(() => {
+        const el = document.getElementById('mint-lesson-quiz-draft-title');
+        if (el) el.focus();
+      });
+    },
+
+    cancelLessonQuizDraft() {
+      this.lessonQuizDraftOpen = false;
+      this.lessonQuizDraftTitle = '';
+    },
+
+    async saveLessonQuizDraft() {
+      if (!this.selectedLesson?.id || this.quizSaving) return;
+      const title = String(this.lessonQuizDraftTitle || '').trim() || 'New Quiz';
+      if (this.selected?.type === 'lesson') {
+        this.pullEditorContent();
+        await this.saveLesson(this.selectedLesson, { toast: false });
+      }
+      const created = await this.createQuiz({ title, stayOnLesson: true });
+      if (created?.id) {
+        this.lessonQuizDraftOpen = false;
+        this.lessonQuizDraftTitle = '';
+      }
+    },
+
+    async editLessonQuiz(quiz) {
+      const quizId = Number(quiz?.id || 0);
+      const lessonId = Number(this.selectedLesson?.id || quiz?.lessonId || 0);
+      if (!quizId || !lessonId) return;
+      if (this.selected?.type === 'lesson') {
+        this.pullEditorContent();
+        if (this.selectedLesson) {
+          await this.saveLesson(this.selectedLesson, { toast: false });
+        }
+      }
+      const sectionId = this.selected?.sectionId ?? this.resolveSectionIdForLesson(lessonId);
+      await this.selectQuiz(lessonId, sectionId, quizId);
+    },
+
+    async removeQuizFromLessonList(quiz) {
+      const quizId = Number(quiz?.id || 0);
+      if (!quizId) return;
+      if (
+        !window.confirm(
+          'Remove this quiz from the lesson? You can attach it to another lesson later.'
+        )
+      ) {
+        return;
+      }
+      this.attaching = true;
+      try {
+        await mintApi(`quizzes/${quizId}/detach`, {
+          method: 'POST',
+          body: '{}',
+        });
+        this.courseQuizzes = (this.courseQuizzes || []).filter((row) => Number(row.id) !== quizId);
+        if (Number(this.lessonQuiz?.id) === quizId) {
+          this.lessonQuiz = this.emptyQuizState();
+        }
+        window.MintLMS.toast.success('Quiz removed from lesson.');
+      } catch (err) {
+        window.MintLMS.toast.error(err.message || 'Could not remove quiz.');
+      } finally {
+        this.attaching = false;
+      }
+    },
+
+    async saveLessonSettings() {
+      if (!this.selectedLesson) return;
+      this.ensureLessonSettings(this.selectedLesson);
+      this.selectedLesson.isPreview = !!this.selectedLesson.settings.sampleLesson;
+      if (this.selectedLesson.settings.videoUrl) {
+        this.selectedLesson.videoUrl = this.selectedLesson.settings.videoUrl;
+      }
+      await this.saveLesson(this.selectedLesson, { toast: true });
+    },
+
+    quizPrereqLabel() {
+      const id = Number(this.lessonQuiz?.settings?.prerequisiteQuizId || 0);
+      if (!id) return 'No prerequisite';
+      const match = (this.courseQuizzes || []).find((q) => Number(q.id) === id);
+      return match?.title || 'Selected quiz';
+    },
+
+    quizPrerequisiteOptions() {
+      const current = Number(this.lessonQuiz?.id || 0);
+      return (this.courseQuizzes || []).filter((q) => Number(q.id) !== current);
+    },
+
+    quizCertificateLabel() {
+      const v = this.lessonQuiz?.settings?.certificate || 'none';
+      return v === 'default' ? 'Default certificate' : 'No certificate';
+    },
+
+    quizRetriesApplyLabel() {
+      return 'All users';
+    },
+
+    quizQuestionDisplayLabel() {
+      const v = this.lessonQuiz?.settings?.questionDisplay || 'one';
+      return v === 'all' ? 'All questions at once' : 'One question at a time';
+    },
+
+    quizCustomElementToggles() {
+      return [
+        { key: 'showPointValue', label: 'Point value' },
+        { key: 'showCategory', label: 'Question category' },
+        { key: 'showPosition', label: 'Question position' },
+        { key: 'showNumbering', label: 'Question numbering' },
+        { key: 'numberAnswers', label: 'Number answers' },
+        { key: 'randomizeAnswers', label: 'Randomize answers', hint: 'Shuffle the answer choices for each student' },
+      ];
+    },
+
+    quizCustomResultsToggles() {
+      return [
+        { key: 'showAverageScore', label: 'Average score', hint: 'Show how the class averaged' },
+        { key: 'showCategoryScore', label: 'Category score', hint: 'Show scores per question category' },
+        { key: 'showOverallScore', label: 'Overall score' },
+        { key: 'showCorrectCount', label: 'No. of correct answers' },
+        { key: 'showTimeSpent', label: 'Time spent' },
+      ];
+    },
+
+    quizAnswerFeedbackToggles() {
+      return [
+        { key: 'correctIncorrectMessages', label: 'Correct / incorrect messages' },
+        { key: 'correctIncorrectMarks', label: 'Correct / incorrect answer marks' },
+        { key: 'viewQuestionsButton', label: 'View questions button' },
+      ];
+    },
+
+    addQuizResultMessage() {
+      if (!this.lessonQuiz?.settings) return;
+      if (!Array.isArray(this.lessonQuiz.settings.resultMessages)) {
+        this.lessonQuiz.settings.resultMessages = [];
+      }
+      this.lessonQuiz.settings.resultMessages.push({ from: 0, message: '', open: true });
+    },
+
+    removeQuizResultMessage(index) {
+      if (!Array.isArray(this.lessonQuiz?.settings?.resultMessages)) return;
+      if (this.lessonQuiz.settings.resultMessages.length <= 1) return;
+      this.lessonQuiz.settings.resultMessages.splice(index, 1);
     },
 
     async resetQuizUserIdentification() {
@@ -354,40 +664,123 @@ function courseBuilder(courseId, opts = {}) {
       const tab = params.get('tab');
       this.preferredLessonTab = tab === 'quiz' || tab === 'video' || tab === 'written' ? tab : null;
       this.openQuizEditor = this.fromQuizzes || tab === 'quiz' || !!params.get('quiz_id') || !!params.get('question_id');
-      await this.loadStructure();
-      // Always load course quizzes + questions so Contents can nest Quiz → Question under Lesson.
-      if (Number(this.courseId) > 0) {
-        await this.loadCourseQuizzes();
-        await this.loadCourseQuestions();
-      }
-      await this.selectFromQuery();
-      if (!this.selected) {
-        const view = String(params.get('view') || '').trim();
-        if (['sections', 'lessons', 'quizzes', 'questions', 'tree'].includes(view)) {
-          this.overviewKind = view;
-          if (view === 'tree') {
-            this.applyTreePageDefaultToggles();
-            this.$nextTick(() => this.initTreePageSortables());
+
+      // Keep the loading screen up until URL selection is restored — otherwise
+      // "Add a lesson" flashes for a moment after refresh.
+      this.loading = true;
+      try {
+        await this.loadStructure({ keepLoading: true });
+        // Always load course quizzes + questions so Contents can nest Quiz → Question under Lesson.
+        if (Number(this.courseId) > 0) {
+          await this.loadCourseQuizzes();
+          await this.loadCourseQuestions();
+        }
+        await this.selectFromQuery();
+        if (!this.selected) {
+          const view = String(params.get('view') || '').trim();
+          if (['sections', 'lessons', 'quizzes', 'questions', 'tree'].includes(view)) {
+            this.overviewKind = view;
+            if (view === 'tree') {
+              this.applyTreePageDefaultToggles();
+              this.$nextTick(() => this.initTreePageSortables());
+            }
           }
         }
+        if (this.isStandalone && !this.selected && this.standaloneLessonId) {
+          // Prefer ?view= overview (e.g. Quizzes Overview) over auto-opening the quiz editor.
+          if (this.overviewKind) {
+            // Stay on overview.
+          } else if (this.openQuizEditor) {
+            const quizId = parseInt(params.get('quiz_id') || '0', 10);
+            await this.selectQuiz(this.standaloneLessonId, 0, quizId || null);
+          } else {
+            this.selectItem('lesson', this.standaloneLessonId, 0);
+            if (this.preferredLessonTab && this.preferredLessonTab !== 'quiz') {
+              this.lessonTab = this.preferredLessonTab;
+            }
+          }
+        }
+        if (params.get('open_nav') === 'tree' && !this.isStandalone && Number(this.courseId) > 0) {
+          // Legacy query: open full tree page (not just the nav dropdown).
+          this.enterTypeOverview('tree');
+        }
+      } finally {
+        this.loading = false;
+        const root = document.getElementById('mint-course-builder');
+        if (root) window.MintLMS?.loading?.hide?.(root);
       }
-      if (this.isStandalone && !this.selected && this.standaloneLessonId) {
-        // Prefer ?view= overview (e.g. Quizzes Overview) over auto-opening the quiz editor.
-        if (this.overviewKind) {
-          // Stay on overview.
-        } else if (this.openQuizEditor) {
-          const quizId = parseInt(params.get('quiz_id') || '0', 10);
-          await this.selectQuiz(this.standaloneLessonId, 0, quizId || null);
+    },
+
+    /**
+     * Keep course-builder selection in the URL so refresh / share restores lesson, quiz, or question.
+     */
+    syncBuilderSelectionUrl(options = {}) {
+      try {
+        const url = new URL(window.location.href);
+        const type = options.type ?? this.selected?.type ?? null;
+
+        if (options.clearContent) {
+          ['lesson_id', 'quiz_id', 'question_id', 'tab'].forEach((key) => {
+            url.searchParams.delete(key);
+          });
+          if (options.view) {
+            url.searchParams.set('view', String(options.view));
+          }
+          window.history.replaceState({}, '', url.toString());
+          return;
+        }
+
+        if (type === 'lesson' || type === 'quiz' || type === 'question' || type === 'section') {
+          url.searchParams.delete('view');
+        }
+
+        if (type === 'lesson') {
+          const lessonId = Number(options.lessonId ?? this.selected?.id ?? 0);
+          if (lessonId > 0) {
+            url.searchParams.set('lesson_id', String(lessonId));
+          } else {
+            url.searchParams.delete('lesson_id');
+          }
+          url.searchParams.delete('quiz_id');
+          url.searchParams.delete('question_id');
+          url.searchParams.delete('tab');
+        } else if (type === 'quiz') {
+          const lessonId = Number(options.lessonId ?? this.selected?.lessonId ?? 0);
+          const quizId = Number(
+            options.quizId ?? this.selected?.quizId ?? this.lessonQuiz?.id ?? 0
+          );
+          if (lessonId > 0) url.searchParams.set('lesson_id', String(lessonId));
+          else url.searchParams.delete('lesson_id');
+          if (quizId > 0) url.searchParams.set('quiz_id', String(quizId));
+          else url.searchParams.delete('quiz_id');
+          url.searchParams.delete('question_id');
+          url.searchParams.delete('tab');
+        } else if (type === 'question') {
+          const lessonId = Number(options.lessonId ?? this.selected?.lessonId ?? 0);
+          const quizId = Number(
+            options.quizId ?? this.selected?.quizId ?? this.lessonQuiz?.id ?? 0
+          );
+          const questionId = Number(
+            options.questionId ?? this.selected?.questionId ?? this.selected?.id ?? 0
+          );
+          if (lessonId > 0) url.searchParams.set('lesson_id', String(lessonId));
+          else url.searchParams.delete('lesson_id');
+          if (quizId > 0) url.searchParams.set('quiz_id', String(quizId));
+          else url.searchParams.delete('quiz_id');
+          if (questionId > 0) url.searchParams.set('question_id', String(questionId));
+          else url.searchParams.delete('question_id');
+        } else if (type === 'section') {
+          url.searchParams.delete('lesson_id');
+          url.searchParams.delete('quiz_id');
+          url.searchParams.delete('question_id');
+          url.searchParams.delete('tab');
         } else {
-          this.selectItem('lesson', this.standaloneLessonId, 0);
-          if (this.preferredLessonTab && this.preferredLessonTab !== 'quiz') {
-            this.lessonTab = this.preferredLessonTab;
-          }
+          return;
         }
-      }
-      if (params.get('open_nav') === 'tree' && !this.isStandalone && Number(this.courseId) > 0) {
-        // Legacy query: open full tree page (not just the nav dropdown).
-        this.enterTypeOverview('tree');
+
+        window.history.replaceState({}, '', url.toString());
+      } catch {
+        // Ignore history failures (private mode / unsupported).
       }
     },
 
@@ -398,9 +791,9 @@ function courseBuilder(courseId, opts = {}) {
       const lessonId = parseInt(params.get('lesson_id') || '0', 10);
 
       if (questionId > 0) {
-        let row = this.courseQuestions.find((item) => item.id === questionId);
+        let row = this.courseQuestions.find((item) => Number(item.id) === questionId);
         if (!row && quizId > 0) {
-          const quizRow = this.courseQuizzes.find((item) => item.id === quizId);
+          const quizRow = this.courseQuizzes.find((item) => Number(item.id) === quizId);
           if (quizRow) {
             await this.selectQuestion(questionId, quizRow.lessonId, quizRow.sectionId || null, quizId);
             return;
@@ -428,8 +821,8 @@ function courseBuilder(courseId, opts = {}) {
 
       // Always honour quiz_id from the URL — do not fall back to "first quiz on lesson"
       // (host lessons can accumulate extra "New Quiz" drafts from prior opens).
-      if (quizId > 0 && (this.fromQuizzes || this.openQuizEditor) && !this.fromQuestions) {
-        const row = this.courseQuizzes.find((item) => item.id === quizId);
+      if (quizId > 0) {
+        const row = this.courseQuizzes.find((item) => Number(item.id) === quizId);
         const resolvedLessonId = Number(row?.lessonId || lessonId || 0);
         if (resolvedLessonId > 0) {
           if (row?.sectionId) {
@@ -445,28 +838,26 @@ function courseBuilder(courseId, opts = {}) {
       if (!lessonId) return;
 
       for (const section of this.sections) {
-        const lesson = (section.lessons || []).find((item) => item.id === lessonId);
+        const lesson = (section.lessons || []).find((item) => Number(item.id) === lessonId);
         if (lesson) {
           this.expanded[section.id] = true;
-          if (this.openQuizEditor) {
-            await this.selectQuiz(lesson.id, section.id, quizId || null);
-          } else {
-            this.selectItem('lesson', lesson.id, section.id);
-            if (this.preferredLessonTab && this.preferredLessonTab !== 'quiz') {
-              this.lessonTab = this.preferredLessonTab;
-            }
+          this.selectItem('lesson', lesson.id, section.id);
+          if (this.preferredLessonTab && this.preferredLessonTab !== 'quiz') {
+            this.lessonTab = this.preferredLessonTab;
           }
           return;
         }
       }
 
-      // Lesson may be outside structure (e.g. just restored) — still open quiz editor.
-      if (this.openQuizEditor && lessonId > 0) {
-        await this.selectQuiz(lessonId, null, quizId || null);
+      // Lesson exists in URL but is not yet in the tree payload — still open the editor.
+      this.selectItem('lesson', lessonId, this.resolveSectionIdForLesson(lessonId) || 0);
+      if (this.preferredLessonTab && this.preferredLessonTab !== 'quiz') {
+        this.lessonTab = this.preferredLessonTab;
       }
     },
 
-    async loadStructure() {
+    async loadStructure(options = {}) {
+      const keepLoading = !!options.keepLoading;
       this.loading = true;
       this.error = '';
       const root = document.getElementById('mint-course-builder');
@@ -488,7 +879,10 @@ function courseBuilder(courseId, opts = {}) {
         this.rememberOriginTab(data.status);
         this.sections = (data.sections || []).map((section) => ({
           ...section,
-          lessons: section.lessons || [],
+          lessons: (section.lessons || []).map((lesson) => ({
+            ...lesson,
+            settings: this.mergeLessonSettings(lesson.settings, lesson),
+          })),
         }));
         // Ungrouped (section id 0) stays expanded — no section chrome to toggle.
         const ungrouped = this.sections.find((s) => Number(s.id) === 0);
@@ -509,8 +903,10 @@ function courseBuilder(courseId, opts = {}) {
         this.error = err.message;
         window.MintLMS.toast.error(err.message);
       } finally {
-        this.loading = false;
-        if (root) window.MintLMS.loading.hide(root);
+        if (!keepLoading) {
+          this.loading = false;
+          if (root) window.MintLMS.loading.hide(root);
+        }
       }
     },
 
@@ -553,6 +949,7 @@ function courseBuilder(courseId, opts = {}) {
               featuredImageUrl,
               isPreview: !!lesson.isPreview,
               availableAfterDays: lesson.availableAfterDays ?? null,
+              settings: this.mergeLessonSettings(lesson.settings, lesson),
               courseId: Number(lesson.courseId) || 0,
               status: 'draft',
               sortOrder: 0,
@@ -1464,6 +1861,42 @@ function courseBuilder(courseId, opts = {}) {
       return this.isCourseBuilderSurface();
     },
 
+    /**
+     * Progressive course-builder navbar:
+     * empty course → Lesson Group + Course Hierarchy only;
+     * after a lesson exists → Lesson; after a quiz → Quiz; after a question → Question.
+     * Standalone library surfaces keep their existing tab rules.
+     *
+     * @param {'section'|'lesson'|'quiz'|'question'|'tree'} kind
+     */
+    showBuilderNavTab(kind) {
+      if (this.isStandaloneQuizSurface()) {
+        return kind === 'quiz';
+      }
+      if (this.isStandaloneQuestionSurface()) {
+        return kind === 'question';
+      }
+
+      // Standalone lesson editor (and other non-course shells): keep full contents nav.
+      if (!this.isCourseBuilderSurface()) {
+        return kind === 'section' || kind === 'lesson' || kind === 'quiz' || kind === 'question' || kind === 'tree';
+      }
+
+      if (kind === 'section' || kind === 'tree') {
+        return true;
+      }
+      if (kind === 'lesson') {
+        return this.navLessonList().length > 0;
+      }
+      if (kind === 'quiz') {
+        return (this.courseQuizzes || []).some((quiz) => Number(quiz?.id) > 0);
+      }
+      if (kind === 'question') {
+        return (this.courseQuestions || []).some((question) => Number(question?.id) > 0);
+      }
+      return false;
+    },
+
     toggleSection(sectionId) {
       const id = Number(sectionId);
       this.expanded = {
@@ -2180,6 +2613,8 @@ function courseBuilder(courseId, opts = {}) {
       this.lessonQuiz = null;
       this.openQuizEditor = false;
       this.quizSettingsView = false;
+      this.lessonSettingsView = false;
+      this.syncBuilderSelectionUrl({ clearContent: true, view });
       if (view === 'tree') {
         this.applyTreePageDefaultToggles();
         this.treePageCancelInlineAdd();
@@ -2237,7 +2672,7 @@ function courseBuilder(courseId, opts = {}) {
      * Full-page hierarchy defaults:
      * - Lesson Group with lessons → expanded (so lesson rows are visible)
      * - Empty Lesson Group → collapsed
-     * - Lessons & Quizzes always collapsed — user expands them
+     * - Lessons & Quizzes stay collapsed — child context is shown in meta text
      */
     applyTreePageDefaultToggles() {
       const nextSec = { ...this.expanded };
@@ -2624,10 +3059,10 @@ function courseBuilder(courseId, opts = {}) {
     },
 
     overviewAddLabel() {
-      if (this.overviewKind === 'sections') return 'New Lesson Group';
-      if (this.overviewKind === 'lessons') return 'New Lesson';
-      if (this.overviewKind === 'quizzes') return 'New Quiz';
-      return 'New Question';
+      if (this.overviewKind === 'sections') return 'Add Lesson Group';
+      if (this.overviewKind === 'lessons') return 'Add Lesson';
+      if (this.overviewKind === 'quizzes') return 'Add Quiz';
+      return 'Add Question';
     },
 
     overviewAddDisabled() {
@@ -2945,6 +3380,7 @@ function courseBuilder(courseId, opts = {}) {
     selectItem(type, id, sectionId = null) {
       this.overviewKind = null;
       this.quizSettingsView = false;
+      this.lessonSettingsView = false;
       // Course builder: stay in SPA even if URL still has from=quizzes/questions.
       // Standalone library shells keep hard-nav when switching back to lesson chrome.
       if (
@@ -2976,14 +3412,9 @@ function courseBuilder(courseId, opts = {}) {
         this.fromLessonOrigin = false;
         try {
           const url = new URL(window.location.href);
-          ['from', 'origin', 'tab', 'quiz_id', 'question_id'].forEach((key) => {
+          ['from', 'origin', 'tab'].forEach((key) => {
             url.searchParams.delete(key);
           });
-          if (type === 'lesson') {
-            url.searchParams.set('lesson_id', String(id));
-          } else {
-            url.searchParams.delete('lesson_id');
-          }
           window.history.replaceState({}, '', url.toString());
         } catch {
           // Ignore history failures.
@@ -2997,12 +3428,17 @@ function courseBuilder(courseId, opts = {}) {
       this.selected = { type, id, sectionId };
       this.refreshPreviewUrl();
       if (type === 'lesson') {
+        this.lessonQuizDraftOpen = false;
+        this.lessonQuizDraftTitle = '';
         this.syncLessonMode();
         this.$nextTick(() => {
           this.initLessonEditor();
           this.syncEditorFromLesson();
         });
         this.loadLessonQuiz(id);
+        if (Number(this.courseId)) {
+          this.loadCourseQuizzes();
+        }
         if (this.showLessonSectionAttachPanel()) {
           const linked =
             Number(sectionId) ||
@@ -3013,6 +3449,10 @@ function courseBuilder(courseId, opts = {}) {
           this.loadAttachSections({ courseId: this.courseId, preserve: true });
         }
       }
+      this.syncBuilderSelectionUrl({
+        type,
+        lessonId: type === 'lesson' ? id : undefined,
+      });
     },
 
     /**
@@ -3022,6 +3462,7 @@ function courseBuilder(courseId, opts = {}) {
       const id = Number(quizId) || 0;
       if (id <= 0) return;
       this.quizSettingsView = false;
+      this.lessonSettingsView = false;
       this.quizLoading = true;
       try {
         const quiz = await mintApi(`quizzes/${id}`);
@@ -3055,6 +3496,9 @@ function courseBuilder(courseId, opts = {}) {
     async selectQuiz(lessonId, sectionId = null, quizId = null) {
       this.overviewKind = null;
       this.quizSettingsView = false;
+      this.lessonSettingsView = false;
+      this.quizQuestionDraftOpen = false;
+      this.quizQuestionDraftTitle = '';
       if (this.selected?.type === 'lesson') {
         this.pullEditorContent();
       }
@@ -3094,6 +3538,11 @@ function courseBuilder(courseId, opts = {}) {
         this.expandQuiz(this.lessonQuiz.id);
       }
       this.syncCourseQuizTitle();
+      this.syncBuilderSelectionUrl({
+        type: 'quiz',
+        lessonId,
+        quizId: Number(this.lessonQuiz?.id || preferredQuizId || 0),
+      });
       if (this.showQuizLessonAttachPanel()) {
         await this.loadAttachLessons();
       }
@@ -3354,6 +3803,12 @@ function courseBuilder(courseId, opts = {}) {
         this.initQuestionEditor();
         this.syncQuestionEditorFromActive();
       });
+      this.syncBuilderSelectionUrl({
+        type: 'question',
+        lessonId,
+        quizId: Number(this.lessonQuiz?.id || knownQuizId || 0),
+        questionId: Number(this.activeQuestion?.id || questionId || 0),
+      });
       if (this.showQuestionQuizAttachPanel()) {
         await this.loadAttachQuizzes();
       }
@@ -3586,6 +4041,101 @@ function courseBuilder(courseId, opts = {}) {
       if (question.type === 'essay') return 'Essay answer';
       if (question.type === 'mcq_multi') return 'MCQ · Multiple choice';
       return 'MCQ · Single choice';
+    },
+
+    quizQuestionAnswerTypePending(question) {
+      return !!question?.settings?.answerTypePending;
+    },
+
+    /** Chip next to Edit on quiz question rows. */
+    quizQuestionAnswerTypeLabel(question) {
+      if (this.quizQuestionAnswerTypePending(question)) {
+        return 'Answer type not set';
+      }
+      if (!question) return 'Answer type not set';
+      if (question.type === 'true_false') return 'True/False';
+      if (question.type === 'essay') return 'Essay Answer';
+      if (question.type === 'mcq_multi') return 'MCQ · Multiple Choice';
+      return 'MCQ · Single Choice';
+    },
+
+    quizQuestionListTitle(question) {
+      if (!question) return 'New Question';
+      const title = String(
+        question.title ||
+          question.settings?.displayTitle ||
+          (this.isBlankQuestionPrompt(question.prompt) ? '' : question.prompt) ||
+          ''
+      ).trim();
+      return title || 'New Question';
+    },
+
+    addNewQuestionToQuiz() {
+      if (!this.lessonQuiz?.id) {
+        window.MintLMS?.toast?.error?.('Save the quiz first, then add a question.');
+        return;
+      }
+      this.quizQuestionDraftOpen = true;
+      this.quizQuestionDraftTitle = '';
+      this.$nextTick(() => {
+        const el = document.getElementById('mint-quiz-question-draft-title');
+        if (el) el.focus();
+      });
+    },
+
+    cancelQuizQuestionDraft() {
+      this.quizQuestionDraftOpen = false;
+      this.quizQuestionDraftTitle = '';
+    },
+
+    async saveQuizQuestionDraft() {
+      if (!this.lessonQuiz?.id || this.quizSaving) return;
+      const title = String(this.quizQuestionDraftTitle || '').trim() || 'New Question';
+      this.quizSaving = true;
+      try {
+        const quiz = await mintApi(`quizzes/${this.lessonQuiz.id}/questions`, {
+          method: 'POST',
+          body: JSON.stringify({
+            type: 'essay',
+            prompt: title,
+            options: [],
+            correct_answer: '',
+            settings: {
+              displayTitle: title,
+              answerTypePending: true,
+            },
+          }),
+        });
+        this.lessonQuiz = this.normalizeQuiz(quiz);
+        if (this.fromQuestions || this.showCourseContentsTree()) {
+          await this.loadCourseQuestions();
+        }
+        this.quizQuestionDraftOpen = false;
+        this.quizQuestionDraftTitle = '';
+        window.MintLMS.toast.success('Question created');
+      } catch (err) {
+        window.MintLMS.toast.error(err.message || 'Could not create question.');
+      } finally {
+        this.quizSaving = false;
+      }
+    },
+
+    async editQuizQuestion(question) {
+      const questionId = Number(question?.id || 0);
+      if (!questionId) return;
+      const lessonId = Number(
+        this.selected?.lessonId || this.lessonQuiz?.lessonId || this.selectedLesson?.id || 0
+      );
+      const quizId = Number(this.lessonQuiz?.id || this.selected?.quizId || 0);
+      const sectionId = this.selected?.sectionId ?? this.resolveSectionIdForLesson(lessonId);
+      await this.selectQuestion(questionId, lessonId, sectionId, quizId || null);
+    },
+
+    async removeQuizQuestionFromList(question) {
+      const deleted = await this.deleteQuizQuestion(question);
+      if (deleted) {
+        window.MintLMS?.toast?.success?.('Question removed.');
+      }
     },
 
     breadcrumbQuestionLabel() {
@@ -3827,6 +4377,12 @@ function courseBuilder(courseId, opts = {}) {
         this.selected.questionId = refreshed.id || 0;
         this.selected.id = refreshed.id || 0;
         this.refreshPreviewUrl();
+        this.syncBuilderSelectionUrl({
+          type: 'question',
+          lessonId: this.selected?.lessonId,
+          quizId: this.selected?.quizId || this.lessonQuiz?.id,
+          questionId: refreshed.id,
+        });
         this.$nextTick(() => {
           this.initQuestionEditor();
           this.syncQuestionEditorFromActive();
@@ -4773,6 +5329,31 @@ function courseBuilder(courseId, opts = {}) {
       return url.toString();
     },
 
+    /**
+     * Course home inside the builder (Lessons overview) — not the WP Courses list.
+     * Header course title uses this; back-chevron still returns to the courses list.
+     */
+    courseHomeUrl() {
+      if (!Number(this.courseId)) return '#';
+      const base = config.urls?.builder || 'admin.php?page=mint-lms-builder';
+      const url = new URL(base, window.location.href);
+      url.searchParams.set('course_id', String(this.courseId));
+      url.searchParams.set('view', 'lessons');
+      ['lesson_id', 'quiz_id', 'question_id', 'tab', 'from', 'origin'].forEach((key) => {
+        url.searchParams.delete(key);
+      });
+      return url.toString();
+    },
+
+    goToCourseHome(event) {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+      if (!Number(this.courseId)) return;
+      this.navOpenOverview('lesson');
+    },
+
     goToCourseSettings(event) {
       if (event) {
         event.preventDefault();
@@ -5399,6 +5980,7 @@ function courseBuilder(courseId, opts = {}) {
                 : 0,
             is_preview: !!lesson.isPreview,
             available_after_days: lesson.availableAfterDays || null,
+            settings: lesson.settings || this.emptyLessonSettings(),
           }),
         });
         this.setSaved();
@@ -5770,18 +6352,34 @@ function courseBuilder(courseId, opts = {}) {
     async headerSaveAction() {
       if (this.selected?.type === 'question' && this.activeQuestion) {
         await this.saveActiveQuestion();
+        this.syncBuilderSelectionUrl({
+          type: 'question',
+          lessonId: this.selected?.lessonId,
+          quizId: this.selected?.quizId || this.lessonQuiz?.id,
+          questionId: this.activeQuestion?.id,
+        });
         return;
       }
       if (this.selected?.type === 'quiz' && this.lessonQuiz) {
         await this.saveQuiz();
+        this.syncBuilderSelectionUrl({
+          type: 'quiz',
+          lessonId: this.selected?.lessonId,
+          quizId: this.lessonQuiz?.id,
+        });
         return;
       }
       if (this.selected?.type === 'lesson' && this.selectedLesson) {
         await this.saveLesson(this.selectedLesson, { toast: true });
+        this.syncBuilderSelectionUrl({
+          type: 'lesson',
+          lessonId: this.selectedLesson.id,
+        });
         return;
       }
       if (this.selected?.type === 'section' && this.selectedSection) {
         await this.saveSection(this.selectedSection, { toast: true });
+        this.syncBuilderSelectionUrl({ type: 'section' });
         return;
       }
       window.MintLMS.toast.info('Nothing to save here');
@@ -6087,6 +6685,46 @@ function courseBuilder(courseId, opts = {}) {
         releaseYear: '',
         releaseHour: '',
         releaseMinute: '',
+        releaseDate: '',
+        externalQuiz: false,
+        prerequisiteQuizId: 0,
+        allowedRegisteredOnly: false,
+        certificate: 'none',
+        materialsEnabled: false,
+        materialsContent: '',
+        autostart: false,
+        questionDisplay: 'one',
+        resultsMode: 'end',
+        displayBackButton: false,
+        questionOverview: false,
+        quizSummary: false,
+        skipQuestion: false,
+        customOrdering: false,
+        sortByCategory: false,
+        randomizeOrder: false,
+        randomizeMode: 'all',
+        randomizeCount: 0,
+        customElements: false,
+        showPointValue: false,
+        showCategory: false,
+        showPosition: false,
+        showNumbering: false,
+        numberAnswers: false,
+        randomizeAnswers: false,
+        showQuizTitle: true,
+        resultMessagesEnabled: false,
+        resultMessages: [{ from: 0, message: '', open: true }],
+        restartButton: false,
+        customResults: false,
+        showAverageScore: false,
+        showCategoryScore: false,
+        showOverallScore: true,
+        showCorrectCount: false,
+        showTimeSpent: false,
+        customAnswerFeedback: false,
+        correctIncorrectMessages: false,
+        correctIncorrectMarks: false,
+        viewQuestionsButton: false,
       };
     },
 
@@ -6131,11 +6769,24 @@ function courseBuilder(courseId, opts = {}) {
         featuredImageId: quiz.featuredImageId || null,
         featuredImageUrl: quiz.featuredImageUrl || '',
         status: quiz.status || 'draft',
-        settings: {
-          ...empty.settings,
-          ...(quiz.settings && typeof quiz.settings === 'object' ? quiz.settings : {}),
-        },
+        settings: this.mergeQuizSettings(quiz.settings),
       };
+    },
+
+    mergeQuizSettings(raw) {
+      const empty = this.emptyQuizSettings();
+      const incoming = raw && typeof raw === 'object' ? raw : {};
+      const merged = { ...empty, ...incoming };
+      if (!Array.isArray(merged.resultMessages) || merged.resultMessages.length === 0) {
+        merged.resultMessages = [{ from: 0, message: '', open: true }];
+      } else {
+        merged.resultMessages = merged.resultMessages.map((row) => ({
+          from: Number(row?.from || 0),
+          message: String(row?.message || ''),
+          open: row?.open !== false,
+        }));
+      }
+      return merged;
     },
 
     async createQuiz(options = {}) {
@@ -6152,12 +6803,35 @@ function courseBuilder(courseId, opts = {}) {
             pass_percent: options.passPercent || 80,
           }),
         });
-        this.lessonQuiz = this.normalizeQuiz({
+        const normalized = this.normalizeQuiz({
           ...quiz,
           settings: options.keepSettings ? this.lessonQuiz?.settings : this.emptyQuizSettings(),
           featuredImageId: options.keepSettings ? this.lessonQuiz?.featuredImageId : null,
           featuredImageUrl: options.keepSettings ? this.lessonQuiz?.featuredImageUrl : '',
         });
+
+        if (options.stayOnLesson) {
+          await this.loadCourseQuizzes();
+          const sectionId = this.selected?.sectionId ?? this.resolveSectionIdForLesson(lessonId);
+          this.courseQuizzes = [
+            {
+              id: normalized.id,
+              title: normalized.title || 'New Quiz',
+              lessonId,
+              lessonTitle: this.selectedLesson?.title || '',
+              sectionId: sectionId || 0,
+              questionCount: (normalized.questions || []).length,
+            },
+            ...(this.courseQuizzes || []).filter((row) => Number(row.id) !== Number(normalized.id)),
+          ];
+          this.syncBuilderSelectionUrl({ type: 'lesson', lessonId });
+          if (!options.silent) {
+            window.MintLMS.toast.success('Quiz created');
+          }
+          return normalized;
+        }
+
+        this.lessonQuiz = normalized;
         this.selected = {
           ...(this.selected || {}),
           type: 'quiz',
@@ -6168,11 +6842,18 @@ function courseBuilder(courseId, opts = {}) {
         };
         await this.loadCourseQuizzes();
         this.syncCourseQuizSidebarRow();
+        this.syncBuilderSelectionUrl({
+          type: 'quiz',
+          lessonId,
+          quizId: this.lessonQuiz.id,
+        });
         if (!options.silent) {
           window.MintLMS.toast.success('Quiz created');
         }
+        return normalized;
       } catch (err) {
         window.MintLMS.toast.error(err.message);
+        return null;
       } finally {
         this.quizSaving = false;
       }

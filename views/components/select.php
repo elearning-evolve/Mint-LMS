@@ -14,7 +14,7 @@ $required = $required ?? false;
 $error    = $error ?? '';
 $attrs    = $attrs ?? '';
 
-$selectClasses = 'mint-block mint-h-control-md mint-w-full mint-rounded-md mint-border mint-border-control mint-bg-bg mint-px-3 mint-text-base mint-text-ink mint-outline-none focus:mint-border-accent focus:mint-shadow-focus disabled:mint-opacity-50';
+$selectClasses = 'mint-block mint-h-control-md mint-w-full mint-rounded-md mint-border mint-border-control mint-bg-bg mint-px-3 mint-text-base mint-text-ink mint-outline-none hover:mint-border-mint-blue focus:mint-border-mint-blue focus:mint-shadow-focus disabled:mint-opacity-50';
 
 if ( '' !== $error ) {
 	$selectClasses .= ' mint-border-danger';

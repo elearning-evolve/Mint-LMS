@@ -15,7 +15,7 @@ $required    = $required ?? false;
 $error       = $error ?? '';
 $attrs       = $attrs ?? '';
 
-$textareaClasses = 'mint-block mint-w-full mint-min-h-[120px] mint-resize-y mint-rounded-md mint-border mint-border-control mint-bg-bg mint-px-3 mint-py-2 mint-text-base mint-text-ink mint-outline-none focus:mint-border-accent focus:mint-shadow-focus disabled:mint-opacity-50';
+$textareaClasses = 'mint-block mint-w-full mint-min-h-[120px] mint-resize-y mint-rounded-md mint-border mint-border-control mint-bg-bg mint-px-3 mint-py-2 mint-text-base mint-text-ink mint-outline-none hover:mint-border-mint-blue focus:mint-border-mint-blue focus:mint-shadow-focus disabled:mint-opacity-50';
 
 if ( '' !== $error ) {
 	$textareaClasses .= ' mint-border-danger';
