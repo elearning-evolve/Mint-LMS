@@ -92,7 +92,7 @@ final class WpPostQuizRepository implements QuizRepositoryInterface {
 		$junction = Schema::validateTable( Schema::quizQuestionsTable( $this->wpdb->prefix ), $this->wpdb->prefix );
 		$data     = Schema::validateTable( Schema::questionDataTable( $this->wpdb->prefix ), $this->wpdb->prefix );
 		$posts    = $this->wpdb->posts;
-		$statusSql = $publishedOnly ? "p.post_status = 'publish'" : "p.post_status != 'trash'";
+		$statusSql = $publishedOnly ? "p.post_status = 'publish'" : "p.post_status NOT IN ('trash','auto-draft')";
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$rows = $this->wpdb->get_results(

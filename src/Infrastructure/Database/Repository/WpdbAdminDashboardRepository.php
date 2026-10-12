@@ -127,7 +127,7 @@ final class WpdbAdminDashboardRepository implements AdminDashboardRepositoryInte
 						WHERE s.course_id = %d
 						AND NOT EXISTS (
 							SELECT 1 FROM {$postmetaTable} pm
-							INNER JOIN {$postsTable} l ON l.ID = pm.post_id AND l.post_type = %s AND l.post_status != 'trash'
+							INNER JOIN {$postsTable} l ON l.ID = pm.post_id AND l.post_type = %s AND l.post_status NOT IN ('trash','auto-draft')
 							WHERE pm.meta_key = %s AND pm.meta_value = CAST(s.id AS CHAR)
 						)",
 						$courseId,
@@ -296,7 +296,7 @@ final class WpdbAdminDashboardRepository implements AdminDashboardRepositoryInte
 				FROM {$postsTable} p
 				INNER JOIN {$postmetaTable} pm ON pm.post_id = p.ID AND pm.meta_key = %s
 				WHERE p.post_type = %s
-					AND p.post_status != 'trash'
+					AND p.post_status NOT IN ('trash','auto-draft')
 					AND CAST(pm.meta_value AS UNSIGNED) IN ({$placeholders})
 				GROUP BY CAST(pm.meta_value AS UNSIGNED)",
 				$courseMeta,

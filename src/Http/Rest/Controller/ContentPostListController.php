@@ -368,15 +368,16 @@ final class ContentPostListController {
 		}
 
 		return array(
-			'id'         => (int) $post->ID,
-			'title'      => '' !== $title ? $title : __( '(no title)', 'mint-lms' ),
-			'authorName' => $author instanceof \WP_User ? $author->display_name : '—',
-			'status'     => $status,
-			'date'       => $this->formatListDate( $modified ),
-			'updatedAt'  => $modified,
-			'courseId'   => $courseId,
-			'lessonId'   => $lessonId,
-			'quizId'     => $quizId,
+			'id'              => (int) $post->ID,
+			'title'           => '' !== $title ? $title : __( '(no title)', 'mint-lms' ),
+			'authorName'      => $author instanceof \WP_User ? $author->display_name : '—',
+			'status'          => $status,
+			'date'            => $this->formatListDate( $modified ),
+			'updatedAt'       => $modified,
+			'courseId'        => $courseId,
+			'lessonId'        => $lessonId,
+			'quizId'          => $quizId,
+			'disposableHost'  => 'lessons' === $type && PostTypes::isDisposableHostLesson( (int) $post->ID ),
 		);
 	}
 

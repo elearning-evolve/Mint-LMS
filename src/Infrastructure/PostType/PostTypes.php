@@ -28,6 +28,7 @@ final class PostTypes {
 	public const META_AVAILABLE_AFTER_DAYS  = '_mint_available_after_days';
 	public const META_SORT_ORDER            = '_mint_sort_order';
 	public const META_PASS_PERCENT          = '_mint_pass_percent';
+	public const META_LESSON_SETTINGS       = '_mint_lesson_settings';
 	public const META_QUIZ_SETTINGS         = '_mint_quiz_settings';
 	public const META_QUESTION_SETTINGS     = '_mint_question_settings';
 	public const META_QUESTION_SHELL        = '_mint_question_shell';
@@ -40,6 +41,17 @@ final class PostTypes {
 		return array( self::COURSE, self::LESSON, self::QUIZ, self::QUESTION );
 	}
 
+	public static function isContentType( string $postType ): bool {
+		return in_array( $postType, self::all(), true );
+	}
+
+	/**
+	 * True once the author has used Save draft / Publish (not Gutenberg auto-draft).
+	 */
+	public static function hasExplicitSave( \WP_Post $post ): bool {
+		return $post->ID > 0 && 'auto-draft' !== $post->post_status;
+	}
+
 	/**
 	 * Native WordPress list-table URL for a Mint CPT.
 	 */
@@ -49,5 +61,41 @@ final class PostTypes {
 		}
 
 		return admin_url( 'edit.php?post_type=' . $postType );
+	}
+
+	/**
+	 * Empty library lesson used only as a quiz/question host (not a real parent).
+	 */
+	public static function isDisposableHostLesson( int $lessonId ): bool {
+		if ( $lessonId <= 0 ) {
+			return false;
+		}
+
+		$post = get_post( $lessonId );
+		if ( ! $post instanceof \WP_Post || self::LESSON !== $post->post_type ) {
+			return false;
+		}
+
+		if ( (int) get_post_meta( $lessonId, self::META_COURSE_ID, true ) > 0 ) {
+			return false;
+		}
+
+		if ( '' !== trim( wp_strip_all_tags( (string) $post->post_content ) ) ) {
+			return false;
+		}
+
+		if ( '' !== trim( (string) get_post_meta( $lessonId, self::META_VIDEO_URL, true ) ) ) {
+			return false;
+		}
+
+		if ( (int) get_post_meta( $lessonId, self::META_ATTACHMENT_ID, true ) > 0 ) {
+			return false;
+		}
+
+		if ( (int) get_post_thumbnail_id( $lessonId ) > 0 ) {
+			return false;
+		}
+
+		return true;
 	}
 }

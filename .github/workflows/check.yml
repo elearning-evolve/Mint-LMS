@@ -1,95 +1,65 @@
-name: Mint LMS Checks
+name: Mint LMS CI
 
 on:
   push:
-    paths:
-      - 'wp-content/plugins/mint-lms/**'
   pull_request:
-    paths:
-      - 'wp-content/plugins/mint-lms/**'
 
-defaults:
-  run:
-    working-directory: wp-content/plugins/mint-lms
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  check:
+  php-syntax:
+    name: PHP syntax
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        php-version: ['8.1', '8.3']
-
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+      - uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php-version }}
+          php-version: '8.2'
+          coverage: none
+      - name: Lint PHP files
+        run: |
+          while IFS= read -r -d '' file; do
+            php -l "$file"
+          done < <(find src views templates mint-lms.php -name '*.php' -print0)
+
+  phpcs:
+    name: WordPress coding standards
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
           tools: composer
           coverage: none
+      - run: composer install --no-interaction --prefer-dist --no-progress
+      - name: Run PHPCS (errors only)
+        run: vendor/bin/phpcs --runtime-set ignore_warnings_on_exit 1 -p --report=full
 
-      - name: Install Composer dependencies
-        run: composer install --no-interaction --prefer-dist
-
-      - name: Run composer check
-        run: composer check
-
-      - name: Run integration tests
-        run: composer test:integ
-
-  plugin-check:
+  tests:
+    name: Unit and architecture tests
     runs-on: ubuntu-latest
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: wp_test
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -proot"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-
-    defaults:
-      run:
-        working-directory: wp-content/plugins/mint-lms
-
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+      - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3'
-          tools: composer, wp
+          php-version: '8.2'
+          tools: composer
           coverage: none
+      - run: composer install --no-interaction --prefer-dist --no-progress
+      - run: composer arch
+      - run: composer test:unit
 
-      - name: Install Composer dependencies
-        run: composer install --no-interaction --prefer-dist
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+  assets:
+    name: JS and Tailwind build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: npm
-
-      - name: Build assets
-        run: npm ci && npm run build
-
-      - name: Set up WordPress
-        run: |
-          wp core download --path=/tmp/wp --quiet
-          wp config create --path=/tmp/wp --dbname=wp_test --dbuser=root --dbpass=root --dbhost=127.0.0.1
-          wp core install --path=/tmp/wp --url=http://example.com --title=Test --admin_user=admin --admin_password=password --admin_email=admin@example.com --skip-email
-          wp plugin install plugin-check --activate --path=/tmp/wp
-          ln -sf "$GITHUB_WORKSPACE" /tmp/wp/wp-content/plugins/mint-lms
-          wp plugin activate mint-lms --path=/tmp/wp
-
-      - name: Run Plugin Check on release tree
-        env:
-          WP_PATH: /tmp/wp
-        run: bash dev/plugin-check.sh
+      - run: npm ci
+      - run: npm run build

@@ -41,6 +41,8 @@
         "sniff": "phpcs",
         "fix": "phpcbf",
         "plugin-check": "bash dev/plugin-check.sh",
+        "ci-local": "bash dev/ci-local.sh",
+        "hooks:install": "git config core.hooksPath dev/hooks",
         "check": [
             "@arch",
             "@stan",

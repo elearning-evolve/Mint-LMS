@@ -87,7 +87,7 @@ if ( $courseId <= 0 ) {
 }
 
 $studentsPageUrl = admin_url( 'admin.php?page=mint-lms-course-students' );
-$inputClass      = 'mint-block mint-w-full mint-rounded-lg mint-border-[1.5px] mint-border-[#B9B6CE] mint-bg-bg mint-px-[14px] mint-py-[11px] mint-text-base mint-text-ink focus:mint-border-accent focus:mint-shadow-focus focus:mint-outline-none';
+$inputClass      = 'mint-block mint-w-full mint-rounded-lg mint-border-[1.5px] mint-border-[#B9B6CE] mint-bg-bg mint-px-[14px] mint-py-[11px] mint-text-base mint-text-ink hover:mint-border-mint-blue focus:mint-border-mint-blue focus:mint-shadow-focus focus:mint-outline-none';
 ?>
 
 <?php if ( $courseId <= 0 ) : ?>

@@ -181,9 +181,9 @@ function contentList(type) {
     },
 
     mintBuilderLabel() {
-      if (isQuestions) return 'Open in question builder';
-      if (isQuizzes) return 'Open in quiz builder';
-      return 'Open in lesson builder';
+      if (isQuestions) return 'Open Question In Mint LMS Builder';
+      if (isQuizzes) return 'Open Quiz In Mint LMS Builder';
+      return 'Open Lesson In Mint LMS Builder';
     },
 
     viewUrl(item) {

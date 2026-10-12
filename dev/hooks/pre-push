@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Runs before git push. Shared via: git config core.hooksPath dev/hooks
+set -euo pipefail
+
+ROOT="$(git rev-parse --show-toplevel)"
+exec bash "$ROOT/dev/ci-local.sh"

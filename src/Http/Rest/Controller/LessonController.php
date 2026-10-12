@@ -15,6 +15,7 @@ use MintLMS\Application\Lesson\Dto\UpdateLessonDto;
 use MintLMS\Application\Lesson\LessonService;
 use MintLMS\Infrastructure\Http\RestContentSanitizer;
 use MintLMS\Http\Rest\Response\ApiResponse;
+use MintLMS\Infrastructure\PostType\PostTypes;
 
 final class LessonController {
 
@@ -198,7 +199,7 @@ final class LessonController {
 
 			$lesson = $this->lessonService->create( $sectionId, $dto, $userId );
 
-			return ApiResponse::success( $lesson->toArray(), 201 );
+			return ApiResponse::success( $this->lessonPayload( $lesson ), 201 );
 		} catch ( ValidationException $exception ) {
 			return ApiResponse::error( 'validation_error', $exception->getMessage(), 400, $exception->errors() );
 		} catch ( NotFoundException $exception ) {
@@ -212,7 +213,7 @@ final class LessonController {
 		try {
 			$userId    = $this->authorization->getCurrentUserId();
 			$courseId  = (int) $request->get_param( 'id' );
-			$sectionId = $request->offsetExists( 'section_id' ) ? (int) $request->get_param( 'section_id' ) : 0;
+			$sectionId = absint( $request->get_param( 'section_id' ) );
 
 			$dto = new CreateLessonDto(
 				(string) ( $request->get_param( 'title' ) ?? '' ),
@@ -230,7 +231,7 @@ final class LessonController {
 				$sectionId > 0 ? $sectionId : null
 			);
 
-			return ApiResponse::success( $lesson->toArray(), 201 );
+			return ApiResponse::success( $this->lessonPayload( $lesson ), 201 );
 		} catch ( ValidationException $exception ) {
 			return ApiResponse::error( 'validation_error', $exception->getMessage(), 400, $exception->errors() );
 		} catch ( NotFoundException $exception ) {
@@ -255,7 +256,7 @@ final class LessonController {
 
 			$lesson = $this->lessonService->createStandalone( $dto, $userId );
 
-			return ApiResponse::success( $lesson->toArray(), 201 );
+			return ApiResponse::success( $this->lessonPayload( $lesson ), 201 );
 		} catch ( ValidationException $exception ) {
 			return ApiResponse::error( 'validation_error', $exception->getMessage(), 400, $exception->errors() );
 		} catch ( ForbiddenException $exception ) {
@@ -277,7 +278,7 @@ final class LessonController {
 				$userId
 			);
 
-			return ApiResponse::success( $lesson->toArray() );
+			return ApiResponse::success( $this->lessonPayload( $lesson ) );
 		} catch ( ValidationException $exception ) {
 			return ApiResponse::error( 'validation_error', $exception->getMessage(), 400, $exception->errors() );
 		} catch ( NotFoundException $exception ) {
@@ -294,7 +295,7 @@ final class LessonController {
 
 			$lesson = $this->lessonService->detachFromCourse( $lessonId, $userId );
 
-			return ApiResponse::success( $lesson->toArray() );
+			return ApiResponse::success( $this->lessonPayload( $lesson ) );
 		} catch ( ValidationException $exception ) {
 			return ApiResponse::error( 'validation_error', $exception->getMessage(), 400, $exception->errors() );
 		} catch ( NotFoundException $exception ) {
@@ -311,7 +312,7 @@ final class LessonController {
 
 			$lesson = $this->lessonService->get( $id, $userId );
 
-			return ApiResponse::success( $lesson->toArray() );
+			return ApiResponse::success( $this->lessonPayload( $lesson ) );
 		} catch ( NotFoundException $exception ) {
 			return ApiResponse::error( 'not_found', $exception->getMessage(), 404 );
 		} catch ( ForbiddenException $exception ) {
@@ -342,7 +343,11 @@ final class LessonController {
 
 			$lesson = $this->lessonService->update( $id, $dto, $userId );
 
-			return ApiResponse::success( $lesson->toArray() );
+			if ( $request->offsetExists( 'settings' ) && is_array( $request->get_param( 'settings' ) ) ) {
+				$this->saveLessonSettings( $id, $request->get_param( 'settings' ) );
+			}
+
+			return ApiResponse::success( $this->lessonPayload( $lesson ) );
 		} catch ( ValidationException $exception ) {
 			return ApiResponse::error( 'validation_error', $exception->getMessage(), 400, $exception->errors() );
 		} catch ( NotFoundException $exception ) {
@@ -571,5 +576,133 @@ final class LessonController {
 		}
 
 		return max( 0, (int) $value );
+	}
+
+	/**
+	 * @return array<string, mixed>
+	 */
+	private function lessonPayload( \MintLMS\Application\Lesson\Dto\LessonDto $lesson ): array {
+		$data             = $lesson->toArray();
+		$data['settings'] = $this->readLessonSettings( $lesson->id );
+
+		return $data;
+	}
+
+	/**
+	 * @return array<string, mixed>
+	 */
+	private function defaultLessonSettings(): array {
+		return array(
+			'materialsEnabled'  => false,
+			'materialsContent'  => '',
+			'videoProgression'  => false,
+			'videoUrl'          => '',
+			'videoTiming'       => 'before',
+			'videoAutoplay'     => false,
+			'videoControls'     => true,
+			'videoPauseHidden'  => false,
+			'videoResume'       => false,
+			'assignmentUploads' => false,
+			'allowedFileTypes'  => '',
+			'maxFileSize'       => '',
+			'awardPoints'       => false,
+			'awardPointsValue'  => 10,
+			'grading'           => 'auto',
+			'maxFiles'          => 1,
+			'allowDeleteFiles'  => false,
+			'minTimeEnabled'    => false,
+			'minTimeHours'      => '00',
+			'minTimeMinutes'    => '00',
+			'minTimeSeconds'    => '00',
+			'sampleLesson'      => false,
+			'releaseSchedule'   => 'immediately',
+			'releaseDays'       => 0,
+			'releaseDate'       => '',
+			'externalLesson'    => false,
+			'externalType'      => 'virtual',
+			'requireAttendance' => 'no',
+		);
+	}
+
+	/**
+	 * @return array<string, mixed>
+	 */
+	private function readLessonSettings( int $lessonId ): array {
+		$raw = get_post_meta( $lessonId, PostTypes::META_LESSON_SETTINGS, true );
+		if ( ! is_array( $raw ) ) {
+			return $this->defaultLessonSettings();
+		}
+
+		return array_merge( $this->defaultLessonSettings(), $raw );
+	}
+
+	/**
+	 * @param array<string, mixed> $settings
+	 */
+	private function saveLessonSettings( int $lessonId, array $settings ): void {
+		$defaults = $this->defaultLessonSettings();
+		$schedule = sanitize_key( (string) ( $settings['releaseSchedule'] ?? 'immediately' ) );
+		if ( ! in_array( $schedule, array( 'immediately', 'enrollment', 'specific_date' ), true ) ) {
+			$schedule = 'immediately';
+		}
+		$timing = sanitize_key( (string) ( $settings['videoTiming'] ?? 'before' ) );
+		if ( ! in_array( $timing, array( 'before', 'after' ), true ) ) {
+			$timing = 'before';
+		}
+		$grading = sanitize_key( (string) ( $settings['grading'] ?? 'auto' ) );
+		if ( ! in_array( $grading, array( 'auto', 'manual' ), true ) ) {
+			$grading = 'auto';
+		}
+		$ext_type = sanitize_key( (string) ( $settings['externalType'] ?? 'virtual' ) );
+		if ( ! in_array( $ext_type, array( 'virtual', 'person' ), true ) ) {
+			$ext_type = 'virtual';
+		}
+		$attend = sanitize_key( (string) ( $settings['requireAttendance'] ?? 'no' ) );
+		if ( ! in_array( $attend, array( 'yes', 'no' ), true ) ) {
+			$attend = 'no';
+		}
+
+		$clean = array(
+			'materialsEnabled'  => ! empty( $settings['materialsEnabled'] ),
+			'materialsContent'  => wp_kses_post( (string) ( $settings['materialsContent'] ?? '' ) ),
+			'videoProgression'  => ! empty( $settings['videoProgression'] ),
+			'videoUrl'          => sanitize_text_field( (string) ( $settings['videoUrl'] ?? '' ) ),
+			'videoTiming'       => $timing,
+			'videoAutoplay'     => ! empty( $settings['videoAutoplay'] ),
+			'videoControls'     => ! empty( $settings['videoControls'] ),
+			'videoPauseHidden'  => ! empty( $settings['videoPauseHidden'] ),
+			'videoResume'       => ! empty( $settings['videoResume'] ),
+			'assignmentUploads' => ! empty( $settings['assignmentUploads'] ),
+			'allowedFileTypes'  => sanitize_text_field( (string) ( $settings['allowedFileTypes'] ?? '' ) ),
+			'maxFileSize'       => sanitize_text_field( (string) ( $settings['maxFileSize'] ?? '' ) ),
+			'awardPoints'       => ! empty( $settings['awardPoints'] ),
+			'awardPointsValue'  => absint( $settings['awardPointsValue'] ?? 10 ),
+			'grading'           => $grading,
+			'maxFiles'          => max( 1, absint( $settings['maxFiles'] ?? 1 ) ),
+			'allowDeleteFiles'  => ! empty( $settings['allowDeleteFiles'] ),
+			'minTimeEnabled'    => ! empty( $settings['minTimeEnabled'] ),
+			'minTimeHours'      => $this->sanitizeLessonTimePart( $settings['minTimeHours'] ?? '00' ),
+			'minTimeMinutes'    => $this->sanitizeLessonTimePart( $settings['minTimeMinutes'] ?? '00' ),
+			'minTimeSeconds'    => $this->sanitizeLessonTimePart( $settings['minTimeSeconds'] ?? '00' ),
+			'sampleLesson'      => ! empty( $settings['sampleLesson'] ),
+			'releaseSchedule'   => $schedule,
+			'releaseDays'       => absint( $settings['releaseDays'] ?? 0 ),
+			'releaseDate'       => sanitize_text_field( (string) ( $settings['releaseDate'] ?? '' ) ),
+			'externalLesson'    => ! empty( $settings['externalLesson'] ),
+			'externalType'      => $ext_type,
+			'requireAttendance' => $attend,
+		);
+
+		update_post_meta( $lessonId, PostTypes::META_LESSON_SETTINGS, array_merge( $defaults, $clean ) );
+	}
+
+	private function sanitizeLessonTimePart( mixed $value ): string {
+		$digits = preg_replace( '/\D+/', '', (string) $value );
+		$digits = is_string( $digits ) ? substr( $digits, 0, 2 ) : '';
+		if ( '' === $digits ) {
+			return '00';
+		}
+
+		return str_pad( (string) min( 59, absint( $digits ) ), 2, '0', STR_PAD_LEFT );
 	}
 }

@@ -22,10 +22,7 @@ final class CourseBuilderPage {
 	}
 
 	public static function newCourseUrl(): string {
-		return wp_nonce_url(
-			admin_url( 'admin.php?page=mint-lms-course-new' ),
-			self::CREATE_NONCE_ACTION
-		);
+		return admin_url( 'post-new.php?post_type=' . PostTypes::COURSE );
 	}
 
 	public function setBuilderTitle(): void {

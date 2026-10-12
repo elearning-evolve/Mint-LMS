@@ -21,7 +21,7 @@ $totalCount  = count( $checklist );
 $pagesCreated = isset( $_GET['mintlms_pages'] ) && '1' === sanitize_text_field( wp_unslash( (string) $_GET['mintlms_pages'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 $cardClass   = 'mint-rounded-xl mint-border mint-border-tint-line mint-bg-tint mint-px-7 mint-py-6';
-$fieldSelect = 'mint-block mint-w-full mint-rounded-lg mint-border mint-border-control mint-bg-bg mint-px-[14px] mint-py-[11px] mint-text-base mint-text-ink focus:mint-border-accent focus:mint-shadow-focus focus:mint-outline-none';
+$fieldSelect = 'mint-block mint-w-full mint-rounded-lg mint-border mint-border-control mint-bg-bg mint-px-[14px] mint-py-[11px] mint-text-base mint-text-ink hover:mint-border-mint-blue focus:mint-border-mint-blue focus:mint-shadow-focus focus:mint-outline-none';
 ?>
 <div class="mint-py-10 mint-pb-24">
 	<?php if ( $pagesCreated ) : ?>

@@ -33,6 +33,7 @@ use MintLMS\Infrastructure\Admin\CoursePostEditUi;
 use MintLMS\Infrastructure\Admin\FirstRunRedirect;
 use MintLMS\Infrastructure\Admin\LessonPostEditUi;
 use MintLMS\Infrastructure\Admin\MenuRegistrar;
+use MintLMS\Infrastructure\Admin\NativeEditorSaveGuard;
 use MintLMS\Infrastructure\Admin\QuestionPostEditUi;
 use MintLMS\Infrastructure\Admin\QuizPostEditUi;
 use MintLMS\Infrastructure\Admin\SettingsPage;
@@ -112,6 +113,7 @@ final class Bootstrap {
 		( new LessonPostEditUi() )->register();
 		( new QuizPostEditUi() )->register();
 		( new QuestionPostEditUi() )->register();
+		( new NativeEditorSaveGuard() )->register();
 		( new FirstRunRedirect() )->register();
 		( new AssetLoader() )->register();
 		( new AdminAjaxHandler() )->register();
