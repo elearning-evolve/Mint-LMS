@@ -22,7 +22,7 @@ jobs:
     uses: elearning-evolve/ci-workflows/.github/workflows/wp-qa.yml@v1
     with:
       # Minimum PHP your plugin's header declares goes first. Override per repo if needed.
-      php-versions: '["7.4", "8.0", "8.1", "8.2", "8.3", "8.4"]'
+      php-versions: '["8.2", "8.3", "8.4"]'
       phpcs-scope: changed      # switch to "all" once a repo is clean
       fail-on-warnings: false
 

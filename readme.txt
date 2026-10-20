@@ -4,7 +4,7 @@ Donate link: https://wordpress.org/plugins/mint-lms/
 Tags: lms, elearning, courses, lessons, quizzes, education, learning management
 Requires at least: 6.2
 Tested up to: 7.1
-Requires PHP: 8.1
+Requires PHP: 8.2
 Stable tag: 1.0.130
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
