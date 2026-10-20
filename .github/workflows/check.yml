@@ -1,46 +1,23 @@
 name: Mint LMS CI
 
+# PHP syntax + WordPress coding standards now run in the shared WP QA workflow (wp-qa.yml).
 on:
   push:
+    branches: [main]
   pull_request:
 
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
-  php-syntax:
-    name: PHP syntax
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-          coverage: none
-      - name: Lint PHP files
-        run: |
-          while IFS= read -r -d '' file; do
-            php -l "$file"
-          done < <(find src views templates mint-lms.php -name '*.php' -print0)
-
-  phpcs:
-    name: WordPress coding standards
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-          tools: composer
-          coverage: none
-      - run: composer install --no-interaction --prefer-dist --no-progress
-      - name: Run PHPCS (errors only)
-        run: vendor/bin/phpcs --runtime-set ignore_warnings_on_exit 1 -p --report=full
-
   tests:
     name: Unit and architecture tests
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: shivammathur/setup-php@v2
@@ -55,6 +32,7 @@ jobs:
   assets:
     name: JS and Tailwind build
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
