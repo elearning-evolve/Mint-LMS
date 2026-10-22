@@ -11,6 +11,8 @@ use MintLMS\Application\Exception\NotFoundException;
 use MintLMS\Application\Exception\ValidationException;
 use MintLMS\Application\Quiz\Dto\CreateQuestionDto;
 use MintLMS\Application\Quiz\Dto\CreateQuizDto;
+use MintLMS\Application\Quiz\Dto\ReorderQuestionsDto;
+use MintLMS\Application\Quiz\Dto\ReorderQuizzesDto;
 use MintLMS\Application\Quiz\Dto\SubmitQuizAttemptDto;
 use MintLMS\Application\Quiz\Dto\UpdateQuestionDto;
 use MintLMS\Application\Quiz\Dto\UpdateQuizDto;
@@ -166,6 +168,32 @@ final class QuizController {
 
 		register_rest_route(
 			self::NAMESPACE,
+			'/lessons/(?P<id>\d+)/quizzes/reorder',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'reorderQuizzes' ),
+					'permission_callback' => array( $this, 'canManageCourses' ),
+					'args'                => $this->reorderArgs(),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/quizzes/(?P<id>\d+)/questions/reorder',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'reorderQuestions' ),
+					'permission_callback' => array( $this, 'canManageCourses' ),
+					'args'                => $this->reorderArgs(),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
 			'/quizzes/(?P<id>\d+)/questions',
 			array(
 				array(
@@ -296,6 +324,7 @@ final class QuizController {
 				'lessonTitle'    => $linked ? (string) get_the_title( $lessonId ) : '',
 				'sectionId'      => $linked ? $sectionId : 0,
 				'courseId'       => $courseId,
+				'sortOrder'      => (int) get_post_meta( $post->ID, PostTypes::META_SORT_ORDER, true ),
 				'linked'         => $linked,
 				'disposableHost' => PostTypes::isDisposableHostLesson( $lessonId ),
 				'questionShell'  => $questionShell,
@@ -486,6 +515,46 @@ final class QuizController {
 			$quiz = $this->quizService->detachFromLesson( $quizId, $userId );
 
 			return ApiResponse::success( $this->quizPayload( $quiz ) );
+		} catch ( ValidationException $exception ) {
+			return ApiResponse::error( 'validation_error', $exception->getMessage(), 400, $exception->errors() );
+		} catch ( NotFoundException $exception ) {
+			return ApiResponse::error( 'not_found', $exception->getMessage(), 404 );
+		} catch ( ForbiddenException $exception ) {
+			return ApiResponse::error( 'forbidden', $exception->getMessage(), 403 );
+		}
+	}
+
+	public function reorderQuizzes( \WP_REST_Request $request ): \WP_REST_Response {
+		try {
+			$userId   = $this->authorization->getCurrentUserId();
+			$lessonId = (int) $request->get_param( 'id' );
+			$ids      = $request->get_param( 'ids' );
+
+			$dto = new ReorderQuizzesDto( is_array( $ids ) ? array_map( 'intval', $ids ) : array() );
+
+			$this->quizService->reorderQuizzes( $lessonId, $dto, $userId );
+
+			return ApiResponse::success( null, 204 );
+		} catch ( ValidationException $exception ) {
+			return ApiResponse::error( 'validation_error', $exception->getMessage(), 400, $exception->errors() );
+		} catch ( NotFoundException $exception ) {
+			return ApiResponse::error( 'not_found', $exception->getMessage(), 404 );
+		} catch ( ForbiddenException $exception ) {
+			return ApiResponse::error( 'forbidden', $exception->getMessage(), 403 );
+		}
+	}
+
+	public function reorderQuestions( \WP_REST_Request $request ): \WP_REST_Response {
+		try {
+			$userId = $this->authorization->getCurrentUserId();
+			$quizId = (int) $request->get_param( 'id' );
+			$ids    = $request->get_param( 'ids' );
+
+			$dto = new ReorderQuestionsDto( is_array( $ids ) ? array_map( 'intval', $ids ) : array() );
+
+			$this->quizService->reorderQuestions( $quizId, $dto, $userId );
+
+			return ApiResponse::success( null, 204 );
 		} catch ( ValidationException $exception ) {
 			return ApiResponse::error( 'validation_error', $exception->getMessage(), 400, $exception->errors() );
 		} catch ( NotFoundException $exception ) {
@@ -744,6 +813,38 @@ final class QuizController {
 			),
 			'settings'           => array(
 				'type' => 'object',
+			),
+		);
+	}
+
+	/**
+	 * @return array<string, array<string, mixed>>
+	 */
+	private function reorderArgs(): array {
+		return array(
+			'ids' => array(
+				'type'              => 'array',
+				'required'          => true,
+				'validate_callback' => static function ( mixed $value ): bool {
+					if ( ! is_array( $value ) ) {
+						return false;
+					}
+
+					foreach ( $value as $id ) {
+						if ( ! is_numeric( $id ) || (int) $id <= 0 ) {
+							return false;
+						}
+					}
+
+					return true;
+				},
+				'sanitize_callback' => static function ( mixed $value ): array {
+					if ( ! is_array( $value ) ) {
+						return array();
+					}
+
+					return array_map( 'absint', $value );
+				},
 			),
 		);
 	}

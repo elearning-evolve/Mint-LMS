@@ -1590,10 +1590,11 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 													<button type="button" class="mint-builder-tree-page__remove" @click.stop="deleteLesson(lesson.id, 0)"><?php esc_html_e( 'Remove', 'mint-lms' ); ?></button>
 												</div>
 												<div class="mint-builder-tree-page__children" x-show="isLessonExpanded(lesson.id) || treePageInlineQuizOpen(lesson.id)">
+													<div class="mint-tree-page-quizzes" :data-lesson-id="lesson.id">
 													<template x-for="quiz in sidebarQuizzesForLesson(lesson)" :key="'tree-page-uqz-' + quiz.id">
-														<div class="mint-builder-tree-page__branch">
+														<div class="mint-builder-tree-page__branch" :data-quiz-id="quiz.id">
 															<div class="mint-builder-tree-page__row mint-builder-tree-page__row--quiz" :class="{ 'is-adding': treePageInlineQuestionOpen(quiz.id) }">
-																<span class="mint-builder-tree-page__grip" aria-hidden="true">
+																<span class="mint-builder-tree-page__grip mint-handle-quiz" title="<?php echo esc_attr__( 'Drag to reorder', 'mint-lms' ); ?>">
 																	<svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><circle cx="5" cy="3" r="1.5"/><circle cx="11" cy="3" r="1.5"/><circle cx="5" cy="8" r="1.5"/><circle cx="11" cy="8" r="1.5"/><circle cx="5" cy="13" r="1.5"/><circle cx="11" cy="13" r="1.5"/></svg>
 																</span>
 																<button type="button" class="mint-builder-tree-page__toggle" @click.stop="toggleQuiz(quiz.id)" :aria-expanded="isQuizExpanded(quiz.id)">
@@ -1614,9 +1615,10 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 																<button type="button" class="mint-builder-tree-page__remove" @click.stop="deleteOverviewQuiz(quiz)"><?php esc_html_e( 'Remove', 'mint-lms' ); ?></button>
 															</div>
 															<div class="mint-builder-tree-page__children" x-show="isQuizExpanded(quiz.id) || treePageInlineQuestionOpen(quiz.id)">
+																<div class="mint-tree-page-questions" :data-quiz-id="quiz.id">
 																<template x-for="question in sidebarQuestionsForQuiz(quiz)" :key="'tree-page-uqt-' + question.id">
-																	<div class="mint-builder-tree-page__row mint-builder-tree-page__row--question">
-																		<span class="mint-builder-tree-page__grip" aria-hidden="true">
+																	<div class="mint-builder-tree-page__row mint-builder-tree-page__row--question" :data-question-id="question.id">
+																		<span class="mint-builder-tree-page__grip mint-handle-question" title="<?php echo esc_attr__( 'Drag to reorder', 'mint-lms' ); ?>">
 																			<svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><circle cx="5" cy="3" r="1.5"/><circle cx="11" cy="3" r="1.5"/><circle cx="5" cy="8" r="1.5"/><circle cx="11" cy="8" r="1.5"/><circle cx="5" cy="13" r="1.5"/><circle cx="11" cy="13" r="1.5"/></svg>
 																		</span>
 																		<span class="mint-builder-tree-page__toggle mint-builder-tree-page__toggle--spacer" aria-hidden="true"></span>
@@ -1626,6 +1628,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 																		<button type="button" class="mint-builder-tree-page__remove" @click.stop="deleteOverviewQuestion({ id: question.id, quizId: quiz.id })"><?php esc_html_e( 'Remove', 'mint-lms' ); ?></button>
 																	</div>
 																</template>
+																</div>
 
 																<div
 																	class="mint-builder-tree-page__inline mint-builder-tree-page__inline--question"
@@ -1658,6 +1661,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 															</div>
 														</div>
 													</template>
+													</div>
 
 													<div
 														class="mint-builder-tree-page__inline mint-builder-tree-page__inline--quiz"
@@ -1744,10 +1748,11 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 													</div>
 
 													<div class="mint-builder-tree-page__children" x-show="isLessonExpanded(lesson.id) || treePageInlineQuizOpen(lesson.id)">
+														<div class="mint-tree-page-quizzes" :data-lesson-id="lesson.id">
 														<template x-for="quiz in sidebarQuizzesForLesson(lesson)" :key="'tree-page-qz-' + quiz.id">
-															<div class="mint-builder-tree-page__branch">
+															<div class="mint-builder-tree-page__branch" :data-quiz-id="quiz.id">
 																<div class="mint-builder-tree-page__row mint-builder-tree-page__row--quiz" :class="{ 'is-adding': treePageInlineQuestionOpen(quiz.id) }">
-																	<span class="mint-builder-tree-page__grip" aria-hidden="true">
+																	<span class="mint-builder-tree-page__grip mint-handle-quiz" title="<?php echo esc_attr__( 'Drag to reorder', 'mint-lms' ); ?>">
 																		<svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><circle cx="5" cy="3" r="1.5"/><circle cx="11" cy="3" r="1.5"/><circle cx="5" cy="8" r="1.5"/><circle cx="11" cy="8" r="1.5"/><circle cx="5" cy="13" r="1.5"/><circle cx="11" cy="13" r="1.5"/></svg>
 																	</span>
 																	<button type="button" class="mint-builder-tree-page__toggle" @click.stop="toggleQuiz(quiz.id)" :aria-expanded="isQuizExpanded(quiz.id)">
@@ -1768,9 +1773,10 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 																	<button type="button" class="mint-builder-tree-page__remove" @click.stop="deleteOverviewQuiz(quiz)"><?php esc_html_e( 'Remove', 'mint-lms' ); ?></button>
 																</div>
 																<div class="mint-builder-tree-page__children" x-show="isQuizExpanded(quiz.id) || treePageInlineQuestionOpen(quiz.id)">
+																	<div class="mint-tree-page-questions" :data-quiz-id="quiz.id">
 																	<template x-for="question in sidebarQuestionsForQuiz(quiz)" :key="'tree-page-qt-' + question.id">
-																		<div class="mint-builder-tree-page__row mint-builder-tree-page__row--question">
-																			<span class="mint-builder-tree-page__grip" aria-hidden="true">
+																		<div class="mint-builder-tree-page__row mint-builder-tree-page__row--question" :data-question-id="question.id">
+																			<span class="mint-builder-tree-page__grip mint-handle-question" title="<?php echo esc_attr__( 'Drag to reorder', 'mint-lms' ); ?>">
 																				<svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><circle cx="5" cy="3" r="1.5"/><circle cx="11" cy="3" r="1.5"/><circle cx="5" cy="8" r="1.5"/><circle cx="11" cy="8" r="1.5"/><circle cx="5" cy="13" r="1.5"/><circle cx="11" cy="13" r="1.5"/></svg>
 																			</span>
 																			<span class="mint-builder-tree-page__toggle mint-builder-tree-page__toggle--spacer" aria-hidden="true"></span>
@@ -1780,6 +1786,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 																			<button type="button" class="mint-builder-tree-page__remove" @click.stop="deleteOverviewQuestion({ id: question.id, quizId: quiz.id })"><?php esc_html_e( 'Remove', 'mint-lms' ); ?></button>
 																		</div>
 																	</template>
+																	</div>
 
 																	<div
 																		class="mint-builder-tree-page__inline mint-builder-tree-page__inline--question"
@@ -1812,6 +1819,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 																</div>
 															</div>
 														</template>
+														</div>
 
 														<div
 															class="mint-builder-tree-page__inline mint-builder-tree-page__inline--quiz"
@@ -3074,13 +3082,47 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 														</div>
 													</div>
 													<div class="mint-qeditor__option-actions">
-														<button type="button" class="mint-qeditor__btn-solid" @click="removeMcqOption(activeQuestion, oIndex)"><?php esc_html_e( 'Delete answer', 'mint-lms' ); ?></button>
-														<button type="button" class="mint-qeditor__btn-outline" @click="addMediaToQuestionOption(oIndex)"><?php esc_html_e( 'Add Media', 'mint-lms' ); ?></button>
-														<button type="button" class="mint-qeditor__btn-outline" @click="moveMcqOption(activeQuestion, oIndex, oIndex === activeQuestion.options.length - 1 ? -1 : 1)"><?php esc_html_e( 'Move', 'mint-lms' ); ?></button>
+														<div class="mint-qeditor__option-move" role="group" aria-label="<?php echo esc_attr__( 'Reorder answer', 'mint-lms' ); ?>">
+															<button
+																type="button"
+																class="mint-qeditor__icon-btn"
+																@click="moveMcqOption(activeQuestion, oIndex, -1)"
+																:disabled="oIndex === 0"
+																title="<?php echo esc_attr__( 'Move up', 'mint-lms' ); ?>"
+																aria-label="<?php echo esc_attr__( 'Move up', 'mint-lms' ); ?>"
+															>
+																<svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12 10 7 15 12"/></svg>
+															</button>
+															<button
+																type="button"
+																class="mint-qeditor__icon-btn"
+																@click="moveMcqOption(activeQuestion, oIndex, 1)"
+																:disabled="oIndex === activeQuestion.options.length - 1"
+																title="<?php echo esc_attr__( 'Move down', 'mint-lms' ); ?>"
+																aria-label="<?php echo esc_attr__( 'Move down', 'mint-lms' ); ?>"
+															>
+																<svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8 10 13 15 8"/></svg>
+															</button>
+														</div>
+														<button type="button" class="mint-qeditor__btn-outline" @click="addMediaToQuestionOption(oIndex)"><?php esc_html_e( 'Add media', 'mint-lms' ); ?></button>
+														<button
+															type="button"
+															class="mint-qeditor__btn-danger"
+															@click="removeMcqOption(activeQuestion, oIndex)"
+															:disabled="activeQuestion.options.length <= 2"
+														><?php esc_html_e( 'Delete', 'mint-lms' ); ?></button>
 													</div>
 												</div>
 											</template>
-											<button type="button" class="mint-qeditor__btn-solid mint-qeditor__btn-solid--wide" x-show="activeQuestion.options.length < 6" @click="addMcqOption(activeQuestion)"><?php esc_html_e( 'Add new answer', 'mint-lms' ); ?></button>
+											<button
+												type="button"
+												class="mint-qeditor__add-answer"
+												x-show="activeQuestion.options.length < 6"
+												@click="addMcqOption(activeQuestion)"
+											>
+												<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M10 5v10M5 10h10"/></svg>
+												<?php esc_html_e( 'Add new answer', 'mint-lms' ); ?>
+											</button>
 										</div>
 									</template>
 
@@ -3162,15 +3204,17 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 												</div>
 											</template>
 
-											<div class="mint-qeditor__tf-actions mint-qeditor__tf-actions--stack">
-												<button type="button" class="mint-qeditor__btn-solid" @click="addExtraTfAnswer()"><?php esc_html_e( '+ Add new answer', 'mint-lms' ); ?></button>
+											<div class="mint-qeditor__tf-actions">
+												<button type="button" class="mint-qeditor__add-answer" @click="addExtraTfAnswer()">
+													<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M10 5v10M5 10h10"/></svg>
+													<?php esc_html_e( 'Add new answer', 'mint-lms' ); ?>
+												</button>
 												<button
 													type="button"
-													class="mint-qeditor__btn-solid"
+													class="mint-qeditor__btn-danger"
 													x-show="!activeQuestion.extraTf || activeQuestion.extraTf.length === 0"
 													@click="deleteBaseTfAnswer()"
 												><?php esc_html_e( 'Delete answer', 'mint-lms' ); ?></button>
-												<button type="button" class="mint-qeditor__btn-solid" @click="saveActiveQuestion()" :disabled="quizSaving"><?php esc_html_e( 'Save question', 'mint-lms' ); ?></button>
 											</div>
 										</div>
 									</template>
@@ -3237,23 +3281,18 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 										</div>
 									</template>
 
-									<button
-										type="button"
-										class="mint-quiz-save-question"
-										x-show="activeQuestion.type !== 'true_false'"
-										@click="saveActiveQuestion()"
-										:disabled="quizSaving"
-									><?php esc_html_e( 'Save question', 'mint-lms' ); ?></button>
 								</div>
 
-								<div class="mint-mt-8 mint-flex mint-flex-wrap mint-items-center mint-justify-between mint-gap-4 mint-border-t mint-border-rule mint-pt-5">
+								<div class="mint-qeditor__footer">
 									<button type="button" class="mint-builder-delete" @click="deleteActiveQuestion()"><?php esc_html_e( 'Delete question', 'mint-lms' ); ?></button>
 									<button
 										type="button"
-										class="mint-builder-btn-publish !mint-h-[38px] !mint-rounded-[9px] !mint-px-4 !mint-text-[15px]"
+										class="mint-qeditor__btn-solid mint-qeditor__btn-solid--wide"
 										@click="saveActiveQuestion()"
 										:disabled="quizSaving"
-									><?php esc_html_e( 'Save changes', 'mint-lms' ); ?></button>
+									>
+										<span x-text="quizSaving ? '<?php echo esc_js( __( 'Saving…', 'mint-lms' ) ); ?>' : '<?php echo esc_js( __( 'Save question', 'mint-lms' ) ); ?>'"></span>
+									</button>
 								</div>
 								</div><!-- /.mint-quiz-editor-layout__main -->
 
