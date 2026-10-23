@@ -15,15 +15,17 @@ if ( ! defined( 'MINTLMS_PATH' ) ) {
 
 MintLMS\Plugin::boot();
 
-$GLOBALS['verify_failures'] = 0;
+$mintlms_verify_failures = 0;
 
 function mintlms_verify( bool $condition, string $label ): void {
+	global $mintlms_verify_failures;
+
 	if ( $condition ) {
 		WP_CLI::log( 'PASS: ' . $label );
 		return;
 	}
 
-	++$GLOBALS['verify_failures'];
+	++$mintlms_verify_failures;
 	WP_CLI::warning( 'FAIL: ' . $label );
 }
 
@@ -66,7 +68,10 @@ function mintlms_render_shortcode( string $tag, array $context = array() ): void
 	$_GET = $previousGet;
 }
 
-global $wpdb;
+$wpdb = mintlms_wpdb();
+if ( null === $wpdb ) {
+	WP_CLI::error( 'Database unavailable.' );
+}
 
 $adminId   = 1;
 $student   = get_user_by( 'login', 'mintstudent' );
@@ -198,17 +203,17 @@ if ( $courseId > 0 ) {
 WP_CLI::log( '' );
 WP_CLI::log( 'Running verify-rest-actions.php...' );
 require MINTLMS_PATH . 'dev/scripts/verify-rest-actions.php';
-$restExit = ( $GLOBALS['rest_failures'] ?? 0 ) > 0 ? 1 : 0;
+$restExit = ( $mintlms_rest_failures ?? 0 ) > 0 ? 1 : 0;
 mintlms_verify( 0 === $restExit, 'REST actions script exit code 0' );
 
 WP_CLI::log( '' );
 WP_CLI::log( 'Running smoke-v1.php...' );
 require MINTLMS_PATH . 'dev/scripts/smoke-v1.php';
-$smokeExit = ( $GLOBALS['failures'] ?? 0 ) > 0 ? 1 : 0;
+$smokeExit = ( $mintlms_failures ?? 0 ) > 0 ? 1 : 0;
 mintlms_verify( 0 === $smokeExit, 'Smoke script exit code 0' );
 
-if ( ( $GLOBALS['verify_failures'] ?? 0 ) > 0 ) {
-	WP_CLI::error( (string) $GLOBALS['verify_failures'] . ' verification check(s) failed.' );
+if ( $mintlms_verify_failures > 0 ) {
+	WP_CLI::error( (string) $mintlms_verify_failures . ' verification check(s) failed.' );
 }
 
 WP_CLI::success( 'All Mint LMS verification checks passed.' );

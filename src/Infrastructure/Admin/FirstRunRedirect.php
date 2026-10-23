@@ -110,9 +110,9 @@ final class FirstRunRedirect {
 	}
 
 	private function isCoursesListScreen(): bool {
-		global $pagenow;
-
-		if ( 'edit.php' !== $pagenow ) {
+		// Avoid global $pagenow — detect CPT list via request (admin_init is before get_current_screen()).
+		$script = isset( $_SERVER['PHP_SELF'] ) ? basename( sanitize_text_field( wp_unslash( (string) $_SERVER['PHP_SELF'] ) ) ) : '';
+		if ( 'edit.php' !== $script ) {
 			return false;
 		}
 

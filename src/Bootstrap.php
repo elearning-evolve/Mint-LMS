@@ -85,7 +85,7 @@ final class Bootstrap {
 	}
 
 	public static function onPluginsLoaded(): void {
-		global $wpdb;
+		$wpdb = mintlms_wpdb();
 
 		self::runMigrations();
 
@@ -95,10 +95,10 @@ final class Bootstrap {
 		add_action(
 			'init',
 			static function (): void {
-				global $wpdb;
+				$db = mintlms_wpdb();
 
-				if ( $wpdb instanceof \wpdb ) {
-					( new ContentMigrator( $wpdb ) )->maybeMigrate();
+				if ( null !== $db ) {
+					( new ContentMigrator( $db ) )->maybeMigrate();
 				}
 			},
 			20
@@ -119,7 +119,7 @@ final class Bootstrap {
 		( new AdminAjaxHandler() )->register();
 		( new StudentAssetLoader() )->register();
 
-		if ( ! $wpdb instanceof \wpdb ) {
+		if ( null === $wpdb ) {
 			return;
 		}
 
@@ -164,9 +164,9 @@ final class Bootstrap {
 	}
 
 	private static function registerFrontend(): void {
-		global $wpdb;
+		$wpdb = mintlms_wpdb();
 
-		if ( ! $wpdb instanceof \wpdb ) {
+		if ( null === $wpdb ) {
 			return;
 		}
 
@@ -225,9 +225,9 @@ final class Bootstrap {
 	}
 
 	private static function registerRestApi(): void {
-		global $wpdb;
+		$wpdb = mintlms_wpdb();
 
-		if ( ! $wpdb instanceof \wpdb ) {
+		if ( null === $wpdb ) {
 			return;
 		}
 
@@ -301,9 +301,9 @@ final class Bootstrap {
 	}
 
 	private static function runMigrations(): void {
-		global $wpdb;
+		$wpdb = mintlms_wpdb();
 
-		if ( ! $wpdb instanceof \wpdb ) {
+		if ( null === $wpdb ) {
 			return;
 		}
 

@@ -311,6 +311,48 @@ final class WpdbQuizRepository implements QuizRepositoryInterface {
 		return (int) $max + 1;
 	}
 
+	/**
+	 * @param list<int> $quizIds
+	 */
+	public function reorderQuizzes( int $lessonId, array $quizIds ): void {
+		$table = Schema::validateTable( Schema::quizzesTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+
+		foreach ( $quizIds as $index => $quizId ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$this->wpdb->update(
+				$table,
+				array( 'sort_order' => (int) $index ),
+				array(
+					'id'        => (int) $quizId,
+					'lesson_id' => $lessonId,
+				),
+				array( '%d' ),
+				array( '%d', '%d' )
+			);
+		}
+	}
+
+	/**
+	 * @param list<int> $questionIds
+	 */
+	public function reorderQuestions( int $quizId, array $questionIds ): void {
+		$table = Schema::validateTable( Schema::quizQuestionsTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+
+		foreach ( $questionIds as $index => $questionId ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$this->wpdb->update(
+				$table,
+				array( 'sort_order' => (int) $index ),
+				array(
+					'id'      => (int) $questionId,
+					'quiz_id' => $quizId,
+				),
+				array( '%d' ),
+				array( '%d', '%d' )
+			);
+		}
+	}
+
 	public function saveAttempt( QuizAttempt $attempt ): QuizAttempt {
 		$table       = Schema::validateTable( Schema::quizAttemptsTable( $this->wpdb->prefix ), $this->wpdb->prefix );
 		$answersJson = wp_json_encode( $attempt->answers );

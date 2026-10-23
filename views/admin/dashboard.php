@@ -13,7 +13,10 @@ use MintLMS\Infrastructure\Database\Repository\WpdbCourseRepository;
 use MintLMS\Infrastructure\Ui\MintUi;
 use MintLMS\Infrastructure\User\WpUserLookup;
 
-global $wpdb;
+$wpdb = mintlms_wpdb();
+if ( null === $wpdb ) {
+	wp_die( esc_html__( 'Database unavailable.', 'mint-lms' ) );
+}
 
 $renderer = new ViewRenderer();
 $userId   = get_current_user_id();

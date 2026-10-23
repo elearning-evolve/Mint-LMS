@@ -555,9 +555,9 @@ final class PostTypeRegistrar {
 	 * @return array{course_id: int, lesson_id: int, quiz_id: int}
 	 */
 	private function createNewQuizStarter(): array {
-		global $wpdb;
+		$wpdb = mintlms_wpdb();
 
-		if ( ! $wpdb instanceof \wpdb ) {
+		if ( null === $wpdb ) {
 			throw new \RuntimeException( 'Database unavailable.' );
 		}
 
@@ -586,9 +586,9 @@ final class PostTypeRegistrar {
 	 * @return array{course_id: int, lesson_id: int, quiz_id: int, question_id: int}
 	 */
 	private function createNewQuestionStarter(): array {
-		global $wpdb;
+		$wpdb = mintlms_wpdb();
 
-		if ( ! $wpdb instanceof \wpdb ) {
+		if ( null === $wpdb ) {
 			throw new \RuntimeException( 'Database unavailable.' );
 		}
 

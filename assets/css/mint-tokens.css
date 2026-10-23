@@ -22,6 +22,17 @@
   --mint-cta-shadow: 0 4px 12px rgba(11, 79, 63, 0.18);
   --mint-cta-focus: 0 0 0 3px rgba(152, 251, 203, 0.55);
 
+  /* Radio / joining-method choice cards — one hover language everywhere */
+  --mint-choice-border: #DAD7E6;
+  --mint-choice-hover-border: #98FBCB;
+  --mint-choice-hover-bg: #E8FFF6;
+  --mint-choice-hover-ring: 0 0 0 3px rgba(152, 251, 203, 0.45);
+  --mint-choice-selected-border: #98FB98;
+  --mint-choice-selected-bg: #F1FFF9;
+  --mint-choice-selected-hover-border: #7FE87F;
+  --mint-choice-selected-hover-bg: #E5FBF0;
+  --mint-choice-selected-hover-ring: 0 0 0 3px rgba(152, 251, 203, 0.35);
+
   /* Surfaces — white page, not grey */
   --mint-bg: #FFFFFF;
   --mint-bg-hover: #FAFAFC;      /* row hover */

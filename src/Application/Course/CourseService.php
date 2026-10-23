@@ -128,6 +128,30 @@ final class CourseService {
 		if ( null !== $dto->seatLimit ) {
 			$settingsPatch['seatLimit'] = $dto->seatLimit;
 		}
+		if ( null !== $dto->materialsEnabled ) {
+			$settingsPatch['materialsEnabled'] = $dto->materialsEnabled;
+		}
+		if ( null !== $dto->materialsContent ) {
+			$settingsPatch['materialsContent'] = $dto->materialsContent;
+		}
+		if ( null !== $dto->lessonListVisibility ) {
+			$settingsPatch['lessonListVisibility'] = $dto->lessonListVisibility;
+		}
+		if ( null !== $dto->paginationEnabled ) {
+			$settingsPatch['paginationEnabled'] = $dto->paginationEnabled;
+		}
+		if ( null !== $dto->lessonsPerPage ) {
+			$settingsPatch['lessonsPerPage'] = $dto->lessonsPerPage;
+		}
+		if ( null !== $dto->groupsPerPage ) {
+			$settingsPatch['groupsPerPage'] = $dto->groupsPerPage;
+		}
+		if ( null !== $dto->completionRedirect ) {
+			$settingsPatch['completionRedirect'] = $dto->completionRedirect;
+		}
+		if ( null !== $dto->pointsOnComplete ) {
+			$settingsPatch['pointsOnComplete'] = $dto->pointsOnComplete;
+		}
 		if ( array() !== $settingsPatch ) {
 			$settings = $settings->merge( $settingsPatch );
 		}

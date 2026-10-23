@@ -9,7 +9,10 @@ use MintLMS\Infrastructure\Admin\ViewRenderer;
 use MintLMS\Infrastructure\Database\Repository\WpdbAdminDashboardRepository;
 use MintLMS\Plugin;
 
-global $wpdb;
+$wpdb = mintlms_wpdb();
+if ( null === $wpdb ) {
+	wp_die( esc_html__( 'Database unavailable.', 'mint-lms' ) );
+}
 
 $renderer = new ViewRenderer();
 $userId   = get_current_user_id();

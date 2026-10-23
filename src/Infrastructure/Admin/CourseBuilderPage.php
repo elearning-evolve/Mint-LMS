@@ -15,29 +15,11 @@ final class CourseBuilderPage {
 
 	public function register(): void {
 		add_action( 'admin_menu', array( $this, 'registerPages' ) );
-		add_action( 'load-admin_page_mint-lms-builder', array( $this, 'setBuilderTitle' ) );
-		add_action( 'load-admin_page_mint-lms-course-edit', array( $this, 'setEditTitle' ) );
 		add_action( 'load-admin_page_mint-lms-course-new', array( $this, 'createAndRedirect' ) );
-		add_action( 'load-admin_page_mint-lms-lesson-edit', array( $this, 'setLessonEditTitle' ) );
 	}
 
 	public static function newCourseUrl(): string {
 		return admin_url( 'post-new.php?post_type=' . PostTypes::COURSE );
-	}
-
-	public function setBuilderTitle(): void {
-		global $title;
-		$title = __( 'Course Builder', 'mint-lms' );
-	}
-
-	public function setEditTitle(): void {
-		global $title;
-		$title = __( 'Edit Course', 'mint-lms' );
-	}
-
-	public function setLessonEditTitle(): void {
-		global $title;
-		$title = __( 'Edit Lesson', 'mint-lms' );
 	}
 
 	public function registerPages(): void {

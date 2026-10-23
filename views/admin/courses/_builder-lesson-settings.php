@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 		<?php esc_html_e( 'Back to lesson', 'mint-lms' ); ?>
 	</button>
 	<h1 class="mint-settings-page__title"><?php esc_html_e( 'Lesson Settings', 'mint-lms' ); ?></h1>
-	<div class="mint-settings-page__subtitle" x-text="selectedLesson?.title || '<?php echo esc_js( __( 'New Lesson', 'mint-lms' ) ); ?>'"></div>
+	<div class="mint-settings-page__subtitle" x-text="selectedLesson?.title || t('newLesson')"></div>
 
 	<!-- Display and content options -->
 	<div class="mint-settings-card">

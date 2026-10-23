@@ -1,6 +1,6 @@
-import { getAdminConfig, joinRestUrl, mintApi } from './api.js';
+import { getAdminConfig, joinRestUrl, mintApi, t } from './api.js';
 
-export { getAdminConfig, mintApi };
+export { getAdminConfig, mintApi, t };
 
 function debounce(fn, delay) {
   let timer;
@@ -16,12 +16,16 @@ function courseBuilder(courseId, opts = {}) {
   const lessonSortables = new Map();
   let treePageSectionSortable = null;
   const treePageLessonSortables = new Map();
+  const treePageQuizSortables = new Map();
+  const treePageQuestionSortables = new Map();
   const standaloneLessonId = Number(opts?.lessonId) || 0;
 
   return {
     courseId,
     standaloneLessonId,
     isStandalone: !Number(courseId) && standaloneLessonId > 0,
+    /** wp_localize_script strings — use in templates: t('untitledCourse') */
+    t,
     attach: { courseId: 0, sectionId: 0, lessonId: 0, quizId: 0, changing: false },
     attachCourses: [],
     attachSections: [],
@@ -684,6 +688,14 @@ function courseBuilder(courseId, opts = {}) {
               this.applyTreePageDefaultToggles();
               this.$nextTick(() => this.initTreePageSortables());
             }
+          } else if (
+            !this.isStandalone &&
+            Number(this.courseId) > 0 &&
+            this.hasRealSections()
+          ) {
+            // Edit Course with existing lesson groups → Lesson Groups overview
+            // (not the blank "Add a lesson" canvas).
+            this.enterTypeOverview('sections');
           }
         }
         if (this.isStandalone && !this.selected && this.standaloneLessonId) {
@@ -1696,6 +1708,10 @@ function courseBuilder(courseId, opts = {}) {
 
       treePageLessonSortables.forEach((instance) => instance.destroy());
       treePageLessonSortables.clear();
+      treePageQuizSortables.forEach((instance) => instance.destroy());
+      treePageQuizSortables.clear();
+      treePageQuestionSortables.forEach((instance) => instance.destroy());
+      treePageQuestionSortables.clear();
 
       document.querySelectorAll('.mint-tree-page-lessons').forEach((el) => {
         const sectionId = parseInt(el.dataset.sectionId, 10);
@@ -1718,6 +1734,36 @@ function courseBuilder(courseId, opts = {}) {
           },
         });
         treePageLessonSortables.set(sectionId, instance);
+      });
+
+      document.querySelectorAll('.mint-tree-page-quizzes').forEach((el) => {
+        const lessonId = parseInt(el.dataset.lessonId, 10);
+        if (!lessonId) return;
+        const instance = Sortable.create(el, {
+          handle: '.mint-handle-quiz',
+          animation: 150,
+          draggable: '[data-quiz-id]',
+          emptyInsertThreshold: 28,
+          onEnd: () => {
+            this.handleQuizSortEnd(lessonId, el);
+          },
+        });
+        treePageQuizSortables.set(lessonId, instance);
+      });
+
+      document.querySelectorAll('.mint-tree-page-questions').forEach((el) => {
+        const quizId = parseInt(el.dataset.quizId, 10);
+        if (!quizId) return;
+        const instance = Sortable.create(el, {
+          handle: '.mint-handle-question',
+          animation: 150,
+          draggable: '[data-question-id]',
+          emptyInsertThreshold: 28,
+          onEnd: () => {
+            this.handleQuestionSortEnd(quizId, el);
+          },
+        });
+        treePageQuestionSortables.set(quizId, instance);
       });
     },
 
@@ -1829,6 +1875,134 @@ function courseBuilder(courseId, opts = {}) {
       this.$nextTick(() => {
         this.initSortables();
       });
+    },
+
+    quizIdsFromContainer(container) {
+      if (!container) return [];
+      return Array.from(container.children)
+        .map((node) => Number(node.getAttribute('data-quiz-id') || 0))
+        .filter((id) => id > 0);
+    },
+
+    questionIdsFromContainer(container) {
+      if (!container) return [];
+      return Array.from(container.children)
+        .map((node) => Number(node.getAttribute('data-question-id') || 0))
+        .filter((id) => id > 0);
+    },
+
+    syncQuizOrderFromDom(container, lessonId) {
+      const lid = Number(lessonId);
+      const ids = this.quizIdsFromContainer(container);
+      if (!ids.length) return;
+      const byId = new Map((this.courseQuizzes || []).map((quiz) => [Number(quiz.id), quiz]));
+      const ordered = [];
+      ids.forEach((id, index) => {
+        const quiz = byId.get(id);
+        if (!quiz) return;
+        quiz.sortOrder = index;
+        ordered.push(quiz);
+      });
+      const rest = (this.courseQuizzes || []).filter(
+        (quiz) => Number(quiz.lessonId) !== lid || !ids.includes(Number(quiz.id))
+      );
+      this.courseQuizzes = [...ordered, ...rest];
+    },
+
+    syncQuestionOrderFromDom(container, quizId) {
+      const qid = Number(quizId);
+      const ids = this.questionIdsFromContainer(container);
+      if (!ids.length) return;
+
+      if (this.lessonQuiz?.id && Number(this.lessonQuiz.id) === qid) {
+        const byId = new Map(
+          (this.lessonQuiz.questions || []).map((question) => [Number(question.id), question])
+        );
+        this.lessonQuiz.questions = ids.map((id, index) => {
+          const question = byId.get(id);
+          if (question) question.sortOrder = index;
+          return question;
+        }).filter(Boolean);
+      }
+
+      const byId = new Map(
+        (this.courseQuestions || [])
+          .filter((question) => Number(question.quizId) === qid)
+          .map((question) => [Number(question.id), question])
+      );
+      const ordered = ids.map((id, index) => {
+        const question = byId.get(id);
+        if (question) question.sortOrder = index;
+        return question;
+      }).filter(Boolean);
+      this.courseQuestions = [
+        ...(this.courseQuestions || []).filter((question) => Number(question.quizId) !== qid),
+        ...ordered,
+      ];
+    },
+
+    async handleQuizSortEnd(lessonId, container) {
+      this.syncQuizOrderFromDom(container, lessonId);
+      await this.persistQuizOrder(lessonId);
+      this.$nextTick(() => this.initTreePageSortables());
+    },
+
+    async handleQuestionSortEnd(quizId, container) {
+      this.syncQuestionOrderFromDom(container, quizId);
+      await this.persistQuestionOrder(quizId);
+      this.$nextTick(() => this.initTreePageSortables());
+    },
+
+    async persistQuizOrder(lessonId) {
+      const lid = Number(lessonId);
+      if (!lid) return;
+      const ids = (this.courseQuizzes || [])
+        .filter((quiz) => Number(quiz.lessonId) === lid)
+        .sort((a, b) => Number(a.sortOrder || 0) - Number(b.sortOrder || 0))
+        .map((quiz) => Number(quiz.id))
+        .filter((id) => id > 0);
+      if (!ids.length) return;
+      try {
+        await mintApi(`lessons/${lid}/quizzes/reorder`, {
+          method: 'POST',
+          body: JSON.stringify({ ids }),
+        });
+      } catch (err) {
+        window.MintLMS.toast.error(err.message || 'Could not reorder quizzes.');
+        await this.loadCourseQuizzes();
+      }
+    },
+
+    async persistQuestionOrder(quizId) {
+      const qid = Number(quizId);
+      if (!qid) return;
+      let ids = [];
+      if (this.lessonQuiz?.id && Number(this.lessonQuiz.id) === qid) {
+        ids = (this.lessonQuiz.questions || [])
+          .map((question) => Number(question.id))
+          .filter((id) => id > 0);
+      } else {
+        ids = (this.courseQuestions || [])
+          .filter((question) => Number(question.quizId) === qid)
+          .map((question) => Number(question.id))
+          .filter((id) => id > 0);
+      }
+      if (!ids.length) return;
+      try {
+        await mintApi(`quizzes/${qid}/questions/reorder`, {
+          method: 'POST',
+          body: JSON.stringify({ ids }),
+        });
+      } catch (err) {
+        window.MintLMS.toast.error(err.message || 'Could not reorder questions.');
+        await this.loadCourseQuestions();
+        if (this.lessonQuiz?.id && Number(this.lessonQuiz.id) === qid) {
+          const lessonId = Number(this.lessonQuiz.lessonId || 0);
+          if (lessonId > 0) {
+            await this.loadLessonQuiz(lessonId, qid);
+          }
+        }
+      }
     },
 
     statusLabel(status) {
@@ -1948,6 +2122,9 @@ function courseBuilder(courseId, opts = {}) {
         ...this.expandedQuizzes,
         [id]: !this.isQuizExpanded(id),
       };
+      if (this.overviewKind === 'tree') {
+        this.$nextTick(() => this.initTreePageSortables());
+      }
     },
 
     expandQuiz(quizId) {
@@ -3856,7 +4033,16 @@ function courseBuilder(courseId, opts = {}) {
         'New Question'
       ).trim();
       // Storage may keep "New Question" as API placeholder — keep the body field empty for editing.
-      const prompt = this.isBlankQuestionPrompt(rawPrompt) ? '' : rawPrompt;
+      // Also strip title-as-prompt leftovers from older drafts (title must not fill the body).
+      let prompt = this.isBlankQuestionPrompt(rawPrompt) ? '' : rawPrompt;
+      if (
+        settings.answerTypePending &&
+        prompt &&
+        displayTitle &&
+        prompt.trim() === displayTitle
+      ) {
+        prompt = '';
+      }
       return {
         ...question,
         title: displayTitle || 'New Question',
@@ -4097,7 +4283,8 @@ function courseBuilder(courseId, opts = {}) {
           method: 'POST',
           body: JSON.stringify({
             type: 'essay',
-            prompt: title,
+            // Storage placeholder only — never seed the question body with the title.
+            prompt: 'New Question',
             options: [],
             correct_answer: '',
             settings: {
@@ -4170,6 +4357,18 @@ function courseBuilder(courseId, opts = {}) {
       question.correctAnswer = option;
     },
 
+    /** Clear body text that was incorrectly seeded from the question title. */
+    clearTitleSeededQuestionPrompt() {
+      if (!this.activeQuestion) return;
+      const title = String(
+        this.activeQuestion.title || this.activeQuestion.settings?.displayTitle || ''
+      ).trim();
+      const prompt = String(this.activeQuestion.prompt || '').trim();
+      if (!prompt || this.isBlankQuestionPrompt(prompt) || (title && prompt === title)) {
+        this.activeQuestion.prompt = '';
+      }
+    },
+
     setQuestionAnswerType(kind) {
       if (!this.activeQuestion) {
         this.activeQuestion = this.emptyActiveQuestion();
@@ -4177,6 +4376,7 @@ function courseBuilder(courseId, opts = {}) {
       if (!this.activeQuestion.settings) {
         this.activeQuestion.settings = this.normalizeQuestionSettings(null, 2);
       }
+      this.clearTitleSeededQuestionPrompt();
       this.activeQuestion.settings.answerTypePending = false;
 
       if (kind === 'essay') {
@@ -5338,7 +5538,7 @@ function courseBuilder(courseId, opts = {}) {
       const base = config.urls?.builder || 'admin.php?page=mint-lms-builder';
       const url = new URL(base, window.location.href);
       url.searchParams.set('course_id', String(this.courseId));
-      url.searchParams.set('view', 'lessons');
+      url.searchParams.set('view', 'sections');
       ['lesson_id', 'quiz_id', 'question_id', 'tab', 'from', 'origin'].forEach((key) => {
         url.searchParams.delete(key);
       });
@@ -5351,7 +5551,7 @@ function courseBuilder(courseId, opts = {}) {
         event.stopPropagation();
       }
       if (!Number(this.courseId)) return;
-      this.navOpenOverview('lesson');
+      this.navOpenOverview('section');
     },
 
     goToCourseSettings(event) {
@@ -6594,7 +6794,19 @@ function courseBuilder(courseId, opts = {}) {
     sidebarQuizzesForLesson(lesson) {
       const lessonId = Number(lesson?.id || 0);
       if (lessonId <= 0) return [];
-      return (this.courseQuizzes || []).filter((quiz) => Number(quiz.lessonId) === lessonId);
+      return (this.courseQuizzes || [])
+        .filter((quiz) => Number(quiz.lessonId) === lessonId)
+        .slice()
+        .sort((a, b) => {
+          const ao = Number(a.sortOrder);
+          const bo = Number(b.sortOrder);
+          const aOk = Number.isFinite(ao);
+          const bOk = Number.isFinite(bo);
+          if (aOk && bOk && ao !== bo) return ao - bo;
+          if (aOk && !bOk) return -1;
+          if (!aOk && bOk) return 1;
+          return Number(a.id) - Number(b.id);
+        });
     },
 
     sidebarHierarchyQuizzes() {
@@ -7444,6 +7656,8 @@ function courseBuilder(courseId, opts = {}) {
 function courseEdit(courseId) {
   return {
     courseId,
+    /** wp_localize_script strings — use in templates: t('untitledCourse') */
+    t,
     loading: true,
     error: '',
     saving: false,
@@ -7484,6 +7698,27 @@ function courseEdit(courseId) {
       accessEndAt: '',
       seatLimit: 0,
     },
+    display: {
+      materialsEnabled: false,
+      materialsContent: '',
+      lessonListVisibility: 'everyone',
+      paginationEnabled: false,
+      lessonsPerPage: 20,
+      groupsPerPage: 20,
+      completionRedirect: '',
+      pointsOnComplete: 0,
+    },
+    materialsEditorView: 'visual',
+    materialsFormatMenuOpen: false,
+    materialsFormatLabel: 'Paragraph',
+    materialsFormatOptions: [
+      { label: 'Paragraph', value: 'p' },
+      { label: 'Heading 2', value: 'h2' },
+      { label: 'Heading 3', value: 'h3' },
+      { label: 'Heading 4', value: 'h4' },
+    ],
+    materialsCodeTags: ['b', 'i', 'link', 'ul', 'ol', 'li', 'code', 'img'],
+    certMenuOpen: false,
     prerequisiteChoices: [],
     options: [
       {
@@ -7603,6 +7838,218 @@ function courseEdit(courseId) {
         accessEndAt: course.accessEndAt || '',
         seatLimit: Math.max(0, Number(course.seatLimit) || 0),
       };
+      this.display = {
+        materialsEnabled: !!course.materialsEnabled,
+        materialsContent: course.materialsContent || '',
+        lessonListVisibility: course.lessonListVisibility === 'enrolled' ? 'enrolled' : 'everyone',
+        paginationEnabled: !!course.paginationEnabled,
+        lessonsPerPage: Math.max(1, Number(course.lessonsPerPage) || 20),
+        groupsPerPage: Math.max(1, Number(course.groupsPerPage) || 20),
+        completionRedirect: course.completionRedirect || '',
+        pointsOnComplete: Math.max(0, Number(course.pointsOnComplete) || 0),
+      };
+    },
+
+    certificateLabel() {
+      return this.optionOn('certificate')
+        ? t('completionCertificate')
+        : t('noCertificate');
+    },
+
+    setCertificate(on) {
+      this.options = this.options.map((option) =>
+        option.key === 'certificate' ? { ...option, on: !!on } : option
+      );
+    },
+
+    materialsVisualEl() {
+      return document.getElementById('mint_course_materials_visual');
+    },
+
+    materialsCodeEl() {
+      return document.getElementById('mint_course_materials_code');
+    },
+
+    sanitizeMaterialsHtml(html) {
+      const raw = String(html || '');
+      if (!raw) return '';
+      try {
+        const doc = new DOMParser().parseFromString(raw, 'text/html');
+        doc.querySelectorAll('script,style,iframe,object,embed').forEach((node) => node.remove());
+        return (doc.body?.innerHTML || '').trim();
+      } catch {
+        return raw;
+      }
+    },
+
+    mountMaterialsEditor(html = '') {
+      const clean = this.sanitizeMaterialsHtml(html);
+      this.display.materialsContent = clean;
+      this.$nextTick(() => {
+        const visual = this.materialsVisualEl();
+        const code = this.materialsCodeEl();
+        if (visual) visual.innerHTML = clean || '';
+        if (code) code.value = clean;
+      });
+    },
+
+    toggleMaterialsEnabled() {
+      this.display.materialsEnabled = !this.display.materialsEnabled;
+      if (this.display.materialsEnabled) {
+        this.$nextTick(() => this.mountMaterialsEditor(this.display.materialsContent || ''));
+      }
+    },
+
+    pullMaterialsContent() {
+      if (this.materialsEditorView === 'visual') {
+        const visual = this.materialsVisualEl();
+        this.display.materialsContent = this.sanitizeMaterialsHtml(visual?.innerHTML || '');
+      } else {
+        const code = this.materialsCodeEl();
+        this.display.materialsContent = this.sanitizeMaterialsHtml(code?.value || '');
+      }
+    },
+
+    onMaterialsVisualInput() {
+      const visual = this.materialsVisualEl();
+      this.display.materialsContent = this.sanitizeMaterialsHtml(visual?.innerHTML || '');
+    },
+
+    onMaterialsCodeInput(event) {
+      this.display.materialsContent = this.sanitizeMaterialsHtml(event?.target?.value || '');
+    },
+
+    setMaterialsEditorView(view) {
+      this.pullMaterialsContent();
+      this.materialsEditorView = view === 'code' ? 'code' : 'visual';
+      this.materialsFormatMenuOpen = false;
+      this.$nextTick(() => {
+        const clean = this.sanitizeMaterialsHtml(this.display.materialsContent || '');
+        const visual = this.materialsVisualEl();
+        const code = this.materialsCodeEl();
+        if (this.materialsEditorView === 'visual' && visual) visual.innerHTML = clean || '';
+        if (code) code.value = clean;
+      });
+    },
+
+    focusMaterialsVisual() {
+      const el = this.materialsVisualEl();
+      if (!el) return;
+      el.focus();
+    },
+
+    runMaterialsCommand(command) {
+      if (this.materialsEditorView !== 'visual') return;
+      this.focusMaterialsVisual();
+      try {
+        document.execCommand(command, false, null);
+      } catch {
+        // Ignore unsupported commands.
+      }
+      this.onMaterialsVisualInput();
+    },
+
+    applyMaterialsFormat(option) {
+      this.materialsFormatLabel = option.label;
+      this.materialsFormatMenuOpen = false;
+      if (this.materialsEditorView !== 'visual') return;
+      this.focusMaterialsVisual();
+      const tag = option?.value || 'p';
+      try {
+        document.execCommand('formatBlock', false, `<${tag}>`);
+      } catch {
+        try {
+          document.execCommand('formatBlock', false, tag);
+        } catch {
+          // Ignore.
+        }
+      }
+      this.onMaterialsVisualInput();
+    },
+
+    insertMaterialsLink() {
+      const url = window.prompt('Enter URL');
+      if (!url) return;
+      if (this.materialsEditorView === 'visual') {
+        this.focusMaterialsVisual();
+        try {
+          document.execCommand('createLink', false, url);
+        } catch {
+          // Ignore.
+        }
+        this.onMaterialsVisualInput();
+        return;
+      }
+      this.wrapMaterialsCodeSelection(`<a href="${url}">`, '</a>');
+    },
+
+    wrapMaterialsCodeSelection(before, after = '') {
+      const textarea = this.materialsCodeEl();
+      if (!textarea) return;
+      const start = textarea.selectionStart ?? 0;
+      const end = textarea.selectionEnd ?? 0;
+      const value = textarea.value || '';
+      const selected = value.slice(start, end);
+      const next = this.sanitizeMaterialsHtml(
+        `${value.slice(0, start)}${before}${selected}${after}${value.slice(end)}`
+      );
+      textarea.value = next;
+      this.display.materialsContent = next;
+    },
+
+    insertMaterialsCodeTag(tag) {
+      if (tag === 'link') {
+        this.insertMaterialsLink();
+        return;
+      }
+      if (tag === 'img') {
+        this.addMediaToMaterials();
+        return;
+      }
+      const pairs = {
+        b: ['<strong>', '</strong>'],
+        i: ['<em>', '</em>'],
+        ul: ['<ul>\n<li>', '</li>\n</ul>'],
+        ol: ['<ol>\n<li>', '</li>\n</ol>'],
+        li: ['<li>', '</li>'],
+        code: ['<code>', '</code>'],
+      };
+      const pair = pairs[tag];
+      if (pair) this.wrapMaterialsCodeSelection(pair[0], pair[1]);
+    },
+
+    addMediaToMaterials() {
+      if (typeof wp === 'undefined' || !wp.media) {
+        window.MintLMS.toast.error('Media library unavailable');
+        return;
+      }
+      const frame = wp.media({
+        title: 'Add media',
+        button: { text: 'Insert into materials' },
+        multiple: false,
+      });
+      frame.on('select', () => {
+        const attachment = frame.state().get('selection').first().toJSON();
+        let html = '';
+        if (attachment.type === 'image') {
+          html = `<img src="${attachment.url}" alt="${attachment.alt || attachment.title || ''}" />`;
+        } else if (attachment.url) {
+          html = `<a href="${attachment.url}">${attachment.title || attachment.filename || 'Download'}</a>`;
+        }
+        if (!html) return;
+        this.setMaterialsEditorView('visual');
+        this.$nextTick(() => {
+          this.focusMaterialsVisual();
+          try {
+            document.execCommand('insertHTML', false, html);
+          } catch {
+            const el = this.materialsVisualEl();
+            if (el) el.innerHTML = `${el.innerHTML || ''}${html}`;
+          }
+          this.onMaterialsVisualInput();
+        });
+      });
+      frame.open();
     },
 
     isPrerequisiteSelected(courseId) {
@@ -7694,6 +8141,9 @@ function courseEdit(courseId) {
         this.applyFeaturedImage(course);
         this.rememberCoursesTab(this.form.status);
         await this.loadPrerequisiteChoices();
+        if (this.display.materialsEnabled) {
+          this.$nextTick(() => this.mountMaterialsEditor(this.display.materialsContent || ''));
+        }
       } catch (err) {
         this.error = err.message;
         window.MintLMS.toast.error(err.message);
@@ -7771,6 +8221,9 @@ function courseEdit(courseId) {
         if (setStatus) {
           this.form.status = setStatus;
         }
+        if (this.display.materialsEnabled) {
+          this.pullMaterialsContent();
+        }
         const imageId = this.form.featuredImageId ? Number(this.form.featuredImageId) : null;
         const course = await mintApi(`courses/${this.courseId}`, {
           method: 'PATCH',
@@ -7794,6 +8247,15 @@ function courseEdit(courseId) {
             access_start_at: this.form.accessStartAt || '',
             access_end_at: this.form.accessEndAt || '',
             seat_limit: Math.max(0, Number(this.form.seatLimit) || 0),
+            materials_enabled: !!this.display.materialsEnabled,
+            materials_content: this.display.materialsContent || '',
+            lesson_list_visibility:
+              this.display.lessonListVisibility === 'enrolled' ? 'enrolled' : 'everyone',
+            pagination_enabled: !!this.display.paginationEnabled,
+            lessons_per_page: Math.max(1, Number(this.display.lessonsPerPage) || 20),
+            groups_per_page: Math.max(1, Number(this.display.groupsPerPage) || 20),
+            completion_redirect: this.display.completionRedirect || '',
+            points_on_complete: Math.max(0, Number(this.display.pointsOnComplete) || 0),
           }),
         });
         this.form = {

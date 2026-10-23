@@ -63,6 +63,7 @@ final class AssetLoader {
 					'catalogPage'  => $pageSettings->getCatalogUrl(),
 					'guidedCourse' => admin_url( 'admin.php?page=mint-lms-guided-course' ),
 				),
+				'i18n'               => AdminI18n::strings(),
 			)
 		);
 
