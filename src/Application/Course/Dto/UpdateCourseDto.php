@@ -33,6 +33,14 @@ final readonly class UpdateCourseDto {
 		public ?string $accessEndAt = null,
 		public bool $clearAccessEndAt = false,
 		public ?int $seatLimit = null,
+		public ?bool $materialsEnabled = null,
+		public ?string $materialsContent = null,
+		public ?string $lessonListVisibility = null,
+		public ?bool $paginationEnabled = null,
+		public ?int $lessonsPerPage = null,
+		public ?int $groupsPerPage = null,
+		public ?string $completionRedirect = null,
+		public ?int $pointsOnComplete = null,
 	) {
 	}
 }

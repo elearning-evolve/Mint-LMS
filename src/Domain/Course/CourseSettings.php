@@ -29,6 +29,14 @@ final readonly class CourseSettings {
 		public ?string $accessStartAt = null,
 		public ?string $accessEndAt = null,
 		public int $seatLimit = 0,
+		public bool $materialsEnabled = false,
+		public string $materialsContent = '',
+		public string $lessonListVisibility = 'everyone',
+		public bool $paginationEnabled = false,
+		public int $lessonsPerPage = 20,
+		public int $groupsPerPage = 20,
+		public string $completionRedirect = '',
+		public int $pointsOnComplete = 0,
 	) {
 	}
 
@@ -85,6 +93,41 @@ final readonly class CourseSettings {
 			$seats = 0;
 		}
 
+		$visibility = isset( $data['lessonListVisibility'] ) && is_string( $data['lessonListVisibility'] )
+			? $data['lessonListVisibility']
+			: 'everyone';
+		if ( ! in_array( $visibility, array( 'everyone', 'enrolled' ), true ) ) {
+			$visibility = 'everyone';
+		}
+
+		$lessonsPerPage = isset( $data['lessonsPerPage'] ) ? (int) $data['lessonsPerPage'] : 20;
+		if ( $lessonsPerPage < 1 ) {
+			$lessonsPerPage = 1;
+		}
+		if ( $lessonsPerPage > 100 ) {
+			$lessonsPerPage = 100;
+		}
+
+		$groupsPerPage = isset( $data['groupsPerPage'] ) ? (int) $data['groupsPerPage'] : 20;
+		if ( $groupsPerPage < 1 ) {
+			$groupsPerPage = 1;
+		}
+		if ( $groupsPerPage > 100 ) {
+			$groupsPerPage = 100;
+		}
+
+		$points = isset( $data['pointsOnComplete'] ) ? (int) $data['pointsOnComplete'] : 0;
+		if ( $points < 0 ) {
+			$points = 0;
+		}
+
+		$materials = isset( $data['materialsContent'] ) && is_string( $data['materialsContent'] )
+			? $data['materialsContent']
+			: '';
+		$redirect  = isset( $data['completionRedirect'] ) && is_string( $data['completionRedirect'] )
+			? $data['completionRedirect']
+			: '';
+
 		return new self(
 			array_key_exists( 'emailOnPublish', $data ) ? (bool) $data['emailOnPublish'] : true,
 			array_key_exists( 'studentComplete', $data ) ? (bool) $data['studentComplete'] : true,
@@ -98,6 +141,14 @@ final readonly class CourseSettings {
 			$start,
 			$end,
 			$seats,
+			array_key_exists( 'materialsEnabled', $data ) ? (bool) $data['materialsEnabled'] : false,
+			$materials,
+			$visibility,
+			array_key_exists( 'paginationEnabled', $data ) ? (bool) $data['paginationEnabled'] : false,
+			$lessonsPerPage,
+			$groupsPerPage,
+			$redirect,
+			$points,
 		);
 	}
 
@@ -131,6 +182,14 @@ final readonly class CourseSettings {
 			'accessStartAt'          => $this->accessStartAt,
 			'accessEndAt'            => $this->accessEndAt,
 			'seatLimit'              => $this->seatLimit,
+			'materialsEnabled'       => $this->materialsEnabled,
+			'materialsContent'       => $this->materialsContent,
+			'lessonListVisibility'   => $this->lessonListVisibility,
+			'paginationEnabled'      => $this->paginationEnabled,
+			'lessonsPerPage'         => $this->lessonsPerPage,
+			'groupsPerPage'          => $this->groupsPerPage,
+			'completionRedirect'     => $this->completionRedirect,
+			'pointsOnComplete'       => $this->pointsOnComplete,
 		);
 	}
 

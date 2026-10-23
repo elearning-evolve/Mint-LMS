@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 		<?php esc_html_e( 'Back to quiz', 'mint-lms' ); ?>
 	</button>
 	<h1 class="mint-settings-page__title"><?php esc_html_e( 'Quiz Settings', 'mint-lms' ); ?></h1>
-	<div class="mint-settings-page__subtitle" x-text="lessonQuiz.title || '<?php echo esc_js( __( 'New Quiz', 'mint-lms' ) ); ?>'"></div>
+	<div class="mint-settings-page__subtitle" x-text="lessonQuiz.title || t('newQuiz')"></div>
 
 	<div class="mint-settings-card">
 		<button type="button" class="mint-settings-card__head" :class="settingsAccordion.quizAccess ? 'is-open' : ''" @click="settingsAccordion.quizAccess = !settingsAccordion.quizAccess" :aria-expanded="settingsAccordion.quizAccess ? 'true' : 'false'">
@@ -358,7 +358,7 @@ defined( 'ABSPATH' ) || exit;
 					</button>
 					<div x-show="lessonQuiz.settings.randomizeMode === 'subset'" x-cloak style="display:flex;align-items:center;gap:10px">
 						<input type="number" min="0" class="mint-settings-input" style="width:72px" x-model.number="lessonQuiz.settings.randomizeCount" />
-						<span class="mint-settings-hint-text" x-text="'<?php echo esc_js( __( 'out of', 'mint-lms' ) ); ?> ' + (lessonQuiz.questions?.length || 0) + ' <?php echo esc_js( __( 'questions', 'mint-lms' ) ); ?>'"></span>
+						<span class="mint-settings-hint-text" x-text="t('outOf') + ' ' + (lessonQuiz.questions?.length || 0) + ' ' + t('questions')"></span>
 					</div>
 				</div>
 			</div>

@@ -1,6 +1,6 @@
-import { getAdminConfig, joinRestUrl, mintApi } from './api.js';
+import { getAdminConfig, joinRestUrl, mintApi, t } from './api.js';
 
-export { getAdminConfig, mintApi };
+export { getAdminConfig, mintApi, t };
 
 function debounce(fn, delay) {
   let timer;
@@ -24,6 +24,8 @@ function courseBuilder(courseId, opts = {}) {
     courseId,
     standaloneLessonId,
     isStandalone: !Number(courseId) && standaloneLessonId > 0,
+    /** wp_localize_script strings — use in templates: t('untitledCourse') */
+    t,
     attach: { courseId: 0, sectionId: 0, lessonId: 0, quizId: 0, changing: false },
     attachCourses: [],
     attachSections: [],
@@ -7654,6 +7656,8 @@ function courseBuilder(courseId, opts = {}) {
 function courseEdit(courseId) {
   return {
     courseId,
+    /** wp_localize_script strings — use in templates: t('untitledCourse') */
+    t,
     loading: true,
     error: '',
     saving: false,
@@ -7694,6 +7698,27 @@ function courseEdit(courseId) {
       accessEndAt: '',
       seatLimit: 0,
     },
+    display: {
+      materialsEnabled: false,
+      materialsContent: '',
+      lessonListVisibility: 'everyone',
+      paginationEnabled: false,
+      lessonsPerPage: 20,
+      groupsPerPage: 20,
+      completionRedirect: '',
+      pointsOnComplete: 0,
+    },
+    materialsEditorView: 'visual',
+    materialsFormatMenuOpen: false,
+    materialsFormatLabel: 'Paragraph',
+    materialsFormatOptions: [
+      { label: 'Paragraph', value: 'p' },
+      { label: 'Heading 2', value: 'h2' },
+      { label: 'Heading 3', value: 'h3' },
+      { label: 'Heading 4', value: 'h4' },
+    ],
+    materialsCodeTags: ['b', 'i', 'link', 'ul', 'ol', 'li', 'code', 'img'],
+    certMenuOpen: false,
     prerequisiteChoices: [],
     options: [
       {
@@ -7813,6 +7838,218 @@ function courseEdit(courseId) {
         accessEndAt: course.accessEndAt || '',
         seatLimit: Math.max(0, Number(course.seatLimit) || 0),
       };
+      this.display = {
+        materialsEnabled: !!course.materialsEnabled,
+        materialsContent: course.materialsContent || '',
+        lessonListVisibility: course.lessonListVisibility === 'enrolled' ? 'enrolled' : 'everyone',
+        paginationEnabled: !!course.paginationEnabled,
+        lessonsPerPage: Math.max(1, Number(course.lessonsPerPage) || 20),
+        groupsPerPage: Math.max(1, Number(course.groupsPerPage) || 20),
+        completionRedirect: course.completionRedirect || '',
+        pointsOnComplete: Math.max(0, Number(course.pointsOnComplete) || 0),
+      };
+    },
+
+    certificateLabel() {
+      return this.optionOn('certificate')
+        ? t('completionCertificate')
+        : t('noCertificate');
+    },
+
+    setCertificate(on) {
+      this.options = this.options.map((option) =>
+        option.key === 'certificate' ? { ...option, on: !!on } : option
+      );
+    },
+
+    materialsVisualEl() {
+      return document.getElementById('mint_course_materials_visual');
+    },
+
+    materialsCodeEl() {
+      return document.getElementById('mint_course_materials_code');
+    },
+
+    sanitizeMaterialsHtml(html) {
+      const raw = String(html || '');
+      if (!raw) return '';
+      try {
+        const doc = new DOMParser().parseFromString(raw, 'text/html');
+        doc.querySelectorAll('script,style,iframe,object,embed').forEach((node) => node.remove());
+        return (doc.body?.innerHTML || '').trim();
+      } catch {
+        return raw;
+      }
+    },
+
+    mountMaterialsEditor(html = '') {
+      const clean = this.sanitizeMaterialsHtml(html);
+      this.display.materialsContent = clean;
+      this.$nextTick(() => {
+        const visual = this.materialsVisualEl();
+        const code = this.materialsCodeEl();
+        if (visual) visual.innerHTML = clean || '';
+        if (code) code.value = clean;
+      });
+    },
+
+    toggleMaterialsEnabled() {
+      this.display.materialsEnabled = !this.display.materialsEnabled;
+      if (this.display.materialsEnabled) {
+        this.$nextTick(() => this.mountMaterialsEditor(this.display.materialsContent || ''));
+      }
+    },
+
+    pullMaterialsContent() {
+      if (this.materialsEditorView === 'visual') {
+        const visual = this.materialsVisualEl();
+        this.display.materialsContent = this.sanitizeMaterialsHtml(visual?.innerHTML || '');
+      } else {
+        const code = this.materialsCodeEl();
+        this.display.materialsContent = this.sanitizeMaterialsHtml(code?.value || '');
+      }
+    },
+
+    onMaterialsVisualInput() {
+      const visual = this.materialsVisualEl();
+      this.display.materialsContent = this.sanitizeMaterialsHtml(visual?.innerHTML || '');
+    },
+
+    onMaterialsCodeInput(event) {
+      this.display.materialsContent = this.sanitizeMaterialsHtml(event?.target?.value || '');
+    },
+
+    setMaterialsEditorView(view) {
+      this.pullMaterialsContent();
+      this.materialsEditorView = view === 'code' ? 'code' : 'visual';
+      this.materialsFormatMenuOpen = false;
+      this.$nextTick(() => {
+        const clean = this.sanitizeMaterialsHtml(this.display.materialsContent || '');
+        const visual = this.materialsVisualEl();
+        const code = this.materialsCodeEl();
+        if (this.materialsEditorView === 'visual' && visual) visual.innerHTML = clean || '';
+        if (code) code.value = clean;
+      });
+    },
+
+    focusMaterialsVisual() {
+      const el = this.materialsVisualEl();
+      if (!el) return;
+      el.focus();
+    },
+
+    runMaterialsCommand(command) {
+      if (this.materialsEditorView !== 'visual') return;
+      this.focusMaterialsVisual();
+      try {
+        document.execCommand(command, false, null);
+      } catch {
+        // Ignore unsupported commands.
+      }
+      this.onMaterialsVisualInput();
+    },
+
+    applyMaterialsFormat(option) {
+      this.materialsFormatLabel = option.label;
+      this.materialsFormatMenuOpen = false;
+      if (this.materialsEditorView !== 'visual') return;
+      this.focusMaterialsVisual();
+      const tag = option?.value || 'p';
+      try {
+        document.execCommand('formatBlock', false, `<${tag}>`);
+      } catch {
+        try {
+          document.execCommand('formatBlock', false, tag);
+        } catch {
+          // Ignore.
+        }
+      }
+      this.onMaterialsVisualInput();
+    },
+
+    insertMaterialsLink() {
+      const url = window.prompt('Enter URL');
+      if (!url) return;
+      if (this.materialsEditorView === 'visual') {
+        this.focusMaterialsVisual();
+        try {
+          document.execCommand('createLink', false, url);
+        } catch {
+          // Ignore.
+        }
+        this.onMaterialsVisualInput();
+        return;
+      }
+      this.wrapMaterialsCodeSelection(`<a href="${url}">`, '</a>');
+    },
+
+    wrapMaterialsCodeSelection(before, after = '') {
+      const textarea = this.materialsCodeEl();
+      if (!textarea) return;
+      const start = textarea.selectionStart ?? 0;
+      const end = textarea.selectionEnd ?? 0;
+      const value = textarea.value || '';
+      const selected = value.slice(start, end);
+      const next = this.sanitizeMaterialsHtml(
+        `${value.slice(0, start)}${before}${selected}${after}${value.slice(end)}`
+      );
+      textarea.value = next;
+      this.display.materialsContent = next;
+    },
+
+    insertMaterialsCodeTag(tag) {
+      if (tag === 'link') {
+        this.insertMaterialsLink();
+        return;
+      }
+      if (tag === 'img') {
+        this.addMediaToMaterials();
+        return;
+      }
+      const pairs = {
+        b: ['<strong>', '</strong>'],
+        i: ['<em>', '</em>'],
+        ul: ['<ul>\n<li>', '</li>\n</ul>'],
+        ol: ['<ol>\n<li>', '</li>\n</ol>'],
+        li: ['<li>', '</li>'],
+        code: ['<code>', '</code>'],
+      };
+      const pair = pairs[tag];
+      if (pair) this.wrapMaterialsCodeSelection(pair[0], pair[1]);
+    },
+
+    addMediaToMaterials() {
+      if (typeof wp === 'undefined' || !wp.media) {
+        window.MintLMS.toast.error('Media library unavailable');
+        return;
+      }
+      const frame = wp.media({
+        title: 'Add media',
+        button: { text: 'Insert into materials' },
+        multiple: false,
+      });
+      frame.on('select', () => {
+        const attachment = frame.state().get('selection').first().toJSON();
+        let html = '';
+        if (attachment.type === 'image') {
+          html = `<img src="${attachment.url}" alt="${attachment.alt || attachment.title || ''}" />`;
+        } else if (attachment.url) {
+          html = `<a href="${attachment.url}">${attachment.title || attachment.filename || 'Download'}</a>`;
+        }
+        if (!html) return;
+        this.setMaterialsEditorView('visual');
+        this.$nextTick(() => {
+          this.focusMaterialsVisual();
+          try {
+            document.execCommand('insertHTML', false, html);
+          } catch {
+            const el = this.materialsVisualEl();
+            if (el) el.innerHTML = `${el.innerHTML || ''}${html}`;
+          }
+          this.onMaterialsVisualInput();
+        });
+      });
+      frame.open();
     },
 
     isPrerequisiteSelected(courseId) {
@@ -7904,6 +8141,9 @@ function courseEdit(courseId) {
         this.applyFeaturedImage(course);
         this.rememberCoursesTab(this.form.status);
         await this.loadPrerequisiteChoices();
+        if (this.display.materialsEnabled) {
+          this.$nextTick(() => this.mountMaterialsEditor(this.display.materialsContent || ''));
+        }
       } catch (err) {
         this.error = err.message;
         window.MintLMS.toast.error(err.message);
@@ -7981,6 +8221,9 @@ function courseEdit(courseId) {
         if (setStatus) {
           this.form.status = setStatus;
         }
+        if (this.display.materialsEnabled) {
+          this.pullMaterialsContent();
+        }
         const imageId = this.form.featuredImageId ? Number(this.form.featuredImageId) : null;
         const course = await mintApi(`courses/${this.courseId}`, {
           method: 'PATCH',
@@ -8004,6 +8247,15 @@ function courseEdit(courseId) {
             access_start_at: this.form.accessStartAt || '',
             access_end_at: this.form.accessEndAt || '',
             seat_limit: Math.max(0, Number(this.form.seatLimit) || 0),
+            materials_enabled: !!this.display.materialsEnabled,
+            materials_content: this.display.materialsContent || '',
+            lesson_list_visibility:
+              this.display.lessonListVisibility === 'enrolled' ? 'enrolled' : 'everyone',
+            pagination_enabled: !!this.display.paginationEnabled,
+            lessons_per_page: Math.max(1, Number(this.display.lessonsPerPage) || 20),
+            groups_per_page: Math.max(1, Number(this.display.groupsPerPage) || 20),
+            completion_redirect: this.display.completionRedirect || '',
+            points_on_complete: Math.max(0, Number(this.display.pointsOnComplete) || 0),
           }),
         });
         this.form = {
