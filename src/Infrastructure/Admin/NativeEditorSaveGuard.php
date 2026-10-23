@@ -50,7 +50,15 @@ final class NativeEditorSaveGuard {
 			return;
 		}
 
-		$post     = isset( $GLOBALS['post'] ) && $GLOBALS['post'] instanceof \WP_Post ? $GLOBALS['post'] : null;
+		// Prefer query post ID over $GLOBALS['post'] (WPCS / no direct global read).
+		$postId = 0;
+		if ( isset( $_GET['post'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only editor bootstrap.
+			$postId = absint( wp_unslash( $_GET['post'] ) );
+		} elseif ( isset( $_GET['post_ID'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$postId = absint( wp_unslash( $_GET['post_ID'] ) );
+		}
+
+		$post     = $postId > 0 ? get_post( $postId ) : null;
 		$postId   = $post instanceof \WP_Post ? (int) $post->ID : 0;
 		$status   = $post instanceof \WP_Post ? (string) $post->post_status : 'auto-draft';
 		$postType = (string) $screen->post_type;

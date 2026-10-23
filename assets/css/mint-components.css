@@ -6940,33 +6940,53 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   width: 100%;
 }
 
-#mint-lms-root .mint-cs-choice {
+#mint-lms-root button.mint-cs-choice {
   display: flex;
   gap: 12px;
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1.5px solid #DAD7E6;
+  border: 1.5px solid var(--mint-choice-border);
   background: #fff;
   text-align: left;
   cursor: pointer;
   font: inherit;
   color: inherit;
-  transition: border-color 120ms ease-out, background 120ms ease-out;
+  box-shadow: none;
+  transition:
+    border-color 140ms ease-out,
+    background 140ms ease-out,
+    box-shadow 140ms ease-out,
+    transform 140ms ease-out;
 }
 
-#mint-lms-root .mint-cs-choice:hover {
-  border-color: #98FB98;
-  background: #F1FFF9;
+/* Unselected hover — shared choice language (tokens) */
+#mint-lms-root button.mint-cs-choice:hover:not(.is-selected) {
+  border-color: var(--mint-choice-hover-border);
+  background: var(--mint-choice-hover-bg);
+  box-shadow: var(--mint-choice-hover-ring);
+  transform: translateY(-1px);
 }
 
-#mint-lms-root .mint-cs-choice:focus-visible {
+#mint-lms-root button.mint-cs-choice:hover:not(.is-selected) .mint-cs-choice__radio {
+  border-color: var(--mint-cta-ink);
+}
+
+#mint-lms-root button.mint-cs-choice:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
+  box-shadow: var(--mint-cta-focus);
 }
 
-#mint-lms-root .mint-cs-choice.is-selected {
-  border-color: #98FB98;
-  background: #F1FFF9;
+#mint-lms-root button.mint-cs-choice.is-selected {
+  border-color: var(--mint-choice-selected-border);
+  background: var(--mint-choice-selected-bg);
+  box-shadow: none;
+  transform: none;
+}
+
+#mint-lms-root button.mint-cs-choice.is-selected:hover {
+  border-color: var(--mint-choice-selected-hover-border);
+  background: var(--mint-choice-selected-hover-bg);
+  box-shadow: var(--mint-choice-selected-hover-ring);
 }
 
 #mint-lms-root .mint-cs-choice__radio {
@@ -6979,13 +6999,14 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   display: flex;
   align-items: center;
   justify-content: center;
+  transition: border-color 140ms ease-out;
 }
 
-#mint-lms-root .mint-cs-choice.is-selected .mint-cs-choice__radio {
+#mint-lms-root button.mint-cs-choice.is-selected .mint-cs-choice__radio {
   border-color: #0B4F3F;
 }
 
-#mint-lms-root .mint-cs-choice.is-selected .mint-cs-choice__radio span {
+#mint-lms-root button.mint-cs-choice.is-selected .mint-cs-choice__radio span {
   width: 8px;
   height: 8px;
   border-radius: 999px;
@@ -7720,15 +7741,32 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   cursor: pointer;
   border: 1.5px solid transparent;
   background: transparent;
+  box-shadow: none;
+  transition:
+    border-color 140ms ease-out,
+    background 140ms ease-out,
+    box-shadow 140ms ease-out,
+    transform 140ms ease-out;
 }
 
-#mint-lms-root .mint-course-sidebar__choice:hover {
-  background: var(--mint-bg-subtle);
+#mint-lms-root .mint-course-sidebar__choice:hover:not(.is-selected) {
+  border-color: var(--mint-choice-hover-border);
+  background: var(--mint-choice-hover-bg);
+  box-shadow: var(--mint-choice-hover-ring);
+  transform: translateY(-1px);
 }
 
 #mint-lms-root .mint-course-sidebar__choice.is-selected {
-  background: rgba(152, 251, 152, 0.18);
-  border-color: rgba(11, 79, 63, 0.18);
+  border-color: var(--mint-choice-selected-border);
+  background: var(--mint-choice-selected-bg);
+  box-shadow: none;
+  transform: none;
+}
+
+#mint-lms-root .mint-course-sidebar__choice.is-selected:hover {
+  border-color: var(--mint-choice-selected-hover-border);
+  background: var(--mint-choice-selected-hover-bg);
+  box-shadow: var(--mint-choice-selected-hover-ring);
 }
 
 #mint-lms-root .mint-course-sidebar__choice-title {
@@ -7867,29 +7905,55 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   grid-template-columns: 1fr 1fr;
 }
 
-#mint-lms-root .mint-settings-choice {
+#mint-lms-root .mint-settings-choice,
+#mint-lms-root button.mint-settings-choice {
   display: flex;
   align-items: flex-start;
   gap: 11px;
   text-align: left;
   padding: 12px 14px;
-  border: 1.5px solid #DAD7E6;
+  border: 1.5px solid var(--mint-choice-border);
   border-radius: 12px;
   background: #fff;
   cursor: pointer;
   font: inherit;
   color: inherit;
-  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: none;
+  transition:
+    border-color 140ms ease-out,
+    background 140ms ease-out,
+    box-shadow 140ms ease-out,
+    transform 140ms ease-out;
 }
 
-#mint-lms-root .mint-settings-choice:hover {
-  border-color: #B9B6CE;
+#mint-lms-root .mint-settings-choice:hover:not(.is-selected),
+#mint-lms-root button.mint-settings-choice:hover:not(.is-selected) {
+  border-color: var(--mint-choice-hover-border);
+  background: var(--mint-choice-hover-bg);
+  box-shadow: var(--mint-choice-hover-ring);
+  transform: translateY(-1px);
 }
 
-#mint-lms-root .mint-settings-choice.is-selected {
-  border-color: #0B4F3F;
-  background: #F3FBF7;
-  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.35);
+#mint-lms-root .mint-settings-choice:hover:not(.is-selected) .mint-settings-choice__radio,
+#mint-lms-root .mint-settings-choice:hover:not(.is-selected) .mint-settings-choice__dot,
+#mint-lms-root button.mint-settings-choice:hover:not(.is-selected) .mint-settings-choice__radio,
+#mint-lms-root button.mint-settings-choice:hover:not(.is-selected) .mint-settings-choice__dot {
+  border-color: var(--mint-cta-ink);
+}
+
+#mint-lms-root .mint-settings-choice.is-selected,
+#mint-lms-root button.mint-settings-choice.is-selected {
+  border-color: var(--mint-choice-selected-border);
+  background: var(--mint-choice-selected-bg);
+  box-shadow: none;
+  transform: none;
+}
+
+#mint-lms-root .mint-settings-choice.is-selected:hover,
+#mint-lms-root button.mint-settings-choice.is-selected:hover {
+  border-color: var(--mint-choice-selected-hover-border);
+  background: var(--mint-choice-selected-hover-bg);
+  box-shadow: var(--mint-choice-selected-hover-ring);
 }
 
 #mint-lms-root .mint-settings-choice__radio {
@@ -8596,33 +8660,58 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   color: #0B4F3F;
 }
 
-#mint-lms-root .mint-settings-choice {
+#mint-lms-root .mint-settings-choice,
+#mint-lms-root button.mint-settings-choice {
   display: flex;
   gap: 12px;
   padding: 12px 14px;
-  border-radius: 10px;
-  border: 1.5px solid #DAD7E6;
-  background: #FFFFFF;
+  border-radius: 12px;
+  border: 1.5px solid var(--mint-choice-border);
+  background: #fff;
   cursor: pointer;
   outline: none;
   text-align: left;
   font-family: var(--mint-font);
   width: 100%;
-  transition: border-color 120ms ease-out, background 120ms ease-out;
+  box-shadow: none;
+  transition:
+    border-color 140ms ease-out,
+    background 140ms ease-out,
+    box-shadow 140ms ease-out,
+    transform 140ms ease-out;
 }
 
-#mint-lms-root .mint-settings-choice:hover {
-  border-color: var(--mint-field-border);
-  box-shadow: var(--mint-field-focus);
+#mint-lms-root .mint-settings-choice:hover:not(.is-selected),
+#mint-lms-root button.mint-settings-choice:hover:not(.is-selected) {
+  border-color: var(--mint-choice-hover-border);
+  background: var(--mint-choice-hover-bg);
+  box-shadow: var(--mint-choice-hover-ring);
+  transform: translateY(-1px);
 }
 
-#mint-lms-root .mint-settings-choice:focus-visible {
-  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
+#mint-lms-root .mint-settings-choice:hover:not(.is-selected) .mint-settings-choice__dot,
+#mint-lms-root button.mint-settings-choice:hover:not(.is-selected) .mint-settings-choice__dot {
+  border-color: var(--mint-cta-ink);
 }
 
-#mint-lms-root .mint-settings-choice.is-selected {
-  border-color: #0B4F3F;
-  background: #F1FFF9;
+#mint-lms-root .mint-settings-choice:focus-visible,
+#mint-lms-root button.mint-settings-choice:focus-visible {
+  box-shadow: var(--mint-cta-focus);
+}
+
+#mint-lms-root .mint-settings-choice.is-selected,
+#mint-lms-root button.mint-settings-choice.is-selected {
+  border-color: var(--mint-choice-selected-border);
+  background: var(--mint-choice-selected-bg);
+  box-shadow: none;
+  transform: none;
+}
+
+#mint-lms-root .mint-settings-choice.is-selected:hover,
+#mint-lms-root button.mint-settings-choice.is-selected:hover {
+  border-color: var(--mint-choice-selected-hover-border);
+  background: var(--mint-choice-selected-hover-bg);
+  box-shadow: var(--mint-choice-selected-hover-ring);
 }
 
 #mint-lms-root .mint-settings-choice__dot {
@@ -8635,6 +8724,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   justify-content: center;
   flex: none;
   margin-top: 2px;
+  transition: border-color 140ms ease-out;
 }
 
 #mint-lms-root .mint-settings-choice.is-selected .mint-settings-choice__dot {

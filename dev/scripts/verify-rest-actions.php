@@ -18,10 +18,13 @@ MintLMS\Plugin::boot();
 require_once ABSPATH . 'wp-includes/rest-api.php';
 do_action( 'rest_api_init' );
 
-global $wpdb;
+$wpdb = mintlms_wpdb();
+if ( null === $wpdb ) {
+	WP_CLI::error( 'Database unavailable.' );
+}
 
-$GLOBALS['rest_failures'] = 0;
-$created                  = array(
+$mintlms_rest_failures = 0;
+$mintlms_created         = array(
 	'course_ids'     => array(),
 	'section_ids'    => array(),
 	'lesson_ids'     => array(),
@@ -30,16 +33,20 @@ $created                  = array(
 );
 
 function mintlms_rest_failures(): int {
-	return (int) ( $GLOBALS['rest_failures'] ?? 0 );
+	global $mintlms_rest_failures;
+
+	return (int) $mintlms_rest_failures;
 }
 
 function mintlms_rest_assert( bool $condition, string $label ): void {
+	global $mintlms_rest_failures;
+
 	if ( $condition ) {
 		WP_CLI::log( 'PASS: ' . $label );
 		return;
 	}
 
-	++$GLOBALS['rest_failures'];
+	++$mintlms_rest_failures;
 	WP_CLI::warning( 'FAIL: ' . $label );
 }
 
@@ -77,27 +84,27 @@ function mintlms_rest_data( array $result ): mixed {
 }
 
 function mintlms_rest_cleanup(): void {
-	global $wpdb;
+	global $mintlms_created;
 
-	$created = $GLOBALS['created'] ?? array();
+	$created = is_array( $mintlms_created ) ? $mintlms_created : array();
 
-	foreach ( $created['quiz_ids'] ?? array() as $quizId ) {
+	foreach ( $mintlms_created['quiz_ids'] ?? array() as $quizId ) {
 		mintlms_rest_dispatch( 'DELETE', '/mintlms/v1/quizzes/' . (int) $quizId );
 	}
 
-	foreach ( $created['lesson_ids'] ?? array() as $lessonId ) {
+	foreach ( $mintlms_created['lesson_ids'] ?? array() as $lessonId ) {
 		mintlms_rest_dispatch( 'DELETE', '/mintlms/v1/lessons/' . (int) $lessonId );
 	}
 
-	foreach ( $created['section_ids'] ?? array() as $sectionId ) {
+	foreach ( $mintlms_created['section_ids'] ?? array() as $sectionId ) {
 		mintlms_rest_dispatch( 'DELETE', '/mintlms/v1/sections/' . (int) $sectionId );
 	}
 
-	foreach ( $created['enrollment_ids'] ?? array() as $enrollmentId ) {
+	foreach ( $mintlms_created['enrollment_ids'] ?? array() as $enrollmentId ) {
 		mintlms_rest_dispatch( 'DELETE', '/mintlms/v1/enrollments/' . (int) $enrollmentId );
 	}
 
-	foreach ( $created['course_ids'] ?? array() as $courseId ) {
+	foreach ( $mintlms_created['course_ids'] ?? array() as $courseId ) {
 		mintlms_rest_dispatch( 'DELETE', '/mintlms/v1/courses/' . (int) $courseId );
 	}
 }
@@ -136,7 +143,7 @@ mintlms_rest_assert( 201 === $createCourse['status'], 'POST create course' );
 $courseId = (int) ( mintlms_rest_data( $createCourse )['id'] ?? 0 );
 mintlms_rest_assert( $courseId > 0, 'POST create course returns id' );
 if ( $courseId > 0 ) {
-	$created['course_ids'][] = $courseId;
+	$mintlms_created['course_ids'][] = $courseId;
 }
 
 $getCourse = mintlms_rest_dispatch( 'GET', '/mintlms/v1/courses/' . $courseId );
@@ -164,7 +171,7 @@ $createSection = mintlms_rest_dispatch(
 mintlms_rest_assert( 201 === $createSection['status'], 'POST create section' );
 $sectionId = (int) ( mintlms_rest_data( $createSection )['id'] ?? 0 );
 if ( $sectionId > 0 ) {
-	$created['section_ids'][] = $sectionId;
+	$mintlms_created['section_ids'][] = $sectionId;
 }
 
 $patchSection = mintlms_rest_dispatch(
@@ -194,7 +201,7 @@ $createLesson = mintlms_rest_dispatch(
 mintlms_rest_assert( 201 === $createLesson['status'], 'POST create lesson' );
 $lessonId = (int) ( mintlms_rest_data( $createLesson )['id'] ?? 0 );
 if ( $lessonId > 0 ) {
-	$created['lesson_ids'][] = $lessonId;
+	$mintlms_created['lesson_ids'][] = $lessonId;
 }
 
 $getLesson = mintlms_rest_dispatch( 'GET', '/mintlms/v1/lessons/' . $lessonId );
@@ -227,7 +234,7 @@ if ( $student instanceof WP_User ) {
 	mintlms_rest_assert( 201 === $enroll['status'], 'POST enroll student' );
 	$enrollmentId = (int) ( mintlms_rest_data( $enroll )['id'] ?? 0 );
 	if ( $enrollmentId > 0 ) {
-		$created['enrollment_ids'][] = $enrollmentId;
+		$mintlms_created['enrollment_ids'][] = $enrollmentId;
 	}
 
 	$listStudents = mintlms_rest_dispatch( 'GET', '/mintlms/v1/courses/' . $courseId . '/students', null, array( 'page' => 1, 'per_page' => 20 ) );
@@ -309,7 +316,7 @@ $createQuiz = mintlms_rest_dispatch(
 mintlms_rest_assert( 201 === $createQuiz['status'], 'POST create quiz' );
 $quizId = (int) ( mintlms_rest_data( $createQuiz )['id'] ?? 0 );
 if ( $quizId > 0 ) {
-	$created['quiz_ids'][] = $quizId;
+	$mintlms_created['quiz_ids'][] = $quizId;
 }
 
 $patchQuiz = mintlms_rest_dispatch(
@@ -398,7 +405,7 @@ $guidedCourse = mintlms_rest_dispatch(
 );
 $guidedCourseId = (int) ( mintlms_rest_data( $guidedCourse )['id'] ?? 0 );
 if ( $guidedCourseId > 0 ) {
-	$created['course_ids'][] = $guidedCourseId;
+	$mintlms_created['course_ids'][] = $guidedCourseId;
 	$guidedSection           = mintlms_rest_dispatch(
 		'POST',
 		'/mintlms/v1/courses/' . $guidedCourseId . '/sections',
@@ -407,7 +414,7 @@ if ( $guidedCourseId > 0 ) {
 	mintlms_rest_assert( 201 === $guidedSection['status'], 'POST guided wizard section' );
 	$guidedSectionId = (int) ( mintlms_rest_data( $guidedSection )['id'] ?? 0 );
 	if ( $guidedSectionId > 0 ) {
-		$created['section_ids'][] = $guidedSectionId;
+		$mintlms_created['section_ids'][] = $guidedSectionId;
 		$guidedLesson             = mintlms_rest_dispatch(
 			'POST',
 			'/mintlms/v1/sections/' . $guidedSectionId . '/lessons',
@@ -419,7 +426,7 @@ if ( $guidedCourseId > 0 ) {
 		mintlms_rest_assert( 201 === $guidedLesson['status'], 'POST guided wizard lesson' );
 		$guidedLessonId = (int) ( mintlms_rest_data( $guidedLesson )['id'] ?? 0 );
 		if ( $guidedLessonId > 0 ) {
-			$created['lesson_ids'][] = $guidedLessonId;
+			$mintlms_created['lesson_ids'][] = $guidedLessonId;
 		}
 	}
 }

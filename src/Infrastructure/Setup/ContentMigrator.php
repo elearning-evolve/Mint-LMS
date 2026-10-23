@@ -94,10 +94,12 @@ final class ContentMigrator {
 	}
 
 	private function ensurePostTypesRegistered(): void {
+		// CLI / odd bootstraps can reach init without WP_Rewrite; wp_insert_post needs it for slug uniqueness.
+		// WordPress requires $wp_rewrite in the global scope — this is the documented bootstrap pattern.
 		global $wp_rewrite;
 
-		// CLI / odd bootstraps can reach init without WP_Rewrite; wp_insert_post needs it for slug uniqueness.
 		if ( ! $wp_rewrite instanceof \WP_Rewrite ) {
+			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Required when rewrite was never bootstrapped (CLI).
 			$wp_rewrite = new \WP_Rewrite();
 		}
 
