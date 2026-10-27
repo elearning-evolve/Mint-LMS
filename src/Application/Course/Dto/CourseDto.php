@@ -40,6 +40,14 @@ final readonly class CourseDto {
 		public ?string $accessStartAt = null,
 		public ?string $accessEndAt = null,
 		public int $seatLimit = 0,
+		public bool $materialsEnabled = false,
+		public string $materialsContent = '',
+		public string $lessonListVisibility = 'everyone',
+		public bool $paginationEnabled = false,
+		public int $lessonsPerPage = 20,
+		public int $groupsPerPage = 20,
+		public string $completionRedirect = '',
+		public int $pointsOnComplete = 0,
 	) {
 	}
 
@@ -86,6 +94,14 @@ final readonly class CourseDto {
 			$settings->accessStartAt,
 			$settings->accessEndAt,
 			$settings->seatLimit,
+			$settings->materialsEnabled,
+			$settings->materialsContent,
+			$settings->lessonListVisibility,
+			$settings->paginationEnabled,
+			$settings->lessonsPerPage,
+			$settings->groupsPerPage,
+			$settings->completionRedirect,
+			$settings->pointsOnComplete,
 		);
 	}
 
@@ -122,6 +138,14 @@ final readonly class CourseDto {
 			'accessStartAt'          => $this->accessStartAt,
 			'accessEndAt'            => $this->accessEndAt,
 			'seatLimit'              => $this->seatLimit,
+			'materialsEnabled'       => $this->materialsEnabled,
+			'materialsContent'       => $this->materialsContent,
+			'lessonListVisibility'   => $this->lessonListVisibility,
+			'paginationEnabled'      => $this->paginationEnabled,
+			'lessonsPerPage'         => $this->lessonsPerPage,
+			'groupsPerPage'          => $this->groupsPerPage,
+			'completionRedirect'     => $this->completionRedirect,
+			'pointsOnComplete'       => $this->pointsOnComplete,
 		);
 	}
 }

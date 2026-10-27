@@ -41,8 +41,8 @@ final class QuestionLinkResolver {
 			return 0;
 		}
 
-		global $wpdb;
-		if ( ! $wpdb instanceof \wpdb ) {
+		$wpdb = mintlms_wpdb();
+		if ( null === $wpdb ) {
 			return 0;
 		}
 
@@ -97,8 +97,8 @@ final class QuestionLinkResolver {
 	 * Insert question_data + junction without rewriting post_title / post_content.
 	 */
 	private function ensureQuestionDataAndLink( int $questionId, int $quizId ): void {
-		global $wpdb;
-		if ( ! $wpdb instanceof \wpdb || $questionId <= 0 || $quizId <= 0 ) {
+		$wpdb = mintlms_wpdb();
+		if ( null === $wpdb || $questionId <= 0 || $quizId <= 0 ) {
 			return;
 		}
 

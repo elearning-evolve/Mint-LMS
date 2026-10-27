@@ -10,7 +10,16 @@ export function getAdminConfig() {
     mediaBase: '/wp-json/wp/v2/media',
     nonce: '',
     urls: {},
+    i18n: {},
   };
+}
+
+/** Translated string from wp_localize_script (mintLmsAdmin.i18n). */
+export function t(key, fallback = '') {
+  const bag = getAdminConfig().i18n || {};
+  const value = bag[key];
+  if (typeof value === 'string' && value !== '') return value;
+  return fallback || key;
 }
 
 export function getStudentConfig() {

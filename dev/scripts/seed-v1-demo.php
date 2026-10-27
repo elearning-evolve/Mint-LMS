@@ -37,7 +37,10 @@ use MintLMS\Infrastructure\User\WpUserLookup;
 use MintLMS\Infrastructure\Setup\PageInstaller;
 use MintLMS\Plugin;
 
-global $wpdb;
+$wpdb = mintlms_wpdb();
+if ( null === $wpdb ) {
+	WP_CLI::error( 'Database unavailable.' );
+}
 
 if ( ! $wpdb instanceof wpdb ) {
 	WP_CLI::error( 'Database unavailable.' );

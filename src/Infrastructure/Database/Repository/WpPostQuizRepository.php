@@ -538,6 +538,48 @@ final class WpPostQuizRepository implements QuizRepositoryInterface {
 		return null !== $this->findBestPassedAttempt( $userId, $quizId );
 	}
 
+	/**
+	 * @param list<int> $quizIds
+	 */
+	public function reorderQuizzes( int $lessonId, array $quizIds ): void {
+		foreach ( $quizIds as $index => $quizId ) {
+			$post = get_post( (int) $quizId );
+
+			if ( ! $post instanceof \WP_Post || PostTypes::QUIZ !== $post->post_type ) {
+				continue;
+			}
+
+			$storedLessonId = (int) get_post_meta( $post->ID, PostTypes::META_LESSON_ID, true );
+
+			if ( $storedLessonId !== $lessonId ) {
+				continue;
+			}
+
+			update_post_meta( $post->ID, PostTypes::META_SORT_ORDER, (int) $index );
+		}
+	}
+
+	/**
+	 * @param list<int> $questionIds
+	 */
+	public function reorderQuestions( int $quizId, array $questionIds ): void {
+		$junction = Schema::validateTable( Schema::quizQuestionsTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+
+		foreach ( $questionIds as $index => $questionId ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$this->wpdb->update(
+				$junction,
+				array( 'sort_order' => (int) $index ),
+				array(
+					'quiz_id'     => $quizId,
+					'question_id' => (int) $questionId,
+				),
+				array( '%d' ),
+				array( '%d', '%d' )
+			);
+		}
+	}
+
 	private function updateQuizMeta( int $postId, Quiz $quiz ): void {
 		update_post_meta( $postId, PostTypes::META_LESSON_ID, $quiz->lessonId );
 		update_post_meta( $postId, PostTypes::META_COURSE_ID, $quiz->courseId );

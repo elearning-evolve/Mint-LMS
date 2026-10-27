@@ -42,6 +42,20 @@ interface QuizRepositoryInterface {
 
 	public function nextQuestionSortOrder( int $quizId ): int;
 
+	/**
+	 * Persist quiz order within a lesson (index = sort_order).
+	 *
+	 * @param list<int> $quizIds
+	 */
+	public function reorderQuizzes( int $lessonId, array $quizIds ): void;
+
+	/**
+	 * Persist question order within a quiz (index = sort_order).
+	 *
+	 * @param list<int> $questionIds
+	 */
+	public function reorderQuestions( int $quizId, array $questionIds ): void;
+
 	public function saveAttempt( QuizAttempt $attempt ): QuizAttempt;
 
 	/**

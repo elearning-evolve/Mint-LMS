@@ -15,17 +15,22 @@ if ( ! defined( 'MINTLMS_PATH' ) ) {
 
 MintLMS\Plugin::boot();
 
-global $wpdb;
+$wpdb = mintlms_wpdb();
+if ( null === $wpdb ) {
+	WP_CLI::error( 'Database unavailable.' );
+}
 
-$GLOBALS['failures'] = 0;
+$mintlms_failures = 0;
 
 function mintlms_smoke_assert( bool $condition, string $label ): void {
+	global $mintlms_failures;
+
 	if ( $condition ) {
 		WP_CLI::log( 'PASS: ' . $label );
 		return;
 	}
 
-	++$GLOBALS['failures'];
+	++$mintlms_failures;
 	WP_CLI::warning( 'FAIL: ' . $label );
 }
 
@@ -141,8 +146,8 @@ mintlms_smoke_assert( $dashboardId > 0, 'Dashboard page configured' );
 mintlms_smoke_assert( $catalogId > 0, 'Catalog page configured' );
 mintlms_smoke_assert( $playerId > 0, 'Player page configured' );
 
-if ( ( $GLOBALS['failures'] ?? 0 ) > 0 ) {
-	WP_CLI::error( (string) $GLOBALS['failures'] . ' smoke test(s) failed.' );
+if ( $mintlms_failures > 0 ) {
+	WP_CLI::error( (string) $mintlms_failures . ' smoke test(s) failed.' );
 }
 
 WP_CLI::success( 'All Mint LMS v1 smoke tests passed.' );

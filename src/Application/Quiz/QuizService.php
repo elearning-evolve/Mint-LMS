@@ -13,6 +13,8 @@ use MintLMS\Application\Quiz\Dto\CreateQuestionDto;
 use MintLMS\Application\Quiz\Dto\CreateQuizDto;
 use MintLMS\Application\Quiz\Dto\QuizAttemptDto;
 use MintLMS\Application\Quiz\Dto\QuizDto;
+use MintLMS\Application\Quiz\Dto\ReorderQuestionsDto;
+use MintLMS\Application\Quiz\Dto\ReorderQuizzesDto;
 use MintLMS\Application\Quiz\Dto\SubmitQuizAttemptDto;
 use MintLMS\Application\Quiz\Dto\UpdateQuestionDto;
 use MintLMS\Application\Quiz\Dto\UpdateQuizDto;
@@ -230,6 +232,83 @@ final class QuizService {
 		$this->quizRepository->saveQuiz( $updated );
 
 		return $this->get( $quizId, $userId );
+	}
+
+	public function reorderQuizzes( int $lessonId, ReorderQuizzesDto $dto, int $userId ): void {
+		$lesson = $this->findLessonOrFail( $lessonId );
+		$this->assertCanManageLessonContent( $userId, $lesson );
+
+		if ( array() === $dto->quizIds ) {
+			throw new ValidationException( 'Validation failed.', array( 'ids' => 'At least one quiz ID is required.' ) );
+		}
+
+		$quizzes = $this->quizRepository->findAllByLessonId( $lessonId );
+
+		if ( count( $quizzes ) !== count( $dto->quizIds ) ) {
+			throw new ValidationException(
+				'Validation failed.',
+				array( 'ids' => 'Quiz IDs must include every quiz on this lesson.' )
+			);
+		}
+
+		$existingIds = array_map(
+			static fn( Quiz $quiz ): int => $quiz->id,
+			$quizzes
+		);
+
+		foreach ( $dto->quizIds as $quizId ) {
+			if ( ! in_array( $quizId, $existingIds, true ) ) {
+				throw new ValidationException(
+					'Validation failed.',
+					array( 'ids' => 'One or more quiz IDs do not belong to this lesson.' )
+				);
+			}
+		}
+
+		if ( count( array_unique( $dto->quizIds ) ) !== count( $dto->quizIds ) ) {
+			throw new ValidationException( 'Validation failed.', array( 'ids' => 'Quiz IDs must be unique.' ) );
+		}
+
+		$this->quizRepository->reorderQuizzes( $lessonId, $dto->quizIds );
+	}
+
+	public function reorderQuestions( int $quizId, ReorderQuestionsDto $dto, int $userId ): void {
+		$quiz   = $this->findQuizOrFail( $quizId );
+		$lesson = $this->findLessonOrFail( $quiz->lessonId );
+		$this->assertCanManageLessonContent( $userId, $lesson );
+
+		if ( array() === $dto->questionIds ) {
+			throw new ValidationException( 'Validation failed.', array( 'ids' => 'At least one question ID is required.' ) );
+		}
+
+		$questions = $this->quizRepository->findQuestionsByQuizId( $quizId );
+
+		if ( count( $questions ) !== count( $dto->questionIds ) ) {
+			throw new ValidationException(
+				'Validation failed.',
+				array( 'ids' => 'Question IDs must include every question on this quiz.' )
+			);
+		}
+
+		$existingIds = array_map(
+			static fn( QuizQuestion $question ): int => $question->id,
+			$questions
+		);
+
+		foreach ( $dto->questionIds as $questionId ) {
+			if ( ! in_array( $questionId, $existingIds, true ) ) {
+				throw new ValidationException(
+					'Validation failed.',
+					array( 'ids' => 'One or more question IDs do not belong to this quiz.' )
+				);
+			}
+		}
+
+		if ( count( array_unique( $dto->questionIds ) ) !== count( $dto->questionIds ) ) {
+			throw new ValidationException( 'Validation failed.', array( 'ids' => 'Question IDs must be unique.' ) );
+		}
+
+		$this->quizRepository->reorderQuestions( $quizId, $dto->questionIds );
 	}
 
 	/**

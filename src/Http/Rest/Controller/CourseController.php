@@ -255,6 +255,14 @@ final class CourseController {
 				$request->has_param( 'access_end_at' ) ? $this->nullableString( $request->get_param( 'access_end_at' ) ) : null,
 				$request->has_param( 'access_end_at' ) && '' === (string) $request->get_param( 'access_end_at' ),
 				$request->has_param( 'seat_limit' ) ? (int) $request->get_param( 'seat_limit' ) : null,
+				$request->has_param( 'materials_enabled' ) ? (bool) $request->get_param( 'materials_enabled' ) : null,
+				$request->has_param( 'materials_content' ) ? (string) $request->get_param( 'materials_content' ) : null,
+				$request->has_param( 'lesson_list_visibility' ) ? (string) $request->get_param( 'lesson_list_visibility' ) : null,
+				$request->has_param( 'pagination_enabled' ) ? (bool) $request->get_param( 'pagination_enabled' ) : null,
+				$request->has_param( 'lessons_per_page' ) ? (int) $request->get_param( 'lessons_per_page' ) : null,
+				$request->has_param( 'groups_per_page' ) ? (int) $request->get_param( 'groups_per_page' ) : null,
+				$request->has_param( 'completion_redirect' ) ? (string) $request->get_param( 'completion_redirect' ) : null,
+				$request->has_param( 'points_on_complete' ) ? (int) $request->get_param( 'points_on_complete' ) : null,
 			);
 
 			$course = $this->courseService->update( $id, $dto, $userId );

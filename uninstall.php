@@ -14,7 +14,10 @@ require_once __DIR__ . '/vendor/autoload.php';
 use MintLMS\Infrastructure\Database\Schema;
 use MintLMS\Infrastructure\Setup\PageSettings;
 
-global $wpdb;
+$wpdb = function_exists( 'mintlms_wpdb' ) ? mintlms_wpdb() : null;
+if ( null === $wpdb ) {
+	return;
+}
 
 // phpcs:disable WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.DirectQuery -- Uninstall drops validated custom LMS tables.
 foreach ( Schema::allTables( $wpdb->prefix ) as $mintlms_table ) {
