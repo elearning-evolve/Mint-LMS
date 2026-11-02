@@ -18,7 +18,7 @@ $content = $renderer->render(
 	'admin/courses/_builder-content',
 	array(
 		'renderer' => $renderer,
-		'courseId'  => $courseId,
+		'courseId' => $courseId,
 	)
 );
 

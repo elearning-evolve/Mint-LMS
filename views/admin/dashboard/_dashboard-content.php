@@ -12,9 +12,9 @@ use MintLMS\Infrastructure\Admin\ViewRenderer;
 /** @var bool $showDetails */
 /** @var int $userId */
 
-$greeting    = MintLMS\Infrastructure\Ui\MintUi::greeting();
-$builderUrl  = admin_url( 'admin.php?page=mint-lms-builder&course_id=' );
-$metrics     = $dashboard->metrics;
+$greeting   = MintLMS\Infrastructure\Ui\MintUi::greeting();
+$builderUrl = admin_url( 'admin.php?page=mint-lms-builder&course_id=' );
+$metrics    = $dashboard->metrics;
 
 $hue_tile_classes = array(
 	1 => 'mint-bg-hue-1 mint-text-hue-1i',

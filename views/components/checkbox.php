@@ -3,12 +3,12 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-$name     = $name ?? '';
-$id       = $id ?? $name;
-$label    = $label ?? '';
-$checked  = $checked ?? false;
-$value    = $value ?? '1';
-$attrs    = $attrs ?? '';
+$name    = $name ?? '';
+$id      = $id ?? $name;
+$label   = $label ?? '';
+$checked = $checked ?? false;
+$value   = $value ?? '1';
+$attrs   = $attrs ?? '';
 ?>
 <label for="<?php echo esc_attr( $id ); ?>" class="mint-inline-flex mint-items-center mint-gap-2 mint-cursor-pointer">
 	<input

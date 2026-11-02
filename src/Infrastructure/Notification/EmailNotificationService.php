@@ -116,9 +116,9 @@ final class EmailNotificationService {
 			return;
 		}
 
-		$page     = 1;
-		$perPage  = 100;
-		$sentTo   = array();
+		$page    = 1;
+		$perPage = 100;
+		$sentTo  = array();
 
 		do {
 			$result = $this->enrollmentRepository->listByCourse(

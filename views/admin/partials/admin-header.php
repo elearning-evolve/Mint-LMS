@@ -5,6 +5,7 @@ defined( 'ABSPATH' ) || exit;
 
 $newCourseUrl  = $newCourseUrl ?? \MintLMS\Infrastructure\Admin\CourseBuilderPage::newCourseUrl();
 $pageLabel     = $pageLabel ?? '';
+$pageLabelHtml = $pageLabelHtml ?? '';
 $headerActions = $headerActions ?? '';
 $maxWidthClass = $maxWidthClass ?? 'mint-max-w-content';
 $searchUrl     = \MintLMS\Infrastructure\PostType\PostTypes::listUrl( \MintLMS\Infrastructure\PostType\PostTypes::COURSE );
@@ -17,7 +18,10 @@ $headerWidth   = $maxWidthClass;
 				<div class="mint-admin-brand__mark-inner"></div>
 			</div>
 			<span class="mint-admin-brand__name"><?php esc_html_e( 'Mint LMS', 'mint-lms' ); ?></span>
-			<?php if ( '' !== $pageLabel ) : ?>
+			<?php if ( '' !== $pageLabelHtml ) : ?>
+				<div class="mint-admin-brand__sep" aria-hidden="true"></div>
+				<span class="mint-admin-brand__page mint-admin-brand__page--crumb"><?php echo $pageLabelHtml; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Caller-escaped crumb HTML. ?></span>
+			<?php elseif ( '' !== $pageLabel ) : ?>
 				<div class="mint-admin-brand__sep" aria-hidden="true"></div>
 				<span class="mint-admin-brand__page"><?php echo esc_html( $pageLabel ); ?></span>
 			<?php endif; ?>

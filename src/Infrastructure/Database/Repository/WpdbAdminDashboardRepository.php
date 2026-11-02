@@ -28,7 +28,7 @@ final class WpdbAdminDashboardRepository implements AdminDashboardRepositoryInte
 		$cacheKey = WpObjectCache::dashboardCacheKey(
 			'author_stats_' . $authorId . '_' . md5( (string) wp_json_encode( $courseIds ) )
 		);
-		$cached    = wp_cache_get( $cacheKey, WpObjectCache::GROUP );
+		$cached   = wp_cache_get( $cacheKey, WpObjectCache::GROUP );
 		if ( false !== $cached && is_array( $cached ) ) {
 			return $cached;
 		}
@@ -320,7 +320,7 @@ final class WpdbAdminDashboardRepository implements AdminDashboardRepositoryInte
 		$cacheKey = WpObjectCache::dashboardCacheKey(
 			'course_stats_' . md5( (string) wp_json_encode( $courseIds ) )
 		);
-		$cached    = wp_cache_get( $cacheKey, WpObjectCache::GROUP );
+		$cached   = wp_cache_get( $cacheKey, WpObjectCache::GROUP );
 		if ( false !== $cached && is_array( $cached ) ) {
 			return $cached;
 		}
@@ -337,6 +337,7 @@ final class WpdbAdminDashboardRepository implements AdminDashboardRepositoryInte
 		foreach ( $courseIds as $courseId ) {
 			$stats[ $courseId ] = array(
 				'students'       => 0,
+				'finished'       => 0,
 				'completion_pct' => null,
 				'lesson_count'   => 0,
 			);
@@ -390,7 +391,9 @@ final class WpdbAdminDashboardRepository implements AdminDashboardRepositoryInte
 		$completionRows = $wpdb->get_results(
 			$wpdb->prepare(
 				sprintf(
-					'SELECT course_id, AVG(pct_complete) AS avg_pct FROM %%i WHERE course_id IN (%s) GROUP BY course_id',
+					'SELECT course_id, AVG(pct_complete) AS avg_pct,
+						SUM(CASE WHEN pct_complete >= 100 THEN 1 ELSE 0 END) AS finished_count
+					FROM %%i WHERE course_id IN (%s) GROUP BY course_id',
 					implode( ',', array_fill( 0, count( $courseIds ), '%d' ) )
 				),
 				array_merge( array( $summaryTable ), $courseIds )
@@ -399,8 +402,11 @@ final class WpdbAdminDashboardRepository implements AdminDashboardRepositoryInte
 		if ( is_array( $completionRows ) ) {
 			foreach ( $completionRows as $row ) {
 				$courseId = (int) $row->course_id;
-				if ( isset( $stats[ $courseId ] ) && null !== $row->avg_pct ) {
-					$stats[ $courseId ]['completion_pct'] = (int) round( (float) $row->avg_pct );
+				if ( isset( $stats[ $courseId ] ) ) {
+					if ( null !== $row->avg_pct ) {
+						$stats[ $courseId ]['completion_pct'] = (int) round( (float) $row->avg_pct );
+					}
+					$stats[ $courseId ]['finished'] = (int) ( $row->finished_count ?? 0 );
 				}
 			}
 		}
@@ -415,7 +421,7 @@ final class WpdbAdminDashboardRepository implements AdminDashboardRepositoryInte
 	 */
 	public function getReportsSummary( ?int $authorId ): array {
 		$cacheKey = WpObjectCache::dashboardCacheKey( 'reports_' . ( null === $authorId ? 'all' : (string) $authorId ) );
-		$cached    = wp_cache_get( $cacheKey, WpObjectCache::GROUP );
+		$cached   = wp_cache_get( $cacheKey, WpObjectCache::GROUP );
 		if ( false !== $cached && is_array( $cached ) ) {
 			return $cached;
 		}

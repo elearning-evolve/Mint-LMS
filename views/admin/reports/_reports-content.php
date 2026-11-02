@@ -76,9 +76,9 @@ $hue_tile_classes = array(
 			if ( ! is_array( $row ) ) {
 				continue;
 			}
-			$user = get_userdata( (int) ( $row['user_id'] ?? 0 ) );
-			$name = $user instanceof WP_User ? $user->display_name : __( 'A student', 'mint-lms' );
-			$hue  = MintUi::hueByIndex( $index );
+			$user     = get_userdata( (int) ( $row['user_id'] ?? 0 ) );
+			$name     = $user instanceof WP_User ? $user->display_name : __( 'A student', 'mint-lms' );
+			$hue      = MintUi::hueByIndex( $index );
 			$hueClass = $hue_tile_classes[ ( $index % 6 ) + 1 ];
 			++$index;
 			$course = (string) ( $row['course_title'] ?? '' );

@@ -9505,3 +9505,658 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   opacity: 0.55;
   cursor: not-allowed;
 }
+
+/* —— Students picker (Mint LMS Students.dc) —— */
+#mint-lms-root main.mint-students-main {
+  margin-left: 0;
+  margin-right: auto;
+  padding-left: 32px;
+  padding-right: 32px;
+  max-width: 1240px;
+  width: 100%;
+  box-sizing: border-box;
+}
+#mint-lms-root .mint-admin-header__inner.mint-students-main {
+  margin-left: 0;
+  margin-right: auto;
+  padding-left: 32px;
+  padding-right: 32px;
+  max-width: 1240px;
+}
+#mint-lms-root .mint-students-picker {
+  padding: 44px 0 72px;
+}
+#mint-lms-root .mint-students-picker__intro {
+  padding-bottom: 26px;
+}
+#mint-lms-root .mint-students-picker__title {
+  margin: 0;
+  font-size: 48px;
+  line-height: 52px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  color: #0F0E1A;
+}
+#mint-lms-root .mint-students-picker__sub {
+  margin: 10px 0 0;
+  font-size: 19px;
+  line-height: 30px;
+  color: #33334A;
+}
+#mint-lms-root .mint-students-picker__search {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 420px;
+  margin-top: 20px;
+}
+#mint-lms-root .mint-students-picker__search-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #33334A;
+}
+#mint-lms-root .mint-students-picker__search-input {
+  display: block;
+  width: 100%;
+  height: 48px;
+  padding: 0 16px 0 42px;
+  border-radius: 10px;
+  border: 1.5px solid #DAD7E6;
+  background: #FFFFFF;
+  color: #0F0E1A;
+  font-size: 16px;
+  font-family: inherit;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 120ms ease-out, box-shadow 120ms ease-out;
+}
+#mint-lms-root .mint-students-picker__search-input:hover {
+  border-color: #98FB98;
+}
+#mint-lms-root .mint-students-picker__search-input:focus {
+  border-color: #98FB98;
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
+}
+#mint-lms-root .mint-students-picker__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 28px;
+  align-items: start;
+}
+#mint-lms-root .mint-students-picker__courses {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+#mint-lms-root a.mint-students-course-card,
+#mint-lms-root a.mint-students-course-card:visited {
+  display: block;
+  height: 112px;
+  padding: 18px;
+  border: 1.5px solid #E4E1F0;
+  border-radius: 16px;
+  background: #FFFFFF;
+  color: #0F0E1A;
+  text-decoration: none;
+  outline: none;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: border-color 150ms ease-out, box-shadow 150ms ease-out, background 150ms ease-out;
+}
+#mint-lms-root a.mint-students-course-card:hover,
+#mint-lms-root a.mint-students-course-card:focus-visible {
+  border-color: #98FBCB;
+  background: #F1FFF9;
+  box-shadow: 0 8px 22px rgba(152, 251, 203, 0.5);
+  color: #0F0E1A;
+  text-decoration: none;
+}
+#mint-lms-root a.mint-students-course-card:focus-visible {
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55), 0 8px 22px rgba(152, 251, 203, 0.5);
+}
+#mint-lms-root .mint-students-course-card__row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 52px;
+}
+#mint-lms-root .mint-students-course-card__tile {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: 700;
+  flex: none;
+  line-height: 1;
+}
+#mint-lms-root .mint-students-course-card__body {
+  flex: 1;
+  min-width: 0;
+}
+#mint-lms-root .mint-students-course-card__title {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 700;
+  color: #17222B;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#mint-lms-root .mint-students-course-card__meta {
+  margin-top: 2px;
+  font-size: 14px;
+  line-height: 20px;
+  color: #5C5C77;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#mint-lms-root .mint-students-course-card__chevron {
+  flex: none;
+}
+#mint-lms-root .mint-students-course-card__progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 16px;
+  height: 8px;
+}
+#mint-lms-root .mint-students-course-card__track {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: #E7E4F3;
+  overflow: hidden;
+  min-width: 0;
+}
+#mint-lms-root .mint-students-course-card__fill {
+  height: 100%;
+  border-radius: 999px;
+  background: #98FB98;
+  width: 0%;
+}
+#mint-lms-root .mint-students-course-card__finished {
+  flex: none;
+  min-width: 72px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 16px;
+  color: #17222B;
+  white-space: nowrap;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+#mint-lms-root .mint-students-picker__aside {
+  width: 340px;
+  display: grid;
+  gap: 16px;
+}
+#mint-lms-root .mint-students-panel {
+  border: 1.5px solid #98FBCB;
+  border-radius: 16px;
+  background: #FFFFFF;
+  box-shadow: 0 8px 24px rgba(152, 251, 203, 0.45);
+  overflow: hidden;
+}
+#mint-lms-root .mint-students-panel__head {
+  padding: 14px 18px;
+  background: #F1FFF9;
+  border-bottom: 1px solid #CFF5E2;
+  font-size: 16px;
+  font-weight: 700;
+  color: #17222B;
+}
+#mint-lms-root .mint-students-panel__stats {
+  padding: 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+#mint-lms-root .mint-students-stat {
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1.5px solid #98FBCB;
+  background: #FFFFFF;
+  box-shadow: 0 6px 16px rgba(152, 251, 203, 0.55);
+  outline: none;
+  transition: transform 150ms ease-out, box-shadow 150ms ease-out, background 150ms ease-out;
+}
+#mint-lms-root .mint-students-stat:hover,
+#mint-lms-root .mint-students-stat:focus-visible {
+  transform: translateY(-4px);
+  background: #F1FFF9;
+  box-shadow: 0 10px 22px rgba(152, 251, 203, 0.7);
+}
+#mint-lms-root .mint-students-stat:focus-visible {
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55), 0 10px 22px rgba(152, 251, 203, 0.7);
+}
+#mint-lms-root .mint-students-stat__value {
+  font-size: 28px;
+  line-height: 32px;
+  font-weight: 700;
+  color: #17222B;
+  font-variant-numeric: tabular-nums;
+}
+#mint-lms-root .mint-students-stat__label {
+  margin-top: 2px;
+  font-size: 13px;
+  color: #33334A;
+}
+#mint-lms-root .mint-students-panel__recent {
+  padding: 4px 18px 10px;
+}
+#mint-lms-root .mint-students-recent {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  margin: 0 -10px;
+  border-top: 1px solid #EDEBF7;
+  border-radius: 10px;
+  outline: none;
+  transition: background 150ms ease-out, box-shadow 150ms ease-out;
+}
+#mint-lms-root .mint-students-recent:hover,
+#mint-lms-root .mint-students-recent:focus-visible {
+  background: #F1FFF9;
+  box-shadow: 0 4px 14px rgba(152, 251, 203, 0.5);
+}
+#mint-lms-root .mint-students-recent:focus-visible {
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
+}
+#mint-lms-root .mint-students-recent__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex: none;
+}
+#mint-lms-root .mint-students-recent__body {
+  flex: 1;
+  min-width: 0;
+}
+#mint-lms-root .mint-students-recent__name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #17222B;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#mint-lms-root .mint-students-recent__course {
+  font-size: 13px;
+  color: #5C5C77;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#mint-lms-root .mint-students-recent__when {
+  font-size: 13px;
+  color: #5C5C77;
+  flex: none;
+}
+#mint-lms-root .mint-students-picker__empty {
+  padding: 24px 0;
+  font-size: 14px;
+  color: #5C5C77;
+}
+@media (max-width: 1100px) {
+  #mint-lms-root .mint-students-picker__layout {
+    grid-template-columns: 1fr;
+  }
+  #mint-lms-root .mint-students-picker__aside {
+    width: 100%;
+  }
+  #mint-lms-root .mint-students-picker__courses {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+@media (max-width: 720px) {
+  #mint-lms-root .mint-students-picker__courses {
+    grid-template-columns: 1fr;
+  }
+  #mint-lms-root a.mint-students-course-card,
+  #mint-lms-root a.mint-students-course-card:visited {
+    height: auto;
+    min-height: 112px;
+  }
+}
+
+/* —— Students in-course desk (Mint LMS Students.dc) —— */
+#mint-lms-root .mint-students-course {
+  padding-bottom: 72px;
+}
+#mint-lms-root a.mint-students-course__back,
+#mint-lms-root a.mint-students-course__back:visited {
+  margin-top: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  font-size: 15px;
+  font-weight: 600;
+  color: #17222B;
+  text-decoration: none;
+  outline: none;
+}
+#mint-lms-root a.mint-students-course__back:hover {
+  text-decoration: underline;
+  color: #17222B;
+}
+#mint-lms-root .mint-students-course__hero {
+  padding: 14px 0 24px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+#mint-lms-root .mint-students-course__title {
+  margin: 0;
+  font-size: 48px;
+  line-height: 52px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  color: #0F0E1A;
+}
+#mint-lms-root .mint-students-course__sub {
+  margin: 8px 0 0;
+  font-size: 19px;
+  line-height: 30px;
+  color: #33334A;
+}
+#mint-lms-root .mint-students-course__pills {
+  display: flex;
+  gap: 12px;
+}
+#mint-lms-root .mint-students-course__pill {
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: 1.5px solid #98FBCB;
+  background: #F1FFF9;
+  box-shadow: 0 6px 18px rgba(152, 251, 203, 0.45);
+}
+#mint-lms-root .mint-students-course__pill-value {
+  font-size: 26px;
+  font-weight: 700;
+  color: #17222B;
+  font-variant-numeric: tabular-nums;
+}
+#mint-lms-root .mint-students-course__pill-label {
+  font-size: 13px;
+  color: #33334A;
+}
+#mint-lms-root .mint-students-course__toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 24px;
+  flex-wrap: wrap;
+}
+#mint-lms-root a.mint-students-course__switcher,
+#mint-lms-root a.mint-students-course__switcher:visited {
+  height: 44px;
+  padding: 0 15px;
+  border-radius: 10px;
+  border: 1.5px solid #98FBCB;
+  background: #FFFFFF;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #17222B;
+  min-width: 290px;
+  text-decoration: none;
+  outline: none;
+  transition: background 120ms ease-out;
+}
+#mint-lms-root a.mint-students-course__switcher:hover,
+#mint-lms-root a.mint-students-course__switcher:focus-visible {
+  background: #F1FFF9;
+  color: #17222B;
+  text-decoration: none;
+}
+#mint-lms-root a.mint-students-course__switcher:focus-visible {
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
+}
+#mint-lms-root .mint-students-course__search {
+  position: relative;
+  flex: 1 1 230px;
+  max-width: 320px;
+}
+#mint-lms-root .mint-students-course__search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #33334A;
+}
+#mint-lms-root .mint-students-course__search-input {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px 0 40px;
+  border-radius: 10px;
+  border: 1.5px solid #DAD7E6;
+  background: #FFFFFF;
+  font-size: 16px;
+  font-family: inherit;
+  color: #0F0E1A;
+  box-sizing: border-box;
+  outline: none;
+}
+#mint-lms-root .mint-students-course__search-input:hover {
+  border-color: #98FB98;
+}
+#mint-lms-root .mint-students-course__search-input:focus {
+  border-color: #98FB98;
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
+}
+#mint-lms-root .mint-students-course__add {
+  background: #F1FFF9;
+  border: 1.5px solid #98FBCB;
+  border-radius: 14px;
+  padding: 22px;
+  margin-bottom: 36px;
+  box-shadow: 0 8px 24px rgba(152, 251, 203, 0.45);
+}
+#mint-lms-root .mint-students-course__add-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #17222B;
+}
+#mint-lms-root .mint-students-course__add-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+#mint-lms-root .mint-students-course__add-input {
+  flex: 1 1 300px;
+  min-width: 0;
+  height: 50px;
+  border: 1.5px solid #DAD7E6;
+  border-radius: 10px;
+  padding: 0 14px;
+  font-size: 17px;
+  font-family: inherit;
+  background: #FFFFFF;
+  color: #0F0E1A;
+  box-sizing: border-box;
+  outline: none;
+}
+#mint-lms-root .mint-students-course__add-input:hover {
+  border-color: #98FB98;
+}
+#mint-lms-root .mint-students-course__add-input:focus {
+  border-color: #98FB98;
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
+}
+#mint-lms-root .mint-students-course__add-hint {
+  margin: 10px 0 0;
+  font-size: 14px;
+  color: #33334A;
+}
+#mint-lms-root .mint-students-table__head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 132px 120px 84px 84px;
+  gap: 16px;
+  padding: 13px 16px;
+  background: #E8FFF3;
+  border-radius: 10px;
+}
+#mint-lms-root .mint-students-table__head-cell {
+  font-size: 15px;
+  font-weight: 700;
+  color: #17222B;
+}
+#mint-lms-root .mint-students-table__head-cell--right {
+  text-align: right;
+}
+#mint-lms-root .mint-students-table__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 132px 120px 84px 84px;
+  gap: 16px;
+  align-items: center;
+  padding: 14px 16px;
+  border-top: 1px solid #EDEBF7;
+  border-radius: 10px;
+  transition: background 120ms ease-out;
+}
+#mint-lms-root .mint-students-table__row:hover {
+  background: #F1FFF9;
+}
+#mint-lms-root .mint-students-table__person {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+}
+#mint-lms-root .mint-students-table__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  flex: none;
+}
+#mint-lms-root .mint-students-table__name {
+  font-size: 17px;
+  font-weight: 600;
+  color: #0F0E1A;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#mint-lms-root .mint-students-table__email {
+  font-size: 15px;
+  color: #33334A;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#mint-lms-root .mint-students-table__where {
+  font-size: 16px;
+  font-weight: 500;
+}
+#mint-lms-root .mint-students-table__progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+#mint-lms-root .mint-students-table__track {
+  flex: 1;
+  height: 9px;
+  border-radius: 999px;
+  background: #E7E4F3;
+  overflow: hidden;
+  min-width: 44px;
+}
+#mint-lms-root .mint-students-table__fill {
+  height: 100%;
+  border-radius: 999px;
+  background: #98FB98;
+  width: 0%;
+}
+#mint-lms-root .mint-students-table__pct {
+  font-size: 16px;
+  font-weight: 600;
+  color: #0F0E1A;
+  font-variant-numeric: tabular-nums;
+  width: 44px;
+  text-align: right;
+}
+#mint-lms-root .mint-students-table__joined {
+  font-size: 16px;
+  color: #33334A;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+#mint-lms-root .mint-students-table__remove,
+#mint-lms-root button.mint-students-table__remove {
+  font-size: 16px;
+  font-weight: 600;
+  color: #C22B2B;
+  text-align: right;
+  cursor: pointer;
+  outline: none;
+  border: none;
+  background: transparent;
+  padding: 0;
+  border-radius: 6px;
+  width: 100%;
+  font-family: inherit;
+}
+#mint-lms-root .mint-students-table__remove:hover,
+#mint-lms-root button.mint-students-table__remove:hover {
+  text-decoration: underline;
+}
+#mint-lms-root .mint-students-table__remove:focus-visible,
+#mint-lms-root button.mint-students-table__remove:focus-visible {
+  box-shadow: 0 0 0 3px rgba(194, 43, 43, 0.26);
+}
+
+#mint-lms-root .mint-admin-brand__page--crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+#mint-lms-root a.mint-admin-brand__crumb-link,
+#mint-lms-root a.mint-admin-brand__crumb-link:visited {
+  color: #33334A;
+  text-decoration: none;
+  font-weight: 400;
+}
+#mint-lms-root a.mint-admin-brand__crumb-link:hover {
+  color: #17222B;
+  text-decoration: none;
+}
+#mint-lms-root .mint-admin-brand__crumb-chevron {
+  flex: none;
+}
+#mint-lms-root .mint-admin-brand__crumb-current {
+  font-weight: 600;
+  color: #17222B;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 42vw;
+}

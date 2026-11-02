@@ -16,7 +16,7 @@ if ( $courseId <= 0 ) {
 }
 
 $pageSettings = new PageSettings();
-$previewUrl  = $courseId > 0 ? $pageSettings->getCourseUrl( $courseId ) : '';
+$previewUrl   = $courseId > 0 ? $pageSettings->getCourseUrl( $courseId ) : '';
 if ( '' === $previewUrl || home_url( '/' ) === $previewUrl ) {
 	$previewUrl = '';
 }
@@ -25,15 +25,15 @@ $content = $renderer->render(
 	'admin/courses/_edit-content',
 	array(
 		'renderer' => $renderer,
-		'courseId'  => $courseId,
+		'courseId' => $courseId,
 	)
 );
 
 $btnSecondary = 'mint-inline-flex mint-h-[38px] mint-items-center mint-justify-center mint-rounded-md mint-border-[1.5px] mint-border-[#B9B6CE] mint-bg-white mint-px-[15px] mint-text-[15px] mint-font-semibold mint-text-ink mint-no-underline mint-transition-colors mint-duration-hover hover:mint-bg-[#F4F3F8] focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(63,0,255,0.32)]';
 $btnPrimary   = 'mint-settings-save mint-inline-flex mint-h-[38px] mint-items-center mint-justify-center mint-rounded-md mint-border-0 mint-bg-cta mint-px-4 mint-text-[15px] mint-font-semibold mint-text-cta-ink mint-transition-colors mint-duration-hover focus-visible:mint-outline-none';
 
-$courseStatus   = $courseId > 0 ? (string) get_post_status( $courseId ) : 'draft';
-$courseIsLive   = 'publish' === $courseStatus;
+$courseStatus = $courseId > 0 ? (string) get_post_status( $courseId ) : 'draft';
+$courseIsLive = 'publish' === $courseStatus;
 
 $headerActions = '';
 

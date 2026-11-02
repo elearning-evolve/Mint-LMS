@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-$id     = $id ?? 'mint-dropdown';
-$label  = $label ?? '';
-$items  = $items ?? array();
-$align  = $align ?? 'left';
+$id    = $id ?? 'mint-dropdown';
+$label = $label ?? '';
+$items = $items ?? array();
+$align = $align ?? 'left';
 ?>
 <div
 	x-data="{ open: false }"
