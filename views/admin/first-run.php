@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template partial variables.
-
 use MintLMS\Infrastructure\Admin\FirstRunRedirect;
 ?>
 <div class="wrap mint-lms-admin-wrap mint-m-0 mint-p-0">

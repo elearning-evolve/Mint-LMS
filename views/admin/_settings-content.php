@@ -3,22 +3,25 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template partial variables.
-
 use MintLMS\Infrastructure\Admin\ViewRenderer;
+use MintLMS\Infrastructure\Ai\AiSettings;
 use MintLMS\Infrastructure\Setup\PageSettings;
 
 /** @var ViewRenderer $renderer */
 /** @var PageSettings $pageSettings */
 /** @var list<array{key: string, label: string, done: bool, detail: string}> $checklist */
 
-$dashboardId = $pageSettings->getDashboardPageId();
-$catalogId   = $pageSettings->getCatalogPageId();
-$playerId    = $pageSettings->getPlayerPageId();
-$certTemplate = (string) get_option( 'mintlms_certificate_template', '' );
-$doneCount   = count( array_filter( $checklist, static fn( array $item ): bool => $item['done'] ) );
-$totalCount  = count( $checklist );
-$pagesCreated = isset( $_GET['mintlms_pages'] ) && '1' === sanitize_text_field( wp_unslash( (string) $_GET['mintlms_pages'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+$dashboardId     = $pageSettings->getDashboardPageId();
+$catalogId       = $pageSettings->getCatalogPageId();
+$playerId        = $pageSettings->getPlayerPageId();
+$certTemplate    = (string) get_option( 'mintlms_certificate_template', '' );
+$aiSettings      = new AiSettings();
+$aiStatus        = $aiSettings->status();
+$aiKeyFieldValue = $aiSettings->hasApiKey() ? AiSettings::MASK_PLACEHOLDER : '';
+$aiUsesConstant  = in_array( (string) $aiStatus['key_source'], array( 'constant', 'env' ), true );
+$doneCount       = count( array_filter( $checklist, static fn( array $item ): bool => $item['done'] ) );
+$totalCount      = count( $checklist );
+$pagesCreated    = isset( $_GET['mintlms_pages'] ) && '1' === sanitize_text_field( wp_unslash( (string) $_GET['mintlms_pages'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 $cardClass   = 'mint-rounded-xl mint-border mint-border-tint-line mint-bg-tint mint-px-7 mint-py-6';
 $fieldSelect = 'mint-block mint-w-full mint-rounded-lg mint-border mint-border-control mint-bg-bg mint-px-[14px] mint-py-[11px] mint-text-base mint-text-ink hover:mint-border-mint-blue focus:mint-border-mint-blue focus:mint-shadow-focus focus:mint-outline-none';
@@ -90,7 +93,7 @@ $fieldSelect = 'mint-block mint-w-full mint-rounded-lg mint-border mint-border-c
 							'selected'          => absint( $dashboardId ),
 							'show_option_none'  => esc_html__( '— Select —', 'mint-lms' ),
 							'option_none_value' => '0',
-							'class'             => $fieldSelect,
+							'class'             => esc_attr( $fieldSelect ),
 						)
 					);
 					?>
@@ -107,7 +110,7 @@ $fieldSelect = 'mint-block mint-w-full mint-rounded-lg mint-border mint-border-c
 							'selected'          => absint( $catalogId ),
 							'show_option_none'  => esc_html__( '— Select —', 'mint-lms' ),
 							'option_none_value' => '0',
-							'class'             => $fieldSelect,
+							'class'             => esc_attr( $fieldSelect ),
 						)
 					);
 					?>
@@ -124,7 +127,7 @@ $fieldSelect = 'mint-block mint-w-full mint-rounded-lg mint-border mint-border-c
 							'selected'          => absint( $playerId ),
 							'show_option_none'  => esc_html__( '— Select —', 'mint-lms' ),
 							'option_none_value' => '0',
-							'class'             => $fieldSelect,
+							'class'             => esc_attr( $fieldSelect ),
 						)
 					);
 					?>
@@ -223,6 +226,145 @@ $fieldSelect = 'mint-block mint-w-full mint-rounded-lg mint-border mint-border-c
 			</div>
 		</div>
 
+		<div class="<?php echo esc_attr( $cardClass ); ?>" id="mintlms-ai-settings">
+			<h2 class="mint-m-0 mint-text-[20px] mint-font-semibold mint-leading-7 mint-tracking-tight mint-text-ink"><?php esc_html_e( 'AI assistant (optional)', 'mint-lms' ); ?></h2>
+			<p class="mint-mt-2 mint-text-sm mint-leading-[22px] mint-text-ink-2">
+				<?php esc_html_e( 'Opt in to send drafting prompts to your chosen AI provider. Off by default. Keys stay on the server — never in the browser. Prefer defining MINTLMS_AI_API_KEY in wp-config.php.', 'mint-lms' ); ?>
+			</p>
+			<p class="mint-mt-2 mint-text-sm mint-leading-[22px] mint-text-ink-3">
+				<?php
+				echo wp_kses(
+					sprintf(
+						/* translators: 1: OpenAI privacy link, 2: Anthropic privacy link */
+						__( 'Providers: OpenAI (%1$s), Anthropic (%2$s). Data leaves this site only after you enable AI and save a key.', 'mint-lms' ),
+						'<a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener noreferrer">' . esc_html__( 'privacy policy', 'mint-lms' ) . '</a>',
+						'<a href="https://www.anthropic.com/privacy" target="_blank" rel="noopener noreferrer">' . esc_html__( 'privacy policy', 'mint-lms' ) . '</a>'
+					),
+					array(
+						'a' => array(
+							'href'   => true,
+							'target' => true,
+							'rel'    => true,
+						),
+					)
+				);
+				?>
+			</p>
+
+			<div class="mint-mt-5 mint-flex mint-flex-col mint-gap-4">
+				<input type="hidden" name="<?php echo esc_attr( AiSettings::OPTION_ENABLED ); ?>" value="0" />
+				<label class="mint-flex mint-items-center mint-gap-3 mint-text-sm mint-text-ink">
+					<input
+						type="checkbox"
+						name="<?php echo esc_attr( AiSettings::OPTION_ENABLED ); ?>"
+						value="1"
+						<?php checked( $aiSettings->isEnabled() ); ?>
+					/>
+					<span><?php esc_html_e( 'Enable AI features (opt-in)', 'mint-lms' ); ?></span>
+				</label>
+
+				<label class="mint-flex mint-flex-col mint-gap-2 mint-text-sm mint-font-semibold mint-text-ink">
+					<span><?php esc_html_e( 'Provider', 'mint-lms' ); ?></span>
+					<select name="<?php echo esc_attr( AiSettings::OPTION_PROVIDER ); ?>" class="<?php echo esc_attr( $fieldSelect ); ?>">
+						<option value="<?php echo esc_attr( AiSettings::PROVIDER_OPENAI ); ?>" <?php selected( $aiSettings->getProvider(), AiSettings::PROVIDER_OPENAI ); ?>><?php esc_html_e( 'OpenAI', 'mint-lms' ); ?></option>
+						<option value="<?php echo esc_attr( AiSettings::PROVIDER_ANTHROPIC ); ?>" <?php selected( $aiSettings->getProvider(), AiSettings::PROVIDER_ANTHROPIC ); ?>><?php esc_html_e( 'Anthropic', 'mint-lms' ); ?></option>
+					</select>
+				</label>
+
+				<label class="mint-flex mint-flex-col mint-gap-2 mint-text-sm mint-font-semibold mint-text-ink">
+					<span><?php esc_html_e( 'Model', 'mint-lms' ); ?></span>
+					<input
+						type="text"
+						name="<?php echo esc_attr( AiSettings::OPTION_MODEL ); ?>"
+						value="<?php echo esc_attr( (string) get_option( AiSettings::OPTION_MODEL, '' ) ); ?>"
+						class="<?php echo esc_attr( $fieldSelect ); ?>"
+						placeholder="<?php echo esc_attr( $aiSettings->getModel() ); ?>"
+					/>
+				</label>
+
+				<label class="mint-flex mint-flex-col mint-gap-2 mint-text-sm mint-font-semibold mint-text-ink">
+					<span><?php esc_html_e( 'API key', 'mint-lms' ); ?></span>
+					<?php if ( $aiUsesConstant ) : ?>
+						<p class="mint-m-0 mint-text-sm mint-font-normal mint-text-ink-2">
+							<?php
+							printf(
+								/* translators: %s: key source (constant or env) */
+								esc_html__( 'Using key from %s (database field ignored).', 'mint-lms' ),
+								esc_html( (string) $aiStatus['key_source'] )
+							);
+							?>
+						</p>
+					<?php else : ?>
+						<input
+							type="password"
+							name="<?php echo esc_attr( AiSettings::OPTION_API_KEY_ENC ); ?>"
+							value="<?php echo esc_attr( $aiKeyFieldValue ); ?>"
+							class="<?php echo esc_attr( $fieldSelect ); ?>"
+							autocomplete="new-password"
+							placeholder="<?php esc_attr_e( 'Paste API key', 'mint-lms' ); ?>"
+						/>
+						<?php if ( $aiSettings->hasApiKey() && '' !== (string) $aiStatus['key_hint'] ) : ?>
+							<span class="mint-text-sm mint-font-normal mint-text-ink-3">
+								<?php
+								printf(
+									/* translators: %s: last four characters of API key */
+									esc_html__( 'Saved key ending in %s', 'mint-lms' ),
+									esc_html( (string) $aiStatus['key_hint'] )
+								);
+								?>
+							</span>
+						<?php endif; ?>
+						<label class="mint-flex mint-items-center mint-gap-3 mint-text-sm mint-font-normal mint-text-ink">
+							<input type="checkbox" name="mintlms_ai_clear_key" value="1" />
+							<span><?php esc_html_e( 'Remove saved API key', 'mint-lms' ); ?></span>
+						</label>
+					<?php endif; ?>
+				</label>
+
+				<div class="mint-flex mint-flex-wrap mint-items-center mint-gap-3">
+					<button
+						type="button"
+						id="mintlms-ai-test"
+						class="button"
+						<?php disabled( ! $aiSettings->isReady() ); ?>
+					>
+						<?php esc_html_e( 'Test connection', 'mint-lms' ); ?>
+					</button>
+					<span id="mintlms-ai-test-result" class="mint-text-sm mint-text-ink-3" aria-live="polite"></span>
+				</div>
+			</div>
+		</div>
+
 		<?php submit_button( __( 'Save settings', 'mint-lms' ) ); ?>
 	</form>
 </div>
+<script>
+(function () {
+	var btn = document.getElementById('mintlms-ai-test');
+	var out = document.getElementById('mintlms-ai-test-result');
+	if (!btn || !out || !window.mintLmsAdmin) return;
+	btn.addEventListener('click', function () {
+		out.textContent = <?php echo wp_json_encode( __( 'Testing…', 'mint-lms' ) ); ?>;
+		btn.disabled = true;
+		fetch(String(mintLmsAdmin.restBase).replace(/\/?$/, '') + '/ai/test', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-WP-Nonce': mintLmsAdmin.nonce || ''
+			},
+			body: '{}'
+		}).then(function (r) { return r.json(); }).then(function (json) {
+			btn.disabled = false;
+			if (json && json.success) {
+				out.textContent = <?php echo wp_json_encode( __( 'Connection OK', 'mint-lms' ) ); ?> +
+					(json.data && json.data.latency_ms ? ' (' + json.data.latency_ms + 'ms)' : '');
+			} else {
+				out.textContent = (json && json.error && json.error.message) ? json.error.message : <?php echo wp_json_encode( __( 'Test failed', 'mint-lms' ) ); ?>;
+			}
+		}).catch(function () {
+			btn.disabled = false;
+			out.textContent = <?php echo wp_json_encode( __( 'Test failed', 'mint-lms' ) ); ?>;
+		});
+	});
+})();
+</script>

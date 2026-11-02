@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template partial variables.
-
 use MintLMS\Application\Admin\CreatorDashboardService;
 use MintLMS\Infrastructure\Admin\MintUiDashboardPresentation;
 use MintLMS\Infrastructure\Admin\ViewRenderer;

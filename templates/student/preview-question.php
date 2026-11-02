@@ -3,19 +3,17 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template partial variables.
-
 use MintLMS\Domain\Quiz\QuizQuestion;
 
 /** @var array{title: string, meta: string, type: string, options: list<array{text: string, correct: bool}>, courseTitle: string} $preview */
-$preview     = $preview;
-$options     = is_array( $preview['options'] ?? null ) ? $preview['options'] : array();
-$type        = (string) ( $preview['type'] ?? QuizQuestion::TYPE_MCQ );
+$preview      = $preview;
+$options      = is_array( $preview['options'] ?? null ) ? $preview['options'] : array();
+$type         = (string) ( $preview['type'] ?? QuizQuestion::TYPE_MCQ );
 $courseTitle  = trim( (string) ( $preview['courseTitle'] ?? '' ) );
 $previewKind  = 'question';
 $itemTitle    = trim( (string) ( $preview['title'] ?? '' ) );
 $sectionTitle = '';
-include MINTLMS_PATH . 'views/student/partials/preview-header.php';
+require MINTLMS_PATH . 'views/student/partials/preview-header.php';
 ?>
 
 <div class="mint-mx-auto mint-max-w-[700px] mint-px-4 mint-pb-14 sm:mint-px-6">
@@ -38,7 +36,8 @@ include MINTLMS_PATH . 'views/student/partials/preview-header.php';
 			</div>
 		<?php else : ?>
 			<div class="mint-mt-[22px] mint-grid mint-gap-2.5">
-				<?php foreach ( $options as $option ) :
+				<?php
+				foreach ( $options as $option ) :
 					$correct   = ! empty( $option['correct'] );
 					$border    = $correct ? '#0B4F3F' : '#E4E1F0';
 					$bg        = $correct ? '#E8FFF3' : '#FFFFFF';

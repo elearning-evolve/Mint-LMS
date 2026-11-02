@@ -12,6 +12,7 @@ use MintLMS\Domain\Enrollment\EnrollmentStatus;
 use MintLMS\Domain\Event\CourseCompleted;
 use MintLMS\Domain\Event\CoursePublished;
 use MintLMS\Domain\Event\EnrollmentCreated;
+use MintLMS\Infrastructure\View\ScopedPhpTemplate;
 
 final class EmailNotificationService {
 
@@ -171,17 +172,7 @@ final class EmailNotificationService {
 	private function renderView( string $template, array $vars ): string {
 		$path = trailingslashit( $this->viewsPath ) . ltrim( $template, '/' );
 
-		if ( ! is_readable( $path ) ) {
-			return '';
-		}
-
-		ob_start();
-
-		// phpcs:ignore WordPress.PHP.DontExtract.extract_extract -- Scoped email template variables.
-		extract( $vars, EXTR_SKIP );
-		include $path;
-
-		return (string) ob_get_clean();
+		return ScopedPhpTemplate::render( $path, $vars );
 	}
 
 	private function send( string $to, string $subject, string $body ): void {

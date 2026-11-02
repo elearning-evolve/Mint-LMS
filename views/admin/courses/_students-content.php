@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template partial variables.
-
 use MintLMS\Application\Exception\ForbiddenException;
 use MintLMS\Application\Exception\NotFoundException;
 use MintLMS\Infrastructure\Admin\ViewRenderer;
@@ -44,8 +42,8 @@ if ( $courseId <= 0 ) {
 		$totalStudents = $result->total;
 
 		foreach ( $result->students as $index => $student ) {
-			$user  = get_userdata( $student->userId );
-			$name  = $user instanceof \WP_User ? $user->display_name : sprintf(
+			$user = get_userdata( $student->userId );
+			$name = $user instanceof \WP_User ? $user->display_name : sprintf(
 				/* translators: %d: user ID */
 				__( 'User #%d', 'mint-lms' ),
 				$student->userId
@@ -261,9 +259,10 @@ $inputClass      = 'mint-block mint-w-full mint-rounded-lg mint-border-[1.5px] m
 				<span></span>
 			</div>
 
-			<?php foreach ( $students as $s ) :
+			<?php
+			foreach ( $students as $s ) :
 				$hueClass = $hue_tile_classes[ (int) $s['hueIdx'] ];
-			?>
+				?>
 			<div
 				class="mint-grid mint-grid-cols-[minmax(0,1fr)_132px_120px_84px_84px] mint-items-center mint-border-b mint-border-rule-soft mint-px-4 mint-py-[14px]"
 				data-mint-student-row

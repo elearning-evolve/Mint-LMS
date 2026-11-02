@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template partial variables.
-
 use MintLMS\Application\Student\Dto\StudentPlayerContextDto;
 
 /** @var StudentPlayerContextDto $context */
@@ -97,7 +95,7 @@ $pct          = (int) round( $context->progressPct );
 			$quizRequired  = $context->quizRequired;
 			$hasPassedQuiz = $context->hasPassedQuiz;
 			$isEnrolled    = $context->isEnrolled;
-			include MINTLMS_PATH . 'templates/student/quiz.php';
+			require MINTLMS_PATH . 'templates/student/quiz.php';
 			?>
 
 			<div class="mint-mt-8 mint-flex mint-flex-col mint-gap-3 sm:mint-flex-row sm:mint-items-center sm:mint-justify-between">
@@ -135,7 +133,8 @@ $pct          = (int) round( $context->progressPct );
 						<h3 class="mint-mb-2 mint-text-xs mint-font-semibold mint-uppercase mint-tracking-wide mint-text-ink-3"><?php echo esc_html( $section->title ); ?></h3>
 					<?php endif; ?>
 					<div class="mint-space-y-1">
-						<?php foreach ( $section->lessons as $sectionLesson ) :
+						<?php
+						foreach ( $section->lessons as $sectionLesson ) :
 							$isCurrent   = $sectionLesson->id === $lesson->id;
 							$isCompleted = in_array( $sectionLesson->id, $completedIds, true );
 							$accessible  = ( $context->isEnrolled || $sectionLesson->isPreview ) && ! $sectionLesson->isDripLocked;
@@ -150,12 +149,12 @@ $pct          = (int) round( $context->progressPct );
 								>
 									<div
 										class="mint-flex mint-h-7 mint-w-7 mint-shrink-0 mint-items-center mint-justify-center mint-rounded-full mint-transition-colors mint-duration-hover"
-										:class="completedIds.includes(<?php echo $lessonId; ?>) ? 'mint-bg-success-wash mint-text-success' : (<?php echo $isCurrent ? 'true' : 'false'; ?> ? 'mint-bg-accent mint-text-neutral-50' : 'mint-bg-bg-subtle mint-text-ink-3')"
+										:class="completedIds.includes(<?php echo esc_attr( (string) $lessonId ); ?>) ? 'mint-bg-success-wash mint-text-success' : (<?php echo $isCurrent ? 'true' : 'false'; ?> ? 'mint-bg-accent mint-text-neutral-50' : 'mint-bg-bg-subtle mint-text-ink-3')"
 									>
-										<template x-if="completedIds.includes(<?php echo $lessonId; ?>)">
+										<template x-if="completedIds.includes(<?php echo esc_attr( (string) $lessonId ); ?>)">
 											<svg class="mint-h-3.5 mint-w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
 										</template>
-										<template x-if="!completedIds.includes(<?php echo $lessonId; ?>)">
+										<template x-if="!completedIds.includes(<?php echo esc_attr( (string) $lessonId ); ?>)">
 											<?php if ( $isCurrent ) : ?>
 												<svg class="mint-h-3 mint-w-3" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
 											<?php else : ?>

@@ -19,23 +19,27 @@ final class Migration_008_CourseAccessSettings implements MigrationInterface {
 	public function up( \wpdb $wpdb ): void {
 		$courses = Schema::coursesTable( $wpdb->prefix );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 		if ( $this->tableExists( $wpdb, $courses ) ) {
 			$courses = Schema::validateTable( $courses, $wpdb->prefix );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.NotPrepared -- Custom table migration; Schema::validateTable().
 			$wpdb->query(
-				"UPDATE {$courses} SET enrollment_type = 'free' WHERE enrollment_type = 'open'"
+				$wpdb->prepare(
+					"UPDATE %i SET enrollment_type = 'free' WHERE enrollment_type = 'open'",
+					$courses
+				)
 			);
 		}
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.NotPrepared -- Custom table migration; Schema::validateTable().
 		$wpdb->query(
 			$wpdb->prepare(
-				"UPDATE {$wpdb->postmeta} SET meta_value = %s WHERE meta_key = %s AND meta_value = %s",
+				'UPDATE %i SET meta_value = %s WHERE meta_key = %s AND meta_value = %s',
+				$wpdb->postmeta,
 				'free',
 				PostTypes::META_ENROLLMENT_TYPE,
 				'open'
 			)
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		$option = get_option( \MintLMS\Infrastructure\Setup\PageSettings::OPTION_DEFAULT_ENROLLMENT, '' );
 		if ( 'open' === $option || '' === $option || false === $option ) {
@@ -45,7 +49,12 @@ final class Migration_008_CourseAccessSettings implements MigrationInterface {
 
 	private function tableExists( \wpdb $wpdb, string $table ): bool {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$found = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
+		$found = $wpdb->get_var(
+			$wpdb->prepare(
+				'SHOW TABLES LIKE %s',
+				$table
+			)
+		);
 
 		return is_string( $found ) && $found === $table;
 	}

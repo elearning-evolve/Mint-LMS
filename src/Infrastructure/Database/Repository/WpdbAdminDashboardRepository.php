@@ -6,6 +6,7 @@ namespace MintLMS\Infrastructure\Database\Repository;
 defined( 'ABSPATH' ) || exit;
 
 use MintLMS\Application\Contract\AdminDashboardRepositoryInterface;
+use MintLMS\Infrastructure\Cache\WpObjectCache;
 use MintLMS\Infrastructure\Database\Schema;
 use MintLMS\Infrastructure\PostType\PostTypes;
 
@@ -21,31 +22,45 @@ final class WpdbAdminDashboardRepository implements AdminDashboardRepositoryInte
 	 * @return array<string, mixed>
 	 */
 	public function getAuthorStats( int $authorId, array $courseIds ): array {
-		// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Dynamic IN() lists for author course ids., PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$prefix           = $this->wpdb->prefix;
-		$postsTable       = $this->wpdb->posts;
-		$postmetaTable    = $this->wpdb->postmeta;
+		$courseIds = array_values( array_map( 'intval', $courseIds ) );
+		sort( $courseIds );
+
+		$cacheKey = WpObjectCache::dashboardCacheKey(
+			'author_stats_' . $authorId . '_' . md5( (string) wp_json_encode( $courseIds ) )
+		);
+		$cached    = wp_cache_get( $cacheKey, WpObjectCache::GROUP );
+		if ( false !== $cached && is_array( $cached ) ) {
+			return $cached;
+		}
+
+		$wpdb             = $this->wpdb;
+		$prefix           = $wpdb->prefix;
+		$postsTable       = $wpdb->posts;
+		$postmetaTable    = $wpdb->postmeta;
 		$enrollmentsTable = Schema::validateTable( Schema::enrollmentsTable( $prefix ), $prefix );
 		$progressTable    = Schema::validateTable( Schema::progressTable( $prefix ), $prefix );
 		$sectionsTable    = Schema::validateTable( Schema::sectionsTable( $prefix ), $prefix );
-		$courseType  = PostTypes::COURSE;
-		$lessonType  = PostTypes::LESSON;
-		$sectionMeta = PostTypes::META_SECTION_ID;
+		$courseType       = PostTypes::COURSE;
+		$lessonType       = PostTypes::LESSON;
+		$sectionMeta      = PostTypes::META_SECTION_ID;
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$publishedCount = (int) $this->wpdb->get_var(
-			$this->wpdb->prepare(
-				"SELECT COUNT(*) FROM {$postsTable}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Custom LMS table; object-cached at method level.
+		$publishedCount = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM %i
 				WHERE post_type = %s AND post_author = %d AND post_status = 'publish'",
+				$postsTable,
 				$courseType,
 				$authorId
 			)
 		);
 
-		$draftCount = (int) $this->wpdb->get_var(
-			$this->wpdb->prepare(
-				"SELECT COUNT(*) FROM {$postsTable}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Custom LMS table; object-cached at method level.
+		$draftCount = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM %i
 				WHERE post_type = %s AND post_author = %d AND post_status = 'draft'",
+				$postsTable,
 				$courseType,
 				$authorId
 			)
@@ -56,26 +71,35 @@ final class WpdbAdminDashboardRepository implements AdminDashboardRepositoryInte
 		$startedCount  = 0;
 
 		if ( array() !== $courseIds ) {
-			$placeholders = implode( ',', array_fill( 0, count( $courseIds ), '%d' ) );
 
-			$studentsTotal = (int) $this->wpdb->get_var(
-				$this->wpdb->prepare(
-					"SELECT COUNT(DISTINCT user_id) FROM {$enrollmentsTable} WHERE course_id IN ({$placeholders}) AND status = 'active'",
-					...$courseIds
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Custom LMS table; object-cached at method level.
+			$studentsTotal = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					sprintf(
+						"SELECT COUNT(DISTINCT user_id) FROM %%i WHERE course_id IN (%s) AND status = 'active'",
+						implode( ',', array_fill( 0, count( $courseIds ), '%d' ) )
+					),
+					array_merge( array( $enrollmentsTable ), $courseIds )
 				)
 			);
-
-			$finishedCount = (int) $this->wpdb->get_var(
-				$this->wpdb->prepare(
-					"SELECT COUNT(*) FROM {$enrollmentsTable} WHERE course_id IN ({$placeholders}) AND completed_at IS NOT NULL",
-					...$courseIds
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Custom LMS table; object-cached at method level.
+			$finishedCount = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					sprintf(
+						'SELECT COUNT(*) FROM %%i WHERE course_id IN (%s) AND completed_at IS NOT NULL',
+						implode( ',', array_fill( 0, count( $courseIds ), '%d' ) )
+					),
+					array_merge( array( $enrollmentsTable ), $courseIds )
 				)
 			);
-
-			$startedCount = (int) $this->wpdb->get_var(
-				$this->wpdb->prepare(
-					"SELECT COUNT(*) FROM {$enrollmentsTable} WHERE course_id IN ({$placeholders}) AND status = 'active'",
-					...$courseIds
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Custom LMS table; object-cached at method level.
+			$startedCount = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					sprintf(
+						"SELECT COUNT(*) FROM %%i WHERE course_id IN (%s) AND status = 'active'",
+						implode( ',', array_fill( 0, count( $courseIds ), '%d' ) )
+					),
+					array_merge( array( $enrollmentsTable ), $courseIds )
 				)
 			);
 		}
@@ -87,11 +111,14 @@ final class WpdbAdminDashboardRepository implements AdminDashboardRepositoryInte
 		$lessonsDone7d = 0;
 
 		if ( array() !== $courseIds ) {
-			$lessonsDone7d = (int) $this->wpdb->get_var(
-				$this->wpdb->prepare(
-					"SELECT COUNT(*) FROM {$progressTable} p
-					INNER JOIN {$postsTable} c ON c.ID = p.course_id AND c.post_type = %s
-					WHERE c.post_author = %d AND p.completed_at >= %s",
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Custom LMS table; object-cached at method level.
+			$lessonsDone7d = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					'SELECT COUNT(*) FROM %i p
+					INNER JOIN %i c ON c.ID = p.course_id AND c.post_type = %s
+					WHERE c.post_author = %d AND p.completed_at >= %s',
+					$progressTable,
+					$postsTable,
 					$courseType,
 					$authorId,
 					$weekAgo
@@ -101,12 +128,15 @@ final class WpdbAdminDashboardRepository implements AdminDashboardRepositoryInte
 
 		$studentsDelta = 0;
 		if ( array() !== $courseIds ) {
-			$placeholders = implode( ',', array_fill( 0, count( $courseIds ), '%d' ) );
 
-			$studentsDelta = (int) $this->wpdb->get_var(
-				$this->wpdb->prepare(
-					"SELECT COUNT(*) FROM {$enrollmentsTable} WHERE course_id IN ({$placeholders}) AND enrolled_at >= %s",
-					...array_merge( $courseIds, array( $weekAgo ) )
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Custom LMS table; object-cached at method level.
+			$studentsDelta = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					sprintf(
+						'SELECT COUNT(*) FROM %%i WHERE course_id IN (%s) AND enrolled_at >= %%s',
+						implode( ',', array_fill( 0, count( $courseIds ), '%d' ) )
+					),
+					array_merge( array( $enrollmentsTable ), $courseIds, array( $weekAgo ) )
 				)
 			);
 		}
@@ -121,16 +151,20 @@ final class WpdbAdminDashboardRepository implements AdminDashboardRepositoryInte
 					continue;
 				}
 
-				$emptySections = (int) $this->wpdb->get_var(
-					$this->wpdb->prepare(
-						"SELECT COUNT(*) FROM {$sectionsTable} s
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Custom LMS table; object-cached at method level.
+				$emptySections = (int) $wpdb->get_var(
+					$wpdb->prepare(
+						"SELECT COUNT(*) FROM %i s
 						WHERE s.course_id = %d
 						AND NOT EXISTS (
-							SELECT 1 FROM {$postmetaTable} pm
-							INNER JOIN {$postsTable} l ON l.ID = pm.post_id AND l.post_type = %s AND l.post_status NOT IN ('trash','auto-draft')
+							SELECT 1 FROM %i pm
+							INNER JOIN %i l ON l.ID = pm.post_id AND l.post_type = %s AND l.post_status NOT IN ('trash','auto-draft')
 							WHERE pm.meta_key = %s AND pm.meta_value = CAST(s.id AS CHAR)
 						)",
+						$sectionsTable,
 						$courseId,
+						$postmetaTable,
+						$postsTable,
 						$lessonType,
 						$sectionMeta
 					)
@@ -143,33 +177,36 @@ final class WpdbAdminDashboardRepository implements AdminDashboardRepositoryInte
 		$activity = array();
 
 		if ( array() !== $courseIds ) {
-			$placeholders = implode( ',', array_fill( 0, count( $courseIds ), '%d' ) );
 
-			$completedRows = $this->wpdb->get_results(
-				$this->wpdb->prepare(
-					"SELECT e.user_id, c.post_title AS course_title, e.completed_at AS occurred_at, 'completed' AS type
-					FROM {$enrollmentsTable} e
-					INNER JOIN {$postsTable} c ON c.ID = e.course_id AND c.post_type = %s
-					WHERE e.course_id IN ({$placeholders}) AND e.completed_at IS NOT NULL
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Custom LMS table; object-cached at method level.
+			$completedRows = $wpdb->get_results(
+				$wpdb->prepare(
+					sprintf(
+						"SELECT e.user_id, c.post_title AS course_title, e.completed_at AS occurred_at, 'completed' AS type
+					FROM %%i e
+					INNER JOIN %%i c ON c.ID = e.course_id AND c.post_type = %%s
+					WHERE e.course_id IN (%s) AND e.completed_at IS NOT NULL
 					ORDER BY e.completed_at DESC LIMIT 5",
-					$courseType,
-					...$courseIds
+						implode( ',', array_fill( 0, count( $courseIds ), '%d' ) )
+					),
+					array_merge( array( $enrollmentsTable, $postsTable, $courseType ), $courseIds )
 				)
 			);
-
-			$enrolledRows = $this->wpdb->get_results(
-				$this->wpdb->prepare(
-					"SELECT e.user_id, c.post_title AS course_title, e.enrolled_at AS occurred_at, 'enrolled' AS type
-					FROM {$enrollmentsTable} e
-					INNER JOIN {$postsTable} c ON c.ID = e.course_id AND c.post_type = %s
-					WHERE e.course_id IN ({$placeholders})
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Custom LMS table; object-cached at method level.
+			$enrolledRows = $wpdb->get_results(
+				$wpdb->prepare(
+					sprintf(
+						"SELECT e.user_id, c.post_title AS course_title, e.enrolled_at AS occurred_at, 'enrolled' AS type
+					FROM %%i e
+					INNER JOIN %%i c ON c.ID = e.course_id AND c.post_type = %%s
+					WHERE e.course_id IN (%s)
 					ORDER BY e.enrolled_at DESC LIMIT 5",
-					$courseType,
-					...$courseIds
+						implode( ',', array_fill( 0, count( $courseIds ), '%d' ) )
+					),
+					array_merge( array( $enrollmentsTable, $postsTable, $courseType ), $courseIds )
 				)
 			);
-
-			$merged = array();
+			$merged       = array();
 
 			if ( is_array( $completedRows ) ) {
 				foreach ( $completedRows as $row ) {
@@ -203,12 +240,15 @@ final class WpdbAdminDashboardRepository implements AdminDashboardRepositoryInte
 
 		$weeklyCompletions = 0;
 		if ( array() !== $courseIds ) {
-			$placeholders = implode( ',', array_fill( 0, count( $courseIds ), '%d' ) );
 
-			$weeklyCompletions = (int) $this->wpdb->get_var(
-				$this->wpdb->prepare(
-					"SELECT COUNT(*) FROM {$enrollmentsTable} WHERE course_id IN ({$placeholders}) AND completed_at >= %s",
-					...array_merge( $courseIds, array( $weekAgo ) )
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Custom LMS table; object-cached at method level.
+			$weeklyCompletions = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					sprintf(
+						'SELECT COUNT(*) FROM %%i WHERE course_id IN (%s) AND completed_at >= %%s',
+						implode( ',', array_fill( 0, count( $courseIds ), '%d' ) )
+					),
+					array_merge( array( $enrollmentsTable ), $courseIds, array( $weekAgo ) )
 				)
 			);
 		}
@@ -243,10 +283,8 @@ final class WpdbAdminDashboardRepository implements AdminDashboardRepositoryInte
 		} else {
 			$signalLine = __( 'Create a course to start welcoming students.', 'mint-lms' );
 		}
-		// phpcs:enable WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 
-		return array(
+		$result = array(
 			'students_total'  => $studentsTotal,
 			'finished_pct'    => $finishedPct,
 			'finished_count'  => $finishedCount,
@@ -260,6 +298,10 @@ final class WpdbAdminDashboardRepository implements AdminDashboardRepositoryInte
 			'activity'        => $activity,
 			'signal_line'     => $signalLine,
 		);
+
+		wp_cache_set( $cacheKey, $result, WpObjectCache::GROUP, WpObjectCache::DASHBOARD_TTL );
+
+		return $result;
 	}
 
 	/**
@@ -267,16 +309,27 @@ final class WpdbAdminDashboardRepository implements AdminDashboardRepositoryInte
 	 * @return array<int, array{students: int, completion_pct: int|null, lesson_count: int}>
 	 */
 	public function getCourseStatsBatch( array $courseIds ): array {
+		$wpdb = $this->wpdb;
 		if ( array() === $courseIds ) {
 			return array();
 		}
 
-		$prefix           = $this->wpdb->prefix;
-		$postsTable       = $this->wpdb->posts;
-		$postmetaTable    = $this->wpdb->postmeta;
+		$courseIds = array_values( array_map( 'intval', $courseIds ) );
+		sort( $courseIds );
+
+		$cacheKey = WpObjectCache::dashboardCacheKey(
+			'course_stats_' . md5( (string) wp_json_encode( $courseIds ) )
+		);
+		$cached    = wp_cache_get( $cacheKey, WpObjectCache::GROUP );
+		if ( false !== $cached && is_array( $cached ) ) {
+			return $cached;
+		}
+
+		$prefix           = $wpdb->prefix;
+		$postsTable       = $wpdb->posts;
+		$postmetaTable    = $wpdb->postmeta;
 		$enrollmentsTable = Schema::validateTable( Schema::enrollmentsTable( $prefix ), $prefix );
 		$summaryTable     = Schema::validateTable( Schema::progressSummaryTable( $prefix ), $prefix );
-		$placeholders     = implode( ',', array_fill( 0, count( $courseIds ), '%d' ) );
 		$lessonType       = PostTypes::LESSON;
 		$courseMeta       = PostTypes::META_COURSE_ID;
 		$stats            = array();
@@ -289,22 +342,22 @@ final class WpdbAdminDashboardRepository implements AdminDashboardRepositoryInte
 			);
 		}
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$lessonRows = $this->wpdb->get_results(
-			$this->wpdb->prepare(
-				"SELECT CAST(pm.meta_value AS UNSIGNED) AS course_id, COUNT(*) AS lesson_count
-				FROM {$postsTable} p
-				INNER JOIN {$postmetaTable} pm ON pm.post_id = p.ID AND pm.meta_key = %s
-				WHERE p.post_type = %s
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Custom LMS table; object-cached at method level.
+		$lessonRows = $wpdb->get_results(
+			$wpdb->prepare(
+				sprintf(
+					"SELECT CAST(pm.meta_value AS UNSIGNED) AS course_id, COUNT(*) AS lesson_count
+				FROM %%i p
+				INNER JOIN %%i pm ON pm.post_id = p.ID AND pm.meta_key = %%s
+				WHERE p.post_type = %%s
 					AND p.post_status NOT IN ('trash','auto-draft')
-					AND CAST(pm.meta_value AS UNSIGNED) IN ({$placeholders})
+					AND CAST(pm.meta_value AS UNSIGNED) IN (%s)
 				GROUP BY CAST(pm.meta_value AS UNSIGNED)",
-				$courseMeta,
-				$lessonType,
-				...$courseIds
+					implode( ',', array_fill( 0, count( $courseIds ), '%d' ) )
+				),
+				array_merge( array( $postsTable, $postmetaTable, $courseMeta, $lessonType ), $courseIds )
 			)
 		);
-
 		if ( is_array( $lessonRows ) ) {
 			foreach ( $lessonRows as $row ) {
 				$courseId = (int) $row->course_id;
@@ -314,13 +367,16 @@ final class WpdbAdminDashboardRepository implements AdminDashboardRepositoryInte
 			}
 		}
 
-		$studentRows = $this->wpdb->get_results(
-			$this->wpdb->prepare(
-				"SELECT course_id, COUNT(*) AS student_count FROM {$enrollmentsTable} WHERE course_id IN ({$placeholders}) AND status = 'active' GROUP BY course_id",
-				...$courseIds
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Custom LMS table; object-cached at method level.
+		$studentRows = $wpdb->get_results(
+			$wpdb->prepare(
+				sprintf(
+					"SELECT course_id, COUNT(*) AS student_count FROM %%i WHERE course_id IN (%s) AND status = 'active' GROUP BY course_id",
+					implode( ',', array_fill( 0, count( $courseIds ), '%d' ) )
+				),
+				array_merge( array( $enrollmentsTable ), $courseIds )
 			)
 		);
-
 		if ( is_array( $studentRows ) ) {
 			foreach ( $studentRows as $row ) {
 				$courseId = (int) $row->course_id;
@@ -330,13 +386,16 @@ final class WpdbAdminDashboardRepository implements AdminDashboardRepositoryInte
 			}
 		}
 
-		$completionRows = $this->wpdb->get_results(
-			$this->wpdb->prepare(
-				"SELECT course_id, AVG(pct_complete) AS avg_pct FROM {$summaryTable} WHERE course_id IN ({$placeholders}) GROUP BY course_id",
-				...$courseIds
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Custom LMS table; object-cached at method level.
+		$completionRows = $wpdb->get_results(
+			$wpdb->prepare(
+				sprintf(
+					'SELECT course_id, AVG(pct_complete) AS avg_pct FROM %%i WHERE course_id IN (%s) GROUP BY course_id',
+					implode( ',', array_fill( 0, count( $courseIds ), '%d' ) )
+				),
+				array_merge( array( $summaryTable ), $courseIds )
 			)
 		);
-
 		if ( is_array( $completionRows ) ) {
 			foreach ( $completionRows as $row ) {
 				$courseId = (int) $row->course_id;
@@ -345,7 +404,8 @@ final class WpdbAdminDashboardRepository implements AdminDashboardRepositoryInte
 				}
 			}
 		}
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+
+		wp_cache_set( $cacheKey, $stats, WpObjectCache::GROUP, WpObjectCache::DASHBOARD_TTL );
 
 		return $stats;
 	}
@@ -354,54 +414,66 @@ final class WpdbAdminDashboardRepository implements AdminDashboardRepositoryInte
 	 * @return array<string, mixed>
 	 */
 	public function getReportsSummary( ?int $authorId ): array {
-		$postsTable       = $this->wpdb->posts;
-		$enrollmentsTable = Schema::validateTable( Schema::enrollmentsTable( $this->wpdb->prefix ), $this->wpdb->prefix );
-		$progressTable    = Schema::validateTable( Schema::progressTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$cacheKey = WpObjectCache::dashboardCacheKey( 'reports_' . ( null === $authorId ? 'all' : (string) $authorId ) );
+		$cached    = wp_cache_get( $cacheKey, WpObjectCache::GROUP );
+		if ( false !== $cached && is_array( $cached ) ) {
+			return $cached;
+		}
+
+		$wpdb             = $this->wpdb;
+		$postsTable       = $wpdb->posts;
+		$enrollmentsTable = Schema::validateTable( Schema::enrollmentsTable( $wpdb->prefix ), $wpdb->prefix );
+		$progressTable    = Schema::validateTable( Schema::progressTable( $wpdb->prefix ), $wpdb->prefix );
 		$courseType       = PostTypes::COURSE;
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$archived = PostTypes::STATUS_ARCHIVED;
 
 		if ( null !== $authorId ) {
-			$totalCourses = (int) $this->wpdb->get_var(
-				$this->wpdb->prepare(
-					"SELECT COUNT(*) FROM {$postsTable}
-					WHERE post_type = %s AND post_author = %d AND post_status IN ('draft','publish','{$archived}')",
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Custom LMS table; object-cached at method level.
+			$totalCourses = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(*) FROM %i
+					WHERE post_type = %s AND post_author = %d AND post_status IN ('draft','publish',%s)",
+					$postsTable,
 					$courseType,
-					$authorId
+					$authorId,
+					$archived
 				)
 			);
-
-			$courseIds = array_map(
-				'intval',
-				$this->wpdb->get_col(
-					$this->wpdb->prepare(
-						"SELECT ID FROM {$postsTable}
-						WHERE post_type = %s AND post_author = %d AND post_status IN ('draft','publish','{$archived}')",
-						$courseType,
-						$authorId
-					)
-				) ?: array()
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Custom LMS table; object-cached at method level.
+			$courseIdRows = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT ID FROM %i
+					WHERE post_type = %s AND post_author = %d AND post_status IN ('draft','publish',%s)",
+					$postsTable,
+					$courseType,
+					$authorId,
+					$archived
+				)
 			);
+			$courseIds    = array_map( 'intval', is_array( $courseIdRows ) ? $courseIdRows : array() );
 		} else {
-			$totalCourses = (int) $this->wpdb->get_var(
-				$this->wpdb->prepare(
-					"SELECT COUNT(*) FROM {$postsTable}
-					WHERE post_type = %s AND post_status IN ('draft','publish','{$archived}')",
-					$courseType
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Custom LMS table; object-cached at method level.
+			$totalCourses = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(*) FROM %i
+					WHERE post_type = %s AND post_status IN ('draft','publish',%s)",
+					$postsTable,
+					$courseType,
+					$archived
 				)
 			);
-
-			$courseIds = array_map(
-				'intval',
-				$this->wpdb->get_col(
-					$this->wpdb->prepare(
-						"SELECT ID FROM {$postsTable}
-						WHERE post_type = %s AND post_status IN ('draft','publish','{$archived}')",
-						$courseType
-					)
-				) ?: array()
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Custom LMS table; object-cached at method level.
+			$courseIdRows = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT ID FROM %i
+					WHERE post_type = %s AND post_status IN ('draft','publish',%s)",
+					$postsTable,
+					$courseType,
+					$archived
+				)
 			);
+			$courseIds    = array_map( 'intval', is_array( $courseIdRows ) ? $courseIdRows : array() );
 		}
 
 		$studentsTotal    = 0;
@@ -410,50 +482,66 @@ final class WpdbAdminDashboardRepository implements AdminDashboardRepositoryInte
 		$activity         = array();
 
 		if ( array() !== $courseIds ) {
-			$placeholders = implode( ',', array_fill( 0, count( $courseIds ), '%d' ) );
 
-			$studentsTotal = (int) $this->wpdb->get_var(
-				$this->wpdb->prepare(
-					"SELECT COUNT(DISTINCT user_id) FROM {$enrollmentsTable} WHERE course_id IN ({$placeholders}) AND status = 'active'",
-					...$courseIds
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Custom LMS table; object-cached at method level.
+			$studentsTotal = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					sprintf(
+						"SELECT COUNT(DISTINCT user_id) FROM %%i WHERE course_id IN (%s) AND status = 'active'",
+						implode( ',', array_fill( 0, count( $courseIds ), '%d' ) )
+					),
+					array_merge( array( $enrollmentsTable ), $courseIds )
 				)
 			);
-
-			$enrollmentsTotal = (int) $this->wpdb->get_var(
-				$this->wpdb->prepare(
-					"SELECT COUNT(*) FROM {$enrollmentsTable} WHERE course_id IN ({$placeholders})",
-					...$courseIds
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Custom LMS table; object-cached at method level.
+			$enrollmentsTotal = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					sprintf(
+						'SELECT COUNT(*) FROM %%i WHERE course_id IN (%s)',
+						implode( ',', array_fill( 0, count( $courseIds ), '%d' ) )
+					),
+					array_merge( array( $enrollmentsTable ), $courseIds )
 				)
 			);
-
-			$completionsTotal = (int) $this->wpdb->get_var(
-				$this->wpdb->prepare(
-					"SELECT COUNT(*) FROM {$enrollmentsTable} WHERE course_id IN ({$placeholders}) AND completed_at IS NOT NULL",
-					...$courseIds
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Custom LMS table; object-cached at method level.
+			$completionsTotal = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					sprintf(
+						'SELECT COUNT(*) FROM %%i WHERE course_id IN (%s) AND completed_at IS NOT NULL',
+						implode( ',', array_fill( 0, count( $courseIds ), '%d' ) )
+					),
+					array_merge( array( $enrollmentsTable ), $courseIds )
 				)
 			);
-
-			$activity = $this->getAuthorStats( $authorId ?? 0, $courseIds )['activity'] ?? array();
+			$activity         = $this->getAuthorStats( $authorId ?? 0, $courseIds )['activity'] ?? array();
 		}
 
 		$lessonsCompleted = 0;
 
 		if ( null !== $authorId ) {
-			$lessonsCompleted = (int) $this->wpdb->get_var(
-				$this->wpdb->prepare(
-					"SELECT COUNT(*) FROM {$progressTable} p
-					INNER JOIN {$postsTable} c ON c.ID = p.course_id AND c.post_type = %s
-					WHERE c.post_author = %d",
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Custom LMS table; object-cached at method level.
+			$lessonsCompleted = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					'SELECT COUNT(*) FROM %i p
+					INNER JOIN %i c ON c.ID = p.course_id AND c.post_type = %s
+					WHERE c.post_author = %d',
+					$progressTable,
+					$postsTable,
 					$courseType,
 					$authorId
 				)
 			);
 		} else {
-			$lessonsCompleted = (int) $this->wpdb->get_var( "SELECT COUNT(*) FROM {$progressTable}" );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Custom LMS table; object-cached at method level.
+			$lessonsCompleted = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					'SELECT COUNT(*) FROM %i',
+					$progressTable
+				)
+			);
 		}
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 
-		return array(
+		$result = array(
 			'total_courses'     => $totalCourses,
 			'total_students'    => $studentsTotal,
 			'total_enrollments' => $enrollmentsTotal,
@@ -461,5 +549,9 @@ final class WpdbAdminDashboardRepository implements AdminDashboardRepositoryInte
 			'lessons_completed' => $lessonsCompleted,
 			'activity'          => $activity,
 		);
+
+		wp_cache_set( $cacheKey, $result, WpObjectCache::GROUP, WpObjectCache::DASHBOARD_TTL );
+
+		return $result;
 	}
 }

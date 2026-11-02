@@ -3,22 +3,32 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template partial variables.
-
 $studentName    = $studentName ?? '';
 $courseTitle    = $courseTitle ?? '';
 $certificateUrl = $certificateUrl ?? '';
 ?>
-<p><?php echo esc_html( sprintf(
+<p>
+<?php
+echo esc_html(
+	sprintf(
 	/* translators: 1: student name */
-	__( 'Congratulations, %1$s!', 'mint-lms' ),
-	$studentName
-) ); ?></p>
-<p><?php echo esc_html( sprintf(
+		__( 'Congratulations, %1$s!', 'mint-lms' ),
+		$studentName
+	)
+);
+?>
+</p>
+<p>
+<?php
+echo esc_html(
+	sprintf(
 	/* translators: %s: course title */
-	__( 'You have completed %s.', 'mint-lms' ),
-	$courseTitle
-) ); ?></p>
+		__( 'You have completed %s.', 'mint-lms' ),
+		$courseTitle
+	)
+);
+?>
+</p>
 <?php if ( '' !== $certificateUrl ) : ?>
 	<p>
 		<a href="<?php echo esc_url( $certificateUrl ); ?>">

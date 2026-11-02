@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template partial variables.
-
 /** @var MintLMS\Infrastructure\Admin\ViewRenderer $renderer */
 /** @var int $courseId */
 

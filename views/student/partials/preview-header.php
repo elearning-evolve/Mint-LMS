@@ -2,21 +2,22 @@
 declare(strict_types=1);
 defined( 'ABSPATH' ) || exit;
 
-// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template partial variables.
-
 $user         = wp_get_current_user();
-$userName     = $userName ?? ( $user->display_name ?: '' );
+$userName     = $userName ?? ( '' !== (string) $user->display_name ? (string) $user->display_name : '' );
 $userInitials = $userInitials ?? MintLMS\Infrastructure\Ui\MintUi::initials( $userName );
 $huePalette   = array(
-	array( 'bg' => 'mint-bg-hue-2', 'text' => 'mint-text-hue-2i' ),
+	array(
+		'bg'   => 'mint-bg-hue-2',
+		'text' => 'mint-text-hue-2i',
+	),
 );
-$hue = $huePalette[0];
+$hue          = $huePalette[0];
 
-$previewKind    = $previewKind ?? 'lesson'; // lesson|quiz|question
-$courseTitle    = trim( (string) ( $courseTitle ?? '' ) );
-$sectionTitle   = trim( (string) ( $sectionTitle ?? '' ) );
-$itemTitle      = trim( (string) ( $itemTitle ?? '' ) );
-$previewLabel   = match ( $previewKind ) {
+$previewKind  = $previewKind ?? 'lesson'; // lesson|quiz|question
+$courseTitle  = trim( (string) ( $courseTitle ?? '' ) );
+$sectionTitle = trim( (string) ( $sectionTitle ?? '' ) );
+$itemTitle    = trim( (string) ( $itemTitle ?? '' ) );
+$previewLabel = match ( $previewKind ) {
 	'quiz' => __( 'Quiz preview', 'mint-lms' ),
 	'question' => __( 'Question preview', 'mint-lms' ),
 	default => __( 'Lesson preview', 'mint-lms' ),

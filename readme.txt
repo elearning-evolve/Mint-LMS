@@ -5,7 +5,7 @@ Tags: lms, elearning, courses, lessons, quizzes, education, learning management
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 8.2
-Stable tag: 1.0.130
+Stable tag: 1.0.338
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -88,6 +88,15 @@ Yes. Authenticated endpoints under `mintlms/v1` power the builders, lists, enrol
 
 Core Mint LMS handles learning. Paid checkout can be connected via WooCommerce integration when available on your install.
 
+= Does Mint LMS use third-party / AI services? =
+
+Optionally. AI features are **off by default**. If an administrator enables AI under **Mint LMS → Settings** and configures a provider API key (or defines `MINTLMS_AI_API_KEY` in `wp-config.php`), drafting prompts may be sent to that provider so Mint can suggest quiz content. Keys are handled server-side and are not exposed to browsers.
+
+* OpenAI — https://openai.com/ — [Terms](https://openai.com/policies/terms-of-use) — [Privacy](https://openai.com/policies/privacy-policy)
+* Anthropic — https://www.anthropic.com/ — [Terms](https://www.anthropic.com/legal/consumer-terms) — [Privacy](https://www.anthropic.com/privacy)
+
+No AI network calls are made until AI is enabled and a key is available. Review your provider’s policies and your site Privacy Policy (Mint suggests text via the WordPress privacy tools).
+
 == Screenshots ==
 
 1. Creator dashboard with course metrics and recent activity
@@ -98,6 +107,11 @@ Core Mint LMS handles learning. Paid checkout can be connected via WooCommerce i
 6. Lessons / Quizzes library screens
 
 == Changelog ==
+
+= 1.0.338 =
+* Optional AI assistant foundation (opt-in): OpenAI / Anthropic via Settings, encrypted option keys or `MINTLMS_AI_API_KEY`.
+* Server-side REST proxy (`/mintlms/v1/ai/*`); quiz draft generation does not auto-save.
+* Privacy policy suggested content and readme third-party service disclosure.
 
 = 1.0.130 =
 * Instructor previews aligned: lesson and quiz previews share the same student-style layout (hero, progress, expandable cards).

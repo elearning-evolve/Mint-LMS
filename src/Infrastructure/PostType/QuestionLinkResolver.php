@@ -48,15 +48,14 @@ final class QuestionLinkResolver {
 
 		$junction = Schema::validateTable( Schema::quizQuestionsTable( $wpdb->prefix ), $wpdb->prefix );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared -- Custom LMS table; $this->wpdb + %i prepare.
 		$quizId = $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT quiz_id FROM {$junction} WHERE question_id = %d ORDER BY id ASC LIMIT 1",
+				'SELECT quiz_id FROM %i WHERE question_id = %d ORDER BY id ASC LIMIT 1',
+				$junction,
 				$questionId
 			)
 		);
-		// phpcs:enable
-
 		return (int) $quizId;
 	}
 
@@ -106,15 +105,14 @@ final class QuestionLinkResolver {
 		$junction  = Schema::validateTable( Schema::quizQuestionsTable( $wpdb->prefix ), $wpdb->prefix );
 		$now       = current_time( 'mysql' );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared -- Custom LMS table; $this->wpdb + %i prepare.
 		$hasData = $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT post_id FROM {$dataTable} WHERE post_id = %d",
+				'SELECT post_id FROM %i WHERE post_id = %d',
+				$dataTable,
 				$questionId
 			)
 		);
-		// phpcs:enable
-
 		if ( null === $hasData ) {
 			$optionsJson = wp_json_encode( array() );
 			$optionsJson = is_string( $optionsJson ) ? $optionsJson : '[]';
@@ -135,15 +133,14 @@ final class QuestionLinkResolver {
 			);
 		}
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared -- Custom LMS table; $this->wpdb + %i prepare.
 		$existingJunction = $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT id FROM {$junction} WHERE question_id = %d ORDER BY id ASC LIMIT 1",
+				'SELECT id FROM %i WHERE question_id = %d ORDER BY id ASC LIMIT 1',
+				$junction,
 				$questionId
 			)
 		);
-		// phpcs:enable
-
 		if ( null !== $existingJunction && '' !== $existingJunction ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			$wpdb->update(

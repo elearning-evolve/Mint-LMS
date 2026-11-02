@@ -69,7 +69,7 @@ final class WpPostCourseRepository implements CourseRepositoryInterface {
 		}
 
 		if ( is_wp_error( $postId ) ) {
-			throw new \RuntimeException( $postId->get_error_message() );
+			throw new \RuntimeException( esc_html( $postId->get_error_message() ) );
 		}
 
 		$postId = (int) $postId;
@@ -139,7 +139,7 @@ final class WpPostCourseRepository implements CourseRepositoryInterface {
 			$args['s'] = trim( $search );
 		}
 
-		$query = new \WP_Query( $args );
+		$query   = new \WP_Query( $args );
 		$courses = array();
 
 		foreach ( $query->posts as $post ) {
@@ -155,10 +155,10 @@ final class WpPostCourseRepository implements CourseRepositoryInterface {
 	}
 
 	private function mapPostToCourse( \WP_Post $post ): Course {
-		$thumbnailId = (int) get_post_thumbnail_id( $post );
+		$thumbnailId     = (int) get_post_thumbnail_id( $post );
 		$featuredImageId = $thumbnailId > 0 ? $thumbnailId : null;
 
-		$enrollmentRaw = get_post_meta( $post->ID, PostTypes::META_ENROLLMENT_TYPE, true );
+		$enrollmentRaw  = get_post_meta( $post->ID, PostTypes::META_ENROLLMENT_TYPE, true );
 		$enrollmentType = EnrollmentType::tryFrom( is_string( $enrollmentRaw ) ? $enrollmentRaw : '' )
 			?? EnrollmentType::Open;
 

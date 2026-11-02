@@ -142,7 +142,7 @@ final class WpPostLessonRepository implements LessonRepositoryInterface {
 		}
 
 		if ( is_wp_error( $postId ) ) {
-			throw new \RuntimeException( $postId->get_error_message() );
+			throw new \RuntimeException( esc_html( $postId->get_error_message() ) );
 		}
 
 		$postId = (int) $postId;
