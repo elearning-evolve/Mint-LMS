@@ -10213,3 +10213,338 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   text-overflow: ellipsis;
   max-width: 42vw;
 }
+
+/* —— Reports page (design match) —— */
+#mint-lms-root main.mint-reports-main,
+#mint-lms-root .mint-admin-header__inner.mint-reports-main {
+  margin-left: 0;
+  margin-right: auto;
+  padding-left: 32px;
+  padding-right: 32px;
+  max-width: 1240px;
+  width: 100%;
+  box-sizing: border-box;
+}
+#mint-lms-root .mint-reports__hero {
+  padding: 44px 0 26px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+#mint-lms-root .mint-reports__title {
+  margin: 0;
+  font-size: 48px;
+  line-height: 52px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  color: #0F0E1A;
+}
+#mint-lms-root .mint-reports__sub {
+  margin: 10px 0 0;
+  font-size: 19px;
+  line-height: 30px;
+  color: #33334A;
+}
+#mint-lms-root .mint-reports__ranges {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background: #E8FFF3;
+  border: 1.5px solid #98FBCB;
+}
+#mint-lms-root .mint-reports__range {
+  height: 36px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #17222B;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  transition: background 150ms ease-out, box-shadow 150ms ease-out;
+}
+#mint-lms-root .mint-reports__range:hover { background: #98FB98; }
+#mint-lms-root .mint-reports__range.is-active {
+  background: #FFFFFF;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(152, 251, 203, 0.8);
+}
+#mint-lms-root .mint-reports__range:focus-visible {
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
+}
+#mint-lms-root .mint-reports__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 16px;
+}
+#mint-lms-root .mint-reports__stat {
+  padding: 18px 20px;
+  border-radius: 16px;
+  border: 1.5px solid #98FBCB;
+  background: #FFFFFF;
+  box-shadow: 0 6px 16px rgba(152, 251, 203, 0.55);
+  cursor: pointer;
+  outline: none;
+  transition: transform 150ms ease-out, box-shadow 150ms ease-out, background 150ms ease-out;
+}
+#mint-lms-root .mint-reports__stat:hover {
+  transform: translateY(-4px);
+  background: #F1FFF9;
+  box-shadow: 0 10px 22px rgba(152, 251, 203, 0.7);
+}
+#mint-lms-root .mint-reports__stat:focus-visible {
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
+}
+#mint-lms-root .mint-reports__stat-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+#mint-lms-root .mint-reports__stat-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #17222B;
+}
+#mint-lms-root .mint-reports__stat-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: #E8FFF3;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #17222B;
+  flex: none;
+}
+#mint-lms-root .mint-reports__stat-value {
+  margin-top: 10px;
+  font-size: 38px;
+  line-height: 44px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: #17222B;
+}
+#mint-lms-root .mint-reports__stat-note {
+  margin-top: 2px;
+  font-size: 14px;
+  color: #5C5C77;
+}
+#mint-lms-root .mint-reports__stat-trend {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 10px;
+  height: 22px;
+  padding: 0 9px;
+  border-radius: 999px;
+  background: #E8FFF3;
+  font-size: 12px;
+  font-weight: 700;
+  color: #17222B;
+}
+#mint-lms-root .mint-reports__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 24px;
+  align-items: start;
+  margin-top: 24px;
+}
+#mint-lms-root .mint-reports__main {
+  display: grid;
+  gap: 24px;
+  min-width: 0;
+}
+#mint-lms-root .mint-reports__panel {
+  border: 1.5px solid #98FBCB;
+  border-radius: 16px;
+  background: #FFFFFF;
+  box-shadow: 0 8px 24px rgba(152, 251, 203, 0.45);
+  overflow: hidden;
+}
+#mint-lms-root .mint-reports__panel-head {
+  padding: 14px 20px;
+  background: #F1FFF9;
+  border-bottom: 1px solid #CFF5E2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+#mint-lms-root .mint-reports__activity .mint-reports__panel-head { padding: 14px 18px; }
+#mint-lms-root .mint-reports__panel-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #17222B;
+}
+#mint-lms-root .mint-reports__panel-note {
+  font-size: 13px;
+  color: #5C5C77;
+}
+#mint-lms-root .mint-reports__chart {
+  padding: 22px 20px 16px;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  height: 230px;
+}
+#mint-lms-root .mint-reports__bar {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  outline: none;
+}
+#mint-lms-root .mint-reports__bar:hover { opacity: 0.85; }
+#mint-lms-root .mint-reports__bar-value {
+  font-size: 12px;
+  font-weight: 700;
+  color: #17222B;
+}
+#mint-lms-root .mint-reports__bar-fill {
+  width: 100%;
+  border-radius: 8px 8px 3px 3px;
+  background: #CFF5E2;
+  transition: background 150ms ease-out;
+  min-height: 8px;
+}
+#mint-lms-root .mint-reports__bar:hover .mint-reports__bar-fill,
+#mint-lms-root .mint-reports__bar-fill.is-latest { background: #98FB98; }
+#mint-lms-root .mint-reports__bar-label {
+  font-size: 12px;
+  color: #5C5C77;
+}
+#mint-lms-root .mint-reports__top { padding: 6px 20px 12px; }
+#mint-lms-root .mint-reports__course {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 10px;
+  margin: 0 -10px;
+  border-top: 1px solid #EDEBF7;
+  border-radius: 10px;
+  cursor: pointer;
+  outline: none;
+  transition: background 150ms ease-out, box-shadow 150ms ease-out;
+}
+#mint-lms-root .mint-reports__course:first-child { border-top: 0; }
+#mint-lms-root .mint-reports__course:hover,
+#mint-lms-root .mint-reports__course:focus-visible {
+  background: #F1FFF9;
+  box-shadow: 0 4px 14px rgba(152, 251, 203, 0.5);
+}
+#mint-lms-root .mint-reports__course-tile {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  flex: none;
+}
+#mint-lms-root .mint-reports__course-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: #17222B;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#mint-lms-root .mint-reports__course-meta {
+  font-size: 13px;
+  color: #5C5C77;
+}
+#mint-lms-root .mint-reports__course-progress {
+  width: 160px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+}
+#mint-lms-root .mint-reports__course-track {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: #E7E4F3;
+  overflow: hidden;
+}
+#mint-lms-root .mint-reports__course-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: #98FB98;
+}
+#mint-lms-root .mint-reports__course-pct {
+  font-size: 14px;
+  font-weight: 700;
+  color: #17222B;
+  width: 40px;
+  text-align: right;
+}
+#mint-lms-root .mint-reports__feed { padding: 4px 18px 10px; }
+#mint-lms-root .mint-reports__event {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 10px;
+  margin: 0 -10px;
+  border-top: 1px solid #EDEBF7;
+  border-radius: 10px;
+  cursor: pointer;
+  outline: none;
+  transition: background 150ms ease-out, box-shadow 150ms ease-out;
+}
+#mint-lms-root .mint-reports__event:first-child { border-top: 0; }
+#mint-lms-root .mint-reports__event:hover,
+#mint-lms-root .mint-reports__event:focus-visible {
+  background: #F1FFF9;
+  box-shadow: 0 4px 14px rgba(152, 251, 203, 0.5);
+}
+#mint-lms-root .mint-reports__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex: none;
+}
+#mint-lms-root .mint-reports__event-text {
+  font-size: 15px;
+  line-height: 21px;
+  color: #17222B;
+}
+#mint-lms-root .mint-reports__event-name { font-weight: 700; }
+#mint-lms-root .mint-reports__event-what {
+  margin-top: 1px;
+  font-size: 13px;
+  color: #5C5C77;
+}
+#mint-lms-root .mint-reports__event-when {
+  font-size: 12px;
+  color: #5C5C77;
+  flex: none;
+  padding-top: 2px;
+}
+#mint-lms-root .mint-reports__empty {
+  margin: 12px 0;
+  font-size: 14px;
+  color: #5C5C77;
+}
+@media (max-width: 980px) {
+  #mint-lms-root .mint-reports__grid { grid-template-columns: 1fr; }
+  #mint-lms-root .mint-reports__course-progress { width: 120px; }
+}

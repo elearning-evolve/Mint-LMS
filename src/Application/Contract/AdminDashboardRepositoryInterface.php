@@ -24,4 +24,11 @@ interface AdminDashboardRepositoryInterface {
 	 * @return list<array{user_id: int, course_id: int, course_title: string, enrolled_at: string, enrollment_id: int}>
 	 */
 	public function getRecentActiveEnrollments( array $courseIds, int $limit = 5 ): array;
+
+	/**
+	 * Reports page payload: totals, range deltas/charts, top courses, activity.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function getReportsDashboard( ?int $authorId ): array;
 }
