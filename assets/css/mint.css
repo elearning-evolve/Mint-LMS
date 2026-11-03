@@ -156,18 +156,18 @@
   box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55) !important;
 }
 
-/* Dashboard v2 — search / details / course row */
-#mint-lms-root a.mint-dash-search {
-  transition: background-color 120ms ease-out;
+/* Dashboard header search — keep form chrome tight next to brand actions */
+#mint-lms-root .mint-dash-header-search {
+  margin: 0;
+  padding: 0;
 }
-
-#mint-lms-root a.mint-dash-search:hover,
-#mint-lms-root a.mint-dash-search:focus-visible {
-  background-color: #F4F3F8 !important;
+#mint-lms-root .mint-dash-header-search .mint-search-input {
+  padding-left: 40px;
 }
-
-#mint-lms-root a.mint-dash-search:focus-visible {
-  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
+#mint-lms-root .mint-dash-header-search .mint-search-input::-webkit-search-decoration,
+#mint-lms-root .mint-dash-header-search .mint-search-input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 #mint-lms-root button.mint-dash-details-toggle {
