@@ -6538,52 +6538,55 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   align-content: start;
   align-self: start;
 }
-#mint-lms-root .mint-settings-card {
+/* Scope under .mint-settings so course-builder settings cards don't override these. */
+#mint-lms-root .mint-settings .mint-settings-card {
   display: flex;
   flex-direction: column;
+  margin-top: 0;
   border: 1.5px solid #98FBCB;
   border-radius: 16px;
   background: #FFFFFF;
   box-shadow:
-    0 8px 24px rgba(152, 251, 203, 0.55),
-    0 4px 10px rgba(15, 14, 26, 0.06);
+    0 10px 28px rgba(152, 251, 203, 0.6),
+    0 4px 12px rgba(152, 251, 203, 0.35),
+    0 2px 6px rgba(15, 14, 26, 0.05);
   overflow: visible;
   isolation: isolate;
 }
-#mint-lms-root .mint-settings-card--grow {
+#mint-lms-root .mint-settings .mint-settings-card--grow {
   min-height: 0;
   flex: 1 1 auto;
   height: 100%;
 }
-#mint-lms-root .mint-settings-card__head {
+#mint-lms-root .mint-settings .mint-settings-card__head {
   padding: 14px 20px;
   background: #F1FFF9;
   border-bottom: 1px solid #CFF5E2;
   border-radius: 14px 14px 0 0;
 }
-#mint-lms-root .mint-settings-card__title {
+#mint-lms-root .mint-settings .mint-settings-card__title {
   margin: 0;
   font-size: 17px;
   font-weight: 700;
   line-height: 1.3;
-  color: #17222B;
+  color: #0F0E1A;
 }
-#mint-lms-root .mint-settings-card__desc {
+#mint-lms-root .mint-settings .mint-settings-card__desc {
   margin: 2px 0 0;
   font-size: 14px;
   line-height: 21px;
   color: #33334A;
 }
-#mint-lms-root .mint-settings-card__body {
+#mint-lms-root .mint-settings .mint-settings-card__body {
   padding: 16px 20px 18px;
 }
-#mint-lms-root .mint-settings-card__body--tight { padding-top: 4px; }
-#mint-lms-root .mint-settings-card__body--grow {
+#mint-lms-root .mint-settings .mint-settings-card__body--tight { padding-top: 4px; }
+#mint-lms-root .mint-settings .mint-settings-card__body--grow {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
-#mint-lms-root .mint-settings-card__actions { margin-top: 16px; }
+#mint-lms-root .mint-settings .mint-settings-card__actions { margin-top: 16px; }
 #mint-lms-root .mint-settings-pages {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -6988,7 +6991,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 #mint-lms-root .mint-settings-btn:focus-visible {
   box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
 }
-#mint-lms-root .mint-settings__footer {
+#mint-lms-root .mint-settings .mint-settings__footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -6999,8 +7002,9 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   border-radius: 14px;
   background: #F1FFF9;
   box-shadow:
-    0 8px 24px rgba(152, 251, 203, 0.55),
-    0 4px 10px rgba(15, 14, 26, 0.06);
+    0 10px 28px rgba(152, 251, 203, 0.6),
+    0 4px 12px rgba(152, 251, 203, 0.35),
+    0 2px 6px rgba(15, 14, 26, 0.05);
 }
 #mint-lms-root .mint-settings__footer-note {
   margin: 0;

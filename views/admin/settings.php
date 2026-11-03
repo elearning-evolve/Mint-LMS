@@ -24,5 +24,7 @@ $renderer->echo(
 		'pageLabel'     => __( 'Settings', 'mint-lms' ),
 		'content'       => $content,
 		'maxWidthClass' => 'mint-max-w-wide',
+		// Hide default "+ New course" on Settings (students page uses the same pattern).
+		'headerActions' => '<span class="mint-hidden" aria-hidden="true"></span>',
 	)
 );
