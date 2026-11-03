@@ -9,7 +9,7 @@ use MintLMS\Application\Exception\NotFoundException;
 use MintLMS\Infrastructure\Admin\MintUiDashboardPresentation;
 use MintLMS\Infrastructure\Admin\ViewRenderer;
 use MintLMS\Infrastructure\Database\Repository\WpdbAdminDashboardRepository;
-use MintLMS\Infrastructure\Database\Repository\WpdbCourseRepository;
+use MintLMS\Infrastructure\Database\Repository\WpPostCourseRepository;
 use MintLMS\Infrastructure\Ui\MintUi;
 use MintLMS\Infrastructure\User\WpUserLookup;
 use MintLMS\Plugin;
@@ -36,7 +36,7 @@ $wpdb = mintlms_wpdb();
 if ( null !== $wpdb ) {
 	$userId           = get_current_user_id();
 	$dashboardService = new CreatorDashboardService(
-		new WpdbCourseRepository( $wpdb ),
+		new WpPostCourseRepository(),
 		new WpdbAdminDashboardRepository( $wpdb ),
 		new MintUiDashboardPresentation(),
 		new WpUserLookup(),

@@ -7,7 +7,7 @@ use MintLMS\Application\Admin\CreatorDashboardService;
 use MintLMS\Infrastructure\Admin\MintUiDashboardPresentation;
 use MintLMS\Infrastructure\Admin\ViewRenderer;
 use MintLMS\Infrastructure\Database\Repository\WpdbAdminDashboardRepository;
-use MintLMS\Infrastructure\Database\Repository\WpdbCourseRepository;
+use MintLMS\Infrastructure\Database\Repository\WpPostCourseRepository;
 use MintLMS\Infrastructure\Ui\MintUi;
 use MintLMS\Infrastructure\User\WpUserLookup;
 
@@ -21,8 +21,10 @@ $userId      = get_current_user_id();
 $user        = wp_get_current_user();
 $showDetails = MintUi::showDetailsPreference( $userId );
 
+// Must use CPT repository (same source as All Courses). Legacy WpdbCourseRepository
+// only had a partial mirror and showed stale rows like "Untitled Course".
 $dashboardService = new CreatorDashboardService(
-	new WpdbCourseRepository( $wpdb ),
+	new WpPostCourseRepository(),
 	new WpdbAdminDashboardRepository( $wpdb ),
 	new MintUiDashboardPresentation(),
 	new WpUserLookup(),

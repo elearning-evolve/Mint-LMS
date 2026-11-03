@@ -11,10 +11,13 @@ use MintLMS\Application\Admin\Dto\NeedsYouCourseDto;
 use MintLMS\Application\Contract\AdminDashboardRepositoryInterface;
 use MintLMS\Application\Contract\DashboardPresentationInterface;
 use MintLMS\Application\Contract\UserLookupInterface;
+use MintLMS\Domain\Course\Course;
 use MintLMS\Domain\Course\CourseRepositoryInterface;
 use MintLMS\Domain\Course\CourseStatus;
 
 final class CreatorDashboardService {
+
+	private const DASHBOARD_COURSE_LIMIT = 4;
 
 	public function __construct(
 		private CourseRepositoryInterface $courseRepository,
@@ -25,14 +28,25 @@ final class CreatorDashboardService {
 	}
 
 	public function getDashboard( int $authorId ): CreatorDashboardDto {
-		$courses   = $this->courseRepository->list( 1, 100, $authorId );
-		$courseIds = array_map( static fn( $c ) => $c->id, $courses['courses'] );
-		$stats     = $this->dashboardRepository->getAuthorStats( $authorId, $courseIds );
-		$rows      = array();
-		$index     = 0;
-		$needsYou  = null;
+		// Pull enough CPT courses to cover the dashboard window; sort by last edit.
+		$listed  = $this->courseRepository->list( 1, 200, $authorId );
+		$courses = $listed['courses'];
 
-		foreach ( $courses['courses'] as $course ) {
+		usort(
+			$courses,
+			static function ( Course $a, Course $b ): int {
+				return $b->updatedAt <=> $a->updatedAt;
+			}
+		);
+
+		$courseIds = array_map( static fn( Course $c ): int => $c->id, $courses );
+		$stats     = $this->dashboardRepository->getAuthorStats( $authorId, $courseIds );
+
+		$rows     = array();
+		$index    = 0;
+		$needsYou = null;
+
+		foreach ( $courses as $course ) {
 			$courseStats = $stats['courses'][ $course->id ] ?? array(
 				'students'       => 0,
 				'completion_pct' => null,
@@ -59,36 +73,27 @@ final class CreatorDashboardService {
 				$this->presentation->courseInitial( $course->title ),
 			);
 
-			if ( null === $needsYou && $isDraft ) {
+			if ( null === $needsYou ) {
 				$blocker = $this->blockerMessage( $courseStats );
-				if ( null !== $blocker ) {
-					$needsYou = new NeedsYouCourseDto(
-						$course->id,
-						$course->title,
-						$blocker,
-						$this->presentation->editedLabel( $course->updatedAt ),
-					);
+				if ( null === $blocker ) {
+					$blocker = $isDraft
+						? __( 'Not published yet', 'mint-lms' )
+						: __( 'Pick up where you left off', 'mint-lms' );
 				}
+
+				$needsYou = new NeedsYouCourseDto(
+					$course->id,
+					$course->title,
+					$blocker,
+					$this->presentation->editedLabel( $course->updatedAt ),
+					$isDraft ? __( 'draft', 'mint-lms' ) : __( 'live', 'mint-lms' ),
+				);
 			}
 		}
 
-		if ( null === $needsYou && array() !== $rows ) {
-			foreach ( $courses['courses'] as $course ) {
-				$courseStats = $stats['courses'][ $course->id ] ?? array();
-				$blocker     = $this->blockerMessage( $courseStats );
-				if ( null !== $blocker ) {
-					$needsYou = new NeedsYouCourseDto(
-						$course->id,
-						$course->title,
-						$blocker,
-						$this->presentation->editedLabel( $course->updatedAt ),
-					);
-					break;
-				}
-			}
-		}
-
-		$activity = $this->buildActivity( $stats['activity'] ?? array() );
+		$coursesTotal   = count( $rows );
+		$displayCourses = array_slice( $rows, 0, self::DASHBOARD_COURSE_LIMIT );
+		$activity       = $this->buildActivity( $stats['activity'] ?? array() );
 
 		return new CreatorDashboardDto(
 			array() === $rows,
@@ -103,10 +108,11 @@ final class CreatorDashboardService {
 				$stats['students_delta'],
 				$stats['finished_delta'],
 			),
-			$rows,
+			$displayCourses,
 			$needsYou,
 			$activity,
 			$stats['signal_line'],
+			$coursesTotal,
 		);
 	}
 
@@ -115,11 +121,20 @@ final class CreatorDashboardService {
 	 */
 	private function blockerMessage( array $courseStats ): ?string {
 		if ( ( $courseStats['lesson_count'] ?? 0 ) === 0 ) {
-			return 'No lessons yet';
+			return __( 'No lessons yet', 'mint-lms' );
 		}
 
 		if ( ( $courseStats['empty_sections'] ?? 0 ) > 0 ) {
-			return 'A lesson group has no lessons yet';
+			$empty = (int) $courseStats['empty_sections'];
+			if ( 1 === $empty ) {
+				return __( 'A lesson group has no lessons yet', 'mint-lms' );
+			}
+
+			return sprintf(
+				/* translators: %d: empty lesson group count */
+				__( '%d lesson groups need lessons', 'mint-lms' ),
+				$empty
+			);
 		}
 
 		return null;
@@ -135,11 +150,15 @@ final class CreatorDashboardService {
 
 		if ( $lessonCount > 0 ) {
 			$parts[] = 1 === $lessonCount
-				? '1 lesson'
-				: sprintf( '%d lessons', $lessonCount );
+				? __( '1 lesson', 'mint-lms' )
+				: sprintf(
+					/* translators: %d: lesson count */
+					__( '%d lessons', 'mint-lms' ),
+					$lessonCount
+				);
 		}
 
-		$parts[] = 'published' === $status ? 'Live' : 'Not Live';
+		$parts[] = 'published' === $status ? __( 'Live', 'mint-lms' ) : __( 'Not Live', 'mint-lms' );
 
 		return implode( ' · ', $parts );
 	}
@@ -153,18 +172,33 @@ final class CreatorDashboardService {
 		$index = 0;
 
 		foreach ( $raw as $row ) {
-			$name = $this->userLookup->getDisplayName( (int) $row['user_id'] ) ?? 'A student';
+			$name = $this->userLookup->getDisplayName( (int) $row['user_id'] ) ?? __( 'A student', 'mint-lms' );
 			$hue  = $this->presentation->hueByIndex( $index );
 			++$index;
 			$course   = (string) ( $row['course_title'] ?? '' );
 			$sentence = '';
 
 			if ( 'completed' === ( $row['type'] ?? '' ) ) {
-				$sentence = sprintf( '%1$s finished %2$s', $name, $course );
+				$sentence = sprintf(
+					/* translators: 1: student name, 2: course title */
+					__( '%1$s finished %2$s', 'mint-lms' ),
+					$name,
+					$course
+				);
 			} elseif ( 'enrolled' === ( $row['type'] ?? '' ) ) {
-				$sentence = sprintf( '%1$s enrolled in %2$s', $name, $course );
+				$sentence = sprintf(
+					/* translators: 1: student name, 2: course title */
+					__( '%1$s enrolled in %2$s', 'mint-lms' ),
+					$name,
+					$course
+				);
 			} else {
-				$sentence = sprintf( '%1$s made progress in %2$s', $name, $course );
+				$sentence = sprintf(
+					/* translators: 1: student name, 2: course title */
+					__( '%1$s made progress in %2$s', 'mint-lms' ),
+					$name,
+					$course
+				);
 			}
 
 			$items[] = new DashboardActivityItemDto(

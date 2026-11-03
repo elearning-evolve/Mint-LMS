@@ -119,7 +119,7 @@ final class WpPostCourseRepository implements CourseRepositoryInterface {
 			'post_type'              => PostTypes::COURSE,
 			'posts_per_page'         => $perPage,
 			'paged'                  => max( 1, $page ),
-			'orderby'                => 'date',
+			'orderby'                => 'modified',
 			'order'                  => 'DESC',
 			'update_post_meta_cache' => true,
 			'update_post_term_cache' => false,

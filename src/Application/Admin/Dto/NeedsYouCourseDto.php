@@ -10,6 +10,7 @@ final class NeedsYouCourseDto {
 		public readonly string $title,
 		public readonly string $blocker,
 		public readonly string $editedLabel,
+		public readonly string $statusLabel = 'draft',
 	) {
 	}
 }
