@@ -21,7 +21,8 @@ $content = $renderer->render(
 $renderer->echo(
 	'admin/layout',
 	array(
-		'pageLabel' => __( 'Settings', 'mint-lms' ),
-		'content'   => $content,
+		'pageLabel'     => __( 'Settings', 'mint-lms' ),
+		'content'       => $content,
+		'maxWidthClass' => 'mint-max-w-wide',
 	)
 );

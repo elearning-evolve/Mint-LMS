@@ -6325,184 +6325,553 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   color: var(--mint-ink-3);
 }
 
-/* Settings */
-#mint-lms-root .mint-settings-shell { padding: 40px 0 96px; }
-#mint-lms-root .mint-settings-head { margin-bottom: 8px; }
-#mint-lms-root .mint-settings-form {
+/* Settings page (design: Mint LMS Settings) */
+#mint-lms-root .mint-settings {
+  padding: 0 0 48px;
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+#mint-lms-root .mint-settings__hero {
+  padding: 40px 0 24px;
+}
+#mint-lms-root .mint-settings__title {
+  margin: 0;
+  font-size: 48px;
+  line-height: 52px;
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  color: #0F0E1A;
+}
+#mint-lms-root .mint-settings__sub {
+  margin: 10px 0 0;
+  font-size: 19px;
+  line-height: 30px;
+  color: #33334A;
+}
+#mint-lms-root .mint-settings__form { margin: 0; }
+#mint-lms-root .mint-settings__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 24px;
+  align-items: stretch;
+  /* Room for mint glow so WP admin doesn’t clip card shadows */
+  padding: 6px 4px 10px;
+  margin: -6px -4px 0;
+}
+#mint-lms-root .mint-settings__col {
+  display: grid;
+  gap: 24px;
+  min-width: 0;
+}
+#mint-lms-root .mint-settings__col--main {
+  grid-template-rows: auto auto minmax(0, 1fr);
+}
+#mint-lms-root .mint-settings__col--side {
+  align-content: start;
+  align-self: start;
+}
+#mint-lms-root .mint-settings-card {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  margin-top: 24px;
+  border: 1.5px solid #98FBCB;
+  border-radius: 16px;
+  background: #FFFFFF;
+  box-shadow:
+    0 8px 24px rgba(152, 251, 203, 0.55),
+    0 4px 10px rgba(15, 14, 26, 0.06);
+  overflow: visible;
+  isolation: isolate;
 }
-#mint-lms-root .mint-card {
-  background: var(--mint-tint);
-  border: 1px solid var(--mint-tint-line);
-  border-radius: var(--mint-r-xl);
-  padding: 24px 28px;
+#mint-lms-root .mint-settings-card--grow {
+  min-height: 0;
+  flex: 1 1 auto;
+  height: 100%;
 }
-#mint-lms-root .mint-card__header {
+#mint-lms-root .mint-settings-card__head {
+  padding: 14px 20px;
+  background: #F1FFF9;
+  border-bottom: 1px solid #CFF5E2;
+  border-radius: 14px 14px 0 0;
+}
+#mint-lms-root .mint-settings-card__title {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: #17222B;
+}
+#mint-lms-root .mint-settings-card__desc {
+  margin: 2px 0 0;
+  font-size: 14px;
+  line-height: 21px;
+  color: #33334A;
+}
+#mint-lms-root .mint-settings-card__body {
+  padding: 16px 20px 18px;
+}
+#mint-lms-root .mint-settings-card__body--tight { padding-top: 4px; }
+#mint-lms-root .mint-settings-card__body--grow {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+#mint-lms-root .mint-settings-card__actions { margin-top: 16px; }
+#mint-lms-root .mint-settings-pages {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+#mint-lms-root .mint-settings-field {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+#mint-lms-root .mint-settings-field__label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #17222B;
+}
+#mint-lms-root .mint-settings-field__help {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #5C5C77;
+}
+#mint-lms-root .mint-settings-select { position: relative; }
+#mint-lms-root .mint-settings-select__trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1.5px solid #DAD7E6;
+  background: #FFFFFF;
+  font-size: 15px;
+  color: #17222B;
+  cursor: pointer;
+  outline: none;
+  text-align: left;
+  transition: border-color 120ms ease-out, box-shadow 120ms ease-out;
+}
+#mint-lms-root .mint-settings-select__trigger svg {
+  flex: none;
+  transition: transform 150ms ease-out;
+}
+#mint-lms-root .mint-settings-select.is-open .mint-settings-select__trigger,
+#mint-lms-root .mint-settings-select__trigger:hover,
+#mint-lms-root .mint-settings-select__trigger:focus {
+  border-color: #98FB98;
+}
+#mint-lms-root .mint-settings-select__trigger:focus {
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
+}
+#mint-lms-root .mint-settings-select.is-open .mint-settings-select__trigger svg {
+  transform: rotate(180deg);
+}
+#mint-lms-root .mint-settings-select__menu {
+  position: absolute;
+  top: 48px;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  max-height: 240px;
+  overflow: auto;
+  padding: 5px;
+  border: 1.5px solid #98FBCB;
+  border-radius: 10px;
+  background: #FFFFFF;
+  box-shadow: 0 12px 28px rgba(152, 251, 203, 0.55), 0 4px 10px rgba(15, 14, 26, 0.08);
+}
+#mint-lms-root .mint-settings-select__option {
+  display: block;
+  width: 100%;
+  padding: 9px 10px;
+  border: 0;
+  border-radius: 7px;
+  background: #FFFFFF;
+  font-size: 15px;
+  font-weight: 500;
+  color: #17222B;
+  text-align: left;
+  cursor: pointer;
+}
+#mint-lms-root .mint-settings-select__option.is-active { font-weight: 700; background: #E8FFF3; }
+#mint-lms-root .mint-settings-select__option:hover { background: #98FB98; }
+#mint-lms-root .mint-settings-input,
+#mint-lms-root .mint-settings-textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1.5px solid #DAD7E6;
+  border-radius: 10px;
+  background: #FFFFFF;
+  color: #17222B;
+  outline: none;
+  transition: border-color 120ms ease-out, box-shadow 120ms ease-out;
+}
+#mint-lms-root .mint-settings-input {
+  height: 44px;
+  padding: 0 14px;
+  font-size: 15px;
+}
+#mint-lms-root .mint-settings-textarea {
+  flex: 1;
+  min-height: 170px;
+  padding: 14px 16px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 14px;
+  line-height: 22px;
+  resize: vertical;
+}
+#mint-lms-root .mint-settings-input:hover,
+#mint-lms-root .mint-settings-textarea:hover { border-color: #98FB98; }
+#mint-lms-root .mint-settings-input:focus,
+#mint-lms-root .mint-settings-textarea:focus {
+  border-color: #98FB98;
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
+}
+#mint-lms-root .mint-settings-tags {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+#mint-lms-root .mint-settings-tags__label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #17222B;
+}
+#mint-lms-root .mint-settings-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1.5px solid #98FBCB;
+  background: #F1FFF9;
+  font-size: 13px;
+  font-weight: 600;
+  color: #17222B;
+  cursor: pointer;
+  outline: none;
+  transition: background 120ms ease-out;
+}
+#mint-lms-root .mint-settings-tag:hover,
+#mint-lms-root .mint-settings-tag:focus { background: #98FB98; }
+#mint-lms-root .mint-settings-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 0;
+  border-top: 1px solid #EDEBF7;
+}
+#mint-lms-root .mint-settings-toggle-row--solo {
+  border-top: 0;
+  padding: 0 0 14px;
+}
+#mint-lms-root .mint-settings-toggle-row__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #17222B;
+}
+#mint-lms-root .mint-settings-toggle-row__help {
+  margin-top: 1px;
+  font-size: 13px;
+  color: #5C5C77;
+}
+#mint-lms-root .mint-settings-switch {
+  position: relative;
+  flex: none;
+  width: 42px;
+  height: 24px;
+  border: 0;
+  border-radius: 999px;
+  background: #DAD7E6;
+  cursor: pointer;
+  outline: none;
+  padding: 0;
+  transition: background 150ms ease-out;
+}
+#mint-lms-root .mint-settings-switch.is-on { background: #98FBCB; }
+#mint-lms-root .mint-settings-switch:focus-visible {
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
+}
+#mint-lms-root .mint-settings-switch__knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #FFFFFF;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: left 150ms ease-out;
+}
+#mint-lms-root .mint-settings-switch.is-on .mint-settings-switch__knob { left: 21px; }
+#mint-lms-root .mint-settings-progress {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+#mint-lms-root .mint-settings-progress__track {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: #E7E4F3;
+  overflow: hidden;
+}
+#mint-lms-root .mint-settings-progress__fill {
+  height: 100%;
+  border-radius: 999px;
+  background: #98FB98;
+  transition: width 200ms ease-out;
+}
+#mint-lms-root .mint-settings-progress__label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #17222B;
+  white-space: nowrap;
+}
+#mint-lms-root .mint-settings-checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+#mint-lms-root .mint-settings-checklist__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  margin: 0 -10px;
+  border-radius: 10px;
+  outline: none;
+  transition: background 150ms ease-out, box-shadow 150ms ease-out;
+}
+#mint-lms-root .mint-settings-checklist__item:hover,
+#mint-lms-root .mint-settings-checklist__item:focus {
+  background: #F1FFF9;
+  box-shadow: 0 4px 14px rgba(152, 251, 203, 0.5);
+}
+#mint-lms-root .mint-settings-checklist__icon {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #E7E4F3;
+  color: #5C5C77;
+}
+#mint-lms-root .mint-settings-checklist__item.is-done .mint-settings-checklist__icon {
+  background: #98FB98;
+  color: #17222B;
+}
+#mint-lms-root .mint-settings-checklist__text {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+#mint-lms-root .mint-settings-checklist__title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #17222B;
+}
+#mint-lms-root .mint-settings-checklist__detail {
+  font-size: 13px;
+  color: #5C5C77;
+}
+#mint-lms-root .mint-settings-enrolls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+#mint-lms-root .mint-settings-enroll {
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1.5px solid #E4E1F0;
+  background: #FFFFFF;
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 120ms ease-out, background 120ms ease-out, box-shadow 150ms ease-out;
+}
+#mint-lms-root .mint-settings-enroll:hover,
+#mint-lms-root .mint-settings-enroll:focus {
+  border-color: #98FB98;
+  background: #F1FFF9;
+  box-shadow: 0 4px 14px rgba(152, 251, 203, 0.5);
+}
+#mint-lms-root .mint-settings-enroll.is-selected {
+  border-color: #17222B;
+  background: #F1FFF9;
+}
+#mint-lms-root .mint-settings-enroll__radio {
+  flex: none;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  border-radius: 999px;
+  border: 2px solid #B9B6CE;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#mint-lms-root .mint-settings-enroll.is-selected .mint-settings-enroll__radio {
+  border-color: #17222B;
+}
+#mint-lms-root .mint-settings-enroll__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: transparent;
+}
+#mint-lms-root .mint-settings-enroll.is-selected .mint-settings-enroll__dot {
+  background: #17222B;
+}
+#mint-lms-root .mint-settings-enroll__title {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+  color: #17222B;
+}
+#mint-lms-root .mint-settings-enroll__desc {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  line-height: 19px;
+  color: #5C5C77;
+}
+#mint-lms-root .mint-settings-ai {
+  display: grid;
+  gap: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #EDEBF7;
+}
+#mint-lms-root .mint-settings-ai__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+#mint-lms-root .mint-settings-ai__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+#mint-lms-root .mint-settings-ai__result {
+  margin: 0;
+  min-height: 20px;
+  font-size: 13px;
+  color: #5C5C77;
+}
+#mint-lms-root .mint-settings-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 42px;
+  padding: 0 18px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  outline: none;
+  transition: background 150ms ease-out, box-shadow 150ms ease-out, transform 150ms ease-out;
+}
+#mint-lms-root .mint-settings-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+#mint-lms-root .mint-settings-btn--outline {
+  border: 1.5px solid #98FBCB;
+  background: #FFFFFF;
+  color: #17222B;
+}
+#mint-lms-root .mint-settings-btn--outline:hover:not(:disabled),
+#mint-lms-root .mint-settings-btn--outline:focus:not(:disabled) {
+  background: #F1FFF9;
+  box-shadow: 0 4px 12px rgba(152, 251, 203, 0.7);
+  transform: translateY(-1px);
+}
+#mint-lms-root .mint-settings-btn--primary {
+  border: none;
+  background: #98FB98;
+  color: #17222B;
+}
+#mint-lms-root .mint-settings-btn--primary:hover:not(:disabled),
+#mint-lms-root .mint-settings-btn--primary:focus:not(:disabled) {
+  background: #7FE87F;
+  box-shadow: 0 4px 12px rgba(152, 251, 203, 0.7);
+  transform: translateY(-1px);
+}
+#mint-lms-root .mint-settings-btn:focus-visible {
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
+}
+#mint-lms-root .mint-settings__footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 4px;
+  margin-top: 24px;
+  padding: 14px 20px;
+  border: 1.5px solid #98FBCB;
+  border-radius: 14px;
+  background: #F1FFF9;
+  box-shadow:
+    0 8px 24px rgba(152, 251, 203, 0.55),
+    0 4px 10px rgba(15, 14, 26, 0.06);
 }
-#mint-lms-root .mint-card__title {
-  font-size: 20px;
-  line-height: 28px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
-  color: var(--mint-ink);
+#mint-lms-root .mint-settings__footer-note {
   margin: 0;
-}
-#mint-lms-root .mint-card__desc {
-  font-size: 15px;
-  line-height: 22px;
-  color: var(--mint-ink-2);
-  margin: 8px 0 0;
-}
-#mint-lms-root .mint-settings-checklist { margin-bottom: 0; }
-#mint-lms-root .mint-checklist {
-  display: flex;
-  flex-direction: column;
-  margin-top: 8px;
-}
-#mint-lms-root .mint-checklist__item {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 14px 0;
-  border-top: 1px solid var(--mint-rule-soft);
-}
-#mint-lms-root .mint-checklist__item:first-child {
-  border-top: none;
-  padding-top: 4px;
-}
-#mint-lms-root .mint-checklist__icon {
-  flex: none;
-  width: 20px;
-  height: 20px;
-  margin-top: 1px;
-  color: var(--mint-ink-3);
-}
-#mint-lms-root .mint-checklist__item.is-done .mint-checklist__icon { color: var(--mint-success); }
-#mint-lms-root .mint-checklist__body { min-width: 0; }
-#mint-lms-root .mint-checklist__label {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--mint-ink);
-}
-#mint-lms-root .mint-checklist__detail {
   font-size: 14px;
-  line-height: 20px;
-  color: var(--mint-ink-3);
-  margin-top: 2px;
+  color: #33334A;
 }
-#mint-lms-root .mint-badge--neutral {
-  background: var(--mint-bg-subtle);
-  color: var(--mint-ink-2);
+@media (max-width: 1180px) {
+  #mint-lms-root .mint-settings__grid {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 340px);
+  }
 }
-#mint-lms-root .mint-settings-fields {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  margin-top: 20px;
+@media (max-width: 980px) {
+  #mint-lms-root .mint-settings__grid {
+    grid-template-columns: 1fr;
+  }
+  #mint-lms-root .mint-settings__col--main {
+    align-self: stretch;
+  }
 }
-#mint-lms-root .mint-settings-fields--inline { gap: 12px; }
-#mint-lms-root .mint-field {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+@media (max-width: 720px) {
+  #mint-lms-root .mint-settings-pages {
+    grid-template-columns: 1fr;
+  }
 }
-#mint-lms-root .mint-field__label {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--mint-ink);
-}
-#mint-lms-root .mint-field__select,
-#mint-lms-root .mint-field__textarea {
-  width: 100%;
-  max-width: 520px;
-  padding: 10px 12px;
-  border: 1.5px solid var(--mint-border);
-  border-radius: var(--mint-r-md);
-  font-family: var(--mint-font);
-  font-size: 15px;
-  color: var(--mint-ink);
-  background: #FFFFFF;
-  outline: none;
-  transition: border-color var(--mint-t-hover) ease-out, box-shadow var(--mint-t-hover) ease-out;
-}
-#mint-lms-root .mint-field__textarea {
-  max-width: 100%;
-  min-height: 200px;
-  resize: vertical;
-}
-#mint-lms-root .mint-field__select:hover,
-#mint-lms-root .mint-field__textarea:hover {
-  border-color: var(--mint-field-border);
-}
-#mint-lms-root .mint-field__select:focus,
-#mint-lms-root .mint-field__textarea:focus {
-  border-color: var(--mint-field-border);
-  box-shadow: var(--mint-field-focus);
-}
-#mint-lms-root .mint-field__help {
-  font-size: 14px;
-  line-height: 20px;
-  color: var(--mint-ink-3);
-  margin: 0;
-}
-#mint-lms-root .mint-settings-inline-action { margin-top: 16px; }
-#mint-lms-root .mint-radio-row,
-#mint-lms-root .mint-checkbox-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 15px;
-  line-height: 22px;
-  color: var(--mint-ink-2);
-  cursor: pointer;
-}
-#mint-lms-root .mint-radio-row input,
-#mint-lms-root .mint-checkbox-row input {
-  width: 16px;
-  height: 16px;
-  flex: none;
-  accent-color: var(--mint-accent);
-  cursor: pointer;
-}
-#mint-lms-root .mint-settings-form .submit { margin: 8px 0 0; padding: 0; }
-#mint-lms-root .mint-settings-form .button,
-#mint-lms-root .mint-settings-inline-action .button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 38px;
-  padding: 0 16px;
-  border: 1.5px solid var(--mint-border);
-  border-radius: var(--mint-r-md);
-  font-family: var(--mint-font);
-  font-size: 15px;
-  font-weight: 500;
-  line-height: 1;
-  color: var(--mint-ink-2);
-  background: #FFFFFF;
-  cursor: pointer;
-  transition: background var(--mint-t-hover) ease-out, border-color var(--mint-t-hover) ease-out;
-}
-#mint-lms-root .mint-settings-form .button:hover,
-#mint-lms-root .mint-settings-inline-action .button:hover {
-  background: var(--mint-bg-subtle);
-}
-#mint-lms-root .mint-settings-form .button-primary {
-  border-color: var(--mint-accent);
-  background: var(--mint-accent);
-  color: #FFFFFF;
-}
-#mint-lms-root .mint-settings-form .button-primary:hover {
-  background: var(--mint-accent-hover);
-  border-color: var(--mint-accent-hover);
+@media (max-width: 640px) {
+  #mint-lms-root .mint-settings__title {
+    font-size: 36px;
+    line-height: 40px;
+  }
+  #mint-lms-root .mint-settings-enrolls,
+  #mint-lms-root .mint-settings-ai__row {
+    grid-template-columns: 1fr;
+  }
+  #mint-lms-root .mint-settings__footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
 }
 
 /* Association cards (Add / Change / Remove) — Mint CTA polish */

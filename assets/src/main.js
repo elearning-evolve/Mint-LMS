@@ -8,6 +8,8 @@ import { mintCourseStudents } from './students-admin.js';
 import './students-admin.js';
 import { mintReports } from './reports-admin.js';
 import './reports-admin.js';
+import { mintSettings } from './settings-admin.js';
+import './settings-admin.js';
 
 window.MintLMS = window.MintLMS || {};
 
@@ -95,6 +97,7 @@ document.addEventListener('alpine:init', () => {
 
   Alpine.data('mintCourseStudents', (config = {}) => mintCourseStudents(config));
   Alpine.data('mintReports', (config = {}) => mintReports(config));
+  Alpine.data('mintSettings', (config = {}) => mintSettings(config));
 
   Alpine.data('mintWelcomeDashboard', (steps = []) => ({
     steps: Array.isArray(steps) ? steps : [],
