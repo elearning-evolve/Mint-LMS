@@ -8,7 +8,7 @@ interface UserLookupInterface {
 	/**
 	 * @return list<array{id: int, email: string, display_name: string}>
 	 */
-	public function searchUsers( string $query, int $limit = 5 ): array;
+	public function searchUsers( string $query, int $limit = 10 ): array;
 
 	public function getDisplayName( int $userId ): ?string;
 }

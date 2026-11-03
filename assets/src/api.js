@@ -41,10 +41,14 @@ export async function mintApi(path, options = {}, config = getAdminConfig()) {
   const response = await fetch(url, { ...options, headers });
   let json = {};
 
-  try {
-    json = await response.json();
-  } catch {
-    json = {};
+  // 204 No Content (and some empty 200/201 bodies) have no JSON payload.
+  if (response.status !== 204) {
+    try {
+      const text = await response.text();
+      json = text ? JSON.parse(text) : {};
+    } catch {
+      json = {};
+    }
   }
 
   if (!response.ok || json.success === false) {
@@ -57,5 +61,5 @@ export async function mintApi(path, options = {}, config = getAdminConfig()) {
     throw new Error(message);
   }
 
-  return json.data;
+  return json.data ?? null;
 }

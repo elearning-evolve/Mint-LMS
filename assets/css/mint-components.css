@@ -9954,13 +9954,18 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 #mint-lms-root .mint-students-course__add-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 14px;
   margin-top: 12px;
   flex-wrap: wrap;
 }
-#mint-lms-root .mint-students-course__add-input {
+#mint-lms-root .mint-students-enroll-field {
+  position: relative;
   flex: 1 1 300px;
+  min-width: 0;
+}
+#mint-lms-root .mint-students-course__add-input {
+  width: 100%;
   min-width: 0;
   height: 50px;
   border: 1.5px solid #DAD7E6;
@@ -9980,10 +9985,84 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   border-color: #98FB98;
   box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
 }
+#mint-lms-root .mint-students-enroll-suggestions {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  background: #FFFFFF;
+  border: 1.5px solid #DAD7E6;
+  border-radius: 12px;
+  box-shadow: 0 14px 34px rgba(15, 14, 26, 0.12);
+  max-height: 280px;
+  overflow: auto;
+}
+#mint-lms-root .mint-students-enroll-suggestions__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+#mint-lms-root .mint-students-enroll-suggestions__item:hover,
+#mint-lms-root .mint-students-enroll-suggestions__item:focus {
+  background: #F1FFF9;
+  outline: none;
+}
+#mint-lms-root .mint-students-enroll-suggestions__avatar {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #E8FFF3;
+  color: #0B4F3F;
+  font-size: 12px;
+  font-weight: 700;
+}
+#mint-lms-root .mint-students-enroll-suggestions__meta {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+#mint-lms-root .mint-students-enroll-suggestions__name {
+  font-size: 15px;
+  font-weight: 700;
+  color: #17222B;
+  line-height: 1.25;
+}
+#mint-lms-root .mint-students-enroll-suggestions__email {
+  font-size: 13px;
+  color: #33334A;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#mint-lms-root .mint-students-enroll-suggestions__empty {
+  padding: 12px;
+  font-size: 14px;
+  color: #33334A;
+}
 #mint-lms-root .mint-students-course__add-hint {
   margin: 10px 0 0;
   font-size: 14px;
   color: #33334A;
+}
+#mint-lms-root #mint-enroll-student:disabled,
+#mint-lms-root .mint-students-course__add-row button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+#mint-lms-root [x-cloak] {
+  display: none !important;
 }
 #mint-lms-root .mint-students-table__head {
   display: grid;

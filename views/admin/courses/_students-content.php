@@ -44,7 +44,7 @@ if ( $courseId > 0 ) {
 		$userId = get_current_user_id();
 		$page   = isset( $_GET['paged'] ) ? max( 1, absint( $_GET['paged'] ) ) : 1; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
-		$result = Plugin::enrollmentService()->listStudentsForCourse( $courseId, $page, 20, $userId );
+		$result = Plugin::enrollmentService()->listStudentsForCourse( $courseId, $page, 100, $userId );
 
 		if ( $totalStudents <= 0 ) {
 			$totalStudents = $result->total;
@@ -237,7 +237,13 @@ $studentsPageUrl = admin_url( 'admin.php?page=mint-lms-course-students' );
 						<p class="mint-students-picker__empty"><?php echo esc_html__( 'No recent enrollments yet.', 'mint-lms' ); ?></p>
 					<?php else : ?>
 						<?php foreach ( $recentJoined as $recent ) : ?>
-							<div class="mint-students-recent" tabindex="0">
+							<div
+								class="mint-students-recent"
+								tabindex="0"
+								data-mint-recent-enrollment="<?php echo esc_attr( (string) (int) ( $recent['enrollmentId'] ?? 0 ) ); ?>"
+								data-mint-recent-user="<?php echo esc_attr( (string) (int) ( $recent['userId'] ?? 0 ) ); ?>"
+								data-mint-recent-course="<?php echo esc_attr( (string) (int) ( $recent['courseId'] ?? 0 ) ); ?>"
+							>
 								<span
 									class="mint-students-recent__avatar"
 									style="background: <?php echo esc_attr( $recent['bg'] ); ?>; color: <?php echo esc_attr( $recent['ink'] ); ?>"
@@ -272,18 +278,50 @@ $studentsPageUrl = admin_url( 'admin.php?page=mint-lms-course-students' );
 </div>
 
 <?php else : ?>
+	<?php
+	$course_students_boot = array(
+		'courseId'      => (int) $courseId,
+		'enrolledCount' => (int) $totalStudents,
+		'finishedCount' => (int) $totalFinished,
+		'lessonCount'   => (int) $lessonCount,
+		'students'      => array_map(
+			static function ( array $s ): array {
+				return array(
+					'enrollmentId' => (int) $s['enrollmentId'],
+					'name'         => (string) $s['name'],
+					'email'        => (string) $s['email'],
+					'initials'     => (string) $s['initials'],
+					'progressPct'  => (int) $s['progressPct'],
+					'whereLabel'   => (string) $s['whereLabel'],
+					'whereInk'     => (string) $s['whereInk'],
+					'enrolled'     => (string) $s['enrolled'],
+				);
+			},
+			$students
+		),
+		'i18n'          => array(
+			'notStarted'    => __( 'Not started', 'mint-lms' ),
+			'finished'      => __( 'Finished', 'mint-lms' ),
+			'inProgress'    => __( 'In progress', 'mint-lms' ),
+			/* translators: 1: current lesson number, 2: total lessons */
+			'lessonOf'      => __( 'Lesson %1$d of %2$d', 'mint-lms' ),
+			'invalidUser'   => __( 'Enter a valid email address or user ID.', 'mint-lms' ),
+			'added'         => __( 'Student added to course.', 'mint-lms' ),
+			'addFailed'     => __( 'Enrollment failed.', 'mint-lms' ),
+			'removed'       => __( 'Student removed.', 'mint-lms' ),
+			'removeFailed'  => __( 'Could not remove student.', 'mint-lms' ),
+			'confirmRemove' => __( 'Remove this student from the course?', 'mint-lms' ),
+			'noMatch'       => __( 'No users match', 'mint-lms' ),
+		),
+	);
+	$course_students_json = wp_json_encode( $course_students_boot );
+	if ( ! is_string( $course_students_json ) ) {
+		$course_students_json = '{}';
+	}
+	?>
 <div
 	class="mint-students-course"
-	x-data="{
-		search: '',
-		matches(row) {
-			if (!this.search) return true;
-			const q = this.search.toLowerCase();
-			const name = (row.dataset.mintStudentName || '').toLowerCase();
-			const email = (row.dataset.mintStudentEmail || '').toLowerCase();
-			return name.includes(q) || email.includes(q);
-		}
-	}"
+	x-data="mintCourseStudents(<?php echo esc_attr( $course_students_json ); ?>)"
 >
 	<a href="<?php echo esc_url( $studentsPageUrl ); ?>" class="mint-students-course__back">
 		<svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 4.5-6 5.5 6 5.5"/></svg>
@@ -301,7 +339,7 @@ $studentsPageUrl = admin_url( 'admin.php?page=mint-lms-course-students' );
 		</div>
 		<div class="mint-students-course__pills">
 			<div class="mint-students-course__pill">
-				<div class="mint-students-course__pill-value"><?php echo esc_html( (string) $totalStudents ); ?></div>
+				<div class="mint-students-course__pill-value" x-text="enrolledCount"><?php echo esc_html( (string) $totalStudents ); ?></div>
 				<div class="mint-students-course__pill-label"><?php echo esc_html__( 'Enrolled', 'mint-lms' ); ?></div>
 			</div>
 			<div class="mint-students-course__pill">
@@ -330,17 +368,49 @@ $studentsPageUrl = admin_url( 'admin.php?page=mint-lms-course-students' );
 	<div class="mint-students-course__add">
 		<div class="mint-students-course__add-title"><?php echo esc_html__( 'Add a student', 'mint-lms' ); ?></div>
 		<div class="mint-students-course__add-row">
-			<input
-				id="mint-enroll-email"
-				type="text"
-				class="mint-students-course__add-input"
-				placeholder="<?php echo esc_attr__( 'Email address or user ID', 'mint-lms' ); ?>"
-			/>
+			<div class="mint-students-enroll-field">
+				<input
+					type="text"
+					class="mint-students-course__add-input"
+					placeholder="<?php echo esc_attr__( 'Email address or user ID', 'mint-lms' ); ?>"
+					autocomplete="off"
+					x-model="query"
+					@input="onQueryInput()"
+					@keydown.enter.prevent="addStudent()"
+					@keydown.escape.prevent="showSuggestions = false"
+					@blur="hideSuggestionsLater()"
+					@focus="query.trim() && runUserSearch()"
+					:aria-expanded="showSuggestions ? 'true' : 'false'"
+				/>
+				<ul
+					class="mint-students-enroll-suggestions"
+					role="listbox"
+					x-show="showSuggestions"
+					x-cloak
+				>
+					<template x-if="suggestions.length === 0">
+						<li class="mint-students-enroll-suggestions__empty" role="presentation" x-text="(i18n.noMatch || 'No users match') + ' “' + query + '”'"></li>
+					</template>
+					<template x-for="user in suggestions" :key="user.id">
+						<li
+							role="option"
+							class="mint-students-enroll-suggestions__item"
+							@mousedown.prevent="selectSuggestion(user)"
+						>
+							<span class="mint-students-enroll-suggestions__avatar" aria-hidden="true" x-text="((user.display_name || user.email || '?') + '').trim().split(/\s+/).filter(Boolean).map((p,i,a)=>a.length===1?p.slice(0,2):(p[0]||'')).join('').slice(0,2).toUpperCase()"></span>
+							<span class="mint-students-enroll-suggestions__meta">
+								<span class="mint-students-enroll-suggestions__name" x-text="user.display_name || ('User #' + user.id)"></span>
+								<span class="mint-students-enroll-suggestions__email" x-text="user.email || ''"></span>
+							</span>
+						</li>
+					</template>
+				</ul>
+			</div>
 			<button
 				type="button"
-				id="mint-enroll-student"
 				class="mint-cta-lime mint-inline-flex mint-h-[50px] mint-shrink-0 mint-items-center mint-justify-center mint-rounded-[10px] mint-border-0 mint-px-6 mint-text-[17px] mint-font-bold"
-				data-mint-course="<?php echo esc_attr( (string) $courseId ); ?>"
+				:disabled="!canAdd"
+				@click="addStudent()"
 			>
 				<?php echo esc_html__( 'Add to course', 'mint-lms' ); ?>
 			</button>
@@ -350,7 +420,7 @@ $studentsPageUrl = admin_url( 'admin.php?page=mint-lms-course-students' );
 		</p>
 	</div>
 
-	<?php if ( empty( $students ) ) : ?>
+	<div x-show="students.length === 0">
 		<?php
 		echo $renderer->component( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- ViewRenderer returns escaped component HTML.
 			'empty-state',
@@ -360,83 +430,60 @@ $studentsPageUrl = admin_url( 'admin.php?page=mint-lms-course-students' );
 			)
 		);
 		?>
-	<?php else : ?>
-		<div class="mint-students-table">
-			<div class="mint-students-table__head">
-				<div class="mint-students-table__head-cell"><?php echo esc_html__( 'Student', 'mint-lms' ); ?></div>
-				<div class="mint-students-table__head-cell"><?php echo esc_html__( 'Where they are', 'mint-lms' ); ?></div>
-				<div class="mint-students-table__head-cell"><?php echo esc_html__( 'Progress', 'mint-lms' ); ?></div>
-				<div class="mint-students-table__head-cell mint-students-table__head-cell--right"><?php echo esc_html__( 'Joined', 'mint-lms' ); ?></div>
-				<div></div>
-			</div>
+	</div>
 
-			<?php foreach ( $students as $s ) : ?>
-				<?php $hue = \MintLMS\Infrastructure\Ui\MintUi::hueByIndex( ( (int) $s['hueIdx'] ) - 1 ); ?>
+	<div class="mint-students-table" x-show="students.length > 0" x-cloak>
+		<div class="mint-students-table__head">
+			<div class="mint-students-table__head-cell"><?php echo esc_html__( 'Student', 'mint-lms' ); ?></div>
+			<div class="mint-students-table__head-cell"><?php echo esc_html__( 'Where they are', 'mint-lms' ); ?></div>
+			<div class="mint-students-table__head-cell"><?php echo esc_html__( 'Progress', 'mint-lms' ); ?></div>
+			<div class="mint-students-table__head-cell mint-students-table__head-cell--right"><?php echo esc_html__( 'Joined', 'mint-lms' ); ?></div>
+			<div></div>
+		</div>
+
+		<template x-for="(student, index) in filteredStudents" :key="student.enrollmentId">
 			<div
 				class="mint-students-table__row"
 				data-mint-student-row
-				data-mint-student-name="<?php echo esc_attr( $s['name'] ); ?>"
-				data-mint-student-email="<?php echo esc_attr( $s['email'] ); ?>"
-				data-mint-student-progress="<?php echo (int) $s['progressPct']; ?>%"
-				data-mint-student-joined="<?php echo esc_attr( $s['enrolled'] ); ?>"
-				x-show="matches($el)"
+				:data-mint-enrollment-id="student.enrollmentId"
+				:data-mint-student-name="student.name"
+				:data-mint-student-email="student.email"
+				:data-mint-student-progress="student.progressPct + '%'"
+				:data-mint-student-joined="student.enrolled"
 			>
 				<div class="mint-students-table__person">
 					<span
 						class="mint-students-table__avatar"
-						style="background: <?php echo esc_attr( $hue['bg'] ); ?>; color: <?php echo esc_attr( $hue['ink'] ); ?>"
-					>
-						<?php echo esc_html( $s['initials'] ); ?>
-					</span>
+						:style="'background:' + hueFor(index).bg + ';color:' + hueFor(index).ink"
+						x-text="student.initials"
+					></span>
 					<div class="mint-min-w-0">
-						<div class="mint-students-table__name"><?php echo esc_html( $s['name'] ); ?></div>
-						<div class="mint-students-table__email"><?php echo esc_html( $s['email'] ); ?></div>
+						<div class="mint-students-table__name" x-text="student.name"></div>
+						<div class="mint-students-table__email" x-text="student.email"></div>
 					</div>
 				</div>
 
-				<div class="mint-students-table__where" style="color: <?php echo esc_attr( $s['whereInk'] ); ?>">
-					<?php echo esc_html( $s['whereLabel'] ); ?>
-				</div>
+				<div class="mint-students-table__where" :style="'color:' + student.whereInk" x-text="student.whereLabel"></div>
 
 				<div class="mint-students-table__progress">
 					<div class="mint-students-table__track">
-						<div class="mint-students-table__fill" style="width: <?php echo (int) $s['progressPct']; ?>%;"></div>
+						<div class="mint-students-table__fill" :style="'width:' + student.progressPct + '%'"></div>
 					</div>
-					<span class="mint-students-table__pct"><?php echo (int) $s['progressPct']; ?>%</span>
+					<span class="mint-students-table__pct" x-text="student.progressPct + '%'"></span>
 				</div>
 
-				<div class="mint-students-table__joined"><?php echo esc_html( $s['enrolled'] ); ?></div>
+				<div class="mint-students-table__joined" x-text="student.enrolled"></div>
 
 				<button
 					type="button"
 					class="mint-students-table__remove"
-					data-mint-unenroll="<?php echo esc_attr( (string) $s['enrollmentId'] ); ?>"
-					data-mint-course="<?php echo esc_attr( (string) $courseId ); ?>"
+					@click="removeStudent(student)"
+					:disabled="busy"
 				>
 					<?php echo esc_html__( 'Remove', 'mint-lms' ); ?>
 				</button>
 			</div>
-			<?php endforeach; ?>
-		</div>
-
-		<?php if ( $pagination['total'] > 1 ) : ?>
-		<div class="mint-mt-7 mint-flex mint-items-center mint-justify-center mint-gap-2">
-			<?php for ( $p = 1; $p <= $pagination['total']; $p++ ) : ?>
-				<?php if ( $p === $pagination['current'] ) : ?>
-					<span class="mint-pointer-events-none mint-inline-flex mint-h-control-md mint-w-control-md mint-items-center mint-justify-center mint-rounded-md mint-bg-cta mint-text-sm mint-font-semibold mint-text-cta-ink">
-						<?php echo (int) $p; ?>
-					</span>
-				<?php else : ?>
-					<a
-						href="<?php echo esc_url( add_query_arg( 'paged', $p, $pagination['base_url'] ) ); ?>"
-						class="mint-inline-flex mint-h-control-md mint-min-w-control-md mint-items-center mint-justify-center mint-rounded-md mint-bg-transparent mint-px-[14px] mint-text-sm mint-font-semibold mint-text-ink-2 mint-no-underline hover:mint-bg-bg-subtle"
-					>
-						<?php echo (int) $p; ?>
-					</a>
-				<?php endif; ?>
-			<?php endfor; ?>
-		</div>
-		<?php endif; ?>
-	<?php endif; ?>
+		</template>
+	</div>
 </div>
 <?php endif; ?>

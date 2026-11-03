@@ -16,4 +16,12 @@ interface AdminDashboardRepositoryInterface {
 	 * @return array<int, array{students: int, completion_pct: int|null, lesson_count: int}>
 	 */
 	public function getCourseStatsBatch( array $courseIds ): array;
+
+	/**
+	 * Latest active enrollments across the given courses (excludes cancelled).
+	 *
+	 * @param list<int> $courseIds
+	 * @return list<array{user_id: int, course_id: int, course_title: string, enrolled_at: string, enrollment_id: int}>
+	 */
+	public function getRecentActiveEnrollments( array $courseIds, int $limit = 5 ): array;
 }

@@ -159,28 +159,24 @@ if ( null !== $wpdb ) {
 		);
 	}
 
-	$rawStats = $dashRepo->getAuthorStats( $userId, $courseIds );
-
+	$recentRows  = $dashRepo->getRecentActiveEnrollments( $courseIds, 5 );
 	$recentIndex = 0;
-	foreach ( (array) ( $rawStats['activity'] ?? array() ) as $row ) {
-		if ( 'enrolled' !== ( $row['type'] ?? '' ) ) {
-			continue;
-		}
+	foreach ( $recentRows as $row ) {
 		$name           = $userLookup->getDisplayName( (int) $row['user_id'] ) ?? __( 'A student', 'mint-lms' );
 		$hue            = $presentation->hueByIndex( $recentIndex );
-		$when           = $presentation->relativeTimeShort( new \DateTimeImmutable( (string) $row['occurred_at'] ) );
+		$when           = $presentation->relativeTimeShort( new \DateTimeImmutable( (string) $row['enrolled_at'] ) );
 		$recentJoined[] = array(
-			'name'     => $name,
-			'initials' => $presentation->initials( $name ),
-			'course'   => (string) ( $row['course_title'] ?? '' ),
-			'when'     => $when,
-			'bg'       => $hue['bg'],
-			'ink'      => $hue['ink'],
+			'enrollmentId' => (int) $row['enrollment_id'],
+			'userId'       => (int) $row['user_id'],
+			'courseId'     => (int) $row['course_id'],
+			'name'         => $name,
+			'initials'     => $presentation->initials( $name ),
+			'course'       => (string) ( $row['course_title'] ?? '' ),
+			'when'         => $when,
+			'bg'           => $hue['bg'],
+			'ink'          => $hue['ink'],
 		);
 		++$recentIndex;
-		if ( count( $recentJoined ) >= 5 ) {
-			break;
-		}
 	}
 
 	if ( $courseId > 0 ) {

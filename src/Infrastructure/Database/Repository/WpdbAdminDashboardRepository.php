@@ -133,7 +133,7 @@ final class WpdbAdminDashboardRepository implements AdminDashboardRepositoryInte
 			$studentsDelta = (int) $wpdb->get_var(
 				$wpdb->prepare(
 					sprintf(
-						'SELECT COUNT(*) FROM %%i WHERE course_id IN (%s) AND enrolled_at >= %%s',
+						"SELECT COUNT(*) FROM %%i WHERE course_id IN (%s) AND status = 'active' AND enrolled_at >= %%s",
 						implode( ',', array_fill( 0, count( $courseIds ), '%d' ) )
 					),
 					array_merge( array( $enrollmentsTable ), $courseIds, array( $weekAgo ) )
@@ -185,7 +185,7 @@ final class WpdbAdminDashboardRepository implements AdminDashboardRepositoryInte
 						"SELECT e.user_id, c.post_title AS course_title, e.completed_at AS occurred_at, 'completed' AS type
 					FROM %%i e
 					INNER JOIN %%i c ON c.ID = e.course_id AND c.post_type = %%s
-					WHERE e.course_id IN (%s) AND e.completed_at IS NOT NULL
+					WHERE e.course_id IN (%s) AND e.status = 'active' AND e.completed_at IS NOT NULL
 					ORDER BY e.completed_at DESC LIMIT 5",
 						implode( ',', array_fill( 0, count( $courseIds ), '%d' ) )
 					),
@@ -199,7 +199,7 @@ final class WpdbAdminDashboardRepository implements AdminDashboardRepositoryInte
 						"SELECT e.user_id, c.post_title AS course_title, e.enrolled_at AS occurred_at, 'enrolled' AS type
 					FROM %%i e
 					INNER JOIN %%i c ON c.ID = e.course_id AND c.post_type = %%s
-					WHERE e.course_id IN (%s)
+					WHERE e.course_id IN (%s) AND e.status = 'active'
 					ORDER BY e.enrolled_at DESC LIMIT 5",
 						implode( ',', array_fill( 0, count( $courseIds ), '%d' ) )
 					),
@@ -414,6 +414,74 @@ final class WpdbAdminDashboardRepository implements AdminDashboardRepositoryInte
 		wp_cache_set( $cacheKey, $stats, WpObjectCache::GROUP, WpObjectCache::DASHBOARD_TTL );
 
 		return $stats;
+	}
+
+	/**
+	 * @param list<int> $courseIds
+	 * @return list<array{user_id: int, course_id: int, course_title: string, enrolled_at: string, enrollment_id: int}>
+	 */
+	public function getRecentActiveEnrollments( array $courseIds, int $limit = 5 ): array {
+		$courseIds = array_values(
+			array_filter(
+				array_map( 'intval', $courseIds ),
+				static fn( int $id ): bool => $id > 0
+			)
+		);
+		$limit     = max( 1, min( 20, $limit ) );
+
+		if ( array() === $courseIds ) {
+			return array();
+		}
+
+		$cacheKey = WpObjectCache::dashboardCacheKey(
+			'recent_active_enrollments_' . md5( (string) wp_json_encode( array( $courseIds, $limit ) ) )
+		);
+		$cached   = wp_cache_get( $cacheKey, WpObjectCache::GROUP );
+		if ( false !== $cached && is_array( $cached ) ) {
+			return $cached;
+		}
+
+		$wpdb             = $this->wpdb;
+		$postsTable       = $wpdb->posts;
+		$enrollmentsTable = Schema::validateTable( Schema::enrollmentsTable( $wpdb->prefix ), $wpdb->prefix );
+		$courseType       = PostTypes::COURSE;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; object-cached at method level.
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				sprintf(
+					"SELECT e.id AS enrollment_id, e.user_id, e.course_id, c.post_title AS course_title, e.enrolled_at
+					FROM %%i e
+					INNER JOIN %%i c ON c.ID = e.course_id AND c.post_type = %%s
+					WHERE e.course_id IN (%s) AND e.status = 'active'
+					ORDER BY e.enrolled_at DESC
+					LIMIT %%d",
+					implode( ',', array_fill( 0, count( $courseIds ), '%d' ) )
+				),
+				array_merge(
+					array( $enrollmentsTable, $postsTable, $courseType ),
+					$courseIds,
+					array( $limit )
+				)
+			)
+		);
+
+		$result = array();
+		if ( is_array( $rows ) ) {
+			foreach ( $rows as $row ) {
+				$result[] = array(
+					'enrollment_id' => (int) $row->enrollment_id,
+					'user_id'       => (int) $row->user_id,
+					'course_id'     => (int) $row->course_id,
+					'course_title'  => (string) $row->course_title,
+					'enrolled_at'   => (string) $row->enrolled_at,
+				);
+			}
+		}
+
+		wp_cache_set( $cacheKey, $result, WpObjectCache::GROUP, WpObjectCache::DASHBOARD_TTL );
+
+		return $result;
 	}
 
 	/**
