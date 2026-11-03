@@ -9605,7 +9605,8 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   outline: none;
   cursor: pointer;
   box-sizing: border-box;
-  transition: border-color 150ms ease-out, box-shadow 150ms ease-out, background 150ms ease-out;
+  transform: translateY(0);
+  transition: border-color 150ms ease-out, box-shadow 150ms ease-out, background 150ms ease-out, transform 150ms ease-out;
 }
 #mint-lms-root a.mint-students-course-card:hover,
 #mint-lms-root a.mint-students-course-card:focus-visible {
@@ -9614,6 +9615,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   box-shadow: 0 8px 22px rgba(152, 251, 203, 0.5);
   color: #0F0E1A;
   text-decoration: none;
+  transform: translateY(-4px);
 }
 #mint-lms-root a.mint-students-course-card:focus-visible {
   box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55), 0 8px 22px rgba(152, 251, 203, 0.5);
@@ -9903,34 +9905,6 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   gap: 12px;
   padding-bottom: 24px;
   flex-wrap: wrap;
-}
-#mint-lms-root a.mint-students-course__switcher,
-#mint-lms-root a.mint-students-course__switcher:visited {
-  height: 44px;
-  padding: 0 15px;
-  border-radius: 10px;
-  border: 1.5px solid #98FBCB;
-  background: #FFFFFF;
-  display: inline-flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  font-size: 16px;
-  font-weight: 600;
-  color: #17222B;
-  min-width: 290px;
-  text-decoration: none;
-  outline: none;
-  transition: background 120ms ease-out;
-}
-#mint-lms-root a.mint-students-course__switcher:hover,
-#mint-lms-root a.mint-students-course__switcher:focus-visible {
-  background: #F1FFF9;
-  color: #17222B;
-  text-decoration: none;
-}
-#mint-lms-root a.mint-students-course__switcher:focus-visible {
-  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
 }
 #mint-lms-root .mint-students-course__search {
   position: relative;

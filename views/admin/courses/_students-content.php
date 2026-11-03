@@ -312,10 +312,6 @@ $studentsPageUrl = admin_url( 'admin.php?page=mint-lms-course-students' );
 	</div>
 
 	<div class="mint-students-course__toolbar">
-		<a href="<?php echo esc_url( $studentsPageUrl ); ?>" class="mint-students-course__switcher">
-			<span class="mint-truncate"><?php echo esc_html( '' !== $courseTitle ? $courseTitle : __( 'Select a course…', 'mint-lms' ) ); ?></span>
-			<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#17222B" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 8 10 12.5 14.5 8"/></svg>
-		</a>
 		<label class="mint-students-course__search">
 			<span class="mint-sr-only"><?php esc_html_e( 'Search students', 'mint-lms' ); ?></span>
 			<span class="mint-students-course__search-icon" aria-hidden="true">
