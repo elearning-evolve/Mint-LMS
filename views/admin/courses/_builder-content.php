@@ -1579,7 +1579,9 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 																		</span>
 																		<span class="mint-builder-tree-page__toggle mint-builder-tree-page__toggle--spacer" aria-hidden="true"></span>
 																		<span class="mint-builder-nav__icon mint-builder-nav__icon--question" aria-hidden="true">?</span>
-																		<span class="mint-builder-tree-page__name mint-truncate" x-text="question.title || t('untitledQuestion')"></span>
+																		<div class="mint-builder-tree-page__identity">
+																			<span class="mint-builder-tree-page__name mint-truncate" x-text="question.title || t('untitledQuestion')"></span>
+																		</div>
 																		<button type="button" class="mint-builder-tree-page__edit" @click.stop="selectNavQuestion({ ...question, quizId: quiz.id, lessonId: quiz.lessonId, sectionId: 0 })"><?php esc_html_e( 'Edit', 'mint-lms' ); ?></button>
 																		<button type="button" class="mint-builder-tree-page__remove" @click.stop="deleteOverviewQuestion({ id: question.id, quizId: quiz.id })"><?php esc_html_e( 'Remove', 'mint-lms' ); ?></button>
 																	</div>
@@ -1737,7 +1739,9 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 																			</span>
 																			<span class="mint-builder-tree-page__toggle mint-builder-tree-page__toggle--spacer" aria-hidden="true"></span>
 																			<span class="mint-builder-nav__icon mint-builder-nav__icon--question" aria-hidden="true">?</span>
-																			<span class="mint-builder-tree-page__name mint-truncate" x-text="question.title || t('untitledQuestion')"></span>
+																			<div class="mint-builder-tree-page__identity">
+																				<span class="mint-builder-tree-page__name mint-truncate" x-text="question.title || t('untitledQuestion')"></span>
+																			</div>
 																			<button type="button" class="mint-builder-tree-page__edit" @click.stop="selectNavQuestion({ ...question, quizId: quiz.id, lessonId: quiz.lessonId, sectionId: section.id })"><?php esc_html_e( 'Edit', 'mint-lms' ); ?></button>
 																			<button type="button" class="mint-builder-tree-page__remove" @click.stop="deleteOverviewQuestion({ id: question.id, quizId: quiz.id })"><?php esc_html_e( 'Remove', 'mint-lms' ); ?></button>
 																		</div>

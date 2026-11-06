@@ -2246,8 +2246,15 @@
 
 #mint-lms-root .mint-builder-tree-page__children .mint-builder-tree-page__children .mint-builder-tree-page__row--question {
   margin-left: 84px;
-  padding: 6px;
+  padding: 7px 6px;
+  gap: 10px;
+  min-height: 52px;
   background: transparent;
+}
+
+#mint-lms-root .mint-builder-tree-page__row--question .mint-builder-tree-page__identity {
+  min-height: 36px;
+  justify-content: center;
 }
 
 #mint-lms-root .mint-builder-tree-page__grip {
