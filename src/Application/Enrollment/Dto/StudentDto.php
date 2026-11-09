@@ -11,6 +11,8 @@ final readonly class StudentDto {
 		public string $status,
 		public string $enrolledAt,
 		public float $progressPct,
+		public string $displayName = '',
+		public string $email = '',
 	) {
 	}
 
@@ -24,6 +26,8 @@ final readonly class StudentDto {
 			'status'       => $this->status,
 			'enrolledAt'   => $this->enrolledAt,
 			'progressPct'  => $this->progressPct,
+			'displayName'  => $this->displayName,
+			'email'        => $this->email,
 		);
 	}
 }

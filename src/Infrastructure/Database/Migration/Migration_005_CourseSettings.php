@@ -14,10 +14,17 @@ final class Migration_005_CourseSettings implements MigrationInterface {
 	public function up( \wpdb $wpdb ): void {
 		$table = Schema::validateTable( Schema::coursesTable( $wpdb->prefix ), $wpdb->prefix );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Custom table migration; table name validated via Schema::validateTable().
-		$columns = $wpdb->get_col( $wpdb->prepare( 'DESC %i', $table ), 0 );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.NotPrepared -- Custom table migration; Schema::validateTable().
+		$columns = $wpdb->get_col(
+			$wpdb->prepare(
+				'DESC %i',
+				$table
+			),
+			0
+		);
 
 		if ( ! is_array( $columns ) || ! in_array( 'settings_json', $columns, true ) ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.NotPrepared -- Custom table migration; Schema::validateTable().
 			$wpdb->query(
 				$wpdb->prepare(
 					'ALTER TABLE %i ADD COLUMN settings_json longtext NULL AFTER enrollment_type',
@@ -25,6 +32,5 @@ final class Migration_005_CourseSettings implements MigrationInterface {
 				)
 			);
 		}
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
 	}
 }

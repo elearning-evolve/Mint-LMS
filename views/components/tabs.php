@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template partial variables.
-
 $tabs   = $tabs ?? array();
 $active = $active ?? ( array_key_first( $tabs ) ?? '' );
 $id     = $id ?? 'mint-tabs';

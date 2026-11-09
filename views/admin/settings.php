@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template partial variables.
-
 use MintLMS\Infrastructure\Admin\ViewRenderer;
 use MintLMS\Infrastructure\Setup\PageSettings;
 
@@ -23,7 +21,10 @@ $content = $renderer->render(
 $renderer->echo(
 	'admin/layout',
 	array(
-		'pageLabel' => __( 'Settings', 'mint-lms' ),
-		'content'   => $content,
+		'pageLabel'     => __( 'Settings', 'mint-lms' ),
+		'content'       => $content,
+		'maxWidthClass' => 'mint-max-w-wide',
+		// Hide default "+ New course" on Settings (students page uses the same pattern).
+		'headerActions' => '<span class="mint-hidden" aria-hidden="true"></span>',
 	)
 );

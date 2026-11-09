@@ -43,3 +43,8 @@
 /vendor/myclabs
 /vendor/theseer
 /vendor/phar-io
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+.cursor
+wp-qa-check.sh

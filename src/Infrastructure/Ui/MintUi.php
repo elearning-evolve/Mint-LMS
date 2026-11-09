@@ -66,8 +66,15 @@ final class MintUi {
 
 	public static function courseInitial( string $title ): string {
 		$trimmed = trim( $title );
+		if ( '' === $trimmed ) {
+			return '?';
+		}
 
-		return '' === $trimmed ? '?' : strtoupper( mb_substr( $trimmed, 0, 1 ) );
+		if ( 1 === preg_match( '/\p{L}|\p{N}/u', $trimmed, $matches ) ) {
+			return mb_strtoupper( $matches[0] );
+		}
+
+		return '?';
 	}
 
 	public static function greeting(): string {

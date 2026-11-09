@@ -9,7 +9,7 @@ use MintLMS\Application\Contract\UserLookupInterface;
 
 final class WpUserLookup implements UserLookupInterface {
 
-	public function searchUsers( string $query, int $limit = 5 ): array {
+	public function searchUsers( string $query, int $limit = 10 ): array {
 		$query = trim( $query );
 
 		if ( '' === $query ) {
@@ -26,20 +26,22 @@ final class WpUserLookup implements UserLookupInterface {
 			}
 
 			return array(
-				array(
-					'id'           => (int) $user->ID,
-					'email'        => (string) $user->user_email,
-					'display_name' => (string) $user->display_name,
-				),
+				$this->mapUser( $user ),
 			);
 		}
+
+		$wpdb = mintlms_wpdb();
+		$like = null !== $wpdb
+			? '*' . $wpdb->esc_like( $query ) . '*'
+			: '*' . $query . '*';
 
 		$userQuery = new \WP_User_Query(
 			array(
 				'number'         => $limit,
-				'search'         => '*' . esc_attr( $query ) . '*',
-				'search_columns' => array( 'user_login', 'user_email', 'display_name' ),
-				'fields'         => array( 'ID', 'user_email', 'display_name' ),
+				'search'         => $like,
+				'search_columns' => array( 'user_login', 'user_email', 'user_nicename', 'display_name' ),
+				'orderby'        => 'display_name',
+				'order'          => 'ASC',
 			)
 		);
 
@@ -50,11 +52,7 @@ final class WpUserLookup implements UserLookupInterface {
 				continue;
 			}
 
-			$results[] = array(
-				'id'           => (int) $user->ID,
-				'email'        => (string) $user->user_email,
-				'display_name' => (string) $user->display_name,
-			);
+			$results[] = $this->mapUser( $user );
 		}
 
 		return $results;
@@ -70,5 +68,16 @@ final class WpUserLookup implements UserLookupInterface {
 		$name = trim( (string) $user->display_name );
 
 		return '' !== $name ? $name : null;
+	}
+
+	/**
+	 * @return array{id: int, email: string, display_name: string}
+	 */
+	private function mapUser( \WP_User $user ): array {
+		return array(
+			'id'           => (int) $user->ID,
+			'email'        => (string) $user->user_email,
+			'display_name' => (string) $user->display_name,
+		);
 	}
 }

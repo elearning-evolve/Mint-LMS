@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template partial variables.
-
 $createUrl  = $createUrl ?? \MintLMS\Infrastructure\Admin\CourseBuilderPage::newCourseUrl();
 $exampleUrl = $exampleUrl ?? apply_filters( 'mint_lms_see_example_url', '' );
 ?>

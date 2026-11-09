@@ -19,19 +19,19 @@ final class WpdbQuizRepository implements QuizRepositoryInterface {
 	}
 
 	public function findById( int $id ): ?Quiz {
-		$table = Schema::validateTable( Schema::quizzesTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::quizzesTable( $wpdb->prefix ), $wpdb->prefix );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$row = $this->wpdb->get_row(
-			$this->wpdb->prepare(
-				"SELECT id, lesson_id, course_id, title, pass_percent, sort_order
-				FROM {$table}
-				WHERE id = %d",
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT id, lesson_id, course_id, title, pass_percent, sort_order
+				FROM %i
+				WHERE id = %d',
+				$table,
 				$id
 			)
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
-
 		if ( null === $row ) {
 			return null;
 		}
@@ -46,21 +46,21 @@ final class WpdbQuizRepository implements QuizRepositoryInterface {
 	}
 
 	public function findAllByLessonId( int $lessonId, bool $publishedOnly = false ): array {
+		$wpdb = $this->wpdb;
 		unset( $publishedOnly );
-		$table = Schema::validateTable( Schema::quizzesTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$table = Schema::validateTable( Schema::quizzesTable( $wpdb->prefix ), $wpdb->prefix );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$rows = $this->wpdb->get_results(
-			$this->wpdb->prepare(
-				"SELECT id, lesson_id, course_id, title, pass_percent, sort_order
-				FROM {$table}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$rows    = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT id, lesson_id, course_id, title, pass_percent, sort_order
+				FROM %i
 				WHERE lesson_id = %d
-				ORDER BY sort_order ASC, id ASC",
+				ORDER BY sort_order ASC, id ASC',
+				$table,
 				$lessonId
 			)
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
-
 		$quizzes = array();
 
 		if ( is_array( $rows ) ) {
@@ -73,17 +73,17 @@ final class WpdbQuizRepository implements QuizRepositoryInterface {
 	}
 
 	public function nextQuizSortOrderForLesson( int $lessonId ): int {
-		$table = Schema::validateTable( Schema::quizzesTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::quizzesTable( $wpdb->prefix ), $wpdb->prefix );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$max = $this->wpdb->get_var(
-			$this->wpdb->prepare(
-				"SELECT MAX(sort_order) FROM {$table} WHERE lesson_id = %d",
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$max = $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT MAX(sort_order) FROM %i WHERE lesson_id = %d',
+				$table,
 				$lessonId
 			)
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
-
 		if ( null === $max || '' === $max ) {
 			return 0;
 		}
@@ -92,21 +92,21 @@ final class WpdbQuizRepository implements QuizRepositoryInterface {
 	}
 
 	public function findQuestionsByQuizId( int $quizId, bool $publishedOnly = false ): array {
+		$wpdb = $this->wpdb;
 		unset( $publishedOnly );
-		$table = Schema::validateTable( Schema::quizQuestionsTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$table = Schema::validateTable( Schema::quizQuestionsTable( $wpdb->prefix ), $wpdb->prefix );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$rows = $this->wpdb->get_results(
-			$this->wpdb->prepare(
-				"SELECT id, quiz_id, type, prompt, options_json, correct_answer, sort_order
-				FROM {$table}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$rows      = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT id, quiz_id, type, prompt, options_json, correct_answer, sort_order
+				FROM %i
 				WHERE quiz_id = %d
-				ORDER BY sort_order ASC, id ASC",
+				ORDER BY sort_order ASC, id ASC',
+				$table,
 				$quizId
 			)
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
-
 		$questions = array();
 
 		if ( is_array( $rows ) ) {
@@ -119,19 +119,19 @@ final class WpdbQuizRepository implements QuizRepositoryInterface {
 	}
 
 	public function findQuestionById( int $questionId ): ?QuizQuestion {
-		$table = Schema::validateTable( Schema::quizQuestionsTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::quizQuestionsTable( $wpdb->prefix ), $wpdb->prefix );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$row = $this->wpdb->get_row(
-			$this->wpdb->prepare(
-				"SELECT id, quiz_id, type, prompt, options_json, correct_answer, sort_order
-				FROM {$table}
-				WHERE id = %d",
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT id, quiz_id, type, prompt, options_json, correct_answer, sort_order
+				FROM %i
+				WHERE id = %d',
+				$table,
 				$questionId
 			)
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
-
 		if ( null === $row ) {
 			return null;
 		}
@@ -140,11 +140,12 @@ final class WpdbQuizRepository implements QuizRepositoryInterface {
 	}
 
 	public function saveQuiz( Quiz $quiz ): Quiz {
-		$table = Schema::validateTable( Schema::quizzesTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::quizzesTable( $wpdb->prefix ), $wpdb->prefix );
 
 		if ( 0 === $quiz->id ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
-			$inserted = $this->wpdb->insert(
+			$inserted = $wpdb->insert(
 				$table,
 				array(
 					'lesson_id'    => $quiz->lessonId,
@@ -161,7 +162,7 @@ final class WpdbQuizRepository implements QuizRepositoryInterface {
 			}
 
 			return new Quiz(
-				(int) $this->wpdb->insert_id,
+				(int) $wpdb->insert_id,
 				$quiz->lessonId,
 				$quiz->courseId,
 				$quiz->title,
@@ -171,7 +172,7 @@ final class WpdbQuizRepository implements QuizRepositoryInterface {
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$updated = $this->wpdb->update(
+		$updated = $wpdb->update(
 			$table,
 			array(
 				'title'        => $quiz->title,
@@ -191,13 +192,14 @@ final class WpdbQuizRepository implements QuizRepositoryInterface {
 	}
 
 	public function saveQuestion( QuizQuestion $question ): QuizQuestion {
-		$table        = Schema::validateTable( Schema::quizQuestionsTable( $this->wpdb->prefix ), $this->wpdb->prefix );
-		$optionsJson  = wp_json_encode( $question->options );
-		$optionsJson  = is_string( $optionsJson ) ? $optionsJson : '[]';
+		$wpdb        = $this->wpdb;
+		$table       = Schema::validateTable( Schema::quizQuestionsTable( $wpdb->prefix ), $wpdb->prefix );
+		$optionsJson = wp_json_encode( $question->options );
+		$optionsJson = is_string( $optionsJson ) ? $optionsJson : '[]';
 
 		if ( 0 === $question->id ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
-			$inserted = $this->wpdb->insert(
+			$inserted = $wpdb->insert(
 				$table,
 				array(
 					'quiz_id'        => $question->quizId,
@@ -215,7 +217,7 @@ final class WpdbQuizRepository implements QuizRepositoryInterface {
 			}
 
 			return new QuizQuestion(
-				(int) $this->wpdb->insert_id,
+				(int) $wpdb->insert_id,
 				$question->quizId,
 				$question->type,
 				$question->prompt,
@@ -226,7 +228,7 @@ final class WpdbQuizRepository implements QuizRepositoryInterface {
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$updated = $this->wpdb->update(
+		$updated = $wpdb->update(
 			$table,
 			array(
 				'type'           => $question->type,
@@ -248,42 +250,46 @@ final class WpdbQuizRepository implements QuizRepositoryInterface {
 	}
 
 	public function deleteQuiz( int $id ): bool {
+		$wpdb = $this->wpdb;
 		$this->deleteQuestionsByQuizId( $id );
 
-		$attemptsTable = Schema::validateTable( Schema::quizAttemptsTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$attemptsTable = Schema::validateTable( Schema::quizAttemptsTable( $wpdb->prefix ), $wpdb->prefix );
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$this->wpdb->delete( $attemptsTable, array( 'quiz_id' => $id ), array( '%d' ) );
+		$wpdb->delete( $attemptsTable, array( 'quiz_id' => $id ), array( '%d' ) );
 
-		$table = Schema::validateTable( Schema::quizzesTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$table = Schema::validateTable( Schema::quizzesTable( $wpdb->prefix ), $wpdb->prefix );
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$deleted = $this->wpdb->delete( $table, array( 'id' => $id ), array( '%d' ) );
+		$deleted = $wpdb->delete( $table, array( 'id' => $id ), array( '%d' ) );
 
 		return false !== $deleted && $deleted > 0;
 	}
 
 	public function deleteAttemptsByQuizId( int $quizId ): void {
+		$wpdb = $this->wpdb;
 		if ( $quizId <= 0 ) {
 			return;
 		}
-		$attemptsTable = Schema::validateTable( Schema::quizAttemptsTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$attemptsTable = Schema::validateTable( Schema::quizAttemptsTable( $wpdb->prefix ), $wpdb->prefix );
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$this->wpdb->delete( $attemptsTable, array( 'quiz_id' => $quizId ), array( '%d' ) );
+		$wpdb->delete( $attemptsTable, array( 'quiz_id' => $quizId ), array( '%d' ) );
 	}
 
 	public function deleteQuestion( int $id ): bool {
-		$table = Schema::validateTable( Schema::quizQuestionsTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::quizQuestionsTable( $wpdb->prefix ), $wpdb->prefix );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$deleted = $this->wpdb->delete( $table, array( 'id' => $id ), array( '%d' ) );
+		$deleted = $wpdb->delete( $table, array( 'id' => $id ), array( '%d' ) );
 
 		return false !== $deleted && $deleted > 0;
 	}
 
 	public function deleteQuestionsByQuizId( int $quizId ): void {
-		$table = Schema::validateTable( Schema::quizQuestionsTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::quizQuestionsTable( $wpdb->prefix ), $wpdb->prefix );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$this->wpdb->delete( $table, array( 'quiz_id' => $quizId ), array( '%d' ) );
+		$wpdb->delete( $table, array( 'quiz_id' => $quizId ), array( '%d' ) );
 	}
 
 	public function deleteByLessonId( int $lessonId ): void {
@@ -293,17 +299,17 @@ final class WpdbQuizRepository implements QuizRepositoryInterface {
 	}
 
 	public function nextQuestionSortOrder( int $quizId ): int {
-		$table = Schema::validateTable( Schema::quizQuestionsTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::quizQuestionsTable( $wpdb->prefix ), $wpdb->prefix );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$max = $this->wpdb->get_var(
-			$this->wpdb->prepare(
-				"SELECT MAX(sort_order) FROM {$table} WHERE quiz_id = %d",
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$max = $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT MAX(sort_order) FROM %i WHERE quiz_id = %d',
+				$table,
 				$quizId
 			)
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
-
 		if ( null === $max || '' === $max ) {
 			return 0;
 		}
@@ -315,11 +321,12 @@ final class WpdbQuizRepository implements QuizRepositoryInterface {
 	 * @param list<int> $quizIds
 	 */
 	public function reorderQuizzes( int $lessonId, array $quizIds ): void {
-		$table = Schema::validateTable( Schema::quizzesTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::quizzesTable( $wpdb->prefix ), $wpdb->prefix );
 
 		foreach ( $quizIds as $index => $quizId ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$this->wpdb->update(
+			$wpdb->update(
 				$table,
 				array( 'sort_order' => (int) $index ),
 				array(
@@ -336,11 +343,12 @@ final class WpdbQuizRepository implements QuizRepositoryInterface {
 	 * @param list<int> $questionIds
 	 */
 	public function reorderQuestions( int $quizId, array $questionIds ): void {
-		$table = Schema::validateTable( Schema::quizQuestionsTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::quizQuestionsTable( $wpdb->prefix ), $wpdb->prefix );
 
 		foreach ( $questionIds as $index => $questionId ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$this->wpdb->update(
+			$wpdb->update(
 				$table,
 				array( 'sort_order' => (int) $index ),
 				array(
@@ -354,12 +362,13 @@ final class WpdbQuizRepository implements QuizRepositoryInterface {
 	}
 
 	public function saveAttempt( QuizAttempt $attempt ): QuizAttempt {
-		$table       = Schema::validateTable( Schema::quizAttemptsTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb        = $this->wpdb;
+		$table       = Schema::validateTable( Schema::quizAttemptsTable( $wpdb->prefix ), $wpdb->prefix );
 		$answersJson = wp_json_encode( $attempt->answers );
 		$answersJson = is_string( $answersJson ) ? $answersJson : '{}';
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
-		$inserted = $this->wpdb->insert(
+		$inserted = $wpdb->insert(
 			$table,
 			array(
 				'user_id'       => $attempt->userId,
@@ -377,7 +386,7 @@ final class WpdbQuizRepository implements QuizRepositoryInterface {
 		}
 
 		return new QuizAttempt(
-			(int) $this->wpdb->insert_id,
+			(int) $wpdb->insert_id,
 			$attempt->userId,
 			$attempt->quizId,
 			$attempt->scorePercent,
@@ -388,20 +397,20 @@ final class WpdbQuizRepository implements QuizRepositoryInterface {
 	}
 
 	public function findAttemptsByQuizId( int $quizId ): array {
-		$table = Schema::validateTable( Schema::quizAttemptsTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::quizAttemptsTable( $wpdb->prefix ), $wpdb->prefix );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$rows = $this->wpdb->get_results(
-			$this->wpdb->prepare(
-				"SELECT id, user_id, quiz_id, score_percent, passed, answers_json, completed_at
-				FROM {$table}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$rows     = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT id, user_id, quiz_id, score_percent, passed, answers_json, completed_at
+				FROM %i
 				WHERE quiz_id = %d
-				ORDER BY completed_at DESC",
+				ORDER BY completed_at DESC',
+				$table,
 				$quizId
 			)
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
-
 		$attempts = array();
 
 		if ( is_array( $rows ) ) {
@@ -414,22 +423,22 @@ final class WpdbQuizRepository implements QuizRepositoryInterface {
 	}
 
 	public function findBestPassedAttempt( int $userId, int $quizId ): ?QuizAttempt {
-		$table = Schema::validateTable( Schema::quizAttemptsTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::quizAttemptsTable( $wpdb->prefix ), $wpdb->prefix );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$row = $this->wpdb->get_row(
-			$this->wpdb->prepare(
-				"SELECT id, user_id, quiz_id, score_percent, passed, answers_json, completed_at
-				FROM {$table}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT id, user_id, quiz_id, score_percent, passed, answers_json, completed_at
+				FROM %i
 				WHERE user_id = %d AND quiz_id = %d AND passed = 1
 				ORDER BY score_percent DESC, completed_at DESC
-				LIMIT 1",
+				LIMIT 1',
+				$table,
 				$userId,
 				$quizId
 			)
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
-
 		if ( null === $row ) {
 			return null;
 		}

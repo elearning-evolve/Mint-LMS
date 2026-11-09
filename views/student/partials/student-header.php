@@ -2,13 +2,15 @@
 declare(strict_types=1);
 defined( 'ABSPATH' ) || exit;
 
-// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template partial variables.
 $pageTitle    = $pageTitle ?? '';
 $user         = wp_get_current_user();
-$userName     = $userName ?? ( $user->display_name ?: '' );
+$userName     = $userName ?? ( '' !== (string) $user->display_name ? (string) $user->display_name : '' );
 $userInitials = $userInitials ?? MintLMS\Infrastructure\Ui\MintUi::initials( $userName );
 $huePalette   = array(
-	array( 'bg' => 'mint-bg-hue-2', 'text' => 'mint-text-hue-2i' ),
+	array(
+		'bg'   => 'mint-bg-hue-2',
+		'text' => 'mint-text-hue-2i',
+	),
 );
 $hue          = $huePalette[0];
 ?>

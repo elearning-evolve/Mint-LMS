@@ -3,13 +3,11 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template partial variables.
-
 use MintLMS\Infrastructure\Admin\ViewRenderer;
 
 $renderer = new ViewRenderer();
 
-$inputClass = 'mint-block mint-w-full mint-h-[50px] mint-rounded-lg mint-border mint-border-control mint-bg-bg mint-px-[14px] mint-text-[17px] mint-text-ink hover:mint-border-mint-blue focus:mint-border-mint-blue focus:mint-shadow-focus focus:mint-outline-none';
+$inputClass    = 'mint-block mint-w-full mint-h-[50px] mint-rounded-lg mint-border mint-border-control mint-bg-bg mint-px-[14px] mint-text-[17px] mint-text-ink hover:mint-border-mint-blue focus:mint-border-mint-blue focus:mint-shadow-focus focus:mint-outline-none';
 $textareaClass = 'mint-block mint-w-full mint-min-h-[100px] mint-resize-y mint-rounded-lg mint-border mint-border-control mint-bg-bg mint-px-[14px] mint-py-[11px] mint-text-base mint-text-ink hover:mint-border-mint-blue focus:mint-border-mint-blue focus:mint-shadow-focus focus:mint-outline-none';
 ?>
 <div class="wrap mint-lms-admin-wrap mint-m-0 mint-p-0">

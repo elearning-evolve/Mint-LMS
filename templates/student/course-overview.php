@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template partial variables.
-
 use MintLMS\Application\Student\Dto\StudentCourseOverviewDto;
 
 /** @var StudentCourseOverviewDto $overview */
@@ -142,21 +140,25 @@ $showCta = $overview->isEnrolled || $overview->canEnroll || ( 'paid' === $overvi
 		<?php if ( $showCta ) : ?>
 			<div class="mint-mt-4 mint-flex mint-flex-wrap mint-gap-3">
 				<?php if ( $overview->isEnrolled ) : ?>
-					<a href="<?php echo esc_url( $continueUrl ); ?>" class="mint-inline-flex mint-h-[42px] mint-items-center mint-justify-center mint-rounded-lg mint-border-0 mint-bg-cta mint-px-[18px] mint-text-sm mint-font-bold mint-text-cta-ink mint-no-underline hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(11,79,63,0.35)]"><?php
+					<a href="<?php echo esc_url( $continueUrl ); ?>" class="mint-inline-flex mint-h-[42px] mint-items-center mint-justify-center mint-rounded-lg mint-border-0 mint-bg-cta mint-px-[18px] mint-text-sm mint-font-bold mint-text-cta-ink mint-no-underline hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(11,79,63,0.35)]">
+					<?php
 						echo null !== $overview->progressPct && $overview->progressPct > 0
 							? esc_html__( 'Continue lesson', 'mint-lms' )
 							: esc_html__( 'Start course', 'mint-lms' );
-					?></a>
+					?>
+					</a>
 				<?php elseif ( $overview->canEnroll ) : ?>
 					<a href="<?php echo esc_url( $enrollUrl ); ?>" class="mint-inline-flex mint-h-[42px] mint-items-center mint-justify-center mint-rounded-lg mint-border-0 mint-bg-cta mint-px-[18px] mint-text-sm mint-font-bold mint-text-cta-ink mint-no-underline hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(11,79,63,0.35)]"><?php esc_html_e( 'Enroll for free', 'mint-lms' ); ?></a>
 				<?php elseif ( 'paid' === $overview->enrollmentType && '' !== $purchaseUrl ) : ?>
-					<a href="<?php echo esc_url( $purchaseUrl ); ?>" class="mint-inline-flex mint-h-[42px] mint-items-center mint-justify-center mint-rounded-lg mint-border-0 mint-bg-cta mint-px-[18px] mint-text-sm mint-font-bold mint-text-cta-ink mint-no-underline hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(11,79,63,0.35)]"><?php
+					<a href="<?php echo esc_url( $purchaseUrl ); ?>" class="mint-inline-flex mint-h-[42px] mint-items-center mint-justify-center mint-rounded-lg mint-border-0 mint-bg-cta mint-px-[18px] mint-text-sm mint-font-bold mint-text-cta-ink mint-no-underline hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(11,79,63,0.35)]">
+					<?php
 						echo '' !== $productPrice
 							? esc_html( sprintf( __( 'Buy course — %s', 'mint-lms' ), function_exists( 'wc_price' ) ? wp_strip_all_tags( wc_price( (float) $productPrice ) ) : $productPrice ) )
 							: esc_html__( 'Buy course', 'mint-lms' );
-					?></a>
+					?>
+					</a>
 				<?php elseif ( ! $overview->isLoggedIn ) : ?>
-					<a href="<?php echo esc_url( wp_login_url( get_permalink() ?: home_url( '/' ) ) ); ?>" class="mint-inline-flex mint-h-[42px] mint-items-center mint-justify-center mint-rounded-lg mint-border-0 mint-bg-cta mint-px-[18px] mint-text-sm mint-font-bold mint-text-cta-ink mint-no-underline hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(11,79,63,0.35)]"><?php esc_html_e( 'Log in to enroll', 'mint-lms' ); ?></a>
+					<a href="<?php echo esc_url( wp_login_url( get_permalink() ? get_permalink() : home_url( '/' ) ) ); ?>" class="mint-inline-flex mint-h-[42px] mint-items-center mint-justify-center mint-rounded-lg mint-border-0 mint-bg-cta mint-px-[18px] mint-text-sm mint-font-bold mint-text-cta-ink mint-no-underline hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(11,79,63,0.35)]"><?php esc_html_e( 'Log in to enroll', 'mint-lms' ); ?></a>
 				<?php endif; ?>
 			</div>
 		<?php endif; ?>
@@ -175,7 +177,8 @@ $showCta = $overview->isEnrolled || $overview->canEnroll || ( 'paid' === $overvi
 			</div>
 		<?php else : ?>
 			<div class="mint-mt-[18px] mint-grid mint-gap-3">
-				<?php foreach ( $outline as $section ) :
+				<?php
+				foreach ( $outline as $section ) :
 					$sectionId    = (int) ( $section['id'] ?? 0 );
 					$sectionKey   = 'sec-' . $sectionId;
 					$sectionTitle = (string) ( $section['title'] ?? '' );
@@ -209,7 +212,8 @@ $showCta = $overview->isEnrolled || $overview->canEnroll || ( 'paid' === $overvi
 							<?php if ( array() === $lessons ) : ?>
 								<p class="mint-m-0 mint-px-2 mint-py-2 mint-text-sm mint-text-[#5C5C77]"><?php esc_html_e( 'No lessons in this lesson group yet.', 'mint-lms' ); ?></p>
 							<?php endif; ?>
-							<?php foreach ( $lessons as $lesson ) :
+							<?php
+							foreach ( $lessons as $lesson ) :
 								$lessonId    = (int) ( $lesson['id'] ?? 0 );
 								$lessonKey   = $sectionKey . '-les-' . $lessonId;
 								$lessonTitle = (string) ( $lesson['title'] ?? '' );
@@ -247,7 +251,8 @@ $showCta = $overview->isEnrolled || $overview->canEnroll || ( 'paid' === $overvi
 
 										<?php if ( array() !== $quizzes ) : ?>
 											<div class="mint-s3-lesson__body" x-show="isOpen('<?php echo esc_js( $lessonKey ); ?>')" x-cloak>
-												<?php foreach ( $quizzes as $quiz ) :
+												<?php
+												foreach ( $quizzes as $quiz ) :
 													$quizId    = (int) ( $quiz['id'] ?? 0 );
 													$quizKey   = $lessonKey . '-quiz-' . $quizId;
 													$quizTitle = (string) ( $quiz['title'] ?? '' );

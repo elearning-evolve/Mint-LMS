@@ -96,8 +96,22 @@ final class EnrollmentController {
 			$userId      = null !== $targetUser && '' !== $targetUser ? (int) $targetUser : $actorUserId;
 
 			$enrollment = $this->enrollmentService->enroll( $userId, $courseId, $actorUserId );
+			$payload    = $enrollment->toArray();
+			$user       = get_userdata( $userId );
 
-			return ApiResponse::success( $enrollment->toArray(), 201 );
+			if ( $user instanceof \WP_User ) {
+				$payload['displayName'] = (string) $user->display_name;
+				$payload['email']       = (string) $user->user_email;
+			} else {
+				$payload['displayName'] = sprintf(
+					/* translators: %d: user ID */
+					__( 'User #%d', 'mint-lms' ),
+					$userId
+				);
+				$payload['email'] = '';
+			}
+
+			return ApiResponse::success( $payload, 201 );
 		} catch ( ValidationException $exception ) {
 			return ApiResponse::error( 'validation_error', $exception->getMessage(), 400, $exception->errors() );
 		} catch ( NotFoundException $exception ) {

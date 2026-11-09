@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template partial variables.
-
 $message = $message ?? __( 'We couldn\'t load this course. Please try again.', 'mint-lms' );
 ?>
 <div class="mint-flex mint-min-h-[50vh] mint-items-center mint-justify-center mint-px-4 mint-py-16">

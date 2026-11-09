@@ -1,0 +1,5 @@
+---
+description: EVOLVE WordPress pipeline rules (WPCS + EvolveQA). Applies to all PHP work.
+alwaysApply: true
+---
+Follow @AGENTS.md for every change. Before you say a change is done, run `bash wp-qa-check.sh` and make sure it ends with PASS.

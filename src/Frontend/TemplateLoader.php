@@ -5,25 +5,15 @@ namespace MintLMS\Frontend;
 
 defined( 'ABSPATH' ) || exit;
 
+use MintLMS\Infrastructure\View\ScopedPhpTemplate;
+
 final class TemplateLoader {
 
 	/**
 	 * @param array<string, mixed> $vars
 	 */
 	public function render( string $template, array $vars = array() ): string {
-		$path = $this->locate( $template );
-
-		if ( ! is_readable( $path ) ) {
-			return '';
-		}
-
-		ob_start();
-
-		// phpcs:ignore WordPress.PHP.DontExtract.extract_extract -- Scoped template variables.
-		extract( $vars, EXTR_SKIP );
-		include $path;
-
-		return (string) ob_get_clean();
+		return ScopedPhpTemplate::render( $this->locate( $template ), $vars );
 	}
 
 	public function locate( string $template ): string {

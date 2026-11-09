@@ -310,11 +310,11 @@ final class QuizController {
 				continue;
 			}
 
-			$lessonId  = (int) get_post_meta( $post->ID, PostTypes::META_LESSON_ID, true );
-			$sectionId = $lessonId > 0 ? (int) get_post_meta( $lessonId, PostTypes::META_SECTION_ID, true ) : 0;
+			$lessonId       = (int) get_post_meta( $post->ID, PostTypes::META_LESSON_ID, true );
+			$sectionId      = $lessonId > 0 ? (int) get_post_meta( $lessonId, PostTypes::META_SECTION_ID, true ) : 0;
 			$lessonCourseId = $lessonId > 0 ? (int) get_post_meta( $lessonId, PostTypes::META_COURSE_ID, true ) : 0;
 			// Disposable host lessons (courseId 0) are not part of the course tree.
-			$linked = $lessonId > 0 && $lessonCourseId > 0;
+			$linked        = $lessonId > 0 && $lessonCourseId > 0;
 			$questionShell = (bool) get_post_meta( $post->ID, PostTypes::META_QUESTION_SHELL, true );
 
 			$items[] = array(
@@ -435,8 +435,8 @@ final class QuizController {
 
 	public function get( \WP_REST_Request $request ): \WP_REST_Response {
 		try {
-			$userId = $this->authorization->getCurrentUserId();
-			$id     = (int) $request->get_param( 'id' );
+			$userId     = $this->authorization->getCurrentUserId();
+			$id         = (int) $request->get_param( 'id' );
 			$forStudent = ! $this->canManageCourses();
 
 			$quiz = $this->quizService->get( $id, $userId, $forStudent );
@@ -658,7 +658,7 @@ final class QuizController {
 
 			$correctAnswer = null;
 			if ( $request->offsetExists( 'correct_answer' ) ) {
-				$rawCorrect = $request->get_param( 'correct_answer' );
+				$rawCorrect    = $request->get_param( 'correct_answer' );
 				$correctAnswer = is_array( $rawCorrect )
 					? QuestionAnswerCodec::encodeMulti( array_map( 'strval', $rawCorrect ) )
 					: (string) $rawCorrect;
@@ -711,8 +711,8 @@ final class QuizController {
 
 	public function submitAttempt( \WP_REST_Request $request ): \WP_REST_Response {
 		try {
-			$userId = $this->authorization->getCurrentUserId();
-			$id     = (int) $request->get_param( 'id' );
+			$userId  = $this->authorization->getCurrentUserId();
+			$id      = (int) $request->get_param( 'id' );
 			$raw     = $request->get_param( 'answers' );
 			$answers = array();
 
@@ -799,19 +799,19 @@ final class QuizController {
 	 */
 	private function updateQuizArgs(): array {
 		return array(
-			'title'              => array(
+			'title'             => array(
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 			),
-			'pass_percent'       => array(
+			'pass_percent'      => array(
 				'type'              => 'integer',
 				'sanitize_callback' => 'absint',
 			),
-			'featured_image_id'  => array(
+			'featured_image_id' => array(
 				'type'              => 'integer',
 				'sanitize_callback' => 'absint',
 			),
-			'settings'           => array(
+			'settings'          => array(
 				'type' => 'object',
 			),
 		);
@@ -854,7 +854,7 @@ final class QuizController {
 	 */
 	private function questionArgs( bool $requireAll = true ): array {
 		$args = array(
-			'type'            => array(
+			'type'           => array(
 				'type'              => 'string',
 				'required'          => $requireAll,
 				'sanitize_callback' => 'sanitize_key',
@@ -862,16 +862,16 @@ final class QuizController {
 					return in_array( (string) $value, QuizQuestion::types(), true );
 				},
 			),
-			'prompt'          => array(
+			'prompt'         => array(
 				'type'              => 'string',
 				'required'          => $requireAll,
 				'sanitize_callback' => 'sanitize_textarea_field',
 			),
-			'options'         => array(
+			'options'        => array(
 				'type'     => 'array',
 				'required' => false,
 			),
-			'correct_answer'  => array(
+			'correct_answer' => array(
 				'required' => $requireAll,
 			),
 		);
@@ -909,7 +909,7 @@ final class QuizController {
 	 * @return array<string, mixed>
 	 */
 	private function quizPayload( \MintLMS\Application\Quiz\Dto\QuizDto $quiz ): array {
-		$data = $quiz->toArray();
+		$data                     = $quiz->toArray();
 		$data['settings']         = $this->readQuizSettings( $quiz->id );
 		$data['featuredImageId']  = null;
 		$data['featuredImageUrl'] = '';
@@ -931,8 +931,8 @@ final class QuizController {
 				if ( ! is_array( $question ) || empty( $question['id'] ) ) {
 					continue;
 				}
-				$questionId = (int) $question['id'];
-				$qThumbId   = (int) get_post_thumbnail_id( $questionId );
+				$questionId                                      = (int) $question['id'];
+				$qThumbId                                        = (int) get_post_thumbnail_id( $questionId );
 				$data['questions'][ $index ]['featuredImageId']  = $qThumbId > 0 ? $qThumbId : null;
 				$data['questions'][ $index ]['featuredImageUrl'] = '';
 				$data['questions'][ $index ]['status']           = $this->mintPostStatus( (string) get_post_status( $questionId ) );
@@ -961,63 +961,63 @@ final class QuizController {
 	 */
 	private function defaultQuizSettings(): array {
 		return array(
-			'restrictRetakes'             => false,
-			'retriesAllowed'              => 0,
-			'retriesApplicableTo'         => 'all',
-			'questionCompletion'          => false,
-			'timeLimitEnabled'            => false,
-			'timeLimitHours'              => '00',
-			'timeLimitMinutes'            => '00',
-			'timeLimitSeconds'            => '00',
-			'quizSavingEnabled'           => false,
-			'quizSavingIntervalSeconds'   => 20,
-			'releaseSchedule'             => 'immediately',
-			'releaseDaysAfterEnrollment'  => 0,
-			'releaseMonth'                => '',
-			'releaseDay'                  => '',
-			'releaseYear'                 => '',
-			'releaseHour'                 => '',
-			'releaseMinute'               => '',
-			'releaseDate'                 => '',
-			'externalQuiz'                => false,
-			'prerequisiteQuizId'          => 0,
-			'allowedRegisteredOnly'       => false,
-			'certificate'                 => 'none',
-			'materialsEnabled'            => false,
-			'materialsContent'            => '',
-			'autostart'                   => false,
-			'questionDisplay'             => 'one',
-			'resultsMode'                 => 'end',
-			'displayBackButton'           => false,
-			'questionOverview'            => false,
-			'quizSummary'                 => false,
-			'skipQuestion'                => false,
-			'customOrdering'              => false,
-			'sortByCategory'              => false,
-			'randomizeOrder'              => false,
-			'randomizeMode'               => 'all',
-			'randomizeCount'              => 0,
-			'customElements'              => false,
-			'showPointValue'              => false,
-			'showCategory'                => false,
-			'showPosition'                => false,
-			'showNumbering'               => false,
-			'numberAnswers'               => false,
-			'randomizeAnswers'            => false,
-			'showQuizTitle'               => true,
-			'resultMessagesEnabled'       => false,
-			'resultMessages'              => array(),
-			'restartButton'               => false,
-			'customResults'               => false,
-			'showAverageScore'            => false,
-			'showCategoryScore'           => false,
-			'showOverallScore'            => true,
-			'showCorrectCount'            => false,
-			'showTimeSpent'               => false,
-			'customAnswerFeedback'        => false,
-			'correctIncorrectMessages'    => false,
-			'correctIncorrectMarks'       => false,
-			'viewQuestionsButton'         => false,
+			'restrictRetakes'            => false,
+			'retriesAllowed'             => 0,
+			'retriesApplicableTo'        => 'all',
+			'questionCompletion'         => false,
+			'timeLimitEnabled'           => false,
+			'timeLimitHours'             => '00',
+			'timeLimitMinutes'           => '00',
+			'timeLimitSeconds'           => '00',
+			'quizSavingEnabled'          => false,
+			'quizSavingIntervalSeconds'  => 20,
+			'releaseSchedule'            => 'immediately',
+			'releaseDaysAfterEnrollment' => 0,
+			'releaseMonth'               => '',
+			'releaseDay'                 => '',
+			'releaseYear'                => '',
+			'releaseHour'                => '',
+			'releaseMinute'              => '',
+			'releaseDate'                => '',
+			'externalQuiz'               => false,
+			'prerequisiteQuizId'         => 0,
+			'allowedRegisteredOnly'      => false,
+			'certificate'                => 'none',
+			'materialsEnabled'           => false,
+			'materialsContent'           => '',
+			'autostart'                  => false,
+			'questionDisplay'            => 'one',
+			'resultsMode'                => 'end',
+			'displayBackButton'          => false,
+			'questionOverview'           => false,
+			'quizSummary'                => false,
+			'skipQuestion'               => false,
+			'customOrdering'             => false,
+			'sortByCategory'             => false,
+			'randomizeOrder'             => false,
+			'randomizeMode'              => 'all',
+			'randomizeCount'             => 0,
+			'customElements'             => false,
+			'showPointValue'             => false,
+			'showCategory'               => false,
+			'showPosition'               => false,
+			'showNumbering'              => false,
+			'numberAnswers'              => false,
+			'randomizeAnswers'           => false,
+			'showQuizTitle'              => true,
+			'resultMessagesEnabled'      => false,
+			'resultMessages'             => array(),
+			'restartButton'              => false,
+			'customResults'              => false,
+			'showAverageScore'           => false,
+			'showCategoryScore'          => false,
+			'showOverallScore'           => true,
+			'showCorrectCount'           => false,
+			'showTimeSpent'              => false,
+			'customAnswerFeedback'       => false,
+			'correctIncorrectMessages'   => false,
+			'correctIncorrectMarks'      => false,
+			'viewQuestionsButton'        => false,
 		);
 	}
 
@@ -1144,8 +1144,10 @@ final class QuizController {
 	}
 
 	/**
-	 * @param mixed $messages
-	 * @return list<array{from:int,message:string,open:bool}>
+	 * Persist score thresholds + message HTML only. Collapse/editor UI state is client-side.
+	 *
+	 * @param mixed $messages Raw messages from request.
+	 * @return list<array{from:int,message:string}>
 	 */
 	private function sanitizeQuizResultMessages( mixed $messages ): array {
 		if ( ! is_array( $messages ) ) {
@@ -1159,7 +1161,6 @@ final class QuizController {
 			$out[] = array(
 				'from'    => absint( $row['from'] ?? 0 ),
 				'message' => wp_kses_post( (string) ( $row['message'] ?? '' ) ),
-				'open'    => ! isset( $row['open'] ) || ! empty( $row['open'] ),
 			);
 		}
 		return $out;
@@ -1232,29 +1233,29 @@ final class QuizController {
 			return $this->defaultQuestionSettings();
 		}
 
-		$settings = array_merge( $this->defaultQuestionSettings(), $raw );
-		$settings['freePreview']    = ! empty( $settings['freePreview'] );
-		$settings['attachmentId']   = absint( $settings['attachmentId'] ?? 0 );
-		$settings['attachmentName'] = sanitize_text_field( (string) ( $settings['attachmentName'] ?? '' ) );
-		$settings['attachmentUrl']  = esc_url_raw( (string) ( $settings['attachmentUrl'] ?? '' ) );
-		$settings['allowHtml']      = isset( $settings['allowHtml'] ) && is_array( $settings['allowHtml'] )
+		$settings                      = array_merge( $this->defaultQuestionSettings(), $raw );
+		$settings['freePreview']       = ! empty( $settings['freePreview'] );
+		$settings['attachmentId']      = absint( $settings['attachmentId'] ?? 0 );
+		$settings['attachmentName']    = sanitize_text_field( (string) ( $settings['attachmentName'] ?? '' ) );
+		$settings['attachmentUrl']     = esc_url_raw( (string) ( $settings['attachmentUrl'] ?? '' ) );
+		$settings['allowHtml']         = isset( $settings['allowHtml'] ) && is_array( $settings['allowHtml'] )
 			? array_map( static fn( $v ): bool => (bool) $v, array_values( $settings['allowHtml'] ) )
 			: array();
-		$settings['submitMethod']   = in_array( (string) ( $settings['submitMethod'] ?? '' ), array( 'Text Box', 'Upload' ), true )
+		$settings['submitMethod']      = in_array( (string) ( $settings['submitMethod'] ?? '' ), array( 'Text Box', 'Upload' ), true )
 			? (string) $settings['submitMethod']
 			: 'Text Box';
-		$allowedGrading = array(
+		$allowedGrading                = array(
 			'-- Select --',
 			'Not Graded, No Points Awarded',
 			'Not Graded, Full Points Awarded',
 			'Graded, Full Points Awarded',
 		);
-		$settings['gradingMode'] = in_array( (string) ( $settings['gradingMode'] ?? '' ), $allowedGrading, true )
+		$settings['gradingMode']       = in_array( (string) ( $settings['gradingMode'] ?? '' ), $allowedGrading, true )
 			? (string) $settings['gradingMode']
 			: 'Not Graded, No Points Awarded';
-		$settings['points'] = max( 0, absint( $settings['points'] ?? 1 ) );
-		$settings['extraTf'] = $this->sanitizeExtraTfList( $settings['extraTf'] ?? array() );
-		$settings['displayTitle'] = sanitize_text_field( (string) ( $settings['displayTitle'] ?? '' ) );
+		$settings['points']            = max( 0, absint( $settings['points'] ?? 1 ) );
+		$settings['extraTf']           = $this->sanitizeExtraTfList( $settings['extraTf'] ?? array() );
+		$settings['displayTitle']      = sanitize_text_field( (string) ( $settings['displayTitle'] ?? '' ) );
 		$settings['answerTypePending'] = ! empty( $settings['answerTypePending'] );
 
 		return $settings;
@@ -1317,12 +1318,12 @@ final class QuizController {
 			$clean['allowHtml'] = array_map( static fn( $v ): bool => (bool) $v, array_values( $settings['allowHtml'] ) );
 		}
 		if ( array_key_exists( 'submitMethod', $settings ) ) {
-			$method = (string) $settings['submitMethod'];
+			$method                = (string) $settings['submitMethod'];
 			$clean['submitMethod'] = in_array( $method, array( 'Text Box', 'Upload' ), true ) ? $method : 'Text Box';
 		}
 		if ( array_key_exists( 'gradingMode', $settings ) ) {
-			$mode = (string) $settings['gradingMode'];
-			$allowed = array(
+			$mode                 = (string) $settings['gradingMode'];
+			$allowed              = array(
 				'-- Select --',
 				'Not Graded, No Points Awarded',
 				'Not Graded, Full Points Awarded',

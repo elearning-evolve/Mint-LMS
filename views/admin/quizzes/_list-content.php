@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template partial variables.
-
 /** @var MintLMS\Infrastructure\Admin\ViewRenderer $renderer */
 $addNewUrl = $addNewUrl ?? admin_url( 'post-new.php?post_type=mint-quiz' );
 ?>

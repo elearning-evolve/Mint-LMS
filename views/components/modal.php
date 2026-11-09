@@ -3,13 +3,11 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template partial variables.
-
-$id      = $id ?? 'mint-modal';
-$title   = $title ?? '';
-$body    = $body ?? '';
-$footer  = $footer ?? '';
-$open    = $open ?? false;
+$id     = $id ?? 'mint-modal';
+$title  = $title ?? '';
+$body   = $body ?? '';
+$footer = $footer ?? '';
+$open   = $open ?? false;
 ?>
 <div
 	x-data="{ open: <?php echo $open ? 'true' : 'false'; ?> }"

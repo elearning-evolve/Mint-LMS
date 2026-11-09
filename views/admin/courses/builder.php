@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template partial variables.
-
 use MintLMS\Infrastructure\Admin\ViewRenderer;
 
 /** @var ViewRenderer $renderer */
@@ -20,7 +18,7 @@ $content = $renderer->render(
 	'admin/courses/_builder-content',
 	array(
 		'renderer' => $renderer,
-		'courseId'  => $courseId,
+		'courseId' => $courseId,
 	)
 );
 
