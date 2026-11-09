@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template partial variables.
-
 /**
  * S3B Lesson preview — student view when opening a course-associated lesson.
  *
@@ -116,7 +114,8 @@ $displayLesson = '' !== $lessonTitle ? $lessonTitle : __( 'Untitled lesson', 'mi
 			<?php if ( array() === $quizzes ) : ?>
 				<div class="mint-px-1 mint-py-2 mint-text-[13px] mint-text-[#5C5C77]"><?php esc_html_e( 'No quiz yet.', 'mint-lms' ); ?></div>
 			<?php else : ?>
-				<?php foreach ( $quizzes as $quiz ) :
+				<?php
+				foreach ( $quizzes as $quiz ) :
 					$quizId        = (int) ( $quiz['id'] ?? 0 );
 					$quizKey       = 'quiz-' . $quizId;
 					$quizTitle     = (string) ( $quiz['title'] ?? __( 'Quiz', 'mint-lms' ) );

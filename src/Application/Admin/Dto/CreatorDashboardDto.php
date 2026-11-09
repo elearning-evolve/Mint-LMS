@@ -6,7 +6,7 @@ namespace MintLMS\Application\Admin\Dto;
 final class CreatorDashboardDto {
 
 	/**
-	 * @param list<DashboardCourseRowDto> $courses
+	 * @param list<DashboardCourseRowDto> $courses Visible course rows (capped for the dashboard table).
 	 * @param list<DashboardActivityItemDto> $activity
 	 */
 	public function __construct(
@@ -16,6 +16,7 @@ final class CreatorDashboardDto {
 		public readonly ?NeedsYouCourseDto $needsYou,
 		public readonly array $activity,
 		public readonly string $signalLine,
+		public readonly int $coursesTotal = 0,
 	) {
 	}
 }

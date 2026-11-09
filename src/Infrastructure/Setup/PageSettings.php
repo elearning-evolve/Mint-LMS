@@ -132,31 +132,31 @@ final class PageSettings {
 		return array(
 			array(
 				'key'    => 'dashboard_page',
-				'label'  => __( 'Dashboard page assigned', 'mint-lms' ),
+				'label'  => __( 'Dashboard page set', 'mint-lms' ),
 				'done'   => $this->isValidLmsPage( $dashboardId, '[mint_lms_dashboard]' ),
 				'detail' => $this->pageChecklistDetail( $dashboardId, __( 'My Learning', 'mint-lms' ) ),
 			),
 			array(
 				'key'    => 'catalog_page',
-				'label'  => __( 'Course catalog page assigned', 'mint-lms' ),
+				'label'  => __( 'Course catalog page set', 'mint-lms' ),
 				'done'   => $this->isValidLmsPage( $catalogId, '[mint_lms_catalog]' ),
 				'detail' => $this->pageChecklistDetail( $catalogId, __( 'Courses', 'mint-lms' ) ),
 			),
 			array(
 				'key'    => 'player_page',
-				'label'  => __( 'Course player page assigned', 'mint-lms' ),
+				'label'  => __( 'Course player page set', 'mint-lms' ),
 				'done'   => $this->isValidLmsPage( $playerId, '[mint_lms_player]' ),
 				'detail' => $this->pageChecklistDetail( $playerId, __( 'Course Player', 'mint-lms' ) ),
 			),
 			array(
 				'key'    => 'default_enrollment',
-				'label'  => __( 'Default enrollment mode set', 'mint-lms' ),
+				'label'  => __( 'Default joining method set', 'mint-lms' ),
 				'done'   => '' !== $this->getDefaultEnrollment(),
 				'detail' => match ( $this->getDefaultEnrollment() ) {
-					'open'   => __( 'Open for everyone', 'mint-lms' ),
-					'free'   => __( 'Free — login to join', 'mint-lms' ),
-					'paid'   => __( 'Paid (WooCommerce)', 'mint-lms' ),
-					default  => __( 'Invite only', 'mint-lms' ),
+					'open'  => __( 'Open for everyone', 'mint-lms' ),
+					'free'  => __( 'Free', 'mint-lms' ),
+					'paid'  => __( 'Paid', 'mint-lms' ),
+					default => __( 'Invite only', 'mint-lms' ),
 				},
 			),
 		);

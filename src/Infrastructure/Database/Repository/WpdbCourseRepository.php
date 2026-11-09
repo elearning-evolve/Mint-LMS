@@ -20,19 +20,19 @@ final class WpdbCourseRepository implements CourseRepositoryInterface {
 	}
 
 	public function findById( int $id ): ?Course {
-		$table = Schema::validateTable( Schema::coursesTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::coursesTable( $wpdb->prefix ), $wpdb->prefix );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$row = $this->wpdb->get_row(
-			$this->wpdb->prepare(
-				"SELECT *
-				FROM {$table}
-				WHERE id = %d",
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %i
+				WHERE id = %d',
+				$table,
 				$id
 			)
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
-
 		if ( null === $row ) {
 			return null;
 		}
@@ -41,19 +41,19 @@ final class WpdbCourseRepository implements CourseRepositoryInterface {
 	}
 
 	public function findBySlug( string $slug ): ?Course {
-		$table = Schema::validateTable( Schema::coursesTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::coursesTable( $wpdb->prefix ), $wpdb->prefix );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$row = $this->wpdb->get_row(
-			$this->wpdb->prepare(
-				"SELECT *
-				FROM {$table}
-				WHERE slug = %s",
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT *
+				FROM %i
+				WHERE slug = %s',
+				$table,
 				$slug
 			)
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
-
 		if ( null === $row ) {
 			return null;
 		}
@@ -62,16 +62,17 @@ final class WpdbCourseRepository implements CourseRepositoryInterface {
 	}
 
 	public function save( Course $course ): Course {
-		$table = Schema::validateTable( Schema::coursesTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::coursesTable( $wpdb->prefix ), $wpdb->prefix );
 		$now   = $course->updatedAt->format( 'Y-m-d H:i:s' );
 
 		if ( 0 === $course->id ) {
-			$created = $course->createdAt->format( 'Y-m-d H:i:s' );
+			$created      = $course->createdAt->format( 'Y-m-d H:i:s' );
 			$settingsJson = wp_json_encode( $course->settings->toArray() );
 			$settingsJson = is_string( $settingsJson ) ? $settingsJson : '{}';
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
-			$inserted = $this->wpdb->insert(
+			$inserted = $wpdb->insert(
 				$table,
 				array(
 					'title'             => $course->title,
@@ -93,7 +94,7 @@ final class WpdbCourseRepository implements CourseRepositoryInterface {
 			}
 
 			return new Course(
-				(int) $this->wpdb->insert_id,
+				(int) $wpdb->insert_id,
 				$course->title,
 				$course->slug,
 				$course->description,
@@ -111,7 +112,7 @@ final class WpdbCourseRepository implements CourseRepositoryInterface {
 		$settingsJson = is_string( $settingsJson ) ? $settingsJson : '{}';
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$updated = $this->wpdb->update(
+		$updated = $wpdb->update(
 			$table,
 			array(
 				'title'             => $course->title,
@@ -136,10 +137,11 @@ final class WpdbCourseRepository implements CourseRepositoryInterface {
 	}
 
 	public function delete( int $id ): bool {
-		$table = Schema::validateTable( Schema::coursesTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::coursesTable( $wpdb->prefix ), $wpdb->prefix );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$deleted = $this->wpdb->delete(
+		$deleted = $wpdb->delete(
 			$table,
 			array( 'id' => $id ),
 			array( '%d' )
@@ -149,7 +151,8 @@ final class WpdbCourseRepository implements CourseRepositoryInterface {
 	}
 
 	public function list( int $page, int $perPage, ?int $authorId = null, ?CourseStatus $status = null, ?string $search = null ): array {
-		$table  = Schema::validateTable( Schema::coursesTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb   = $this->wpdb;
+		$table  = Schema::validateTable( Schema::coursesTable( $wpdb->prefix ), $wpdb->prefix );
 		$offset = ( $page - 1 ) * $perPage;
 
 		$where  = array( '1=1' );
@@ -170,33 +173,26 @@ final class WpdbCourseRepository implements CourseRepositoryInterface {
 
 		if ( null !== $search && '' !== trim( $search ) ) {
 			$where[]  = 'title LIKE %s';
-			$params[] = '%' . $this->wpdb->esc_like( trim( $search ) ) . '%';
+			$params[] = '%' . $wpdb->esc_like( trim( $search ) ) . '%';
 		}
 
 		$whereSql = implode( ' AND ', $where );
 
-		$countSql = "SELECT COUNT(*) FROM {$table} WHERE {$whereSql}";
-		$listSql  = "SELECT *
-			FROM {$table}
-			WHERE {$whereSql}
+		$countSql = 'SELECT COUNT(*) FROM %i WHERE ' . $whereSql;
+		$listSql  = 'SELECT *
+			FROM %i
+			WHERE ' . $whereSql . '
 			ORDER BY created_at DESC
-			LIMIT %d OFFSET %d";
+			LIMIT %d OFFSET %d';
 
-		if ( array() !== $params ) {
-			// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-			$total = (int) $this->wpdb->get_var( $this->wpdb->prepare( $countSql, ...$params ) );
-			$rows  = $this->wpdb->get_results(
-				$this->wpdb->prepare( $listSql, ...array_merge( $params, array( $perPage, $offset ) ) )
-			);
-			// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
-		} else {
-			// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-			$total = (int) $this->wpdb->get_var( $countSql );
-			$rows  = $this->wpdb->get_results(
-				$this->wpdb->prepare( $listSql, $perPage, $offset )
-			);
-			// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
-		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- SQL built from validated table (%i) + whitelist WHERE fragments.
+		$total = (int) $wpdb->get_var( $wpdb->prepare( $countSql, $table, ...$params ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$rows = $wpdb->get_results(
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- SQL built from validated table (%i) + whitelist WHERE fragments.
+			$wpdb->prepare( $listSql, $table, ...array_merge( $params, array( $perPage, $offset ) ) )
+		);
 
 		$courses = array();
 
@@ -222,7 +218,7 @@ final class WpdbCourseRepository implements CourseRepositoryInterface {
 		$settings = CourseSettings::defaults();
 
 		if ( isset( $row->settings_json ) && is_string( $row->settings_json ) && '' !== $row->settings_json ) {
-			$decoded = json_decode( $row->settings_json, true );
+			$decoded  = json_decode( $row->settings_json, true );
 			$settings = CourseSettings::fromArray( is_array( $decoded ) ? $decoded : null );
 		}
 

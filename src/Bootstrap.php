@@ -16,6 +16,8 @@ use MintLMS\Application\Student\StudentExperienceService;
 use MintLMS\Frontend\ShortcodeRegistrar;
 use MintLMS\Frontend\StudentAssetLoader;
 use MintLMS\Frontend\TemplateLoader;
+use MintLMS\Application\Ai\AiAssistantService;
+use MintLMS\Http\Rest\Controller\AiController;
 use MintLMS\Http\Rest\Controller\ContentPostListController;
 use MintLMS\Http\Rest\Controller\CourseController;
 use MintLMS\Http\Rest\Controller\EnrollmentController;
@@ -26,6 +28,9 @@ use MintLMS\Http\Rest\Controller\QuizController;
 use MintLMS\Http\Rest\Controller\SectionController;
 use MintLMS\Http\Rest\Controller\UserController;
 use MintLMS\Http\Rest\RouteRegistrar;
+use MintLMS\Infrastructure\Ai\AiProviderClient;
+use MintLMS\Infrastructure\Ai\AiSettings;
+use MintLMS\Infrastructure\Privacy\PrivacyPolicyContent;
 use MintLMS\Infrastructure\Admin\AdminAjaxHandler;
 use MintLMS\Infrastructure\Admin\AssetLoader;
 use MintLMS\Infrastructure\Admin\CourseBuilderPage;
@@ -37,7 +42,9 @@ use MintLMS\Infrastructure\Admin\NativeEditorSaveGuard;
 use MintLMS\Infrastructure\Admin\QuestionPostEditUi;
 use MintLMS\Infrastructure\Admin\QuizPostEditUi;
 use MintLMS\Infrastructure\Admin\SettingsPage;
+use MintLMS\Infrastructure\Cache\WpObjectCache;
 use MintLMS\Infrastructure\Clock\SystemClock;
+use MintLMS\Infrastructure\PostType\PostTypes;
 use MintLMS\Infrastructure\Certificate\CertificateDownloadHandler;
 use MintLMS\Infrastructure\Certificate\WpCertificateTemplateProvider;
 use MintLMS\Infrastructure\Certificate\WpCertificateUrlBuilder;
@@ -106,6 +113,17 @@ final class Bootstrap {
 
 		Plugin::boot();
 
+		add_action( 'mintlms_dashboard_cache_invalidate', array( WpObjectCache::class, 'invalidateDashboard' ) );
+		add_action( 'save_post_' . PostTypes::COURSE, array( WpObjectCache::class, 'invalidateDashboard' ) );
+		add_action(
+			'before_delete_post',
+			static function ( int $postId ): void {
+				if ( PostTypes::COURSE === get_post_type( $postId ) ) {
+					WpObjectCache::invalidateDashboard();
+				}
+			}
+		);
+
 		( new MenuRegistrar() )->register();
 		( new SettingsPage() )->register();
 		( new CourseBuilderPage() )->register();
@@ -118,6 +136,7 @@ final class Bootstrap {
 		( new AssetLoader() )->register();
 		( new AdminAjaxHandler() )->register();
 		( new StudentAssetLoader() )->register();
+		( new PrivacyPolicyContent() )->register();
 
 		if ( null === $wpdb ) {
 			return;
@@ -170,15 +189,15 @@ final class Bootstrap {
 			return;
 		}
 
-		$courseRepo     = new WpPostCourseRepository();
-		$lessonRepo     = new WpPostLessonRepository();
-		$sectionRepo    = new WpdbSectionRepository( $wpdb, $lessonRepo );
-		$enrollmentRepo = new WpdbEnrollmentRepository( $wpdb );
-		$progressRepo   = new WpdbProgressRepository( $wpdb );
-		$quizRepo       = new WpPostQuizRepository( $wpdb );
-		$clock          = new SystemClock();
-		$authorization  = Plugin::authorization();
-		$userLookup     = new WpUserLookup();
+		$courseRepo         = new WpPostCourseRepository();
+		$lessonRepo         = new WpPostLessonRepository();
+		$sectionRepo        = new WpdbSectionRepository( $wpdb, $lessonRepo );
+		$enrollmentRepo     = new WpdbEnrollmentRepository( $wpdb );
+		$progressRepo       = new WpdbProgressRepository( $wpdb );
+		$quizRepo           = new WpPostQuizRepository( $wpdb );
+		$clock              = new SystemClock();
+		$authorization      = Plugin::authorization();
+		$userLookup         = new WpUserLookup();
 		$certificateService = self::createCertificateService( $wpdb, $clock );
 
 		$enrollmentService = new EnrollmentService(
@@ -198,7 +217,7 @@ final class Bootstrap {
 			$courseRepo,
 			$sectionRepo,
 		);
-		$quizService    = new QuizService( $quizRepo, $lessonRepo, $courseRepo, $authorization, $clock, $progressRepo, $userLookup, $lessonAccessService );
+		$quizService         = new QuizService( $quizRepo, $lessonRepo, $courseRepo, $authorization, $clock, $progressRepo, $userLookup, $lessonAccessService );
 
 		$studentExperience = new StudentExperienceService(
 			$courseRepo,
@@ -231,18 +250,18 @@ final class Bootstrap {
 			return;
 		}
 
-		$authorization     = Plugin::authorization();
-		$clock             = new SystemClock();
-		$courseRepo        = new WpPostCourseRepository();
-		$lessonRepo        = new WpPostLessonRepository();
-		$sectionRepo       = new WpdbSectionRepository( $wpdb, $lessonRepo );
-		$enrollmentRepo    = new WpdbEnrollmentRepository( $wpdb );
-		$progressRepo      = new WpdbProgressRepository( $wpdb );
-		$quizRepo          = new WpPostQuizRepository( $wpdb );
-		$dashboardRepo     = new WpdbAdminDashboardRepository( $wpdb );
-		$userLookup        = new WpUserLookup();
-		$courseService     = new CourseService( $courseRepo, $authorization, $clock, $dashboardRepo, $userLookup, Plugin::eventPublisher() );
-		$sectionService    = new SectionService( $sectionRepo, $lessonRepo, $courseRepo, $authorization, $clock );
+		$authorization       = Plugin::authorization();
+		$clock               = new SystemClock();
+		$courseRepo          = new WpPostCourseRepository();
+		$lessonRepo          = new WpPostLessonRepository();
+		$sectionRepo         = new WpdbSectionRepository( $wpdb, $lessonRepo );
+		$enrollmentRepo      = new WpdbEnrollmentRepository( $wpdb );
+		$progressRepo        = new WpdbProgressRepository( $wpdb );
+		$quizRepo            = new WpPostQuizRepository( $wpdb );
+		$dashboardRepo       = new WpdbAdminDashboardRepository( $wpdb );
+		$userLookup          = new WpUserLookup();
+		$courseService       = new CourseService( $courseRepo, $authorization, $clock, $dashboardRepo, $userLookup, Plugin::eventPublisher() );
+		$sectionService      = new SectionService( $sectionRepo, $lessonRepo, $courseRepo, $authorization, $clock );
 		$lessonAccessService = new LessonAccessService(
 			$lessonRepo,
 			$enrollmentRepo,
@@ -251,9 +270,9 @@ final class Bootstrap {
 			$courseRepo,
 			$sectionRepo,
 		);
-		$quizService       = new QuizService( $quizRepo, $lessonRepo, $courseRepo, $authorization, $clock, $progressRepo, $userLookup, $lessonAccessService );
-		$progressService   = new ProgressService( $progressRepo, Plugin::eventPublisher(), $clock, $quizService, $lessonAccessService, $courseRepo );
-		$enrollmentService = new EnrollmentService(
+		$quizService         = new QuizService( $quizRepo, $lessonRepo, $courseRepo, $authorization, $clock, $progressRepo, $userLookup, $lessonAccessService );
+		$progressService     = new ProgressService( $progressRepo, Plugin::eventPublisher(), $clock, $quizService, $lessonAccessService, $courseRepo );
+		$enrollmentService   = new EnrollmentService(
 			$enrollmentRepo,
 			$courseRepo,
 			$authorization,
@@ -261,7 +280,7 @@ final class Bootstrap {
 			Plugin::eventPublisher(),
 			$progressRepo
 		);
-		$lessonService     = new LessonService(
+		$lessonService       = new LessonService(
 			$lessonRepo,
 			$sectionRepo,
 			$courseRepo,
@@ -270,7 +289,7 @@ final class Bootstrap {
 			$progressService,
 			$quizService
 		);
-		$structureService  = new CourseStructureService( $courseRepo, $sectionRepo, $authorization );
+		$structureService    = new CourseStructureService( $courseRepo, $sectionRepo, $authorization );
 		Plugin::registerCourseServices( $courseService, $structureService );
 		Plugin::registerEnrollmentService( $enrollmentService );
 		Plugin::registerProgressService( $progressService );
@@ -285,6 +304,8 @@ final class Bootstrap {
 			new WpUserLookup(),
 			$authorization,
 		);
+		$aiSettings           = new AiSettings();
+		$aiAssistant          = new AiAssistantService( $aiSettings, new AiProviderClient( $aiSettings ) );
 		$routeRegistrar       = new RouteRegistrar(
 			$courseController,
 			$sectionController,
@@ -295,6 +316,7 @@ final class Bootstrap {
 			$onboardingController,
 			$userController,
 			new ContentPostListController(),
+			new AiController( $aiSettings, $aiAssistant ),
 		);
 
 		$routeRegistrar->register();

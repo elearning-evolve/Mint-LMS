@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 		<?php esc_html_e( 'Back to lesson', 'mint-lms' ); ?>
 	</button>
 	<h1 class="mint-settings-page__title"><?php esc_html_e( 'Lesson Settings', 'mint-lms' ); ?></h1>
-	<div class="mint-settings-page__subtitle" x-text="selectedLesson?.title || t('newLesson')"></div>
+	<div class="mint-settings-page__subtitle"><?php esc_html_e( "What you'll need", 'mint-lms' ); ?></div>
 
 	<!-- Display and content options -->
 	<div class="mint-settings-card">
@@ -44,6 +44,12 @@ defined( 'ABSPATH' ) || exit;
 					<div class="mint-settings-editor__toolbar">
 						<div class="mint-settings-editor__tools">
 							<span class="mint-settings-editor__chip"><?php esc_html_e( 'Paragraph', 'mint-lms' ); ?></span>
+							<span class="mint-settings-editor__tool" style="font-weight:700" aria-hidden="true">B</span>
+							<span class="mint-settings-editor__tool" style="font-style:italic" aria-hidden="true">I</span>
+							<span class="mint-settings-editor__tool" style="font-weight:600" aria-hidden="true">H2</span>
+							<span class="mint-settings-editor__tool" style="font-weight:600" aria-hidden="true">•</span>
+							<span class="mint-settings-editor__tool" aria-hidden="true">1.</span>
+							<span class="mint-settings-editor__tool" aria-hidden="true">🔗</span>
 						</div>
 						<button type="button" class="mint-settings-editor__media"><?php esc_html_e( 'Add media', 'mint-lms' ); ?></button>
 					</div>
@@ -293,22 +299,44 @@ defined( 'ABSPATH' ) || exit;
 		</div>
 	</div>
 
-	<div class="mint-settings-drip">
-		<label class="mint-settings-drip__label" for="mint-lesson-settings-drip"><?php esc_html_e( 'Available days after enrollment', 'mint-lms' ); ?></label>
-		<input
-			id="mint-lesson-settings-drip"
-			type="number"
-			min="0"
-			step="1"
-			class="mint-settings-drip__input"
-			x-model.number="selectedLesson.availableAfterDays"
-			@input="onLessonDripInput()"
-			placeholder="<?php echo esc_attr__( 'Leave empty for immediate access', 'mint-lms' ); ?>"
-		/>
-		<p class="mint-settings-drip__copy"><?php esc_html_e( 'Students can access this lesson after this many days from enrollment.', 'mint-lms' ); ?></p>
-	</div>
-
-	<div class="mint-settings-footer">
-		<button type="button" class="mint-settings-save" @click="saveLessonSettings()" :disabled="saveStatus === 'saving'"><?php esc_html_e( 'Save lesson', 'mint-lms' ); ?></button>
+	<!-- Available days after enrollment -->
+	<div class="mint-settings-featured">
+		<div class="mint-settings-featured__head">
+			<span class="mint-settings-featured__icon" aria-hidden="true">
+				<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#17222B" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="14" height="12" rx="2.5"/><path d="M3 8.5h14M7 3v3M13 3v3"/></svg>
+			</span>
+			<div>
+				<div class="mint-settings-featured__title"><?php esc_html_e( 'Available days after enrollment', 'mint-lms' ); ?></div>
+				<div class="mint-settings-featured__copy"><?php esc_html_e( 'Students can open this lesson after this many days from when they join.', 'mint-lms' ); ?></div>
+			</div>
+		</div>
+		<div class="mint-settings-featured__body">
+			<div class="mint-settings-days">
+				<button type="button" class="mint-settings-days__step" @click="adjustLessonDripDays(-1)" aria-label="<?php echo esc_attr__( 'Decrease days', 'mint-lms' ); ?>">−</button>
+				<input
+					type="text"
+					inputmode="numeric"
+					class="mint-settings-days__input"
+					:value="lessonDripDaysDisplay()"
+					@input="onLessonDripDaysField($event)"
+					placeholder="0"
+				/>
+				<button type="button" class="mint-settings-days__step" @click="adjustLessonDripDays(1)" aria-label="<?php echo esc_attr__( 'Increase days', 'mint-lms' ); ?>">+</button>
+				<span class="mint-settings-days__unit"><?php esc_html_e( 'days after joining', 'mint-lms' ); ?></span>
+			</div>
+			<div class="mint-settings-days__chips">
+				<span class="mint-settings-days__chips-label"><?php esc_html_e( 'Quick pick:', 'mint-lms' ); ?></span>
+				<template x-for="chip in lessonDripDayChips()" :key="'drip-' + chip.value">
+					<button
+						type="button"
+						class="mint-settings-days__chip"
+						:class="chip.active ? 'is-active' : ''"
+						@click="setLessonDripDays(chip.value)"
+						x-text="chip.label"
+					></button>
+				</template>
+			</div>
+			<p class="mint-settings-days__note" x-text="lessonDripDaysNote()"></p>
+		</div>
 	</div>
 </div>

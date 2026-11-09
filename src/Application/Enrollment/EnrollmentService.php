@@ -181,12 +181,31 @@ final class EnrollmentService {
 
 		$students = array_map(
 			static function ( Enrollment $enrollment ) use ( $progressMap ): StudentDto {
+				$user        = get_userdata( $enrollment->userId );
+				$displayName = '';
+				$email       = '';
+
+				if ( $user instanceof \WP_User ) {
+					$displayName = (string) $user->display_name;
+					$email       = (string) $user->user_email;
+				}
+
+				if ( '' === $displayName ) {
+					$displayName = sprintf(
+						/* translators: %d: user ID */
+						__( 'User #%d', 'mint-lms' ),
+						$enrollment->userId
+					);
+				}
+
 				return new StudentDto(
 					$enrollment->id,
 					$enrollment->userId,
 					$enrollment->status->value,
 					$enrollment->enrolledAt->format( 'c' ),
 					$progressMap[ $enrollment->userId ] ?? 0.0,
+					$displayName,
+					$email,
 				);
 			},
 			$result['enrollments']

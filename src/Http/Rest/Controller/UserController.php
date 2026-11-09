@@ -28,10 +28,16 @@ final class UserController {
 				'callback'            => array( $this, 'search' ),
 				'permission_callback' => array( $this, 'canEnrollStudents' ),
 				'args'                => array(
-					'q' => array(
+					'q'     => array(
 						'required'          => true,
 						'type'              => 'string',
 						'sanitize_callback' => 'sanitize_text_field',
+					),
+					'limit' => array(
+						'required'          => false,
+						'type'              => 'integer',
+						'default'           => 10,
+						'sanitize_callback' => 'absint',
 					),
 				),
 			)
@@ -46,7 +52,8 @@ final class UserController {
 
 	public function search( \WP_REST_Request $request ): \WP_REST_Response {
 		$query = (string) $request->get_param( 'q' );
-		$users = $this->userLookup->searchUsers( $query );
+		$limit = (int) $request->get_param( 'limit' );
+		$users = $this->userLookup->searchUsers( $query, $limit > 0 ? $limit : 10 );
 
 		return ApiResponse::success(
 			array(

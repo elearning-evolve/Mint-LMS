@@ -26,12 +26,13 @@ final class ContentMigrator {
 	}
 
 	public function maybeMigrate(): void {
+		$wpdb = $this->wpdb;
 		if ( '1' === (string) get_option( self::OPTION_MIGRATED, '' ) ) {
 			return;
 		}
 
 		try {
-			$coursesTable = Schema::coursesTable( $this->wpdb->prefix );
+			$coursesTable = Schema::coursesTable( $wpdb->prefix );
 
 			if ( ! $this->tableExists( $coursesTable ) || $this->tableIsEmpty( $coursesTable ) ) {
 				update_option( self::OPTION_MIGRATED, '1', false );
@@ -80,9 +81,10 @@ final class ContentMigrator {
 	 * Migration_006 must have created id_map, question_data, and the quiz↔question junction.
 	 */
 	private function assertHybridSchemaReady(): void {
-		$idMap = Schema::idMapTable( $this->wpdb->prefix );
-		$data  = Schema::questionDataTable( $this->wpdb->prefix );
-		$junction = Schema::quizQuestionsTable( $this->wpdb->prefix );
+		$wpdb     = $this->wpdb;
+		$idMap    = Schema::idMapTable( $wpdb->prefix );
+		$data     = Schema::questionDataTable( $wpdb->prefix );
+		$junction = Schema::quizQuestionsTable( $wpdb->prefix );
 
 		if ( ! $this->tableExists( $idMap ) || ! $this->tableExists( $data ) ) {
 			throw new \RuntimeException( 'CPT hybrid tables (id_map / question_data) missing; run DB migrations first.' );
@@ -111,11 +113,16 @@ final class ContentMigrator {
 	}
 
 	private function migrateCourses(): void {
-		$table = Schema::validateTable( Schema::coursesTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::coursesTable( $wpdb->prefix ), $wpdb->prefix );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$rows = $this->wpdb->get_results( "SELECT * FROM {$table} ORDER BY id ASC" );
-		// phpcs:enable
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT * FROM %i ORDER BY id ASC',
+				$table
+			)
+		);
 
 		if ( ! is_array( $rows ) ) {
 			return;
@@ -144,7 +151,7 @@ final class ContentMigrator {
 			);
 
 			if ( is_wp_error( $postId ) ) {
-				throw new \RuntimeException( 'Course migrate failed for #' . $legacyId . ': ' . $postId->get_error_message() );
+				throw new \RuntimeException( 'Course migrate failed for #' . absint( $legacyId ) . ': ' . esc_html( $postId->get_error_message() ) );
 			}
 
 			$postId = (int) $postId;
@@ -163,37 +170,46 @@ final class ContentMigrator {
 	}
 
 	private function remapSectionsCourseIds(): void {
-		$sections = Schema::sectionsTable( $this->wpdb->prefix );
-		$idMap    = Schema::idMapTable( $this->wpdb->prefix );
+		$wpdb     = $this->wpdb;
+		$sections = Schema::sectionsTable( $wpdb->prefix );
+		$idMap    = Schema::idMapTable( $wpdb->prefix );
 
 		if ( ! $this->tableExists( $sections ) || ! $this->tableExists( $idMap ) ) {
 			return;
 		}
 
-		$sections = Schema::validateTable( $sections, $this->wpdb->prefix );
-		$idMap    = Schema::validateTable( $idMap, $this->wpdb->prefix );
+		$sections = Schema::validateTable( $sections, $wpdb->prefix );
+		$idMap    = Schema::validateTable( $idMap, $wpdb->prefix );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$this->wpdb->query(
-			"UPDATE {$sections} s
-			INNER JOIN {$idMap} m ON m.entity_type = 'course' AND m.legacy_id = s.course_id
-			SET s.course_id = m.post_id"
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE %i s
+			INNER JOIN %i m ON m.entity_type = 'course' AND m.legacy_id = s.course_id
+			SET s.course_id = m.post_id",
+				$sections,
+				$idMap
+			)
 		);
-		// phpcs:enable
 	}
 
 	private function migrateLessons(): void {
-		$table = Schema::lessonsTable( $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::lessonsTable( $wpdb->prefix );
 
 		if ( ! $this->tableExists( $table ) ) {
 			return;
 		}
 
-		$table = Schema::validateTable( $table, $this->wpdb->prefix );
+		$table = Schema::validateTable( $table, $wpdb->prefix );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$rows = $this->wpdb->get_results( "SELECT * FROM {$table} ORDER BY id ASC" );
-		// phpcs:enable
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT * FROM %i ORDER BY id ASC',
+				$table
+			)
+		);
 
 		if ( ! is_array( $rows ) ) {
 			return;
@@ -223,7 +239,7 @@ final class ContentMigrator {
 			);
 
 			if ( is_wp_error( $postId ) ) {
-				throw new \RuntimeException( 'Lesson migrate failed for #' . $legacyId . ': ' . $postId->get_error_message() );
+				throw new \RuntimeException( 'Lesson migrate failed for #' . absint( $legacyId ) . ': ' . esc_html( $postId->get_error_message() ) );
 			}
 
 			$postId = (int) $postId;
@@ -245,84 +261,110 @@ final class ContentMigrator {
 	}
 
 	private function remapProgressIds(): void {
-		$progress = Schema::progressTable( $this->wpdb->prefix );
-		$summary  = Schema::progressSummaryTable( $this->wpdb->prefix );
-		$idMap    = Schema::idMapTable( $this->wpdb->prefix );
+		$wpdb     = $this->wpdb;
+		$progress = Schema::progressTable( $wpdb->prefix );
+		$summary  = Schema::progressSummaryTable( $wpdb->prefix );
+		$idMap    = Schema::idMapTable( $wpdb->prefix );
 
 		if ( ! $this->tableExists( $idMap ) ) {
 			return;
 		}
 
-		$idMap = Schema::validateTable( $idMap, $this->wpdb->prefix );
+		$idMap = Schema::validateTable( $idMap, $wpdb->prefix );
 
 		if ( $this->tableExists( $progress ) ) {
-			$progress = Schema::validateTable( $progress, $this->wpdb->prefix );
+			$progress = Schema::validateTable( $progress, $wpdb->prefix );
 
-			// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$this->wpdb->query(
-				"UPDATE {$progress} p
-				INNER JOIN {$idMap} m ON m.entity_type = 'lesson' AND m.legacy_id = p.lesson_id
-				SET p.lesson_id = m.post_id"
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+			$wpdb->query(
+				$wpdb->prepare(
+					"UPDATE %i p
+				INNER JOIN %i m ON m.entity_type = 'lesson' AND m.legacy_id = p.lesson_id
+				SET p.lesson_id = m.post_id",
+					$progress,
+					$idMap
+				)
 			);
-			$this->wpdb->query(
-				"UPDATE {$progress} p
-				INNER JOIN {$idMap} m ON m.entity_type = 'course' AND m.legacy_id = p.course_id
-				SET p.course_id = m.post_id"
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+			$wpdb->query(
+				$wpdb->prepare(
+					"UPDATE %i p
+				INNER JOIN %i m ON m.entity_type = 'course' AND m.legacy_id = p.course_id
+				SET p.course_id = m.post_id",
+					$progress,
+					$idMap
+				)
 			);
-			// phpcs:enable
 		}
 
 		if ( $this->tableExists( $summary ) ) {
-			$summary = Schema::validateTable( $summary, $this->wpdb->prefix );
+			$summary = Schema::validateTable( $summary, $wpdb->prefix );
 
-			// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$this->wpdb->query(
-				"UPDATE {$summary} s
-				INNER JOIN {$idMap} m ON m.entity_type = 'course' AND m.legacy_id = s.course_id
-				SET s.course_id = m.post_id"
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+			$wpdb->query(
+				$wpdb->prepare(
+					"UPDATE %i s
+				INNER JOIN %i m ON m.entity_type = 'course' AND m.legacy_id = s.course_id
+				SET s.course_id = m.post_id",
+					$summary,
+					$idMap
+				)
 			);
-			$this->wpdb->query(
-				"UPDATE {$summary} s
-				INNER JOIN {$idMap} m ON m.entity_type = 'lesson' AND m.legacy_id = s.last_lesson_id
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+			$wpdb->query(
+				$wpdb->prepare(
+					"UPDATE %i s
+				INNER JOIN %i m ON m.entity_type = 'lesson' AND m.legacy_id = s.last_lesson_id
 				SET s.last_lesson_id = m.post_id
-				WHERE s.last_lesson_id IS NOT NULL AND s.last_lesson_id > 0"
+				WHERE s.last_lesson_id IS NOT NULL AND s.last_lesson_id > 0",
+					$summary,
+					$idMap
+				)
 			);
-			// phpcs:enable
 		}
 	}
 
 	private function remapEnrollmentsCourseIds(): void {
-		$enrollments = Schema::enrollmentsTable( $this->wpdb->prefix );
-		$idMap       = Schema::idMapTable( $this->wpdb->prefix );
+		$wpdb        = $this->wpdb;
+		$enrollments = Schema::enrollmentsTable( $wpdb->prefix );
+		$idMap       = Schema::idMapTable( $wpdb->prefix );
 
 		if ( ! $this->tableExists( $enrollments ) || ! $this->tableExists( $idMap ) ) {
 			return;
 		}
 
-		$enrollments = Schema::validateTable( $enrollments, $this->wpdb->prefix );
-		$idMap       = Schema::validateTable( $idMap, $this->wpdb->prefix );
+		$enrollments = Schema::validateTable( $enrollments, $wpdb->prefix );
+		$idMap       = Schema::validateTable( $idMap, $wpdb->prefix );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$this->wpdb->query(
-			"UPDATE {$enrollments} e
-			INNER JOIN {$idMap} m ON m.entity_type = 'course' AND m.legacy_id = e.course_id
-			SET e.course_id = m.post_id"
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE %i e
+			INNER JOIN %i m ON m.entity_type = 'course' AND m.legacy_id = e.course_id
+			SET e.course_id = m.post_id",
+				$enrollments,
+				$idMap
+			)
 		);
-		// phpcs:enable
 	}
 
 	private function migrateQuizzes(): void {
-		$table = Schema::quizzesTable( $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::quizzesTable( $wpdb->prefix );
 
 		if ( ! $this->tableExists( $table ) ) {
 			return;
 		}
 
-		$table = Schema::validateTable( $table, $this->wpdb->prefix );
+		$table = Schema::validateTable( $table, $wpdb->prefix );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$rows = $this->wpdb->get_results( "SELECT * FROM {$table} ORDER BY id ASC" );
-		// phpcs:enable
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT * FROM %i ORDER BY id ASC',
+				$table
+			)
+		);
 
 		if ( ! is_array( $rows ) ) {
 			return;
@@ -350,7 +392,7 @@ final class ContentMigrator {
 			);
 
 			if ( is_wp_error( $postId ) ) {
-				throw new \RuntimeException( 'Quiz migrate failed for #' . $legacyId . ': ' . $postId->get_error_message() );
+				throw new \RuntimeException( 'Quiz migrate failed for #' . absint( $legacyId ) . ': ' . esc_html( $postId->get_error_message() ) );
 			}
 
 			$postId = (int) $postId;
@@ -366,29 +408,32 @@ final class ContentMigrator {
 	}
 
 	private function migrateQuestions(): void {
+		$wpdb   = $this->wpdb;
 		$source = $this->resolveLegacyQuestionsTable();
 
 		if ( null === $source ) {
 			return;
 		}
 
-		$dataTable = Schema::questionDataTable( $this->wpdb->prefix );
-		$junction  = Schema::quizQuestionsTable( $this->wpdb->prefix );
+		$dataTable = Schema::questionDataTable( $wpdb->prefix );
+		$junction  = Schema::quizQuestionsTable( $wpdb->prefix );
 
 		if ( ! $this->tableExists( $dataTable ) || ! $this->tableExists( $junction ) ) {
 			return;
 		}
 
-		$dataTable = Schema::validateTable( $dataTable, $this->wpdb->prefix );
-		$junction  = Schema::validateTable( $junction, $this->wpdb->prefix );
+		$dataTable = Schema::validateTable( $dataTable, $wpdb->prefix );
+		$junction  = Schema::validateTable( $junction, $wpdb->prefix );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$rows = $this->wpdb->get_results(
-			"SELECT id, quiz_id, type, prompt, options_json, correct_answer, sort_order
-			FROM {$source}
-			ORDER BY quiz_id ASC, sort_order ASC, id ASC"
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT id, quiz_id, type, prompt, options_json, correct_answer, sort_order
+			FROM %i
+			ORDER BY quiz_id ASC, sort_order ASC, id ASC',
+				$source
+			)
 		);
-		// phpcs:enable
 
 		if ( ! is_array( $rows ) ) {
 			return;
@@ -408,7 +453,7 @@ final class ContentMigrator {
 				continue;
 			}
 
-			$prompt      = (string) $row->prompt;
+			$prompt       = (string) $row->prompt;
 			$titleContent = $this->splitPromptForPost( $prompt );
 
 			$postId = wp_insert_post(
@@ -422,7 +467,7 @@ final class ContentMigrator {
 			);
 
 			if ( is_wp_error( $postId ) ) {
-				throw new \RuntimeException( 'Question migrate failed for #' . $legacyId . ': ' . $postId->get_error_message() );
+				throw new \RuntimeException( 'Question migrate failed for #' . absint( $legacyId ) . ': ' . esc_html( $postId->get_error_message() ) );
 			}
 
 			$postId = (int) $postId;
@@ -435,7 +480,7 @@ final class ContentMigrator {
 			}
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
-			$inserted = $this->wpdb->insert(
+			$inserted = $wpdb->insert(
 				$dataTable,
 				array(
 					'post_id'        => $postId,
@@ -451,11 +496,11 @@ final class ContentMigrator {
 
 			if ( false === $inserted ) {
 				wp_delete_post( $postId, true );
-				throw new \RuntimeException( 'Question data migrate failed for #' . $legacyId );
+				throw new \RuntimeException( 'Question data migrate failed for #' . absint( $legacyId ) );
 			}
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
-			$linked = $this->wpdb->insert(
+			$linked = $wpdb->insert(
 				$junction,
 				array(
 					'quiz_id'     => $mappedQuizId,
@@ -466,9 +511,9 @@ final class ContentMigrator {
 			);
 
 			if ( false === $linked ) {
-				$this->wpdb->delete( $dataTable, array( 'post_id' => $postId ), array( '%d' ) );
+				$wpdb->delete( $dataTable, array( 'post_id' => $postId ), array( '%d' ) );
 				wp_delete_post( $postId, true );
-				throw new \RuntimeException( 'Question junction migrate failed for #' . $legacyId );
+				throw new \RuntimeException( 'Question junction migrate failed for #' . absint( $legacyId ) );
 			}
 
 			$this->writeIdMap( 'question', $legacyId, $postId );
@@ -476,26 +521,36 @@ final class ContentMigrator {
 	}
 
 	private function remapQuizAttempts(): void {
-		$attempts = Schema::quizAttemptsTable( $this->wpdb->prefix );
-		$idMap    = Schema::idMapTable( $this->wpdb->prefix );
+		$wpdb     = $this->wpdb;
+		$attempts = Schema::quizAttemptsTable( $wpdb->prefix );
+		$idMap    = Schema::idMapTable( $wpdb->prefix );
 
 		if ( ! $this->tableExists( $attempts ) || ! $this->tableExists( $idMap ) ) {
 			return;
 		}
 
-		$attempts = Schema::validateTable( $attempts, $this->wpdb->prefix );
-		$idMap    = Schema::validateTable( $idMap, $this->wpdb->prefix );
+		$attempts = Schema::validateTable( $attempts, $wpdb->prefix );
+		$idMap    = Schema::validateTable( $idMap, $wpdb->prefix );
 
 		// Remap quiz_id via id_map.
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$this->wpdb->query(
-			"UPDATE {$attempts} a
-			INNER JOIN {$idMap} m ON m.entity_type = 'quiz' AND m.legacy_id = a.quiz_id
-			SET a.quiz_id = m.post_id"
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE %i a
+			INNER JOIN %i m ON m.entity_type = 'quiz' AND m.legacy_id = a.quiz_id
+			SET a.quiz_id = m.post_id",
+				$attempts,
+				$idMap
+			)
 		);
 
-		$rows = $this->wpdb->get_results( "SELECT id, answers_json FROM {$attempts}" );
-		// phpcs:enable
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT id, answers_json FROM %i',
+				$attempts
+			)
+		);
 
 		if ( ! is_array( $rows ) ) {
 			return;
@@ -517,7 +572,7 @@ final class ContentMigrator {
 				$key = (int) $legacyQuestionId;
 				if ( isset( $questionMap[ $key ] ) ) {
 					$rewritten[ (string) $questionMap[ $key ] ] = $answer;
-					$changed = true;
+					$changed                                    = true;
 				} else {
 					$rewritten[ (string) $key ] = $answer;
 				}
@@ -533,7 +588,7 @@ final class ContentMigrator {
 			}
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$this->wpdb->update(
+			$wpdb->update(
 				$attempts,
 				array( 'answers_json' => $json ),
 				array( 'id' => (int) $row->id ),
@@ -544,44 +599,47 @@ final class ContentMigrator {
 	}
 
 	private function remapWooCommerceCourseMeta(): void {
+		$wpdb    = $this->wpdb;
 		$metaKey = EnrollmentBridge::META_COURSE_ID;
-		$idMap   = Schema::idMapTable( $this->wpdb->prefix );
+		$idMap   = Schema::idMapTable( $wpdb->prefix );
 
 		if ( ! $this->tableExists( $idMap ) ) {
 			return;
 		}
 
-		$idMap    = Schema::validateTable( $idMap, $this->wpdb->prefix );
-		$postmeta = $this->wpdb->postmeta;
+		$idMap    = Schema::validateTable( $idMap, $wpdb->prefix );
+		$postmeta = $wpdb->postmeta;
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$this->wpdb->query(
-			$this->wpdb->prepare(
-				"UPDATE {$postmeta} pm
-				INNER JOIN {$idMap} m ON m.entity_type = 'course' AND m.legacy_id = CAST(pm.meta_value AS UNSIGNED)
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE %i pm
+				INNER JOIN %i m ON m.entity_type = 'course' AND m.legacy_id = CAST(pm.meta_value AS UNSIGNED)
 				SET pm.meta_value = m.post_id
 				WHERE pm.meta_key = %s
 				AND pm.meta_value REGEXP '^[0-9]+$'",
+				$postmeta,
+				$idMap,
 				$metaKey
 			)
 		);
-		// phpcs:enable
 	}
 
 	/**
 	 * Prefer renamed legacy table; fall back to junction table still holding owned-question rows.
 	 */
 	private function resolveLegacyQuestionsTable(): ?string {
-		$legacy = Schema::quizQuestionsLegacyTable( $this->wpdb->prefix );
+		$wpdb   = $this->wpdb;
+		$legacy = Schema::quizQuestionsLegacyTable( $wpdb->prefix );
 
 		if ( $this->tableExists( $legacy ) ) {
-			return Schema::validateTable( $legacy, $this->wpdb->prefix );
+			return Schema::validateTable( $legacy, $wpdb->prefix );
 		}
 
-		$questions = Schema::quizQuestionsTable( $this->wpdb->prefix );
+		$questions = Schema::quizQuestionsTable( $wpdb->prefix );
 
 		if ( $this->tableExists( $questions ) && $this->columnExists( $questions, 'prompt' ) ) {
-			return Schema::validateTable( $questions, $this->wpdb->prefix );
+			return Schema::validateTable( $questions, $wpdb->prefix );
 		}
 
 		return null;
@@ -620,36 +678,38 @@ final class ContentMigrator {
 	}
 
 	private function mappedPostId( string $entityType, int $legacyId ): int {
+		$wpdb = $this->wpdb;
 		if ( $legacyId <= 0 ) {
 			return 0;
 		}
 
-		$idMap = Schema::idMapTable( $this->wpdb->prefix );
+		$idMap = Schema::idMapTable( $wpdb->prefix );
 
 		if ( ! $this->tableExists( $idMap ) ) {
 			return 0;
 		}
 
-		$idMap = Schema::validateTable( $idMap, $this->wpdb->prefix );
+		$idMap = Schema::validateTable( $idMap, $wpdb->prefix );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$postId = $this->wpdb->get_var(
-			$this->wpdb->prepare(
-				"SELECT post_id FROM {$idMap} WHERE entity_type = %s AND legacy_id = %d",
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$postId = $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT post_id FROM %i WHERE entity_type = %s AND legacy_id = %d',
+				$idMap,
 				$entityType,
 				$legacyId
 			)
 		);
-		// phpcs:enable
 
 		return (int) $postId;
 	}
 
 	private function writeIdMap( string $entityType, int $legacyId, int $postId ): void {
-		$idMap = Schema::validateTable( Schema::idMapTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$idMap = Schema::validateTable( Schema::idMapTable( $wpdb->prefix ), $wpdb->prefix );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
-		$inserted = $this->wpdb->insert(
+		$inserted = $wpdb->insert(
 			$idMap,
 			array(
 				'entity_type' => $entityType,
@@ -661,7 +721,12 @@ final class ContentMigrator {
 
 		if ( false === $inserted ) {
 			throw new \RuntimeException(
-				sprintf( 'Failed to write id_map for %s #%d → %d', $entityType, $legacyId, $postId )
+				sprintf(
+					'Failed to write id_map for %s #%d → %d',
+					esc_html( $entityType ),
+					absint( $legacyId ),
+					absint( $postId )
+				)
 			);
 		}
 	}
@@ -670,22 +735,23 @@ final class ContentMigrator {
 	 * @return array<int, int> legacy_id => post_id
 	 */
 	private function loadEntityMap( string $entityType ): array {
-		$idMap = Schema::idMapTable( $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$idMap = Schema::idMapTable( $wpdb->prefix );
 
 		if ( ! $this->tableExists( $idMap ) ) {
 			return array();
 		}
 
-		$idMap = Schema::validateTable( $idMap, $this->wpdb->prefix );
+		$idMap = Schema::validateTable( $idMap, $wpdb->prefix );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$rows = $this->wpdb->get_results(
-			$this->wpdb->prepare(
-				"SELECT legacy_id, post_id FROM {$idMap} WHERE entity_type = %s",
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				'SELECT legacy_id, post_id FROM %i WHERE entity_type = %s',
+				$idMap,
 				$entityType
 			)
 		);
-		// phpcs:enable
 
 		$map = array();
 
@@ -699,38 +765,56 @@ final class ContentMigrator {
 	}
 
 	private function tableExists( string $table ): bool {
+		$wpdb = $this->wpdb;
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$found = $this->wpdb->get_var( $this->wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) );
+		$found = $wpdb->get_var(
+			$wpdb->prepare(
+				'SHOW TABLES LIKE %s',
+				$table
+			)
+		);
 
 		return is_string( $found ) && $found === $table;
 	}
 
 	private function tableIsEmpty( string $table ): bool {
+		$wpdb = $this->wpdb;
 		if ( ! $this->tableExists( $table ) ) {
 			return true;
 		}
 
 		// Only call for schema-known tables.
 		try {
-			$table = Schema::validateTable( $table, $this->wpdb->prefix );
+			$table = Schema::validateTable( $table, $wpdb->prefix );
 		} catch ( \InvalidArgumentException $e ) {
 			return true;
 		}
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$count = $this->wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
-		// phpcs:enable
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$count = $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT COUNT(*) FROM %i',
+				$table
+			)
+		);
 
-		return (int) $count === 0;
+		return 0 === (int) $count;
 	}
 
 	private function columnExists( string $table, string $column ): bool {
+		$wpdb = $this->wpdb;
 		if ( ! $this->tableExists( $table ) ) {
 			return false;
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$cols = $this->wpdb->get_col( $this->wpdb->prepare( 'DESC %i', $table ), 0 );
+		$cols = $wpdb->get_col(
+			$wpdb->prepare(
+				'DESC %i',
+				$table
+			),
+			0
+		);
 
 		return is_array( $cols ) && in_array( $column, $cols, true );
 	}
@@ -746,19 +830,22 @@ final class ContentMigrator {
 	}
 
 	private function beginTransaction(): bool {
+		$wpdb = $this->wpdb;
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$result = $this->wpdb->query( 'START TRANSACTION' );
+		$result = $wpdb->query( 'START TRANSACTION' );
 
 		return false !== $result;
 	}
 
 	private function commitTransaction(): void {
+		$wpdb = $this->wpdb;
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$this->wpdb->query( 'COMMIT' );
+		$wpdb->query( 'COMMIT' );
 	}
 
 	private function rollbackTransaction(): void {
+		$wpdb = $this->wpdb;
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$this->wpdb->query( 'ROLLBACK' );
+		$wpdb->query( 'ROLLBACK' );
 	}
 }

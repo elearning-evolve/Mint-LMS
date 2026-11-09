@@ -4,7 +4,12 @@ import { courseBuilder, courseEdit } from './builder.js';
 import { coursesList } from './courses-list.js';
 import { lessonsList, quizzesList, questionsList } from './content-list.js';
 import { mintGuidedCourse } from './guided-course.js';
+import { mintCourseStudents } from './students-admin.js';
 import './students-admin.js';
+import { mintReports } from './reports-admin.js';
+import './reports-admin.js';
+import { mintSettings } from './settings-admin.js';
+import './settings-admin.js';
 
 window.MintLMS = window.MintLMS || {};
 
@@ -89,6 +94,10 @@ document.addEventListener('alpine:init', () => {
     const config = window.mintLmsGuided || {};
     return mintGuidedCourse(config);
   });
+
+  Alpine.data('mintCourseStudents', (config = {}) => mintCourseStudents(config));
+  Alpine.data('mintReports', (config = {}) => mintReports(config));
+  Alpine.data('mintSettings', (config = {}) => mintSettings(config));
 
   Alpine.data('mintWelcomeDashboard', (steps = []) => ({
     steps: Array.isArray(steps) ? steps : [],

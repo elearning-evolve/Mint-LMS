@@ -3,17 +3,15 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template partial variables.
-
 use MintLMS\Infrastructure\Admin\ViewRenderer;
 
-$renderer   = new ViewRenderer();
-$addNewUrl  = admin_url( 'post-new.php?post_type=mint-lesson' );
+$renderer  = new ViewRenderer();
+$addNewUrl = admin_url( 'post-new.php?post_type=mint-lesson' );
 
 $content = $renderer->render(
 	'admin/lessons/_list-content',
 	array(
-		'renderer' => $renderer,
+		'renderer'  => $renderer,
 		'addNewUrl' => $addNewUrl,
 	)
 );

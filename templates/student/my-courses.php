@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template partial variables.
-
 use MintLMS\Application\Student\Dto\StudentCourseItemDto;
 use MintLMS\Infrastructure\Ui\MintUi;
 
@@ -22,17 +20,35 @@ foreach ( $courses as $c ) {
 	}
 }
 
-$pageTitle = __( 'My courses', 'mint-lms' );
-$userName  = '';
+$pageTitle  = __( 'My courses', 'mint-lms' );
+$userName   = '';
 $huePalette = array(
-	array( 'bg' => 'mint-bg-hue-1', 'text' => 'mint-text-hue-1i' ),
-	array( 'bg' => 'mint-bg-hue-2', 'text' => 'mint-text-hue-2i' ),
-	array( 'bg' => 'mint-bg-hue-3', 'text' => 'mint-text-hue-3i' ),
-	array( 'bg' => 'mint-bg-hue-4', 'text' => 'mint-text-hue-4i' ),
-	array( 'bg' => 'mint-bg-hue-5', 'text' => 'mint-text-hue-5i' ),
-	array( 'bg' => 'mint-bg-hue-6', 'text' => 'mint-text-hue-6i' ),
+	array(
+		'bg'   => 'mint-bg-hue-1',
+		'text' => 'mint-text-hue-1i',
+	),
+	array(
+		'bg'   => 'mint-bg-hue-2',
+		'text' => 'mint-text-hue-2i',
+	),
+	array(
+		'bg'   => 'mint-bg-hue-3',
+		'text' => 'mint-text-hue-3i',
+	),
+	array(
+		'bg'   => 'mint-bg-hue-4',
+		'text' => 'mint-text-hue-4i',
+	),
+	array(
+		'bg'   => 'mint-bg-hue-5',
+		'text' => 'mint-text-hue-5i',
+	),
+	array(
+		'bg'   => 'mint-bg-hue-6',
+		'text' => 'mint-text-hue-6i',
+	),
 );
-include MINTLMS_PATH . 'views/student/partials/student-header.php';
+require MINTLMS_PATH . 'views/student/partials/student-header.php';
 ?>
 
 <div class="mint-max-w-content mint-mx-auto mint-px-4 sm:mint-px-6 mint-pb-10">
@@ -61,7 +77,8 @@ include MINTLMS_PATH . 'views/student/partials/student-header.php';
 	);
 	?>
 	<div class="mint-flex mint-flex-wrap mint-gap-2 mint-mb-7">
-		<?php foreach ( $filters as $key => $label ) :
+		<?php
+		foreach ( $filters as $key => $label ) :
 			$isActive = $filter === $key;
 			$tabClass = $isActive
 				? 'mint-bg-accent mint-text-neutral-50 mint-border-accent'
@@ -81,7 +98,8 @@ include MINTLMS_PATH . 'views/student/partials/student-header.php';
 		</div>
 	<?php else : ?>
 		<div class="mint-grid mint-grid-cols-1 sm:mint-grid-cols-2 lg:mint-grid-cols-3 mint-gap-5">
-			<?php foreach ( $courses as $idx => $course ) :
+			<?php
+			foreach ( $courses as $idx => $course ) :
 				$hue     = $huePalette[ $idx % count( $huePalette ) ];
 				$initial = MintUi::courseInitial( $course->title );
 				$pctVal  = (int) round( $course->progressPct );
@@ -90,8 +108,14 @@ include MINTLMS_PATH . 'views/student/partials/student-header.php';
 				$targetLesson = $isDone
 					? $course->firstLessonId
 					: ( $course->lastLessonId ?? $course->firstLessonId );
-				$actionUrl = $targetLesson
-					? add_query_arg( array( 'mint_course' => (string) $course->courseId, 'mint_lesson' => (string) $targetLesson ), $playerUrl )
+				$actionUrl    = $targetLesson
+					? add_query_arg(
+						array(
+							'mint_course' => (string) $course->courseId,
+							'mint_lesson' => (string) $targetLesson,
+						),
+						$playerUrl
+					)
 					: $playerUrl;
 
 				$ctaLabel = $isDone ? __( 'Review course', 'mint-lms' ) : __( 'Continue', 'mint-lms' );

@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template partial variables.
-
 use MintLMS\Application\Student\Dto\StudentCourseItemDto;
 use MintLMS\Infrastructure\Ui\MintUi;
 
@@ -13,7 +11,7 @@ $courses   = $courses ?? array();
 $playerUrl = $playerUrl ?? home_url( '/' );
 
 $user      = wp_get_current_user();
-$firstName = $user->first_name ?: $user->display_name ?: '';
+$firstName = '' !== (string) $user->first_name ? (string) $user->first_name : (string) $user->display_name;
 $greeting  = MintUi::greeting();
 
 $continueCourse = null;
@@ -35,16 +33,34 @@ if ( null === $continueCourse && array() !== $courses ) {
 $totalLessons = $continueCourse ? max( 1, $continueCourse->totalLessons ) : 0;
 $doneLessons  = $continueCourse ? min( $continueCourse->completedLessons, $totalLessons ) : 0;
 
-$pageTitle = __( 'My learning', 'mint-lms' );
+$pageTitle  = __( 'My learning', 'mint-lms' );
 $huePalette = array(
-	array( 'bg' => 'mint-bg-hue-1', 'text' => 'mint-text-hue-1i' ),
-	array( 'bg' => 'mint-bg-hue-2', 'text' => 'mint-text-hue-2i' ),
-	array( 'bg' => 'mint-bg-hue-3', 'text' => 'mint-text-hue-3i' ),
-	array( 'bg' => 'mint-bg-hue-4', 'text' => 'mint-text-hue-4i' ),
-	array( 'bg' => 'mint-bg-hue-5', 'text' => 'mint-text-hue-5i' ),
-	array( 'bg' => 'mint-bg-hue-6', 'text' => 'mint-text-hue-6i' ),
+	array(
+		'bg'   => 'mint-bg-hue-1',
+		'text' => 'mint-text-hue-1i',
+	),
+	array(
+		'bg'   => 'mint-bg-hue-2',
+		'text' => 'mint-text-hue-2i',
+	),
+	array(
+		'bg'   => 'mint-bg-hue-3',
+		'text' => 'mint-text-hue-3i',
+	),
+	array(
+		'bg'   => 'mint-bg-hue-4',
+		'text' => 'mint-text-hue-4i',
+	),
+	array(
+		'bg'   => 'mint-bg-hue-5',
+		'text' => 'mint-text-hue-5i',
+	),
+	array(
+		'bg'   => 'mint-bg-hue-6',
+		'text' => 'mint-text-hue-6i',
+	),
 );
-include MINTLMS_PATH . 'views/student/partials/student-header.php';
+require MINTLMS_PATH . 'views/student/partials/student-header.php';
 ?>
 
 <div class="mint-max-w-content mint-mx-auto mint-px-4 sm:mint-px-6 mint-pb-10">
@@ -67,12 +83,19 @@ include MINTLMS_PATH . 'views/student/partials/student-header.php';
 		<?php endif; ?>
 	</div>
 
-	<?php if ( null !== $continueCourse ) :
+	<?php
+	if ( null !== $continueCourse ) :
 		$continueLessonId = $continueCourse->lastLessonId ?? $continueCourse->firstLessonId;
 		$continueUrl      = $continueLessonId
-			? add_query_arg( array( 'mint_course' => (string) $continueCourse->courseId, 'mint_lesson' => (string) $continueLessonId ), $playerUrl )
+			? add_query_arg(
+				array(
+					'mint_course' => (string) $continueCourse->courseId,
+					'mint_lesson' => (string) $continueLessonId,
+				),
+				$playerUrl
+			)
 			: $playerUrl;
-		$pct = (int) round( $continueCourse->progressPct );
+		$pct              = (int) round( $continueCourse->progressPct );
 		?>
 		<div class="mint-mb-10 mint-rounded-xl mint-bg-accent mint-p-6 sm:mint-p-7 mint-text-neutral-50 mint-shadow-card">
 			<div class="mint-text-over mint-font-semibold mint-uppercase mint-tracking-widest mint-text-neutral-50/80">
@@ -112,7 +135,8 @@ include MINTLMS_PATH . 'views/student/partials/student-header.php';
 			<?php esc_html_e( 'YOUR COURSES', 'mint-lms' ); ?>
 		</div>
 		<div class="mint-grid mint-grid-cols-1 sm:mint-grid-cols-2 lg:mint-grid-cols-3 mint-gap-5">
-			<?php foreach ( $courses as $idx => $course ) :
+			<?php
+			foreach ( $courses as $idx => $course ) :
 				$hue     = $huePalette[ $idx % count( $huePalette ) ];
 				$initial = MintUi::courseInitial( $course->title );
 				$pctVal  = (int) round( $course->progressPct );
@@ -120,8 +144,14 @@ include MINTLMS_PATH . 'views/student/partials/student-header.php';
 				$targetLesson = $course->isComplete
 					? $course->firstLessonId
 					: ( $course->lastLessonId ?? $course->firstLessonId );
-				$actionUrl = $targetLesson
-					? add_query_arg( array( 'mint_course' => (string) $course->courseId, 'mint_lesson' => (string) $targetLesson ), $playerUrl )
+				$actionUrl    = $targetLesson
+					? add_query_arg(
+						array(
+							'mint_course' => (string) $course->courseId,
+							'mint_lesson' => (string) $targetLesson,
+						),
+						$playerUrl
+					)
 					: $playerUrl;
 				?>
 				<a href="<?php echo esc_url( $actionUrl ); ?>" class="mint-group mint-flex mint-flex-col mint-overflow-hidden mint-rounded-xl mint-border mint-border-rule mint-bg-bg mint-shadow-card hover:mint-border-control mint-transition-colors mint-duration-hover mint-no-underline">

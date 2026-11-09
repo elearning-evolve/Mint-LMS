@@ -31,34 +31,36 @@ final class WpdbProgressRepository implements ProgressRepositoryInterface {
 	}
 
 	public function isUserEnrolled( int $userId, int $courseId ): bool {
-		$table = Schema::validateTable( Schema::enrollmentsTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::enrollmentsTable( $wpdb->prefix ), $wpdb->prefix );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$found = $this->wpdb->get_var(
-			$this->wpdb->prepare(
-				"SELECT id FROM {$table} WHERE user_id = %d AND course_id = %d AND status = %s",
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$found = $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT id FROM %i WHERE user_id = %d AND course_id = %d AND status = %s',
+				$table,
 				$userId,
 				$courseId,
 				'active'
 			)
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 
 		return null !== $found;
 	}
 
 	public function isLessonComplete( int $userId, int $lessonId ): bool {
-		$table = Schema::validateTable( Schema::progressTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::progressTable( $wpdb->prefix ), $wpdb->prefix );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$found = $this->wpdb->get_var(
-			$this->wpdb->prepare(
-				"SELECT id FROM {$table} WHERE user_id = %d AND lesson_id = %d",
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$found = $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT id FROM %i WHERE user_id = %d AND lesson_id = %d',
+				$table,
 				$userId,
 				$lessonId
 			)
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 
 		return null !== $found;
 	}
@@ -84,6 +86,11 @@ final class WpdbProgressRepository implements ProgressRepositoryInterface {
 
 			$this->commitTransaction();
 
+			/**
+			 * Fires after progress changes so dashboard aggregates can refresh.
+			 */
+			do_action( 'mintlms_dashboard_cache_invalidate' );
+
 			return new CompleteLessonResult( $wasNewlyCompleted, $summary, $courseJustCompleted );
 		} catch ( \Throwable $exception ) {
 			$this->rollbackTransaction();
@@ -96,6 +103,7 @@ final class WpdbProgressRepository implements ProgressRepositoryInterface {
 		int $lessonId,
 		\DateTimeImmutable $updatedAt,
 	): void {
+		$wpdb     = $this->wpdb;
 		$courseId = $this->findLessonCourseId( $lessonId );
 
 		if ( null === $courseId ) {
@@ -105,10 +113,10 @@ final class WpdbProgressRepository implements ProgressRepositoryInterface {
 		$this->beginTransaction();
 
 		try {
-			$progressTable = Schema::validateTable( Schema::progressTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+			$progressTable = Schema::validateTable( Schema::progressTable( $wpdb->prefix ), $wpdb->prefix );
 
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$this->wpdb->delete(
+			$wpdb->delete(
 				$progressTable,
 				array(
 					'user_id'   => $userId,
@@ -121,6 +129,11 @@ final class WpdbProgressRepository implements ProgressRepositoryInterface {
 			$this->clearEnrollmentCompleted( $userId, $courseId );
 
 			$this->commitTransaction();
+
+			/**
+			 * Fires after progress changes so dashboard aggregates can refresh.
+			 */
+			do_action( 'mintlms_dashboard_cache_invalidate' );
 		} catch ( \Throwable $exception ) {
 			$this->rollbackTransaction();
 			throw $exception;
@@ -128,19 +141,20 @@ final class WpdbProgressRepository implements ProgressRepositoryInterface {
 	}
 
 	public function getSummary( int $userId, int $courseId ): ?ProgressSummary {
-		$table = Schema::validateTable( Schema::progressSummaryTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::progressSummaryTable( $wpdb->prefix ), $wpdb->prefix );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$row = $this->wpdb->get_row(
-			$this->wpdb->prepare(
-				"SELECT user_id, course_id, lessons_done, lessons_total, pct_complete, last_lesson_id, updated_at
-				FROM {$table}
-				WHERE user_id = %d AND course_id = %d",
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT user_id, course_id, lessons_done, lessons_total, pct_complete, last_lesson_id, updated_at
+				FROM %i
+				WHERE user_id = %d AND course_id = %d',
+				$table,
 				$userId,
 				$courseId
 			)
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 
 		if ( null === $row ) {
 			return null;
@@ -169,32 +183,36 @@ final class WpdbProgressRepository implements ProgressRepositoryInterface {
 	}
 
 	public function getCompletedLessonIds( int $userId, int $courseId ): array {
-		$progressTable = Schema::validateTable( Schema::progressTable( $this->wpdb->prefix ), $this->wpdb->prefix );
-		$postsTable    = $this->wpdb->posts;
-		$postmetaTable = $this->wpdb->postmeta;
+		$wpdb          = $this->wpdb;
+		$progressTable = Schema::validateTable( Schema::progressTable( $wpdb->prefix ), $wpdb->prefix );
+		$postsTable    = $wpdb->posts;
+		$postmetaTable = $wpdb->postmeta;
 		$lessonType    = \MintLMS\Infrastructure\PostType\PostTypes::LESSON;
 		$courseMeta    = \MintLMS\Infrastructure\PostType\PostTypes::META_COURSE_ID;
 		$sortMeta      = \MintLMS\Infrastructure\PostType\PostTypes::META_SORT_ORDER;
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$rows = $this->wpdb->get_col(
-			$this->wpdb->prepare(
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$rows = $wpdb->get_col(
+			$wpdb->prepare(
 				"SELECT p.lesson_id
-				FROM {$progressTable} p
-				INNER JOIN {$postsTable} l ON l.ID = p.lesson_id AND l.post_type = %s AND l.post_status = 'publish'
-				INNER JOIN {$postmetaTable} cm ON cm.post_id = l.ID AND cm.meta_key = %s AND cm.meta_value = %s
-				LEFT JOIN {$postmetaTable} sm ON sm.post_id = l.ID AND sm.meta_key = %s
+				FROM %i p
+				INNER JOIN %i l ON l.ID = p.lesson_id AND l.post_type = %s AND l.post_status = 'publish'
+				INNER JOIN %i cm ON cm.post_id = l.ID AND cm.meta_key = %s AND cm.meta_value = %s
+				LEFT JOIN %i sm ON sm.post_id = l.ID AND sm.meta_key = %s
 				WHERE p.user_id = %d AND p.course_id = %d
 				ORDER BY CAST(COALESCE(sm.meta_value, '0') AS UNSIGNED) ASC, l.ID ASC",
+				$progressTable,
+				$postsTable,
 				$lessonType,
+				$postmetaTable,
 				$courseMeta,
 				(string) $courseId,
+				$postmetaTable,
 				$sortMeta,
 				$userId,
 				$courseId
 			)
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 
 		if ( ! is_array( $rows ) ) {
 			return array();
@@ -226,28 +244,29 @@ final class WpdbProgressRepository implements ProgressRepositoryInterface {
 	}
 
 	public function onLessonDeleted( int $lessonId, \DateTimeImmutable $updatedAt ): void {
+		$wpdb     = $this->wpdb;
 		$courseId = $this->findLessonCourseId( $lessonId );
 
 		if ( null === $courseId ) {
 			return;
 		}
 
-		$progressTable = Schema::validateTable( Schema::progressTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$progressTable = Schema::validateTable( Schema::progressTable( $wpdb->prefix ), $wpdb->prefix );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$userIds = $this->wpdb->get_col(
-			$this->wpdb->prepare(
-				"SELECT DISTINCT user_id FROM {$progressTable} WHERE lesson_id = %d",
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$userIds = $wpdb->get_col(
+			$wpdb->prepare(
+				'SELECT DISTINCT user_id FROM %i WHERE lesson_id = %d',
+				$progressTable,
 				$lessonId
 			)
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 
 		$this->beginTransaction();
 
 		try {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$this->wpdb->delete(
+			$wpdb->delete(
 				$progressTable,
 				array( 'lesson_id' => $lessonId ),
 				array( '%d' )
@@ -273,10 +292,11 @@ final class WpdbProgressRepository implements ProgressRepositoryInterface {
 		int $courseId,
 		\DateTimeImmutable $completedAt,
 	): void {
-		$table = Schema::validateTable( Schema::progressTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::progressTable( $wpdb->prefix ), $wpdb->prefix );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
-		$inserted = $this->wpdb->insert(
+		$inserted = $wpdb->insert(
 			$table,
 			array(
 				'user_id'      => $userId,
@@ -299,6 +319,7 @@ final class WpdbProgressRepository implements ProgressRepositoryInterface {
 		\DateTimeImmutable $updatedAt,
 		?int $lastLessonId,
 	): ProgressSummary {
+		$wpdb         = $this->wpdb;
 		$lessonsTotal = $this->countLessonsInCourse( $courseId );
 		$lessonsDone  = $this->countCompletedLessons( $userId, $courseId );
 		$pctComplete  = $this->calculatePercent( $lessonsDone, $lessonsTotal );
@@ -307,11 +328,11 @@ final class WpdbProgressRepository implements ProgressRepositoryInterface {
 			$lastLessonId = $this->findLastCompletedLessonId( $userId, $courseId );
 		}
 
-		$table = Schema::validateTable( Schema::progressSummaryTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$table = Schema::validateTable( Schema::progressSummaryTable( $wpdb->prefix ), $wpdb->prefix );
 		$now   = $updatedAt->format( 'Y-m-d H:i:s' );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
-		$replaced = $this->wpdb->replace(
+		$replaced = $wpdb->replace(
 			$table,
 			array(
 				'user_id'        => $userId,
@@ -345,20 +366,21 @@ final class WpdbProgressRepository implements ProgressRepositoryInterface {
 	}
 
 	private function findLastCompletedLessonId( int $userId, int $courseId ): ?int {
-		$table = Schema::validateTable( Schema::progressTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::progressTable( $wpdb->prefix ), $wpdb->prefix );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$lessonId = $this->wpdb->get_var(
-			$this->wpdb->prepare(
-				"SELECT lesson_id FROM {$table}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$lessonId = $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT lesson_id FROM %i
 				WHERE user_id = %d AND course_id = %d
 				ORDER BY completed_at DESC, id DESC
-				LIMIT 1",
+				LIMIT 1',
+				$table,
 				$userId,
 				$courseId
 			)
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 
 		if ( null === $lessonId ) {
 			return null;
@@ -373,28 +395,29 @@ final class WpdbProgressRepository implements ProgressRepositoryInterface {
 		ProgressSummary $summary,
 		\DateTimeImmutable $completedAt,
 	): bool {
+		$wpdb = $this->wpdb;
 		if ( ! $summary->isCourseComplete() ) {
 			return false;
 		}
 
-		$table = Schema::validateTable( Schema::enrollmentsTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$table = Schema::validateTable( Schema::enrollmentsTable( $wpdb->prefix ), $wpdb->prefix );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$existing = $this->wpdb->get_var(
-			$this->wpdb->prepare(
-				"SELECT completed_at FROM {$table} WHERE user_id = %d AND course_id = %d",
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$existing = $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT completed_at FROM %i WHERE user_id = %d AND course_id = %d',
+				$table,
 				$userId,
 				$courseId
 			)
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 
 		if ( null !== $existing && '' !== $existing ) {
 			return false;
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$this->wpdb->update(
+		$wpdb->update(
 			$table,
 			array( 'completed_at' => $completedAt->format( 'Y-m-d H:i:s' ) ),
 			array(
@@ -409,10 +432,11 @@ final class WpdbProgressRepository implements ProgressRepositoryInterface {
 	}
 
 	private function clearEnrollmentCompleted( int $userId, int $courseId ): void {
-		$table = Schema::validateTable( Schema::enrollmentsTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::enrollmentsTable( $wpdb->prefix ), $wpdb->prefix );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$this->wpdb->update(
+		$wpdb->update(
 			$table,
 			array( 'completed_at' => null ),
 			array(
@@ -451,17 +475,20 @@ final class WpdbProgressRepository implements ProgressRepositoryInterface {
 	}
 
 	private function beginTransaction(): void {
+		$wpdb = $this->wpdb;
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$this->wpdb->query( 'START TRANSACTION' );
+		$wpdb->query( 'START TRANSACTION' );
 	}
 
 	private function commitTransaction(): void {
+		$wpdb = $this->wpdb;
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$this->wpdb->query( 'COMMIT' );
+		$wpdb->query( 'COMMIT' );
 	}
 
 	private function rollbackTransaction(): void {
+		$wpdb = $this->wpdb;
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$this->wpdb->query( 'ROLLBACK' );
+		$wpdb->query( 'ROLLBACK' );
 	}
 }

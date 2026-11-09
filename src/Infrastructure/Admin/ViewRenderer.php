@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Infrastructure\Admin;
 
+use MintLMS\Infrastructure\View\ScopedPhpTemplate;
+
 final class ViewRenderer {
 
 	/**
@@ -13,17 +15,7 @@ final class ViewRenderer {
 	public function render( string $view, array $vars = array() ): string {
 		$viewPath = MINTLMS_PATH . 'views/' . ltrim( $view, '/' ) . '.php';
 
-		if ( ! is_readable( $viewPath ) ) {
-			return '';
-		}
-
-		// phpcs:ignore WordPress.PHP.DontExtract.extract_extract -- Controlled internal view variables only.
-		extract( $vars, EXTR_SKIP );
-
-		ob_start();
-		include $viewPath;
-
-		return (string) ob_get_clean();
+		return ScopedPhpTemplate::render( $viewPath, $vars );
 	}
 
 	/**

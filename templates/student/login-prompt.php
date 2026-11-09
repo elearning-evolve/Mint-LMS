@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template partial variables.
-
 $message = $message ?? __( 'You need to sign in before you can access this course content.', 'mint-lms' );
 ?>
 <div class="mint-flex mint-min-h-[50vh] mint-items-center mint-justify-center mint-px-4 mint-py-16">
@@ -15,7 +13,7 @@ $message = $message ?? __( 'You need to sign in before you can access this cours
 		<h1 class="mint-text-h2 mint-font-semibold mint-text-ink mint-tracking-tight"><?php esc_html_e( 'Sign in to continue', 'mint-lms' ); ?></h1>
 		<p class="mint-mt-3 mint-text-sm mint-leading-relaxed mint-text-ink-2"><?php echo esc_html( $message ); ?></p>
 		<a
-			href="<?php echo esc_url( wp_login_url( get_permalink() ?: home_url( '/' ) ) ); ?>"
+			href="<?php echo esc_url( wp_login_url( get_permalink() ? get_permalink() : home_url( '/' ) ) ); ?>"
 			class="mint-mt-6 mint-inline-flex mint-items-center mint-justify-center mint-h-control-md mint-px-5 mint-text-sm mint-font-medium mint-rounded-md mint-bg-accent mint-text-neutral-50 hover:mint-bg-accent-hover mint-transition-colors mint-duration-hover mint-no-underline"
 		>
 			<?php esc_html_e( 'Sign in', 'mint-lms' ); ?>

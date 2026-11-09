@@ -25,6 +25,7 @@ final readonly class CourseDto {
 		public string $updatedAt,
 		public int $lessonCount = 0,
 		public int $studentCount = 0,
+		public int $finishedCount = 0,
 		public ?int $completionRate = null,
 		public string $authorName = '',
 		public string $category = '',
@@ -54,11 +55,13 @@ final readonly class CourseDto {
 	public static function fromCourse( Course $course, ?array $stats = null, string $authorName = '', string $category = '' ): self {
 		$lessonCount    = 0;
 		$studentCount   = 0;
+		$finishedCount  = 0;
 		$completionRate = null;
 
 		if ( null !== $stats ) {
 			$lessonCount    = (int) ( $stats['lesson_count'] ?? 0 );
 			$studentCount   = (int) ( $stats['students'] ?? 0 );
+			$finishedCount  = (int) ( $stats['finished'] ?? 0 );
 			$completionRate = isset( $stats['completion_pct'] ) && null !== $stats['completion_pct']
 				? (int) $stats['completion_pct']
 				: null;
@@ -79,6 +82,7 @@ final readonly class CourseDto {
 			$course->updatedAt->format( 'c' ),
 			$lessonCount,
 			$studentCount,
+			$finishedCount,
 			$completionRate,
 			$authorName,
 			$category,
@@ -110,42 +114,43 @@ final readonly class CourseDto {
 	 */
 	public function toArray(): array {
 		return array(
-			'id'                     => $this->id,
-			'title'                  => $this->title,
-			'slug'                   => $this->slug,
-			'description'            => $this->description,
-			'featuredImageId'        => $this->featuredImageId,
-			'status'                 => $this->status,
-			'enrollmentType'         => $this->enrollmentType,
-			'authorId'               => $this->authorId,
-			'authorName'             => $this->authorName,
-			'instructor'             => $this->authorName,
-			'category'               => $this->category,
-			'createdAt'              => $this->createdAt,
-			'updatedAt'              => $this->updatedAt,
-			'lessonCount'            => $this->lessonCount,
-			'studentCount'           => $this->studentCount,
-			'completionRate'         => $this->completionRate,
-			'emailOnPublish'         => $this->emailOnPublish,
-			'studentComplete'        => $this->studentComplete,
-			'certificate'            => $this->certificate,
-			'progression'            => $this->progression,
-			'expireAccess'           => $this->expireAccess,
-			'expireAccessDays'       => $this->expireAccessDays,
-			'prerequisitesEnabled'   => $this->prerequisitesEnabled,
-			'prerequisiteCourseIds'  => $this->prerequisiteCourseIds,
-			'prerequisiteCompare'    => $this->prerequisiteCompare,
-			'accessStartAt'          => $this->accessStartAt,
-			'accessEndAt'            => $this->accessEndAt,
-			'seatLimit'              => $this->seatLimit,
-			'materialsEnabled'       => $this->materialsEnabled,
-			'materialsContent'       => $this->materialsContent,
-			'lessonListVisibility'   => $this->lessonListVisibility,
-			'paginationEnabled'      => $this->paginationEnabled,
-			'lessonsPerPage'         => $this->lessonsPerPage,
-			'groupsPerPage'          => $this->groupsPerPage,
-			'completionRedirect'     => $this->completionRedirect,
-			'pointsOnComplete'       => $this->pointsOnComplete,
+			'id'                    => $this->id,
+			'title'                 => $this->title,
+			'slug'                  => $this->slug,
+			'description'           => $this->description,
+			'featuredImageId'       => $this->featuredImageId,
+			'status'                => $this->status,
+			'enrollmentType'        => $this->enrollmentType,
+			'authorId'              => $this->authorId,
+			'authorName'            => $this->authorName,
+			'instructor'            => $this->authorName,
+			'category'              => $this->category,
+			'createdAt'             => $this->createdAt,
+			'updatedAt'             => $this->updatedAt,
+			'lessonCount'           => $this->lessonCount,
+			'studentCount'          => $this->studentCount,
+			'finishedCount'         => $this->finishedCount,
+			'completionRate'        => $this->completionRate,
+			'emailOnPublish'        => $this->emailOnPublish,
+			'studentComplete'       => $this->studentComplete,
+			'certificate'           => $this->certificate,
+			'progression'           => $this->progression,
+			'expireAccess'          => $this->expireAccess,
+			'expireAccessDays'      => $this->expireAccessDays,
+			'prerequisitesEnabled'  => $this->prerequisitesEnabled,
+			'prerequisiteCourseIds' => $this->prerequisiteCourseIds,
+			'prerequisiteCompare'   => $this->prerequisiteCompare,
+			'accessStartAt'         => $this->accessStartAt,
+			'accessEndAt'           => $this->accessEndAt,
+			'seatLimit'             => $this->seatLimit,
+			'materialsEnabled'      => $this->materialsEnabled,
+			'materialsContent'      => $this->materialsContent,
+			'lessonListVisibility'  => $this->lessonListVisibility,
+			'paginationEnabled'     => $this->paginationEnabled,
+			'lessonsPerPage'        => $this->lessonsPerPage,
+			'groupsPerPage'         => $this->groupsPerPage,
+			'completionRedirect'    => $this->completionRedirect,
+			'pointsOnComplete'      => $this->pointsOnComplete,
 		);
 	}
 }

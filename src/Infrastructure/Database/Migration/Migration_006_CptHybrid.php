@@ -51,16 +51,41 @@ final class Migration_006_CptHybrid implements MigrationInterface {
 		$questions = Schema::validateTable( Schema::quizQuestionsTable( $prefix ), $prefix );
 		$legacy    = $prefix . 'mintlms_quiz_questions_legacy';
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $questions ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.NotPrepared -- Custom table migration; Schema::validateTable().
+		$exists = $wpdb->get_var(
+			$wpdb->prepare(
+				'SHOW TABLES LIKE %s',
+				$questions
+			)
+		);
 		if ( $questions === $exists ) {
-			$cols = $wpdb->get_col( $wpdb->prepare( 'DESC %i', $questions ), 0 );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.NotPrepared -- Custom table migration; Schema::validateTable().
+			$cols       = $wpdb->get_col(
+				$wpdb->prepare(
+					'DESC %i',
+					$questions
+				),
+				0
+			);
 			$isJunction = is_array( $cols ) && in_array( 'question_id', $cols, true );
 
 			if ( ! $isJunction ) {
-				$legacyExists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $legacy ) );
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.NotPrepared -- Custom table migration; Schema::validateTable().
+				$legacyExists = $wpdb->get_var(
+					$wpdb->prepare(
+						'SHOW TABLES LIKE %s',
+						$legacy
+					)
+				);
 				if ( $legacy !== $legacyExists ) {
-					$wpdb->query( "RENAME TABLE `{$questions}` TO `{$legacy}`" );
+					// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.NotPrepared -- Custom table migration; Schema::validateTable().
+					$wpdb->query(
+						$wpdb->prepare(
+							'RENAME TABLE %i TO %i',
+							$questions,
+							$legacy
+						)
+					);
 				}
 			}
 		}
@@ -78,6 +103,5 @@ final class Migration_006_CptHybrid implements MigrationInterface {
                 KEY question_id (question_id)
             ) {$charset};"
 		);
-		// phpcs:enable
 	}
 }

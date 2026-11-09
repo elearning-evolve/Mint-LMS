@@ -238,17 +238,107 @@ defined( 'ABSPATH' ) || exit;
 				<div class="mint-settings-row__label"><?php esc_html_e( 'Quiz materials', 'mint-lms' ); ?></div>
 				<div class="mint-settings-row__control">
 					<span class="mint-settings-hint" title="<?php echo esc_attr__( 'Notes or downloads shown before the quiz', 'mint-lms' ); ?>">?</span>
-					<button type="button" role="switch" class="mint-lesson-preview-toggle" :class="lessonQuiz.settings.materialsEnabled ? 'is-on' : ''" :aria-pressed="lessonQuiz.settings.materialsEnabled ? 'true' : 'false'" @click="lessonQuiz.settings.materialsEnabled = !lessonQuiz.settings.materialsEnabled"><span class="mint-lesson-preview-toggle__knob"></span></button>
+					<button
+						type="button"
+						role="switch"
+						class="mint-lesson-preview-toggle"
+						:class="lessonQuiz.settings.materialsEnabled ? 'is-on' : ''"
+						:aria-pressed="lessonQuiz.settings.materialsEnabled ? 'true' : 'false'"
+						@click="toggleQuizMaterialsEnabled()"
+					><span class="mint-lesson-preview-toggle__knob"></span></button>
 					<span class="mint-settings-hint-text" x-show="lessonQuiz.settings.materialsEnabled" x-cloak><?php esc_html_e( 'Any content added below is displayed on the quiz page', 'mint-lms' ); ?></span>
 				</div>
 			</div>
 			<div class="mint-settings-nested" x-show="lessonQuiz.settings.materialsEnabled" x-cloak>
-				<div class="mint-settings-editor">
-					<div class="mint-settings-editor__toolbar">
-						<div class="mint-settings-editor__tools"><span class="mint-settings-editor__chip"><?php esc_html_e( 'Paragraph', 'mint-lms' ); ?></span></div>
-						<button type="button" class="mint-settings-editor__media"><?php esc_html_e( 'Add media', 'mint-lms' ); ?></button>
+				<div class="mint-cs-materials mint-cs-materials--settings">
+					<div class="mint-cs-materials__actions">
+						<button type="button" class="mint-cs-materials__add-media" @click="addMediaToQuizMaterials()">
+							<svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="#0B4F3F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="3.5" width="15" height="13" rx="3"/><circle cx="7" cy="8" r="1.4"/><path d="m4 14 4-3.5 3 2 4.5-4"/></svg>
+							<?php esc_html_e( 'Add media', 'mint-lms' ); ?>
+						</button>
+						<div class="mint-cs-materials__view-toggle" role="group" aria-label="<?php echo esc_attr__( 'Editor mode', 'mint-lms' ); ?>">
+							<button
+								type="button"
+								class="mint-cs-materials__view-btn"
+								:class="quizMaterialsEditorView === 'visual' ? 'is-active' : ''"
+								@click="setQuizMaterialsEditorView('visual')"
+							><?php esc_html_e( 'Visual', 'mint-lms' ); ?></button>
+							<button
+								type="button"
+								class="mint-cs-materials__view-btn"
+								:class="quizMaterialsEditorView === 'code' ? 'is-active' : ''"
+								@click="setQuizMaterialsEditorView('code')"
+							><?php esc_html_e( 'Code', 'mint-lms' ); ?></button>
+						</div>
 					</div>
-					<textarea class="mint-settings-editor__textarea" x-model="lessonQuiz.settings.materialsContent" placeholder="<?php echo esc_attr__( 'Add notes, links or downloads for the quiz page…', 'mint-lms' ); ?>"></textarea>
+					<div
+						class="mint-cs-materials__frame"
+						:class="quizMaterialsEditorView === 'code' ? 'is-code' : 'is-visual'"
+					>
+						<div
+							class="mint-cs-materials__toolbar"
+							x-show="quizMaterialsEditorView === 'visual'"
+							@click.outside="quizMaterialsFormatMenuOpen = false"
+							@mousedown.prevent
+						>
+							<div class="mint-cs-materials__format">
+								<button
+									type="button"
+									class="mint-cs-materials__format-trigger"
+									@click="quizMaterialsFormatMenuOpen = !quizMaterialsFormatMenuOpen"
+									:aria-expanded="quizMaterialsFormatMenuOpen ? 'true' : 'false'"
+								>
+									<span x-text="quizMaterialsFormatLabel"></span>
+									<svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#0B4F3F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 8 10 12.5 14.5 8"/></svg>
+								</button>
+								<div class="mint-cs-materials__format-menu" x-show="quizMaterialsFormatMenuOpen">
+									<template x-for="option in quizMaterialsFormatOptions" :key="'qm-fmt-' + option.value">
+										<button
+											type="button"
+											class="mint-cs-materials__format-option"
+											:class="quizMaterialsFormatLabel === option.label ? 'is-active' : ''"
+											@click="applyQuizMaterialsFormat(option)"
+											x-text="option.label"
+										></button>
+									</template>
+								</div>
+							</div>
+							<span class="mint-cs-materials__toolbar-divider" aria-hidden="true"></span>
+							<button type="button" class="mint-cs-materials__tool" style="font-weight:700" @click="runQuizMaterialsCommand('bold')" title="<?php echo esc_attr__( 'Bold', 'mint-lms' ); ?>">B</button>
+							<button type="button" class="mint-cs-materials__tool" style="font-weight:500;font-style:italic" @click="runQuizMaterialsCommand('italic')" title="<?php echo esc_attr__( 'Italic', 'mint-lms' ); ?>">I</button>
+							<button type="button" class="mint-cs-materials__tool" @click="runQuizMaterialsCommand('InsertUnorderedList')" title="<?php echo esc_attr__( 'Bullet list', 'mint-lms' ); ?>">•</button>
+							<button type="button" class="mint-cs-materials__tool" @click="runQuizMaterialsCommand('InsertOrderedList')" title="<?php echo esc_attr__( 'Numbered list', 'mint-lms' ); ?>">1.</button>
+							<button type="button" class="mint-cs-materials__tool" @click="insertQuizMaterialsLink()" title="<?php echo esc_attr__( 'Link', 'mint-lms' ); ?>">🔗</button>
+						</div>
+						<div
+							class="mint-cs-materials__toolbar mint-cs-materials__toolbar--code"
+							x-show="quizMaterialsEditorView === 'code'"
+							@mousedown.prevent
+						>
+							<template x-for="tag in quizMaterialsCodeTags" :key="'qm-code-' + tag">
+								<button type="button" class="mint-cs-materials__code-chip" @click="insertQuizMaterialsCodeTag(tag)" x-text="tag"></button>
+							</template>
+						</div>
+						<div
+							id="mint_quiz_materials_visual"
+							class="mint-cs-materials__visual"
+							contenteditable="true"
+							role="textbox"
+							aria-multiline="true"
+							x-show="quizMaterialsEditorView === 'visual'"
+							@input="onQuizMaterialsVisualInput()"
+							@blur="onQuizMaterialsVisualInput()"
+							data-placeholder="<?php echo esc_attr__( 'Add notes, links or downloads for the quiz page…', 'mint-lms' ); ?>"
+						></div>
+						<textarea
+							id="mint_quiz_materials_code"
+							class="mint-cs-materials__code"
+							rows="8"
+							x-show="quizMaterialsEditorView === 'code'"
+							@input="onQuizMaterialsCodeInput($event)"
+							placeholder="<?php echo esc_attr__( 'Add notes, links or downloads for the quiz page…', 'mint-lms' ); ?>"
+						></textarea>
+					</div>
 				</div>
 			</div>
 			<div class="mint-settings-divider"></div>
@@ -410,34 +500,107 @@ defined( 'ABSPATH' ) || exit;
 				<div class="mint-settings-row__label"><?php esc_html_e( 'Result message(s)', 'mint-lms' ); ?></div>
 				<div class="mint-settings-row__control">
 					<span class="mint-settings-hint" title="<?php echo esc_attr__( 'Custom messages shown after the quiz', 'mint-lms' ); ?>">?</span>
-					<button type="button" role="switch" class="mint-lesson-preview-toggle" :class="lessonQuiz.settings.resultMessagesEnabled ? 'is-on' : ''" :aria-pressed="lessonQuiz.settings.resultMessagesEnabled ? 'true' : 'false'" @click="lessonQuiz.settings.resultMessagesEnabled = !lessonQuiz.settings.resultMessagesEnabled"><span class="mint-lesson-preview-toggle__knob"></span></button>
+					<button type="button" role="switch" class="mint-lesson-preview-toggle" :class="lessonQuiz.settings.resultMessagesEnabled ? 'is-on' : ''" :aria-pressed="lessonQuiz.settings.resultMessagesEnabled ? 'true' : 'false'" @click="toggleQuizResultMessages()"><span class="mint-lesson-preview-toggle__knob"></span></button>
 					<span class="mint-settings-hint-text" x-show="lessonQuiz.settings.resultMessagesEnabled" x-cloak><?php esc_html_e( 'The message below is shown on the quiz results page', 'mint-lms' ); ?></span>
 				</div>
 			</div>
-			<div class="mint-settings-nested" x-show="lessonQuiz.settings.resultMessagesEnabled" x-cloak style="gap:14px">
+			<div class="mint-settings-nested mint-settings-nested--stack" x-show="lessonQuiz.settings.resultMessagesEnabled" x-cloak>
 				<template x-for="(rb, ri) in lessonQuiz.settings.resultMessages" :key="'rm-' + ri">
-					<div class="mint-settings-grad">
-						<button type="button" class="mint-settings-grad__head" @click="rb.open = !rb.open">
+					<div class="mint-settings-grad" :class="rb.open === false ? 'is-collapsed' : ''">
+						<div
+							class="mint-settings-grad__head"
+							role="button"
+							tabindex="0"
+							@click="rb.open = rb.open === false"
+							@keydown.enter.prevent="rb.open = rb.open === false"
+							@keydown.space.prevent="rb.open = rb.open === false"
+						>
 							<div class="mint-settings-grad__meta">
-								<span style="font-weight:600"><?php esc_html_e( 'From', 'mint-lms' ); ?></span>
-								<input type="number" class="mint-settings-input" style="width:64px;height:36px;text-align:center" x-model.number="rb.from" @click.stop />
+								<span class="mint-settings-grad__meta-label"><?php esc_html_e( 'From', 'mint-lms' ); ?></span>
+								<input
+									type="number"
+									min="0"
+									max="100"
+									class="mint-settings-input mint-settings-input--grad"
+									x-model.number="rb.from"
+									@click.stop
+								/>
 								<span><?php esc_html_e( '% score, show this message:', 'mint-lms' ); ?></span>
 							</div>
-							<div style="display:flex;align-items:center;gap:12px">
-								<button type="button" class="mint-settings-delete-grad" x-show="lessonQuiz.settings.resultMessages.length > 1" x-cloak @click.stop="removeQuizResultMessage(ri)">
+							<div class="mint-settings-grad__actions">
+								<button
+									type="button"
+									class="mint-settings-delete-grad"
+									x-show="lessonQuiz.settings.resultMessages.length > 1"
+									@click.stop="removeQuizResultMessage(ri)"
+								>
 									<svg width="18" height="18" viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="8.5" fill="#C22B2B"/><path d="m7 7 6 6M13 7l-6 6" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/></svg>
 									<?php esc_html_e( 'Delete graduation', 'mint-lms' ); ?>
 								</button>
-								<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#0B4F3F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" :style="rb.open ? 'transform:rotate(180deg)' : ''" aria-hidden="true"><path d="m5 8 5 5 5-5"/></svg>
+								<svg
+									class="mint-settings-grad__chevron"
+									width="16"
+									height="16"
+									viewBox="0 0 20 20"
+									fill="none"
+									stroke="#0B4F3F"
+									stroke-width="2.4"
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									:class="rb.open === false ? '' : 'is-open'"
+									aria-hidden="true"
+								><path d="m5 8 5 5 5-5"/></svg>
 							</div>
-						</button>
-						<div class="mint-settings-grad__body" x-show="rb.open" x-cloak>
-							<div class="mint-settings-editor">
-								<div class="mint-settings-editor__toolbar">
-									<div class="mint-settings-editor__tools"><span class="mint-settings-editor__chip"><?php esc_html_e( 'Paragraph', 'mint-lms' ); ?></span></div>
-									<button type="button" class="mint-settings-editor__media"><?php esc_html_e( 'Add media', 'mint-lms' ); ?></button>
+						</div>
+						<div class="mint-settings-grad__body">
+							<div class="mint-settings-rte">
+								<div class="mint-settings-rte__top">
+									<button
+										type="button"
+										class="mint-settings-rte__media"
+										@click="addMediaToResultMessage(ri)"
+									>
+										<svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="3.5" width="15" height="13" rx="3"/><circle cx="7" cy="8" r="1.4"/><path d="m4 14 4-3.5 3 2 4.5-4"/></svg>
+										<?php esc_html_e( 'Add media', 'mint-lms' ); ?>
+									</button>
+									<div class="mint-settings-rte__views" role="group" aria-label="<?php echo esc_attr__( 'Editor mode', 'mint-lms' ); ?>">
+										<button
+											type="button"
+											class="mint-settings-rte__view"
+											:class="(rb.editorView || 'visual') === 'visual' ? 'is-active' : ''"
+											@click="rb.editorView = 'visual'"
+										><?php esc_html_e( 'Visual', 'mint-lms' ); ?></button>
+										<button
+											type="button"
+											class="mint-settings-rte__view"
+											:class="rb.editorView === 'code' ? 'is-active' : ''"
+											@click="rb.editorView = 'code'"
+										><?php esc_html_e( 'Code', 'mint-lms' ); ?></button>
+									</div>
 								</div>
-								<textarea class="mint-settings-editor__textarea" x-model="rb.message" placeholder="<?php echo esc_attr__( 'Write the message students see for this score…', 'mint-lms' ); ?>"></textarea>
+								<div class="mint-settings-editor">
+									<div class="mint-settings-editor__toolbar mint-settings-editor__toolbar--tags">
+										<button type="button" class="mint-settings-editor__chip" @click="insertResultMessageCodeTag(ri, 'b')">b</button>
+										<button type="button" class="mint-settings-editor__chip" @click="insertResultMessageCodeTag(ri, 'i')">i</button>
+										<button type="button" class="mint-settings-editor__chip" @click="insertResultMessageCodeTag(ri, 'link')">link</button>
+										<button type="button" class="mint-settings-editor__chip" @click="insertResultMessageCodeTag(ri, 'b-quote')">b-quote</button>
+										<button type="button" class="mint-settings-editor__chip" @click="insertResultMessageCodeTag(ri, 'del')">del</button>
+										<button type="button" class="mint-settings-editor__chip" @click="insertResultMessageCodeTag(ri, 'ins')">ins</button>
+										<button type="button" class="mint-settings-editor__chip" @click="insertResultMessageCodeTag(ri, 'img')">img</button>
+										<button type="button" class="mint-settings-editor__chip" @click="insertResultMessageCodeTag(ri, 'ul')">ul</button>
+										<button type="button" class="mint-settings-editor__chip" @click="insertResultMessageCodeTag(ri, 'ol')">ol</button>
+										<button type="button" class="mint-settings-editor__chip" @click="insertResultMessageCodeTag(ri, 'li')">li</button>
+										<button type="button" class="mint-settings-editor__chip" @click="insertResultMessageCodeTag(ri, 'code')">code</button>
+										<button type="button" class="mint-settings-editor__chip" @click="insertResultMessageCodeTag(ri, 'more')">more</button>
+										<button type="button" class="mint-settings-editor__chip" @click="insertResultMessageCodeTag(ri, 'close tags')">close tags</button>
+									</div>
+									<textarea
+										:id="'mint-result-msg-' + ri"
+										class="mint-settings-editor__textarea"
+										x-model="rb.message"
+										placeholder="<?php echo esc_attr__( 'Write the message students see for this score…', 'mint-lms' ); ?>"
+									></textarea>
+								</div>
 							</div>
 						</div>
 					</div>

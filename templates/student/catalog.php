@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template partial variables.
-
 use MintLMS\Application\Student\Dto\StudentCatalogCourseDto;
 use MintLMS\Infrastructure\Ui\MintUi;
 
@@ -15,14 +13,32 @@ $excerptLength = 140;
 $pageTitle     = __( 'Courses', 'mint-lms' );
 $userName      = '';
 $huePalette    = array(
-	array( 'bg' => 'mint-bg-hue-1', 'text' => 'mint-text-hue-1i' ),
-	array( 'bg' => 'mint-bg-hue-2', 'text' => 'mint-text-hue-2i' ),
-	array( 'bg' => 'mint-bg-hue-3', 'text' => 'mint-text-hue-3i' ),
-	array( 'bg' => 'mint-bg-hue-4', 'text' => 'mint-text-hue-4i' ),
-	array( 'bg' => 'mint-bg-hue-5', 'text' => 'mint-text-hue-5i' ),
-	array( 'bg' => 'mint-bg-hue-6', 'text' => 'mint-text-hue-6i' ),
+	array(
+		'bg'   => 'mint-bg-hue-1',
+		'text' => 'mint-text-hue-1i',
+	),
+	array(
+		'bg'   => 'mint-bg-hue-2',
+		'text' => 'mint-text-hue-2i',
+	),
+	array(
+		'bg'   => 'mint-bg-hue-3',
+		'text' => 'mint-text-hue-3i',
+	),
+	array(
+		'bg'   => 'mint-bg-hue-4',
+		'text' => 'mint-text-hue-4i',
+	),
+	array(
+		'bg'   => 'mint-bg-hue-5',
+		'text' => 'mint-text-hue-5i',
+	),
+	array(
+		'bg'   => 'mint-bg-hue-6',
+		'text' => 'mint-text-hue-6i',
+	),
 );
-include MINTLMS_PATH . 'views/student/partials/student-header.php';
+require MINTLMS_PATH . 'views/student/partials/student-header.php';
 ?>
 
 <div class="mint-max-w-content mint-mx-auto mint-px-4 sm:mint-px-6 mint-pb-10">
@@ -38,7 +54,8 @@ include MINTLMS_PATH . 'views/student/partials/student-header.php';
 		</div>
 	<?php else : ?>
 		<div class="mint-grid mint-grid-cols-1 sm:mint-grid-cols-2 lg:mint-grid-cols-3 mint-gap-5">
-			<?php foreach ( $courses as $idx => $course ) :
+			<?php
+			foreach ( $courses as $idx => $course ) :
 				$hue         = $huePalette[ $idx % count( $huePalette ) ];
 				$initial     = MintUi::courseInitial( $course->title );
 				$overviewUrl = $courseUrl( $course->courseId );

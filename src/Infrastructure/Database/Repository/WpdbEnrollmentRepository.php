@@ -18,18 +18,19 @@ final class WpdbEnrollmentRepository implements EnrollmentRepositoryInterface {
 	}
 
 	public function findById( int $id ): ?Enrollment {
-		$table = Schema::validateTable( Schema::enrollmentsTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::enrollmentsTable( $wpdb->prefix ), $wpdb->prefix );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$row = $this->wpdb->get_row(
-			$this->wpdb->prepare(
-				"SELECT id, user_id, course_id, status, enrolled_at, expires_at, completed_at
-				FROM {$table}
-				WHERE id = %d",
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT id, user_id, course_id, status, enrolled_at, expires_at, completed_at
+				FROM %i
+				WHERE id = %d',
+				$table,
 				$id
 			)
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 
 		if ( null === $row ) {
 			return null;
@@ -39,19 +40,20 @@ final class WpdbEnrollmentRepository implements EnrollmentRepositoryInterface {
 	}
 
 	public function findByUserAndCourse( int $userId, int $courseId ): ?Enrollment {
-		$table = Schema::validateTable( Schema::enrollmentsTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::enrollmentsTable( $wpdb->prefix ), $wpdb->prefix );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$row = $this->wpdb->get_row(
-			$this->wpdb->prepare(
-				"SELECT id, user_id, course_id, status, enrolled_at, expires_at, completed_at
-				FROM {$table}
-				WHERE user_id = %d AND course_id = %d",
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT id, user_id, course_id, status, enrolled_at, expires_at, completed_at
+				FROM %i
+				WHERE user_id = %d AND course_id = %d',
+				$table,
 				$userId,
 				$courseId
 			)
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 
 		if ( null === $row ) {
 			return null;
@@ -61,7 +63,8 @@ final class WpdbEnrollmentRepository implements EnrollmentRepositoryInterface {
 	}
 
 	public function save( Enrollment $enrollment ): Enrollment {
-		$table = Schema::validateTable( Schema::enrollmentsTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::enrollmentsTable( $wpdb->prefix ), $wpdb->prefix );
 
 		$data = array(
 			'user_id'      => $enrollment->userId,
@@ -74,7 +77,7 @@ final class WpdbEnrollmentRepository implements EnrollmentRepositoryInterface {
 
 		if ( 0 === $enrollment->id ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
-			$inserted = $this->wpdb->insert(
+			$inserted = $wpdb->insert(
 				$table,
 				$data,
 				array( '%d', '%d', '%s', '%s', '%s', '%s' )
@@ -84,8 +87,8 @@ final class WpdbEnrollmentRepository implements EnrollmentRepositoryInterface {
 				throw new \RuntimeException( 'Failed to insert enrollment.' );
 			}
 
-			return new Enrollment(
-				(int) $this->wpdb->insert_id,
+			$created = new Enrollment(
+				(int) $wpdb->insert_id,
 				$enrollment->userId,
 				$enrollment->courseId,
 				$enrollment->status,
@@ -93,10 +96,16 @@ final class WpdbEnrollmentRepository implements EnrollmentRepositoryInterface {
 				$enrollment->expiresAt,
 				$enrollment->completedAt,
 			);
+			/**
+			 * Fires after enrollment rows change so dashboard aggregates can refresh.
+			 */
+			do_action( 'mintlms_dashboard_cache_invalidate' );
+
+			return $created;
 		}
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$updated = $this->wpdb->update(
+		$updated = $wpdb->update(
 			$table,
 			$data,
 			array( 'id' => $enrollment->id ),
@@ -108,6 +117,11 @@ final class WpdbEnrollmentRepository implements EnrollmentRepositoryInterface {
 			throw new \RuntimeException( 'Failed to update enrollment.' );
 		}
 
+		/**
+		 * Fires after enrollment rows change so dashboard aggregates can refresh.
+		 */
+		do_action( 'mintlms_dashboard_cache_invalidate' );
+
 		return $enrollment;
 	}
 
@@ -117,7 +131,8 @@ final class WpdbEnrollmentRepository implements EnrollmentRepositoryInterface {
 		int $perPage,
 		?EnrollmentStatus $status = null,
 	): array {
-		$table  = Schema::validateTable( Schema::enrollmentsTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb   = $this->wpdb;
+		$table  = Schema::validateTable( Schema::enrollmentsTable( $wpdb->prefix ), $wpdb->prefix );
 		$offset = ( $page - 1 ) * $perPage;
 
 		$where  = array( 'course_id = %d' );
@@ -130,19 +145,21 @@ final class WpdbEnrollmentRepository implements EnrollmentRepositoryInterface {
 
 		$whereSql = implode( ' AND ', $where );
 
-		$countSql = "SELECT COUNT(*) FROM {$table} WHERE {$whereSql}";
-		$listSql  = "SELECT id, user_id, course_id, status, enrolled_at, expires_at, completed_at
-			FROM {$table}
-			WHERE {$whereSql}
+		$countSql = 'SELECT COUNT(*) FROM %i WHERE ' . $whereSql;
+		$listSql  = 'SELECT id, user_id, course_id, status, enrolled_at, expires_at, completed_at
+			FROM %i
+			WHERE ' . $whereSql . '
 			ORDER BY enrolled_at DESC
-			LIMIT %d OFFSET %d";
+			LIMIT %d OFFSET %d';
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$total = (int) $this->wpdb->get_var( $this->wpdb->prepare( $countSql, ...$params ) );
-		$rows  = $this->wpdb->get_results(
-			$this->wpdb->prepare( $listSql, ...array_merge( $params, array( $perPage, $offset ) ) )
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- SQL built from validated table (%i) + whitelist WHERE fragments.
+		$total = (int) $wpdb->get_var( $wpdb->prepare( $countSql, $table, ...$params ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$rows = $wpdb->get_results(
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- SQL built from validated table (%i) + whitelist WHERE fragments.
+			$wpdb->prepare( $listSql, $table, ...array_merge( $params, array( $perPage, $offset ) ) )
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 
 		$enrollments = array();
 
@@ -164,7 +181,8 @@ final class WpdbEnrollmentRepository implements EnrollmentRepositoryInterface {
 		int $perPage,
 		?EnrollmentStatus $status = null,
 	): array {
-		$table  = Schema::validateTable( Schema::enrollmentsTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb   = $this->wpdb;
+		$table  = Schema::validateTable( Schema::enrollmentsTable( $wpdb->prefix ), $wpdb->prefix );
 		$offset = ( $page - 1 ) * $perPage;
 
 		$where  = array( 'user_id = %d' );
@@ -177,19 +195,21 @@ final class WpdbEnrollmentRepository implements EnrollmentRepositoryInterface {
 
 		$whereSql = implode( ' AND ', $where );
 
-		$countSql = "SELECT COUNT(*) FROM {$table} WHERE {$whereSql}";
-		$listSql  = "SELECT id, user_id, course_id, status, enrolled_at, expires_at, completed_at
-			FROM {$table}
-			WHERE {$whereSql}
+		$countSql = 'SELECT COUNT(*) FROM %i WHERE ' . $whereSql;
+		$listSql  = 'SELECT id, user_id, course_id, status, enrolled_at, expires_at, completed_at
+			FROM %i
+			WHERE ' . $whereSql . '
 			ORDER BY enrolled_at DESC
-			LIMIT %d OFFSET %d";
+			LIMIT %d OFFSET %d';
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$total = (int) $this->wpdb->get_var( $this->wpdb->prepare( $countSql, ...$params ) );
-		$rows  = $this->wpdb->get_results(
-			$this->wpdb->prepare( $listSql, ...array_merge( $params, array( $perPage, $offset ) ) )
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- SQL built from validated table (%i) + whitelist WHERE fragments.
+		$total = (int) $wpdb->get_var( $wpdb->prepare( $countSql, $table, ...$params ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$rows = $wpdb->get_results(
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- SQL built from validated table (%i) + whitelist WHERE fragments.
+			$wpdb->prepare( $listSql, $table, ...array_merge( $params, array( $perPage, $offset ) ) )
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
 
 		$enrollments = array();
 
@@ -206,26 +226,26 @@ final class WpdbEnrollmentRepository implements EnrollmentRepositoryInterface {
 	}
 
 	public function getProgressPercentagesForCourse( int $courseId, array $userIds ): array {
+		$wpdb = $this->wpdb;
 		if ( array() === $userIds ) {
 			return array();
 		}
 
-		$table        = Schema::validateTable( Schema::progressSummaryTable( $this->wpdb->prefix ), $this->wpdb->prefix );
-		$placeholders = implode( ',', array_fill( 0, count( $userIds ), '%d' ) );
-		$params       = array_merge( array( $courseId ), $userIds );
+		$table = Schema::validateTable( Schema::progressSummaryTable( $wpdb->prefix ), $wpdb->prefix );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$rows = $this->wpdb->get_results(
-			$this->wpdb->prepare(
-				"SELECT user_id, pct_complete
-				FROM {$table}
-				WHERE course_id = %d AND user_id IN ({$placeholders})",
-				...$params
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				sprintf(
+					'SELECT user_id, pct_complete
+					FROM %%i
+					WHERE course_id = %%d AND user_id IN (%s)',
+					implode( ',', array_fill( 0, count( $userIds ), '%d' ) )
+				),
+				array_merge( array( $table, $courseId ), $userIds )
 			)
 		);
-		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
-
-		$map = array();
+		$map  = array();
 
 		if ( is_array( $rows ) ) {
 			foreach ( $rows as $row ) {
@@ -237,12 +257,14 @@ final class WpdbEnrollmentRepository implements EnrollmentRepositoryInterface {
 	}
 
 	public function countActiveByCourse( int $courseId ): int {
-		$table = Schema::validateTable( Schema::enrollmentsTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::enrollmentsTable( $wpdb->prefix ), $wpdb->prefix );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-		return (int) $this->wpdb->get_var(
-			$this->wpdb->prepare(
-				"SELECT COUNT(*) FROM {$table} WHERE course_id = %d AND status = %s",
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT COUNT(*) FROM %i WHERE course_id = %d AND status = %s',
+				$table,
 				$courseId,
 				EnrollmentStatus::Active->value
 			)

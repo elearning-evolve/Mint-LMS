@@ -17,16 +17,38 @@ final class Migration_007_MultiQuizPerLesson implements MigrationInterface {
 	public function up( \wpdb $wpdb ): void {
 		$table = Schema::validateTable( Schema::quizzesTable( $wpdb->prefix ), $wpdb->prefix );
 
-		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$index = $wpdb->get_row( "SHOW INDEX FROM {$table} WHERE Key_name = 'lesson_id'" );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.NotPrepared -- Custom table migration; Schema::validateTable().
+		$index = $wpdb->get_row(
+			$wpdb->prepare(
+				"SHOW INDEX FROM %i WHERE Key_name = 'lesson_id'",
+				$table
+			)
+		);
 		if ( null !== $index ) {
-			$wpdb->query( "ALTER TABLE {$table} DROP INDEX lesson_id" );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.NotPrepared -- Custom table migration; Schema::validateTable().
+			$wpdb->query(
+				$wpdb->prepare(
+					'ALTER TABLE %i DROP INDEX lesson_id',
+					$table
+				)
+			);
 		}
 
-		$sortIndex = $wpdb->get_row( "SHOW INDEX FROM {$table} WHERE Key_name = 'lesson_sort'" );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.NotPrepared -- Custom table migration; Schema::validateTable().
+		$sortIndex = $wpdb->get_row(
+			$wpdb->prepare(
+				"SHOW INDEX FROM %i WHERE Key_name = 'lesson_sort'",
+				$table
+			)
+		);
 		if ( null === $sortIndex ) {
-			$wpdb->query( "ALTER TABLE {$table} ADD KEY lesson_sort (lesson_id, sort_order)" );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange, WordPress.DB.PreparedSQL.NotPrepared -- Custom table migration; Schema::validateTable().
+			$wpdb->query(
+				$wpdb->prepare(
+					'ALTER TABLE %i ADD KEY lesson_sort (lesson_id, sort_order)',
+					$table
+				)
+			);
 		}
-		// phpcs:enable
 	}
 }
