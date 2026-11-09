@@ -2255,16 +2255,24 @@ function courseBuilder(courseId, opts = {}) {
     },
 
     /**
-     * Course Settings belongs to the full course-builder chrome, not Lessons/Quizzes/Questions library flows.
+     * Course Settings only on course surfaces (hierarchy / type overviews / lesson groups).
+     * Lesson, Quiz, and Question editors show their own settings next to Preview.
      */
     showCourseSettingsButton() {
-      return (
-        Number(this.courseId) > 0 &&
-        !this.isStandalone &&
-        !this.isLessonsLibraryFlow() &&
-        !this.isQuizzesLibraryFlow() &&
-        !this.isQuestionsLibraryFlow()
-      );
+      if (
+        Number(this.courseId) <= 0 ||
+        this.isStandalone ||
+        this.isLessonsLibraryFlow() ||
+        this.isQuizzesLibraryFlow() ||
+        this.isQuestionsLibraryFlow()
+      ) {
+        return false;
+      }
+      if (this.lessonSettingsView || this.quizSettingsView) {
+        return false;
+      }
+      const type = this.selected?.type || '';
+      return type !== 'lesson' && type !== 'quiz' && type !== 'question';
     },
 
     async startChangeCourse() {
