@@ -98,6 +98,7 @@ document.addEventListener('alpine:init', () => {
     questions: config.questions || [],
     answers: {},
     hasPassed: config.hasPassed || false,
+    previewMode: !!config.previewMode,
     submitted: false,
     submitting: false,
     scorePercent: 0,
@@ -136,11 +137,52 @@ document.addEventListener('alpine:init', () => {
       return payload;
     },
 
+    previewAnswerMatches(question) {
+      const given = this.answers[question.id];
+      if (question.type === 'mcq_multi') {
+        const expected = Array.isArray(question.correctAnswers)
+          ? [...question.correctAnswers].map((value) => String(value)).sort()
+          : [];
+        const actual = Array.isArray(given) ? [...given].map((value) => String(value)).sort() : [];
+        return expected.length > 0 && JSON.stringify(expected) === JSON.stringify(actual);
+      }
+      if (question.type === 'essay') {
+        return String(given || '').trim() !== '';
+      }
+      return String(given ?? '').trim().toLowerCase() === String(question.correctAnswer ?? '').trim().toLowerCase();
+    },
+
+    submitPreviewScore() {
+      let graded = 0;
+      let correct = 0;
+      (this.questions || []).forEach((question) => {
+        if (question.type === 'essay') {
+          return;
+        }
+        if (question.correctAnswer == null && !Array.isArray(question.correctAnswers)) {
+          return;
+        }
+        graded += 1;
+        if (this.previewAnswerMatches(question)) {
+          correct += 1;
+        }
+      });
+      this.scorePercent = graded > 0 ? (correct / graded) * 100 : 100;
+      this.submitted = true;
+      this.hasPassed = this.scorePercent + 0.0001 >= Number(this.passPercent || 0);
+    },
+
     async submitQuiz() {
       if (this.submitting || this.hasPassed) return;
 
       this.submitting = true;
       this.error = '';
+
+      if (this.previewMode) {
+        this.submitPreviewScore();
+        this.submitting = false;
+        return;
+      }
 
       try {
         const response = await fetch(

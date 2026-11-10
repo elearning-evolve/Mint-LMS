@@ -132,28 +132,29 @@ final class ShortcodeRegistrar {
 
 		// Lesson/quiz preview: keep theme page title visible ("Lessons" / "Quizzes").
 		// Question preview: hide theme title to avoid competing chrome.
-		add_filter( 'body_class', static function ( array $classes ) use ( $mode ): array {
-			$classes[] = 'mint-lms-builder-preview';
-			$classes[] = 'mint-lms-builder-preview--' . $mode;
+		add_filter(
+			'body_class',
+			static function ( array $classes ) use ( $mode ): array {
+				$classes[] = 'mint-lms-builder-preview';
+				$classes[] = 'mint-lms-builder-preview--' . $mode;
 
-			return $classes;
-		} );
+				return $classes;
+			}
+		);
 
 		add_filter(
 			'document_title_parts',
 			static function ( array $parts ) use ( $mode ): array {
-				$parts['title'] = match ( $mode ) {
-					'quiz' => __( 'Quiz preview', 'mint-lms' ),
-					'question' => __( 'Question preview', 'mint-lms' ),
-					default => __( 'Lesson preview', 'mint-lms' ),
-				};
+				$parts['title'] = 'lesson' === $mode
+					? __( 'Lesson preview', 'mint-lms' )
+					: __( 'Quiz preview', 'mint-lms' );
 
 				return $parts;
 			}
 		);
 
-		if ( 'lesson' === $mode || 'quiz' === $mode ) {
-			$pageHeading = 'quiz' === $mode ? __( 'Quizzes', 'mint-lms' ) : __( 'Lessons', 'mint-lms' );
+		if ( 'lesson' === $mode || 'quiz' === $mode || 'question' === $mode ) {
+			$pageHeading = 'lesson' === $mode ? __( 'Lessons', 'mint-lms' ) : __( 'Quizzes', 'mint-lms' );
 			add_filter(
 				'the_title',
 				static function ( $title, $postId = 0 ) use ( $pageHeading ) {
@@ -190,20 +191,20 @@ final class ShortcodeRegistrar {
 		add_action(
 			'wp_head',
 			static function () use ( $mode ): void {
-				if ( 'lesson' === $mode || 'quiz' === $mode ) {
+				if ( 'lesson' === $mode || 'quiz' === $mode || 'question' === $mode ) {
 					$mod = sanitize_html_class( $mode );
 					echo '<style id="mint-lms-builder-preview-chrome">
-						body.mint-lms-builder-preview--' . $mod . ' .entry-hero,
-						body.mint-lms-builder-preview--' . $mod . ' .entry-hero-container-inner,
-						body.mint-lms-builder-preview--' . $mod . ' .hero-container {
+						body.mint-lms-builder-preview--' . esc_attr( $mod ) . ' .entry-hero,
+						body.mint-lms-builder-preview--' . esc_attr( $mod ) . ' .entry-hero-container-inner,
+						body.mint-lms-builder-preview--' . esc_attr( $mod ) . ' .hero-container {
 							min-height: 0 !important;
 							padding-top: 18px !important;
 							padding-bottom: 10px !important;
 						}
-						body.mint-lms-builder-preview--' . $mod . ' #mint-lms-root.mint-lms-student .mint-s3b-wrap {
+						body.mint-lms-builder-preview--' . esc_attr( $mod ) . ' #mint-lms-root.mint-lms-student .mint-s3b-wrap {
 							padding-top: 12px;
 						}
-						body.mint-lms-builder-preview--' . $mod . ' #mint-lms-root.mint-lms-student .mint-s3-hero {
+						body.mint-lms-builder-preview--' . esc_attr( $mod ) . ' #mint-lms-root.mint-lms-student .mint-s3-hero {
 							margin-bottom: 0;
 						}
 					</style>';
@@ -360,6 +361,13 @@ final class ShortcodeRegistrar {
 					return $this->wrap( $this->errorMessage( __( 'Lesson is required for preview.', 'mint-lms' ) ) );
 				}
 
+				if ( $courseId > 0 ) {
+					$player = $this->renderLessonPlayerPreview( $courseId, $lessonId, $userId );
+					if ( null !== $player ) {
+						return $player;
+					}
+				}
+
 				$preview = $this->studentExperience->getLessonBuilderPreview( $courseId, $lessonId, $userId );
 				$featuredId = isset( $preview['featuredImageId'] ) ? (int) $preview['featuredImageId'] : 0;
 				$settings   = $this->settings();
@@ -389,41 +397,22 @@ final class ShortcodeRegistrar {
 				);
 			}
 
-			if ( 'quiz' === $mode ) {
-				$quizId = $this->queryInt( 'mint_quiz' );
-				if ( $lessonId <= 0 && $quizId > 0 ) {
-					$lessonId = $this->studentExperience->resolveLessonIdForQuizPreview( $quizId, $userId );
-				}
-				if ( $lessonId <= 0 ) {
-					return $this->wrap( $this->errorMessage( __( 'Lesson is required for quiz preview.', 'mint-lms' ) ) );
-				}
-
-				$preview = $this->studentExperience->getQuizBuilderPreview( $courseId, $lessonId, $userId );
-				$settings = $this->settings();
-				$resolvedCourseId = $courseId > 0 ? $courseId : 0;
-
-				return $this->wrap(
-					$this->templateLoader->render(
-						'student/preview-quiz.php',
-						array(
-							'preview'   => $preview,
-							'courseUrl' => $resolvedCourseId > 0 ? $settings->getCourseUrl( $resolvedCourseId ) : '',
-						)
-					)
-				);
+			$quizId = $this->queryInt( 'mint_quiz' );
+			if ( $lessonId <= 0 && $quizId > 0 ) {
+				$lessonId = $this->studentExperience->resolveLessonIdForQuizPreview( $quizId, $userId );
 			}
 
-			$questionId = $this->queryInt( 'mint_question' );
-			if ( $questionId <= 0 ) {
-				return $this->wrap( $this->errorMessage( __( 'Question is required for preview.', 'mint-lms' ) ) );
-			}
-
-			$preview = $this->studentExperience->getQuestionBuilderPreview( $courseId, $questionId, $lessonId, $userId );
+			$quiz = $this->studentExperience->getQuizForBuilderLivePreview( $quizId, $lessonId, $userId );
+			$settings = $this->settings();
+			$resolvedCourseId = $courseId > 0 ? $courseId : (int) $quiz->courseId;
 
 			return $this->wrap(
 				$this->templateLoader->render(
-					'student/preview-question.php',
-					array( 'preview' => $preview )
+					'student/preview-quiz.php',
+					array(
+						'quiz'      => $quiz,
+						'courseUrl' => $resolvedCourseId > 0 ? $settings->getCourseUrl( $resolvedCourseId ) : '',
+					)
 				)
 			);
 		} catch ( NotFoundException $exception ) {
@@ -732,6 +721,32 @@ final class ShortcodeRegistrar {
 
 	private function wrap( string $content ): string {
 		return UiRoot::open( 'student' ) . $content . UiRoot::close();
+	}
+
+	private function renderLessonPlayerPreview( int $courseId, int $lessonId, int $userId ): ?string {
+		try {
+			$context = $this->studentExperience->getPlayerContext( $courseId, $lessonId, $userId );
+		} catch ( NotFoundException | ForbiddenException $exception ) {
+			return null;
+		}
+
+		$settings      = $this->settings();
+		$attachmentUrl = $this->attachmentUrl( $context->currentLesson->attachmentId );
+		$lessonUrl     = fn( int $id ): string => $this->lessonUrl( $courseId, $id );
+
+		return $this->wrap(
+			$this->templateLoader->render(
+				'student/player.php',
+				array(
+					'context'       => $context,
+					'playerBaseUrl' => $settings->resolvePlayerUrl( '' ),
+					'dashboardUrl'  => $settings->resolveDashboardUrl( '' ),
+					'lessonUrl'     => $lessonUrl,
+					'attachmentUrl' => $attachmentUrl,
+					'videoEmbed'    => $this->videoEmbed( $context->currentLesson->videoUrl ),
+				)
+			)
+		);
 	}
 
 	private function errorMessage( string $message ): string {

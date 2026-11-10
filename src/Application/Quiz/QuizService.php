@@ -67,7 +67,7 @@ final class QuizService {
 
 		$questions = $this->quizRepository->findQuestionsByQuizId( $quiz->id, $publishedOnly );
 
-		return QuizDto::fromQuiz( $quiz, $questions, ! $forStudent );
+		return QuizDto::fromQuiz( $quiz, $questions, ! $forStudent || $editorReview );
 	}
 
 	public function get( int $quizId, int $userId, bool $forStudent = false ): QuizDto {
@@ -92,7 +92,7 @@ final class QuizService {
 		$publishedOnly = $forStudent && ! $editorReview;
 		$questions     = $this->quizRepository->findQuestionsByQuizId( $quiz->id, $publishedOnly );
 
-		return QuizDto::fromQuiz( $quiz, $questions, ! $forStudent );
+		return QuizDto::fromQuiz( $quiz, $questions, ! $forStudent || $editorReview );
 	}
 
 	public function create( int $lessonId, CreateQuizDto $dto, int $userId ): QuizDto {

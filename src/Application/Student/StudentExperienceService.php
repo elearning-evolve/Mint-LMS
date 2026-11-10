@@ -9,6 +9,7 @@ use MintLMS\Application\Course\Dto\CourseStructureLessonDto;
 use MintLMS\Application\Course\Dto\CourseStructureSectionDto;
 use MintLMS\Application\Exception\ForbiddenException;
 use MintLMS\Application\Exception\NotFoundException;
+use MintLMS\Application\Quiz\Dto\QuizDto;
 use MintLMS\Application\Quiz\QuestionAnswerCodec;
 use MintLMS\Application\Quiz\QuizService;
 use MintLMS\Application\Student\Dto\StudentCatalogCourseDto;
@@ -362,6 +363,31 @@ final class StudentExperienceService {
 	}
 
 	/**
+	 * Instructor live quiz runner (does not persist student attempts).
+	 */
+	public function getQuizForBuilderLivePreview( int $quizId, int $lessonId, int $userId ): QuizDto {
+		if ( null === $this->quizService ) {
+			throw new NotFoundException( 'Quiz not found.' );
+		}
+
+		if ( $quizId > 0 ) {
+			return $this->quizService->get( $quizId, $userId, false );
+		}
+
+		if ( $lessonId <= 0 ) {
+			throw new NotFoundException( 'Quiz not found.' );
+		}
+
+		$quiz = $this->quizService->getByLessonId( $lessonId, $userId, false );
+
+		if ( null === $quiz ) {
+			throw new NotFoundException( 'Quiz not found.' );
+		}
+
+		return $quiz;
+	}
+
+	/**
 	 * Resolve host lesson for quiz preview when only mint_quiz is present.
 	 */
 	public function resolveLessonIdForQuizPreview( int $quizId, int $userId ): int {
@@ -663,12 +689,12 @@ final class StudentExperienceService {
 		if ( null !== $this->quizService && $userId > 0 ) {
 			$quizDto = $this->quizService->getByLessonId( $lessonId, $userId, true, $isEditorPreview );
 
-			if ( null !== $quizDto && [] !== $quizDto->questions ) {
+			if ( null !== $quizDto && array() !== $quizDto->questions ) {
 				$quiz = $quizDto;
 				if ( $isEditorPreview ) {
-					// Review mode: show quiz + questions, but don't block navigation.
+					// Review mode: show the live quiz, but don't block navigation / completion.
 					$quizRequired  = false;
-					$hasPassedQuiz = true;
+					$hasPassedQuiz = false;
 				} else {
 					$quizRequired  = true;
 					$hasPassedQuiz = $this->quizService->hasPassed( $userId, $quizDto->id );
@@ -902,7 +928,10 @@ final class StudentExperienceService {
 		bool $reallyEnrolled = false,
 	): CourseStructureLessonDto {
 		$dripState = $skipDrip || ! $reallyEnrolled
-			? array( 'locked' => false, 'message' => null )
+			? array(
+				'locked'  => false,
+				'message' => null,
+			)
 			: $this->resolveDripState( $lesson, $reallyEnrolled, $enrolledAt );
 
 		$progressionLocked = false;

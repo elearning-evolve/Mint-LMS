@@ -66,6 +66,7 @@ final class StudentAssetLoader {
 					'submitQuiz'     => __( 'Submit quiz', 'mint-lms' ),
 					'submittingQuiz' => __( 'Submitting…', 'mint-lms' ),
 					'quizPassed'     => __( 'Quiz passed! You can now mark this lesson complete.', 'mint-lms' ),
+					'quizPreviewPassed' => __( 'Preview passed — this attempt was not saved.', 'mint-lms' ),
 					'quizFailed'     => __( 'Quiz not passed.', 'mint-lms' ),
 					'quizRetry'      => __( 'Review the lesson and try again.', 'mint-lms' ),
 					'quizSubmitError' => __( 'Could not submit quiz.', 'mint-lms' ),
@@ -77,6 +78,11 @@ final class StudentAssetLoader {
 	private function shouldEnqueueStudentAssets(): bool {
 		if ( is_admin() ) {
 			return false;
+		}
+
+		$previewMode = isset( $_GET['mint_preview'] ) ? sanitize_key( (string) wp_unslash( $_GET['mint_preview'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( in_array( $previewMode, array( 'lesson', 'quiz', 'question' ), true ) ) {
+			return true;
 		}
 
 		$post = get_post();

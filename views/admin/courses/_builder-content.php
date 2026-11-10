@@ -317,6 +317,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 				class="mint-builder-btn-preview"
 				x-show="showHeaderPreviewButton()"
 				x-cloak
+				:href="previewUrl && previewUrl !== '#' ? previewUrl : '#'"
 				@click.prevent="openBuilderPreview($event)"
 			><?php esc_html_e( 'Preview', 'mint-lms' ); ?></a>
 			<button
