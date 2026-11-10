@@ -202,7 +202,7 @@ final class PostTypeRegistrar {
 	public function registerPostTypes(): void {
 		$common = array(
 			'public'              => false,
-			'publicly_queryable'  => false,
+			'publicly_queryable'  => true,
 			'show_in_rest'        => true,
 			'exclude_from_search' => true,
 			'has_archive'         => false,
@@ -448,7 +448,6 @@ final class PostTypeRegistrar {
 				. '&quiz_id=' . $postId
 				. '&from=quizzes&tab=quiz'
 			)
-
 		);
 		exit;
 	}

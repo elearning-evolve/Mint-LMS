@@ -77,6 +77,40 @@
   box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55), 0 4px 12px rgba(11, 79, 63, 0.18) !important;
 }
 
+/* Builder header Preview — filled control; reset would otherwise make it look like text. */
+#mint-lms-root a.mint-builder-btn-preview,
+#mint-lms-root a.mint-builder-btn-preview:visited,
+#mint-lms-root a.mint-builder-btn-preview:hover,
+#mint-lms-root a.mint-builder-btn-preview:active,
+#mint-lms-root a.mint-builder-btn-preview:focus,
+#mint-lms-root a.mint-builder-btn-preview:focus-visible {
+  color: #0B4F3F !important;
+  background-color: #98FB98 !important;
+  background-image: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  text-decoration: none !important;
+  cursor: pointer;
+  transition: background 150ms ease-out, box-shadow 150ms ease-out, transform 150ms ease-out;
+}
+
+#mint-lms-root a.mint-builder-btn-preview:hover,
+#mint-lms-root a.mint-builder-btn-preview:focus-visible {
+  background-color: #7FE87F !important;
+  box-shadow: 0 4px 12px rgba(11, 79, 63, 0.18) !important;
+  transform: translateY(-1px);
+}
+
+#mint-lms-root a.mint-builder-btn-preview:active {
+  background-color: #7FE87F !important;
+  box-shadow: none !important;
+  transform: translateY(0);
+}
+
+#mint-lms-root a.mint-builder-btn-preview:focus-visible {
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55), 0 4px 12px rgba(11, 79, 63, 0.18) !important;
+}
+
 /* Dashboard v2 — Needs you + Continue editing (design: h36 / 15px / r8) */
 #mint-lms-root .mint-dash-needs {
   display: flex;

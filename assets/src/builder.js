@@ -205,8 +205,12 @@ function courseBuilder(courseId, opts = {}) {
     editorReady: false,
     questionEditorReady: false,
 
+    previewPageBaseUrl() {
+      return String(config.urls.playerPage || config.urls.catalogPage || '').replace(/\/+$/, '');
+    },
+
     buildPreviewUrl() {
-      const base = String(config.urls.catalogPage || config.urls.playerPage || '').replace(/\/+$/, '');
+      const base = this.previewPageBaseUrl();
       if (!base) return '#';
 
       const courseId =
@@ -219,10 +223,11 @@ function courseBuilder(courseId, opts = {}) {
       const params = new URLSearchParams();
       if (courseId > 0) {
         params.set('mintlms_course', String(courseId));
+        params.set('mint_course', String(courseId));
       }
 
       const selected = this.selected;
-      const quizId = Number(this.lessonQuiz?.id || 0);
+      const quizId = Number(this.lessonQuiz?.id || selected?.quizId || 0);
       const questionId =
         Number(this.activeQuestion?.id) ||
         Number(selected?.questionId) ||
@@ -240,29 +245,22 @@ function courseBuilder(courseId, opts = {}) {
         lessonId = Number(selected.id) || lessonId;
       }
 
-      const wantQuestion =
-        selected?.type === 'question' ||
-        this.fromQuestions ||
-        (this.questionEditorActive && questionId > 0);
       const wantQuiz =
-        !wantQuestion &&
-        (selected?.type === 'quiz' ||
-          this.quizEditorActive ||
-          this.fromQuizzes ||
-          this.lessonTab === 'quiz' ||
-          (this.openQuizEditor && quizId > 0));
+        selected?.type === 'quiz' ||
+        selected?.type === 'question' ||
+        this.questionEditorActive ||
+        this.fromQuestions ||
+        this.quizEditorActive ||
+        this.fromQuizzes ||
+        this.lessonTab === 'quiz' ||
+        (this.openQuizEditor && quizId > 0);
 
-      if (wantQuestion) {
-        if (questionId <= 0) return '#';
-        params.set('mint_preview', 'question');
-        params.set('mint_question', String(questionId));
-        if (lessonId > 0) params.set('mint_lesson', String(lessonId));
-        if (quizId > 0) params.set('mint_quiz', String(quizId));
-      } else if (wantQuiz) {
-        if (lessonId <= 0 && quizId <= 0) return '#';
+      if (wantQuiz) {
+        if (quizId <= 0 && lessonId <= 0) return '#';
         params.set('mint_preview', 'quiz');
         if (lessonId > 0) params.set('mint_lesson', String(lessonId));
         if (quizId > 0) params.set('mint_quiz', String(quizId));
+        if (questionId > 0) params.set('mint_question', String(questionId));
       } else if (lessonId > 0) {
         params.set('mint_preview', 'lesson');
         params.set('mint_lesson', String(lessonId));
@@ -300,7 +298,9 @@ function courseBuilder(courseId, opts = {}) {
         window.MintLMS?.toast?.error?.(
           needsQuizContext
             ? 'Save the quiz first, then try Preview again.'
-            : 'Preview page is not configured.'
+            : this.selected?.type === 'lesson'
+              ? 'Save the lesson first, then try Preview again.'
+              : 'Preview page is not configured.'
         );
         return;
       }
@@ -2346,10 +2346,25 @@ function courseBuilder(courseId, opts = {}) {
     },
 
     showHeaderPreviewButton() {
+      if (this.lessonSettingsView || this.quizSettingsView) {
+        return false;
+      }
       if (this.isOverviewOrHierarchyPage()) {
         return false;
       }
-      return this.showCourseSettingsButton() || !this.showEditorRailActions();
+      if (this.selected?.type === 'lesson') {
+        return Number(this.selectedLesson?.id || this.selected?.id || 0) > 0;
+      }
+      if (this.selected?.type === 'quiz') {
+        return Number(this.lessonQuiz?.id || this.selected?.quizId || 0) > 0;
+      }
+      if (this.selected?.type === 'question') {
+        return (
+          Number(this.lessonQuiz?.id || this.selected?.quizId || 0) > 0 ||
+          Number(this.activeQuestion?.id || this.selected?.id || 0) > 0
+        );
+      }
+      return false;
     },
 
     async startChangeCourse() {

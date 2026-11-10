@@ -9,12 +9,18 @@ use MintLMS\Application\Quiz\Dto\QuizDto;
 /** @var bool $quizRequired */
 /** @var bool $hasPassedQuiz */
 /** @var bool $isEnrolled */
+/** @var bool $isReviewMode */
 $quiz          = $quiz ?? null;
 $quizRequired  = $quizRequired ?? false;
 $hasPassedQuiz = $hasPassedQuiz ?? true;
 $isEnrolled    = $isEnrolled ?? false;
+$isReviewMode  = ! empty( $isReviewMode );
 
-if ( ! $quizRequired || null === $quiz || ! $isEnrolled ) {
+if ( null === $quiz || ( ! $isEnrolled && ! $isReviewMode ) ) {
+	return;
+}
+
+if ( ! $quizRequired && ! $isReviewMode ) {
 	return;
 }
 ?>
@@ -24,6 +30,7 @@ if ( ! $quizRequired || null === $quiz || ! $isEnrolled ) {
 		quizId: <?php echo (int) $quiz->id; ?>,
 		passPercent: <?php echo (int) $quiz->passPercent; ?>,
 		hasPassed: <?php echo $hasPassedQuiz ? 'true' : 'false'; ?>,
+		previewMode: <?php echo $isReviewMode ? 'true' : 'false'; ?>,
 		questions: <?php echo wp_json_encode( array_map( static fn( $q ) => $q->toArray(), $quiz->questions ) ); ?>
 	})"
 >
@@ -42,7 +49,7 @@ if ( ! $quizRequired || null === $quiz || ! $isEnrolled ) {
 
 	<template x-if="hasPassed">
 		<div class="mint-mb-4 mint-rounded-lg mint-bg-success-wash mint-px-4 mint-py-4">
-			<p class="mint-text-sm mint-font-medium mint-text-success" x-text="mintLmsStudent.i18n.quizPassed"></p>
+			<p class="mint-text-sm mint-font-medium mint-text-success" x-text="previewMode ? mintLmsStudent.i18n.quizPreviewPassed : mintLmsStudent.i18n.quizPassed"></p>
 		</div>
 	</template>
 
