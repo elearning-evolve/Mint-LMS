@@ -634,3 +634,37 @@
   background: #d8f5e8;
   border-color: rgba(152, 251, 203, 0.55);
 }
+
+#mint-lms-root.mint-lms-student button.mint-s3-expand {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 28px;
+  min-height: 28px;
+  max-height: 28px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 7px;
+  background: #98fb98;
+  color: #0b4f3f;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  box-sizing: border-box;
+  transform: none;
+}
+
+#mint-lms-root.mint-lms-student button.mint-s3-expand:hover,
+#mint-lms-root.mint-lms-student button.mint-s3-expand:focus-visible {
+  background: #7fe87f;
+  color: #0b4f3f;
+  transform: none;
+}
+
+#mint-lms-root.mint-lms-student button.mint-s3-expand svg {
+  width: 9px;
+  height: 9px;
+  flex: none;
+}

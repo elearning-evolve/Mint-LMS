@@ -181,7 +181,7 @@ $showCta = $overview->isEnrolled || $overview->canEnroll || ( 'paid' === $overvi
 							</div>
 							<button
 								type="button"
-								class="mint-inline-flex mint-h-[34px] mint-shrink-0 mint-items-center mint-gap-1.5 mint-rounded-lg mint-border-0 mint-bg-cta mint-px-3.5 mint-text-[13px] mint-font-semibold mint-text-cta-ink hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(11,79,63,0.35)]"
+								class="mint-s3-expand"
 								@click.stop="toggle('<?php echo esc_js( $sectionKey ); ?>')"
 								:aria-expanded="isOpen('<?php echo esc_js( $sectionKey ); ?>') ? 'true' : 'false'"
 							>
@@ -222,7 +222,7 @@ $showCta = $overview->isEnrolled || $overview->canEnroll || ( 'paid' === $overvi
 											<?php if ( array() !== $quizzes ) : ?>
 												<button
 													type="button"
-													class="mint-inline-flex mint-h-8 mint-shrink-0 mint-items-center mint-gap-1 mint-rounded-lg mint-border-0 mint-bg-cta mint-px-3 mint-text-xs mint-font-semibold mint-text-cta-ink hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(11,79,63,0.35)]"
+													class="mint-s3-expand"
 													@click.stop="toggle('<?php echo esc_js( $lessonKey ); ?>')"
 													:aria-expanded="isOpen('<?php echo esc_js( $lessonKey ); ?>') ? 'true' : 'false'"
 												>
@@ -255,7 +255,7 @@ $showCta = $overview->isEnrolled || $overview->canEnroll || ( 'paid' === $overvi
 																<?php if ( array() !== $questions ) : ?>
 																	<button
 																		type="button"
-																		class="mint-inline-flex mint-h-[30px] mint-shrink-0 mint-items-center mint-gap-1 mint-rounded-md mint-border-0 mint-bg-cta mint-px-2.5 mint-text-xs mint-font-semibold mint-text-cta-ink hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(11,79,63,0.35)]"
+																		class="mint-s3-expand"
 																		@click.stop="toggle('<?php echo esc_js( $quizKey ); ?>')"
 																		:aria-expanded="isOpen('<?php echo esc_js( $quizKey ); ?>') ? 'true' : 'false'"
 																	>
