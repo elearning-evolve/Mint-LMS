@@ -86,7 +86,7 @@ final class CreatorDashboardService {
 					$course->title,
 					$blocker,
 					$this->presentation->editedLabel( $course->updatedAt ),
-					$isDraft ? __( 'draft', 'mint-lms' ) : __( 'live', 'mint-lms' ),
+					$isDraft ? __( 'draft', 'mint-lms' ) : __( 'published', 'mint-lms' ),
 				);
 			}
 		}
@@ -158,7 +158,7 @@ final class CreatorDashboardService {
 				);
 		}
 
-		$parts[] = 'published' === $status ? __( 'Live', 'mint-lms' ) : __( 'Not Live', 'mint-lms' );
+		$parts[] = 'published' === $status ? __( 'Published', 'mint-lms' ) : __( 'Draft', 'mint-lms' );
 
 		return implode( ' · ', $parts );
 	}

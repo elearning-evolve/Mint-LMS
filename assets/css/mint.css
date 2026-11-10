@@ -603,3 +603,59 @@
 #mint-lms-root button.mint-settings-delete:focus-visible {
   box-shadow: 0 0 0 3px rgba(194, 43, 43, 0.26) !important;
 }
+
+/*
+ * Global pressable motion — hover / focus lifts, click settles.
+ * Skip menu-row options and switches so lists do not jump.
+ */
+#mint-lms-root button:not(:disabled):not(.mint-settings-toggle):not(.mint-settings-select__option),
+#mint-lms-root a.mint-btn,
+#mint-lms-root a.mint-quiz-settings-btn,
+#mint-lms-root a.mint-builder-btn-preview,
+#mint-lms-root a.mint-builder-btn-save,
+#mint-lms-root a.mint-cta-lime,
+#mint-lms-root a.mint-settings-save,
+#mint-lms-root a.mint-settings-action,
+#mint-lms-root a.mint-welcome-cta {
+  cursor: pointer;
+  transition-property: background, background-color, border-color, box-shadow, color, opacity, transform;
+  transition-duration: 150ms;
+  transition-timing-function: ease-out;
+}
+
+#mint-lms-root button:not(:disabled):not(.mint-settings-toggle):not(.mint-settings-select__option):hover,
+#mint-lms-root button:not(:disabled):not(.mint-settings-toggle):not(.mint-settings-select__option):focus-visible,
+#mint-lms-root a.mint-btn:hover,
+#mint-lms-root a.mint-btn:focus-visible,
+#mint-lms-root a.mint-quiz-settings-btn:hover,
+#mint-lms-root a.mint-quiz-settings-btn:focus-visible,
+#mint-lms-root a.mint-builder-btn-preview:hover,
+#mint-lms-root a.mint-builder-btn-preview:focus-visible,
+#mint-lms-root a.mint-builder-btn-save:hover,
+#mint-lms-root a.mint-builder-btn-save:focus-visible,
+#mint-lms-root a.mint-cta-lime:hover,
+#mint-lms-root a.mint-cta-lime:focus-visible,
+#mint-lms-root a.mint-settings-save:hover,
+#mint-lms-root a.mint-settings-save:focus-visible,
+#mint-lms-root a.mint-settings-action:hover,
+#mint-lms-root a.mint-settings-action:focus-visible,
+#mint-lms-root a.mint-welcome-cta:hover,
+#mint-lms-root a.mint-welcome-cta:focus-visible {
+  transform: translateY(-1px);
+}
+
+#mint-lms-root button:not(:disabled):not(.mint-settings-toggle):not(.mint-settings-select__option):active,
+#mint-lms-root a.mint-btn:active,
+#mint-lms-root a.mint-quiz-settings-btn:active,
+#mint-lms-root a.mint-builder-btn-preview:active,
+#mint-lms-root a.mint-builder-btn-save:active,
+#mint-lms-root a.mint-cta-lime:active,
+#mint-lms-root a.mint-settings-save:active,
+#mint-lms-root a.mint-settings-action:active,
+#mint-lms-root a.mint-welcome-cta:active {
+  transform: translateY(0);
+}
+
+#mint-lms-root button:disabled {
+  transform: none;
+}

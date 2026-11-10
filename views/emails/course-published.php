@@ -15,7 +15,7 @@ $courseTitle = $courseTitle ?? '';
 	echo esc_html(
 		sprintf(
 			/* translators: %s: course title */
-			__( 'Good news — %s is now live. You can start learning whenever you are ready.', 'mint-lms' ),
+			__( 'Good news — %s is now published. You can start learning whenever you are ready.', 'mint-lms' ),
 			$courseTitle
 		)
 	);

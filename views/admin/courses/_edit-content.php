@@ -11,8 +11,6 @@ $inputClass = 'mint-cs-input';
 <div
 	x-data="courseEdit(<?php echo esc_attr( (string) $courseId ); ?>)"
 	x-init="init()"
-	@mint-save-course.window="save()"
-	@mint-publish-course.window="publish()"
 >
 	<div x-show="loading" x-cloak class="mint-pt-10">
 		<?php
@@ -58,12 +56,22 @@ $inputClass = 'mint-cs-input';
 				title="<?php echo esc_attr__( 'Back to courses', 'mint-lms' ); ?>"
 				aria-label="<?php echo esc_attr__( 'Back to courses', 'mint-lms' ); ?>"
 			>
-				<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="#0B4F3F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 4.5-6 5.5 6 5.5" /></svg>
+				<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.5 4.5 7 10l5.5 5.5"/></svg>
 			</a>
-			<span class="mint-cs-switcher__link is-active" aria-current="page"><?php esc_html_e( 'Course Settings', 'mint-lms' ); ?></span>
-			<a class="mint-cs-switcher__link" href="<?php echo esc_url( $builderUrl ); ?>"><?php esc_html_e( 'Course Builder', 'mint-lms' ); ?></a>
-			<a class="mint-cs-switcher__link" href="<?php echo esc_url( $treeUrl ); ?>"><?php esc_html_e( 'Course Hierarchy', 'mint-lms' ); ?></a>
-			<span class="mint-cs-switcher__title" x-text="form.title || t('untitledCourseAlt')"></span>
+			<div class="mint-cs-switcher__tabs">
+				<span class="mint-cs-switcher__link is-active" aria-current="page"><?php esc_html_e( 'Course Settings', 'mint-lms' ); ?></span>
+				<a class="mint-cs-switcher__link" href="<?php echo esc_url( $builderUrl ); ?>"><?php esc_html_e( 'Course Builder', 'mint-lms' ); ?></a>
+				<a class="mint-cs-switcher__link" href="<?php echo esc_url( $treeUrl ); ?>"><?php esc_html_e( 'Course Hierarchy', 'mint-lms' ); ?></a>
+			</div>
+			<div class="mint-cs-switcher__course">
+				<span class="mint-cs-switcher__course-kicker"><?php esc_html_e( 'Course', 'mint-lms' ); ?></span>
+				<span class="mint-cs-switcher__title" x-text="form.title || t('untitledCourseAlt')"></span>
+				<span
+					class="mint-status-chip"
+					:class="courseStatusChipClass()"
+					x-text="statusBadgeLabel()"
+				></span>
+			</div>
 		</nav>
 
 		<nav class="mint-cs-crumb" aria-label="<?php echo esc_attr__( 'Breadcrumb', 'mint-lms' ); ?>">

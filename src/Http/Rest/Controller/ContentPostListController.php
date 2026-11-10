@@ -198,7 +198,7 @@ final class ContentPostListController {
 				true
 			);
 			if ( is_wp_error( $result ) ) {
-				return ApiResponse::error( 'publish_failed', __( 'Could not make this live.', 'mint-lms' ), 500 );
+				return ApiResponse::error( 'publish_failed', __( 'Could not publish this.', 'mint-lms' ), 500 );
 			}
 		}
 

@@ -663,6 +663,6 @@ defined( 'ABSPATH' ) || exit;
 	</div>
 
 	<div class="mint-settings-footer">
-		<button type="button" class="mint-settings-save" @click="saveQuiz()" :disabled="quizSaving"><?php esc_html_e( 'Save quiz', 'mint-lms' ); ?></button>
+		<button type="button" class="mint-settings-save" @click="headerSaveAction()" :disabled="quizSaving"><?php esc_html_e( 'Save changes', 'mint-lms' ); ?></button>
 	</div>
 </div>

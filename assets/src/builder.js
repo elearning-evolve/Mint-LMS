@@ -10,6 +10,29 @@ function debounce(fn, delay) {
   };
 }
 
+const MINT_SAVE_FLASH_KEY = 'mintlms_save_flash';
+
+function mintReloadAfterSave() {
+  try {
+    window.sessionStorage.setItem(MINT_SAVE_FLASH_KEY, '1');
+  } catch {
+    // Ignore storage failures.
+  }
+  window.location.reload();
+}
+
+function mintShowSaveFlash() {
+  try {
+    if (window.sessionStorage.getItem(MINT_SAVE_FLASH_KEY) !== '1') {
+      return;
+    }
+    window.sessionStorage.removeItem(MINT_SAVE_FLASH_KEY);
+  } catch {
+    return;
+  }
+  window.MintLMS?.toast?.success?.('Changes saved');
+}
+
 function courseBuilder(courseId, opts = {}) {
   const config = getAdminConfig();
   let sectionSortable = null;
@@ -329,6 +352,7 @@ function courseBuilder(courseId, opts = {}) {
       }
       this.ensureQuizResultMessagesOpen();
       this.quizSettingsView = true;
+      this.syncSettingsViewUrl();
       this.refreshPreviewUrl();
       if (this.lessonQuiz?.settings?.materialsEnabled) {
         this.$nextTick(() => this.mountQuizMaterialsEditor(this.lessonQuiz.settings.materialsContent || ''));
@@ -550,6 +574,7 @@ function courseBuilder(courseId, opts = {}) {
     closeQuizSettings() {
       this.quizSettingsView = false;
       this.lessonSettingsView = false;
+      this.syncSettingsViewUrl();
       this.refreshPreviewUrl();
     },
 
@@ -560,6 +585,7 @@ function courseBuilder(courseId, opts = {}) {
       }
       this.ensureLessonSettings(this.selectedLesson);
       this.lessonSettingsView = true;
+      this.syncSettingsViewUrl();
       this.settingsDropdowns.lessonCourse = false;
       this.settingsDropdowns.lessonGroup = false;
       this.attachCourseSearch = '';
@@ -663,6 +689,7 @@ function courseBuilder(courseId, opts = {}) {
 
     closeLessonSettings() {
       this.lessonSettingsView = false;
+      this.syncSettingsViewUrl();
       this.refreshPreviewUrl();
     },
 
@@ -921,13 +948,13 @@ function courseBuilder(courseId, opts = {}) {
     },
 
     async saveLessonSettings() {
-      if (!this.selectedLesson) return;
+      if (!this.selectedLesson) return false;
       this.ensureLessonSettings(this.selectedLesson);
       this.selectedLesson.isPreview = !!this.selectedLesson.settings.sampleLesson;
       if (this.selectedLesson.settings.videoUrl) {
         this.selectedLesson.videoUrl = this.selectedLesson.settings.videoUrl;
       }
-      await this.saveLesson(this.selectedLesson, { toast: true });
+      return this.saveLesson(this.selectedLesson, { toast: false });
     },
 
     quizPrereqLabel() {
@@ -1166,12 +1193,21 @@ function courseBuilder(courseId, opts = {}) {
   debouncedSaveLesson: null,
 
     async init() {
+      mintShowSaveFlash();
       this.debouncedSaveSection = debounce((section) => this.saveSection(section), 800);
       this.debouncedSaveLesson = debounce((lesson) => this.saveLesson(lesson), 800);
       const params = new URLSearchParams(window.location.search);
-      this.fromLessons = params.get('from') === 'lessons' || this.isStandalone;
-      this.fromQuizzes = params.get('from') === 'quizzes' || params.get('from') === 'questions';
-      this.fromQuestions = params.get('from') === 'questions';
+      const fromParam = params.get('from');
+      this.fromQuestions = fromParam === 'questions';
+      this.fromQuizzes =
+        fromParam === 'quizzes' ||
+        fromParam === 'questions' ||
+        (this.isStandalone &&
+          Number(params.get('quiz_id') || 0) > 0 &&
+          fromParam !== 'lessons');
+      this.fromLessons =
+        fromParam === 'lessons' ||
+        (this.isStandalone && !this.fromQuizzes && !this.fromQuestions);
       this.fromBuilderOrigin = params.get('origin') === 'builder';
       this.fromLessonOrigin = params.get('origin') === 'lesson';
       this.fromQuizOrigin = params.get('origin') === 'quiz';
@@ -1237,9 +1273,44 @@ function courseBuilder(courseId, opts = {}) {
           this.enterTypeOverview('tree');
         }
       } finally {
+        this.restoreSettingsViewFromUrl();
         this.loading = false;
         const root = document.getElementById('mint-course-builder');
         if (root) window.MintLMS?.loading?.hide?.(root);
+      }
+    },
+
+    restoreSettingsViewFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const settings = String(params.get('settings') || '');
+      if (settings === 'lesson' && this.selectedLesson?.id) {
+        this.ensureLessonSettings(this.selectedLesson);
+        this.lessonSettingsView = true;
+        this.quizSettingsView = false;
+        return;
+      }
+      if (settings === 'quiz' && this.lessonQuiz?.id) {
+        this.quizSettingsView = true;
+        this.lessonSettingsView = false;
+        if (this.lessonQuiz?.settings?.materialsEnabled) {
+          this.$nextTick(() => this.mountQuizMaterialsEditor(this.lessonQuiz.settings.materialsContent || ''));
+        }
+      }
+    },
+
+    syncSettingsViewUrl() {
+      try {
+        const url = new URL(window.location.href);
+        if (this.lessonSettingsView) {
+          url.searchParams.set('settings', 'lesson');
+        } else if (this.quizSettingsView) {
+          url.searchParams.set('settings', 'quiz');
+        } else {
+          url.searchParams.delete('settings');
+        }
+        window.history.replaceState({}, '', url.toString());
+      } catch {
+        // Ignore history failures.
       }
     },
 
@@ -1563,18 +1634,19 @@ function courseBuilder(courseId, opts = {}) {
         }
         if (quiz?.id) {
           const quizIsShell = !!quiz.questionShell;
+          const hostIsDisposable = this.isDisposableHostLesson(lesson);
+          const quizLinked = !quizIsShell && !hostIsDisposable;
           this.courseQuizzes = [
             {
               id: quiz.id,
               title: quiz.title,
               lessonId: lesson.id,
-              // Always keep lesson title on this standalone shell so Overview is not "Unlinked".
-              lessonTitle: lesson.title || 'New Lesson',
+              lessonTitle: hostIsDisposable ? '' : (lesson.title || ''),
               courseId: Number(lesson.courseId) || 0,
               sectionId: 0,
               questionCount: (quiz.questions || []).length,
-              linked: !quizIsShell,
-              disposableHost: !!quiz.disposableHost,
+              linked: quizLinked,
+              disposableHost: hostIsDisposable || !!quiz.disposableHost,
               questionShell: quizIsShell,
             },
           ];
@@ -1586,12 +1658,11 @@ function courseBuilder(courseId, opts = {}) {
               title: displayTitle || q.prompt || q.title || 'New Question',
               prompt: q.prompt || '',
               lessonId: lesson.id,
-              lessonTitle: lesson.title || 'New Lesson',
+              lessonTitle: hostIsDisposable ? '' : (lesson.title || ''),
               quizId: quiz.id,
               quizTitle: quiz.title || 'New Quiz',
               sectionId: 0,
-              // Standalone: living on this lesson's non-shell quiz counts as associated.
-              linked: !quizIsShell,
+              linked: quizLinked,
               questionShell: quizIsShell,
               settings,
             };
@@ -2255,24 +2326,30 @@ function courseBuilder(courseId, opts = {}) {
     },
 
     /**
-     * Course Settings only on course surfaces (hierarchy / type overviews / lesson groups).
-     * Lesson, Quiz, and Question editors show their own settings next to Preview.
+     * Course Settings + Preview stay in the top header for the whole
+     * Course → Lesson → Quiz → Question builder flow.
      */
     showCourseSettingsButton() {
-      if (
-        Number(this.courseId) <= 0 ||
-        this.isStandalone ||
-        this.isLessonsLibraryFlow() ||
-        this.isQuizzesLibraryFlow() ||
-        this.isQuestionsLibraryFlow()
-      ) {
+      return (
+        Number(this.courseId) > 0 &&
+        !this.isStandalone &&
+        !this.isLessonsLibraryFlow() &&
+        !this.isQuizzesLibraryFlow() &&
+        !this.isQuestionsLibraryFlow()
+      );
+    },
+
+    isOverviewOrHierarchyPage() {
+      return ['sections', 'lessons', 'quizzes', 'questions', 'tree'].includes(
+        String(this.overviewKind || '')
+      );
+    },
+
+    showHeaderPreviewButton() {
+      if (this.isOverviewOrHierarchyPage()) {
         return false;
       }
-      if (this.lessonSettingsView || this.quizSettingsView) {
-        return false;
-      }
-      const type = this.selected?.type || '';
-      return type !== 'lesson' && type !== 'quiz' && type !== 'question';
+      return this.showCourseSettingsButton() || !this.showEditorRailActions();
     },
 
     async startChangeCourse() {
@@ -2891,8 +2968,105 @@ function courseBuilder(courseId, opts = {}) {
     },
 
     statusLabel(status) {
-      const labels = { draft: 'Draft', published: 'Live', archived: 'Archived' };
+      const labels = { draft: 'Draft', published: 'Published', archived: 'Archived' };
       return labels[status] || status;
+    },
+
+    courseStatusChipClass() {
+      const status = String(this.course?.status || 'draft');
+      if (status === 'published') return 'mint-status-chip--published';
+      if (status === 'archived') return 'mint-status-chip--archived';
+      return 'mint-status-chip--draft';
+    },
+
+    courseIdentityTitle() {
+      const name = this.course?.title || 'Untitled course';
+      const status = this.statusLabel(this.course?.status);
+      return `${name} · ${status}`;
+    },
+
+    showLessonIdentityHeader() {
+      return !this.showCourseSettingsButton() && !!this.fromLessons && !this.fromQuizzes;
+    },
+
+    lessonIdentityName() {
+      return (
+        this.selectedLesson?.title ||
+        this.breadcrumbParentLessonTitle?.() ||
+        this.t('newLesson')
+      );
+    },
+
+    lessonIdentityStatus() {
+      return this.selectedLesson?.status || 'draft';
+    },
+
+    lessonStatusChipClass() {
+      const status = String(this.lessonIdentityStatus());
+      if (status === 'published') return 'mint-status-chip--published';
+      if (status === 'archived') return 'mint-status-chip--archived';
+      return 'mint-status-chip--draft';
+    },
+
+    lessonIdentityTitle() {
+      return `${this.lessonIdentityName()} · ${this.statusLabel(this.lessonIdentityStatus())}`;
+    },
+
+    nativePostEditUrl(postId) {
+      const id = Number(postId);
+      if (id <= 0) return '#';
+      return `post.php?post=${id}&action=edit`;
+    },
+
+    goToNativePostEdit(postId, event) {
+      if (event) event.preventDefault();
+      const href = this.nativePostEditUrl(postId);
+      if (!href || href === '#') return;
+      window.location.href = href;
+    },
+
+    standaloneLessonEditId() {
+      return Number(this.standaloneLessonId || this.selectedLesson?.id || 0);
+    },
+
+    goToStandaloneLessonHome(event) {
+      this.goToNativePostEdit(this.standaloneLessonEditId(), event);
+    },
+
+    showQuizIdentityHeader() {
+      return (
+        !this.showCourseSettingsButton() &&
+        !!this.fromQuizzes &&
+        !this.fromQuestions &&
+        !this.fromBuilderOrigin
+      );
+    },
+
+    quizIdentityName() {
+      return this.lessonQuiz?.title || this.breadcrumbQuizLabel?.() || this.t('newQuiz');
+    },
+
+    quizIdentityStatus() {
+      return this.lessonQuiz?.status || 'draft';
+    },
+
+    quizStatusChipClass() {
+      const status = String(this.quizIdentityStatus());
+      if (status === 'published') return 'mint-status-chip--published';
+      if (status === 'archived') return 'mint-status-chip--archived';
+      return 'mint-status-chip--draft';
+    },
+
+    quizIdentityTitle() {
+      return `${this.quizIdentityName()} · ${this.statusLabel(this.quizIdentityStatus())}`;
+    },
+
+    standaloneQuizEditId() {
+      return Number(this.lessonQuiz?.id || this.selected?.quizId || 0);
+    },
+
+    goToStandaloneQuizHome(event) {
+      this.goToNativePostEdit(this.standaloneQuizEditId(), event);
     },
 
     statusBadgeClass(status) {
@@ -2922,11 +3096,19 @@ function courseBuilder(courseId, opts = {}) {
 
     /** Quizzes library: Quiz → Question (no Lesson / Group / Course chrome). */
     isQuizzesLibraryFlow() {
+      // Course builder URLs may still carry from=quizzes (WP quiz-edit redirect).
+      // That is still the Course → Lesson → Quiz flow, not the quizzes library.
+      if (this.isCourseBuilderSurface()) {
+        return false;
+      }
       return !!this.fromQuizzes && !this.fromQuestions;
     },
 
     /** Questions library: Question only. */
     isQuestionsLibraryFlow() {
+      if (this.isCourseBuilderSurface()) {
+        return false;
+      }
       return !!this.fromQuestions && !this.fromBuilderOrigin;
     },
 
@@ -3625,10 +3807,10 @@ function courseBuilder(courseId, opts = {}) {
       if (quiz.questionShell === true) return false;
 
       const lessonId = Number(quiz.lessonId) || 0;
-      // Standalone lesson editor: quiz living on this lesson is associated for
-      // Overview / Attach (API `linked` only means "lesson is in a course").
+      // Standalone lesson library: quiz on this lesson is a real child.
+      // Quizzes library uses a disposable host — that is not a parent lesson.
       if (
-        this.isStandalone &&
+        this.isLessonsLibraryFlow() &&
         lessonId > 0 &&
         lessonId === Number(this.standaloneLessonId)
       ) {
@@ -3670,9 +3852,8 @@ function courseBuilder(courseId, opts = {}) {
         return false;
       }
 
-      // Standalone lesson editor: question already living on this lesson's quiz is associated,
-      // even when API `linked` is false (that flag only means "lesson is in a course").
-      if (this.isStandalone) {
+      // Standalone lesson library: question on this lesson's quiz is associated.
+      if (this.isLessonsLibraryFlow()) {
         if (Number(question.lessonId) === Number(this.standaloneLessonId)) {
           return true;
         }
@@ -3875,8 +4056,25 @@ function courseBuilder(courseId, opts = {}) {
 
     async navAddQuiz() {
       this.closeAllNavMenus();
+      if (
+        !this.isCourseBuilderSurface() &&
+        (this.isStandaloneQuizSurface() || (this.isStandalone && this.fromQuizzes))
+      ) {
+        this.goToWpNewQuiz();
+        return;
+      }
       // Always create unassociated — author links via Attach to Lesson.
       await this.addCourseQuiz();
+    },
+
+    /** Standalone-only: Quizzes list Add New uses native WP Gutenberg. */
+    goToWpNewQuiz() {
+      if (this.isCourseBuilderSurface()) {
+        this.addCourseQuiz();
+        return;
+      }
+      const url = config.urls?.newQuiz || 'post-new.php?post_type=mint-quiz';
+      window.location.assign(url);
     },
 
     async navAddQuestion() {
@@ -6090,7 +6288,7 @@ function courseBuilder(courseId, opts = {}) {
     },
 
     async saveActiveQuestion() {
-      if (!this.activeQuestion) return;
+      if (!this.activeQuestion) return false;
 
       this.pullQuestionEditorContent();
 
@@ -6112,19 +6310,21 @@ function courseBuilder(courseId, opts = {}) {
         if (!this.activeQuestion.id) {
           window.MintLMS.toast.info('Choose an answer type first');
           this.syncCourseQuestionSidebarTitle();
-          return;
+          return false;
         }
-        await this.saveQuestionTitleOnly();
-        return;
+        return (await this.saveQuestionTitleOnly()) === true;
       }
 
       if (!prompt) {
         window.MintLMS.toast.info('Write your question');
         this.focusQuestionPrompt();
-        return;
+        return false;
       }
 
-      await this.saveQuizQuestion(this.activeQuestion);
+      const questionSaved = (await this.saveQuizQuestion(this.activeQuestion)) === true;
+      if (!questionSaved) {
+        return false;
+      }
       if (this.activeQuestion.type === 'true_false') {
         await this.syncExtraTfQuestions();
       }
@@ -6172,10 +6372,11 @@ function courseBuilder(courseId, opts = {}) {
         await this.loadCourseQuestions();
         this.syncCourseQuestionSidebarTitle();
       }
+      return true;
     },
 
     async saveQuestionTitleOnly() {
-      if (!this.activeQuestion?.id || !this.lessonQuiz?.id) return;
+      if (!this.activeQuestion?.id || !this.lessonQuiz?.id) return false;
       this.quizSaving = true;
       try {
         const type = this.normalizeQuestionType(this.activeQuestion.type || 'mcq');
@@ -6236,8 +6437,10 @@ function courseBuilder(courseId, opts = {}) {
           this.syncCourseQuestionSidebarTitle();
         }
         window.MintLMS.toast.success('Question saved');
+        return true;
       } catch (err) {
         window.MintLMS.toast.error(err.message);
+        return false;
       } finally {
         this.quizSaving = false;
       }
@@ -6440,7 +6643,11 @@ function courseBuilder(courseId, opts = {}) {
 
     onTreeAddSection() {
       if (this.fromQuizzes) {
-        this.addCourseQuiz();
+        if (this.isCourseBuilderSurface()) {
+          this.addCourseQuiz();
+        } else {
+          this.goToWpNewQuiz();
+        }
         return;
       }
       if (this.quizEditorActive) {
@@ -7130,19 +7337,10 @@ function courseBuilder(courseId, opts = {}) {
     },
 
     /**
-     * Course home inside the builder (Lessons overview) — not the WP Courses list.
-     * Header course title uses this; back-chevron still returns to the courses list.
+     * Native WP course editor. Header title uses this; back-chevron returns to the courses list.
      */
     courseHomeUrl() {
-      if (!Number(this.courseId)) return '#';
-      const base = config.urls?.builder || 'admin.php?page=mint-lms-builder';
-      const url = new URL(base, window.location.href);
-      url.searchParams.set('course_id', String(this.courseId));
-      url.searchParams.set('view', 'sections');
-      ['lesson_id', 'quiz_id', 'question_id', 'tab', 'from', 'origin'].forEach((key) => {
-        url.searchParams.delete(key);
-      });
-      return url.toString();
+      return this.nativePostEditUrl(this.courseId);
     },
 
     goToCourseHome(event) {
@@ -7158,7 +7356,7 @@ function courseBuilder(courseId, opts = {}) {
       ) {
         return;
       }
-      this.navOpenOverview('section');
+      this.goToNativePostEdit(this.courseId);
     },
 
     goToCourseSettings(event) {
@@ -7448,9 +7646,9 @@ function courseBuilder(courseId, opts = {}) {
       const lessonId = Number(
         this.lessonQuiz?.lessonId || this.selected?.lessonId || this.standaloneLessonId || 0
       );
-      // Standalone lesson shell: this lesson is the authoring parent, not a disposable host.
+      // Standalone lesson library: this lesson is the authoring parent, not a disposable host.
       if (
-        this.isStandalone &&
+        this.isLessonsLibraryFlow() &&
         lessonId > 0 &&
         lessonId === Number(this.standaloneLessonId)
       ) {
@@ -7475,8 +7673,8 @@ function courseBuilder(courseId, opts = {}) {
         this.lessonQuiz?.lessonId || this.selected?.lessonId || this.standaloneLessonId || 0
       );
       if (lessonId <= 0) return false;
-      // Standalone lesson editor: quiz on this lesson always has that lesson as parent.
-      if (this.isStandalone && lessonId === Number(this.standaloneLessonId)) {
+      // Standalone lesson library: quiz on this lesson always has that lesson as parent.
+      if (this.isLessonsLibraryFlow() && lessonId === Number(this.standaloneLessonId)) {
         return true;
       }
       if (this.quizUsesDisposableHost()) return false;
@@ -7489,9 +7687,9 @@ function courseBuilder(courseId, opts = {}) {
       const parentLessonId = Number(
         this.lessonQuiz?.lessonId || this.selected?.lessonId || this.standaloneLessonId || 0
       );
-      // Standalone lesson shell: quiz on this lesson → always show Parent Lesson.
+      // Standalone lesson library: quiz on this lesson → always show Parent Lesson.
       if (
-        this.isStandalone &&
+        this.isLessonsLibraryFlow() &&
         parentLessonId > 0 &&
         parentLessonId === Number(this.standaloneLessonId)
       ) {
@@ -7909,8 +8107,8 @@ function courseBuilder(courseId, opts = {}) {
       await this.createCourseLesson(this.resolveTargetLessonGroupId(sectionId));
     },
 
-    async saveSection(section, { toast = false } = {}) {
-      if (!section) return;
+    async saveSection(section, { toast = false, reload = false } = {}) {
+      if (!section) return false;
       this.setSaving();
       try {
         await mintApi(`sections/${section.id}`, {
@@ -7918,16 +8116,23 @@ function courseBuilder(courseId, opts = {}) {
           body: JSON.stringify({ title: section.title }),
         });
         this.setSaved();
+        if (reload) {
+          mintReloadAfterSave();
+          return true;
+        }
         if (toast) {
           window.MintLMS.toast.success('Lesson group saved');
         }
+        return true;
       } catch (err) {
         this.saveStatus = '';
         window.MintLMS.toast.error(err.message);
+        return false;
       }
     },
 
     async saveLesson(lesson, options = {}) {
+      if (!lesson?.id) return false;
       this.setSaving();
       if (this.selectedLesson?.id === lesson.id) {
         this.pullEditorContent();
@@ -7954,9 +8159,11 @@ function courseBuilder(courseId, opts = {}) {
         if (options.toast) {
           window.MintLMS.toast.success('Lesson saved');
         }
+        return true;
       } catch (err) {
         this.saveStatus = '';
         window.MintLMS.toast.error(err.message);
+        return false;
       }
     },
 
@@ -8166,7 +8373,7 @@ function courseBuilder(courseId, opts = {}) {
         this.course.status = course.status;
         this.rememberCoursesTab(course.status);
         this.rememberOriginTab(course.status);
-        window.MintLMS.toast.success('Course is live');
+        window.MintLMS.toast.success('Course is published');
       } catch (err) {
         window.MintLMS.toast.error(err.message);
       } finally {
@@ -8261,6 +8468,58 @@ function courseBuilder(courseId, opts = {}) {
       return !this.courseId && !this.isStandalone;
     },
 
+    showEditorRailActions() {
+      if (this.lessonSettingsView || this.quizSettingsView) {
+        return false;
+      }
+      if (this.selected?.type === 'lesson') {
+        return !!this.selectedLesson?.id;
+      }
+      if (this.selected?.type === 'quiz') {
+        return !!this.lessonQuiz?.id;
+      }
+      if (this.selected?.type === 'question') {
+        return !!this.activeQuestion?.id;
+      }
+      return false;
+    },
+
+    showHeaderDeleteButton() {
+      if (this.lessonSettingsView || this.quizSettingsView) {
+        return false;
+      }
+      if (this.selected?.type === 'lesson') {
+        return !!this.selectedLesson?.id;
+      }
+      if (this.selected?.type === 'quiz') {
+        return !!this.lessonQuiz?.id;
+      }
+      if (this.selected?.type === 'question') {
+        return !!this.activeQuestion?.id;
+      }
+      return false;
+    },
+
+    headerDeleteLabel() {
+      if (this.selected?.type === 'quiz') return 'Delete quiz';
+      if (this.selected?.type === 'question') return 'Delete question';
+      return 'Delete lesson';
+    },
+
+    headerDeleteAction() {
+      if (this.selected?.type === 'quiz') {
+        this.deleteQuiz();
+        return;
+      }
+      if (this.selected?.type === 'question') {
+        this.deleteActiveQuestion();
+        return;
+      }
+      if (this.selected?.type === 'lesson' && this.selectedLesson?.id) {
+        this.deleteLesson(this.selectedLesson.id, this.selected?.sectionId);
+      }
+    },
+
     headerLiveDisabled() {
       if (!this.headerShowsLive()) {
         return true;
@@ -8317,39 +8576,49 @@ function courseBuilder(courseId, opts = {}) {
     },
 
     async headerSaveAction() {
-      if (this.selected?.type === 'question' && this.activeQuestion) {
-        await this.saveActiveQuestion();
+      let saved = false;
+      this.syncSettingsViewUrl();
+
+      if (this.lessonSettingsView && this.selectedLesson) {
+        saved = (await this.saveLessonSettings()) === true;
+      } else if (this.quizSettingsView && this.lessonQuiz) {
+        saved = (await this.saveQuiz()) === true;
+      } else if (this.selected?.type === 'question' && this.activeQuestion) {
+        saved = (await this.saveActiveQuestion()) === true;
         this.syncBuilderSelectionUrl({
           type: 'question',
           lessonId: this.selected?.lessonId,
           quizId: this.selected?.quizId || this.lessonQuiz?.id,
           questionId: this.activeQuestion?.id,
         });
-        return;
-      }
-      if (this.selected?.type === 'quiz' && this.lessonQuiz) {
-        await this.saveQuiz();
+      } else if (this.selected?.type === 'quiz' && this.lessonQuiz) {
+        saved = (await this.saveQuiz()) === true;
         this.syncBuilderSelectionUrl({
           type: 'quiz',
           lessonId: this.selected?.lessonId,
           quizId: this.lessonQuiz?.id,
         });
-        return;
-      }
-      if (this.selected?.type === 'lesson' && this.selectedLesson) {
-        await this.saveLesson(this.selectedLesson, { toast: true });
+      } else if (this.selected?.type === 'lesson' && this.selectedLesson) {
+        saved = (await this.saveLesson(this.selectedLesson, { toast: false })) === true;
         this.syncBuilderSelectionUrl({
           type: 'lesson',
           lessonId: this.selectedLesson.id,
         });
-        return;
-      }
-      if (this.selected?.type === 'section' && this.selectedSection) {
-        await this.saveSection(this.selectedSection, { toast: true });
+      } else if (this.selected?.type === 'section' && this.selectedSection) {
+        saved = (await this.saveSection(this.selectedSection, { toast: false })) === true;
         this.syncBuilderSelectionUrl({ type: 'section' });
+      } else if (Number(this.courseId) > 0) {
+        saved = true;
+      } else {
+        window.MintLMS.toast.info('Nothing to save here');
         return;
       }
-      window.MintLMS.toast.info('Nothing to save here');
+
+      if (!saved) {
+        return;
+      }
+      this.syncSettingsViewUrl();
+      mintReloadAfterSave();
     },
 
     async headerLiveAction() {
@@ -8364,7 +8633,7 @@ function courseBuilder(courseId, opts = {}) {
         if (this.course?.status !== 'published') {
           await this.publishCourse();
         } else {
-          window.MintLMS.toast.success('Question is live');
+          window.MintLMS.toast.success('Question is published');
         }
         this.rememberOriginTab('published');
         return;
@@ -8379,7 +8648,7 @@ function courseBuilder(courseId, opts = {}) {
         if (this.course?.status !== 'published') {
           await this.publishCourse();
         } else {
-          window.MintLMS.toast.success('Quiz is live');
+          window.MintLMS.toast.success('Quiz is published');
         }
         this.rememberOriginTab('published');
         return;
@@ -8394,7 +8663,7 @@ function courseBuilder(courseId, opts = {}) {
         if (this.course?.status !== 'published') {
           await this.publishCourse();
         } else {
-          window.MintLMS.toast.success('Lesson is live');
+          window.MintLMS.toast.success('Lesson is published');
         }
         this.rememberOriginTab('published');
         return;
@@ -8898,7 +9167,7 @@ function courseBuilder(courseId, opts = {}) {
     async saveQuiz() {
       if (!this.lessonQuiz?.id) {
         await this.createQuiz();
-        if (!this.lessonQuiz?.id) return;
+        if (!this.lessonQuiz?.id) return false;
       }
       if (this.quizSettingsView && this.lessonQuiz?.settings?.materialsEnabled) {
         this.pullQuizMaterialsContent();
@@ -8924,13 +9193,11 @@ function courseBuilder(courseId, opts = {}) {
         if (this.quizSettingsView && this.lessonQuiz?.settings?.materialsEnabled) {
           this.$nextTick(() => this.mountQuizMaterialsEditor(this.lessonQuiz.settings.materialsContent || ''));
         }
-        window.MintLMS.toast.success('Quiz saved');
-        setTimeout(() => {
-          if (this.saveStatus === 'saved') this.saveStatus = 'idle';
-        }, 1600);
+        return true;
       } catch (err) {
         this.saveStatus = 'idle';
         window.MintLMS.toast.error(err.message);
+        return false;
       } finally {
         this.quizSaving = false;
       }
@@ -9411,7 +9678,7 @@ function courseBuilder(courseId, opts = {}) {
       if (!this.lessonQuiz?.id) {
         await this.createQuiz();
       }
-      if (!this.lessonQuiz?.id) return;
+      if (!this.lessonQuiz?.id) return false;
 
       const type = this.normalizeQuestionType(question.type);
       let correctAnswer = question.correctAnswer || '';
@@ -9453,8 +9720,10 @@ function courseBuilder(courseId, opts = {}) {
         }
         this.lessonQuiz = this.normalizeQuiz(quiz);
         window.MintLMS.toast.success('Question saved');
+        return true;
       } catch (err) {
         window.MintLMS.toast.error(err.message);
+        return false;
       } finally {
         this.quizSaving = false;
       }
@@ -9569,8 +9838,23 @@ function courseEdit(courseId) {
     ],
 
     async init() {
+      mintShowSaveFlash();
       this.editPanel = 'settings';
+      this.bindCourseSettingsHeaderActions();
       await this.load();
+    },
+
+    bindCourseSettingsHeaderActions() {
+      if (this._courseHeaderBound) {
+        return;
+      }
+      this._courseHeaderBound = true;
+      window.addEventListener('mint-save-course', () => {
+        this.save({ reload: true });
+      });
+      window.addEventListener('mint-publish-course', () => {
+        this.publish();
+      });
     },
 
     setEditPanel(panel) {
@@ -9588,6 +9872,13 @@ function courseEdit(courseId) {
     statusBadgeLabel() {
       const map = { published: 'Published', draft: 'Draft', archived: 'Hidden' };
       return map[this.form.status] || 'Draft';
+    },
+
+    courseStatusChipClass() {
+      const status = String(this.form?.status || 'draft');
+      if (status === 'published') return 'mint-status-chip--published';
+      if (status === 'archived') return 'mint-status-chip--archived';
+      return 'mint-status-chip--draft';
     },
 
     statusHint() {
@@ -10044,7 +10335,7 @@ function courseEdit(courseId) {
     },
 
     async save(options = {}) {
-      const { toastMessage = 'Settings saved', setStatus = null } = options;
+      const { toastMessage = 'Settings saved', setStatus = null, reload = true } = options;
       this.saving = true;
       this.saveStatus = 'saving';
       try {
@@ -10103,6 +10394,10 @@ function courseEdit(courseId) {
         this.applyFeaturedImage(course);
         this.rememberCoursesTab(this.form.status);
         this.saveStatus = 'saved';
+        if (reload) {
+          mintReloadAfterSave();
+          return true;
+        }
         window.MintLMS.toast.success(toastMessage);
         setTimeout(() => {
           if (this.saveStatus === 'saved') this.saveStatus = '';
@@ -10119,12 +10414,13 @@ function courseEdit(courseId) {
 
     async publish() {
       if (this.form.status === 'published') {
-        window.MintLMS.toast.info('Course is already live');
+        window.MintLMS.toast.info('Course is already published');
         return;
       }
       const saved = await this.save({
         setStatus: 'published',
-        toastMessage: 'Course is live',
+        toastMessage: 'Course is published',
+        reload: false,
       });
       if (!saved) return;
       try {
@@ -10135,8 +10431,10 @@ function courseEdit(courseId) {
         // Settings already saved as published; surface publish endpoint errors only.
         if (this.form.status !== 'published') {
           window.MintLMS.toast.error(err.message);
+          return;
         }
       }
+      mintReloadAfterSave();
     },
 
     coursesTabForStatus(status) {
