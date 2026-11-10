@@ -75,7 +75,7 @@ $showCta = $overview->isEnrolled || $overview->canEnroll || ( 'paid' === $overvi
 			</div>
 		<?php else : ?>
 			<div class="mint-s3-hero__countdown">
-				<div class="mint-text-[13px] mint-font-bold mint-uppercase mint-tracking-[0.18em] mint-text-cta-ink"><?php esc_html_e( 'Going live in', 'mint-lms' ); ?></div>
+				<div class="mint-text-[13px] mint-font-bold mint-uppercase mint-tracking-[0.18em] mint-text-cta-ink"><?php esc_html_e( 'Publishing in', 'mint-lms' ); ?></div>
 				<div class="mint-mt-2 mint-text-[44px] mint-font-bold mint-leading-none mint-tracking-[0.02em] mint-text-cta-ink mint-tabular-nums">00 : 00 : 00 : 00</div>
 				<div class="mint-mt-1.5 mint-flex mint-justify-center mint-gap-11">
 					<div class="mint-text-xs mint-text-cta-ink"><?php esc_html_e( 'days', 'mint-lms' ); ?></div>

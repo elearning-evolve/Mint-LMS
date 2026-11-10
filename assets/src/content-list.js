@@ -79,7 +79,7 @@ function contentList(type) {
         { value: 'all', label: `All (${this.allTotal})` },
         {
           value: 'published',
-          label: this.publishedTotal > 0 ? `Live (${this.publishedTotal})` : 'Live',
+          label: this.publishedTotal > 0 ? `Published (${this.publishedTotal})` : 'Published',
         },
         { value: 'draft', label: `Drafts (${this.draftTotal})` },
         {
@@ -111,16 +111,16 @@ function contentList(type) {
     },
 
     statusLabel(status) {
-      const labels = { draft: 'Not Live', published: 'Live', archived: 'Hidden', trashed: 'Trash' };
+      const labels = { draft: 'Draft', published: 'Published', archived: 'Hidden', trashed: 'Trash' };
       return labels[status] || status;
     },
 
     itemMeta(item) {
       if (!item) return '';
       if (item.status === 'trashed') return 'In trash';
-      if (item.status === 'published') return 'Live';
+      if (item.status === 'published') return 'Published';
       if (item.status === 'archived') return 'Hidden';
-      return 'Not Live';
+      return 'Draft';
     },
 
     isEmpty() {

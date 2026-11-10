@@ -112,7 +112,7 @@ $hue_tile_classes = array(
 					<?php
 					echo esc_html(
 						sprintf(
-							/* translators: 1: blocker/status note, 2: draft|live, 3: relative edited label */
+							/* translators: 1: blocker/status note, 2: draft|published, 3: relative edited label */
 							__( '%1$s · %2$s · edited %3$s', 'mint-lms' ),
 							$dashboard->needsYou->blocker,
 							$dashboard->needsYou->statusLabel,

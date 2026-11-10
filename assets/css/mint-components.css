@@ -19,7 +19,7 @@
   cursor: pointer;
   white-space: nowrap;
   text-decoration: none;
-  transition: background var(--mint-t-hover) ease-out, border-color var(--mint-t-hover) ease-out, color var(--mint-t-hover) ease-out, opacity var(--mint-t-hover) ease-out;
+  transition: background var(--mint-t-hover) ease-out, border-color var(--mint-t-hover) ease-out, color var(--mint-t-hover) ease-out, opacity var(--mint-t-hover) ease-out, transform var(--mint-t-hover) ease-out, box-shadow var(--mint-t-hover) ease-out;
   outline: none;
 }
 #mint-lms-root .mint-btn:focus-visible { box-shadow: var(--mint-focus); }
@@ -39,6 +39,13 @@
   background: var(--mint-cta);
   color: var(--mint-cta-ink);
 }
+#mint-lms-root .mint-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+#mint-lms-root .mint-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
 #mint-lms-root .mint-btn--primary:hover {
   background: var(--mint-cta-hover);
   box-shadow: var(--mint-cta-shadow);
@@ -2014,14 +2021,84 @@
   box-shadow: var(--mint-field-focus);
 }
 
+#mint-lms-root .mint-builder-identity {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+#mint-lms-root .mint-builder-identity__body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+}
+
+#mint-lms-root .mint-builder-identity__meta {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+#mint-lms-root .mint-builder-identity__kicker {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5C5C77;
+  line-height: 1;
+}
+
+#mint-lms-root .mint-builder-identity__title {
+  min-width: 0;
+  max-width: 42vw;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  color: #0F0E1A;
+  text-decoration: none !important;
+}
+
+#mint-lms-root .mint-builder-identity__title:hover {
+  color: #0B4F3F;
+}
+
 #mint-lms-root .mint-status-chip {
-  font-size: 13px;
-  font-weight: 600;
-  padding: 3px 8px;
-  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: 999px;
   background: var(--mint-bg-subtle);
   color: var(--mint-ink-3);
+  border: 1px solid transparent;
   flex-shrink: 0;
+}
+
+#mint-lms-root .mint-status-chip--published {
+  background: #E8FFF3;
+  color: #0B4F3F;
+  border-color: #98FBCB;
+}
+
+#mint-lms-root .mint-status-chip--draft {
+  background: #F4F3F8;
+  color: #5C5C77;
+  border-color: #E4E1F0;
+}
+
+#mint-lms-root .mint-status-chip--archived {
+  background: #F9EEDC;
+  color: #7A4E08;
+  border-color: #F0D9A8;
 }
 
 #mint-lms-root .mint-handle-section,
@@ -3437,12 +3514,20 @@
   text-decoration: none !important;
   display: inline-flex;
   align-items: center;
-  transition: background 120ms ease-out;
+  cursor: pointer;
+  transition: background 150ms ease-out, box-shadow 150ms ease-out, transform 150ms ease-out;
 }
 #mint-lms-root .mint-builder-btn-preview:hover,
 #mint-lms-root .mint-builder-btn-preview:focus-visible {
   background: #F4F3F8 !important;
   color: #0F0E1A !important;
+  box-shadow: 0 4px 12px rgba(15, 14, 26, 0.10);
+  transform: translateY(-1px);
+  cursor: pointer;
+}
+#mint-lms-root .mint-builder-btn-preview:active {
+  box-shadow: none;
+  transform: translateY(0);
 }
 
 #mint-lms-root .mint-builder-btn-publish,
@@ -3501,11 +3586,78 @@
   color: #0F0E1A !important;
   font-size: 15px;
   font-weight: 600;
-  cursor: pointer;
-  transition: background 120ms ease-out;
+  cursor: pointer !important;
+  transition: background 150ms ease-out, border-color 150ms ease-out, box-shadow 150ms ease-out, transform 150ms ease-out;
 }
-#mint-lms-root button.mint-builder-btn-secondary:hover {
+#mint-lms-root .mint-builder-btn-secondary:hover:not(:disabled),
+#mint-lms-root button.mint-builder-btn-secondary:hover:not(:disabled),
+#mint-lms-root .mint-builder-btn-secondary:focus-visible:not(:disabled),
+#mint-lms-root button.mint-builder-btn-secondary:focus-visible:not(:disabled) {
   background: #F4F3F8 !important;
+  border-color: rgba(15, 14, 26, 0.28) !important;
+  box-shadow: 0 4px 12px rgba(15, 14, 26, 0.10) !important;
+  transform: translateY(-1px);
+  cursor: pointer !important;
+}
+#mint-lms-root .mint-builder-btn-secondary:active:not(:disabled),
+#mint-lms-root button.mint-builder-btn-secondary:active:not(:disabled) {
+  background: #EBEAF2 !important;
+  border-color: rgba(15, 14, 26, 0.32) !important;
+  box-shadow: none !important;
+  transform: translateY(0);
+  cursor: pointer !important;
+}
+#mint-lms-root .mint-builder-btn-secondary:disabled,
+#mint-lms-root button.mint-builder-btn-secondary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed !important;
+  transform: none;
+  box-shadow: none !important;
+}
+
+#mint-lms-root .mint-builder-btn-save,
+#mint-lms-root button.mint-builder-btn-save {
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: none;
+  background: var(--mint-cta) !important;
+  color: var(--mint-cta-ink) !important;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 150ms ease-out, box-shadow 150ms ease-out, transform 150ms ease-out;
+}
+#mint-lms-root .mint-builder-btn-save:hover:not(:disabled),
+#mint-lms-root button.mint-builder-btn-save:hover:not(:disabled),
+#mint-lms-root .mint-builder-btn-save:focus-visible:not(:disabled),
+#mint-lms-root button.mint-builder-btn-save:focus-visible:not(:disabled) {
+  background: var(--mint-cta-hover) !important;
+  color: var(--mint-cta-ink) !important;
+  box-shadow: var(--mint-cta-shadow) !important;
+  transform: translateY(-1px);
+  cursor: pointer !important;
+}
+#mint-lms-root .mint-builder-btn-save:focus-visible:not(:disabled),
+#mint-lms-root button.mint-builder-btn-save:focus-visible:not(:disabled) {
+  box-shadow: var(--mint-cta-focus), var(--mint-cta-shadow) !important;
+}
+#mint-lms-root .mint-builder-btn-save:active:not(:disabled),
+#mint-lms-root button.mint-builder-btn-save:active:not(:disabled) {
+  background: var(--mint-cta-hover) !important;
+  box-shadow: none !important;
+  transform: translateY(0);
+  cursor: pointer !important;
+}
+#mint-lms-root .mint-builder-btn-save:disabled,
+#mint-lms-root button.mint-builder-btn-save:disabled {
+  opacity: 0.45;
+  cursor: not-allowed !important;
+  transform: none;
+  box-shadow: none !important;
 }
 
 #mint-lms-root .mint-builder-delete {
@@ -3520,6 +3672,27 @@
 }
 #mint-lms-root .mint-builder-delete:focus-visible {
   box-shadow: var(--mint-focus-danger);
+}
+
+#mint-lms-root .mint-builder-delete--header,
+#mint-lms-root button.mint-builder-delete--header {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: 9px;
+  border: 1.5px solid #F3B4B4;
+  background: #FDF2F2 !important;
+  color: #C22B2B !important;
+  font-weight: 600;
+  font-family: inherit;
+  white-space: nowrap;
+  box-shadow: none;
+}
+#mint-lms-root button.mint-builder-delete--header:hover {
+  background: #FBE9E9 !important;
+  border-color: #E89A9A;
 }
 
 #mint-lms-root .mint-editor-frame__toolbar {
@@ -4220,6 +4393,7 @@
   gap: 8px;
   outline: none;
   text-decoration: none !important;
+  transition: background 150ms ease-out, box-shadow 150ms ease-out, transform 150ms ease-out;
 }
 
 #mint-lms-root .mint-quiz-settings-btn__icon {
@@ -4234,8 +4408,17 @@
 #mint-lms-root a.mint-quiz-settings-btn:focus-visible,
 #mint-lms-root button.mint-quiz-settings-btn:hover:not(:disabled),
 #mint-lms-root button.mint-quiz-settings-btn:focus-visible:not(:disabled) {
-  background: #7FE87F !important;
-  color: #0B4F3F !important;
+  background: var(--mint-cta-hover) !important;
+  color: var(--mint-cta-ink) !important;
+  box-shadow: var(--mint-cta-shadow) !important;
+  transform: translateY(-1px);
+  cursor: pointer !important;
+}
+#mint-lms-root a.mint-quiz-settings-btn:active,
+#mint-lms-root button.mint-quiz-settings-btn:active:not(:disabled) {
+  background: var(--mint-cta-hover) !important;
+  box-shadow: none !important;
+  transform: translateY(0);
 }
 
 #mint-lms-root a.mint-quiz-settings-btn:focus-visible,
@@ -5978,6 +6161,12 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 #mint-lms-root .mint-admin-brand__sep { width: 1px; height: 16px; background: #C4C1D6; margin: 0 3px; }
 #mint-lms-root .mint-admin-brand__page { font-size: 16px; color: var(--mint-ink-2); }
 #mint-lms-root .mint-admin-header__actions { display: flex; align-items: center; gap: 8px; flex: none; }
+#mint-lms-root .mint-admin-header__actions .mint-builder-btn-save,
+#mint-lms-root .mint-admin-header__actions button.mint-builder-btn-save {
+  height: 38px;
+  padding: 0 16px;
+  font-size: 15px;
+}
 
 /* Admin dashboard */
 #mint-lms-root .mint-dash-empty { padding: 120px 0 140px; max-width: 520px; }
@@ -7329,12 +7518,12 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 #mint-lms-root .mint-cs-switcher {
   display: flex;
   align-items: center;
-  gap: 20px;
-  height: 46px;
-  padding: 0 6px;
-  border-radius: 999px;
+  gap: 10px;
+  min-height: 56px;
+  padding: 6px;
+  border-radius: 16px;
   background: #F1FFF9;
-  border: 1px solid #CFF5E2;
+  border: 1.5px solid #CFF5E2;
   box-sizing: border-box;
 }
 
@@ -7343,55 +7532,94 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   align-items: center;
   justify-content: center;
   flex: none;
-  width: 34px;
-  height: 34px;
-  border-radius: 999px;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
   background: #fff;
+  color: #0B4F3F;
   text-decoration: none;
-  transition: background 120ms ease-out;
+  border: 1px solid #CFF5E2;
+  transition: background 150ms ease-out, transform 150ms ease-out, box-shadow 150ms ease-out;
 }
 
 #mint-lms-root .mint-cs-switcher__back:hover,
 #mint-lms-root .mint-cs-switcher__back:focus-visible {
   background: #98FB98;
+  box-shadow: var(--mint-cta-shadow);
+  transform: translateY(-1px);
   outline: none;
 }
 
+#mint-lms-root .mint-cs-switcher__tabs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  flex: 1;
+}
+
 #mint-lms-root .mint-cs-switcher__link {
-  font-size: 15px;
-  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  height: 40px;
+  padding: 0 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
   color: #5C5C77;
   text-decoration: none;
   white-space: nowrap;
-  transition: color 120ms ease-out;
+  border: 1px solid transparent;
+  transition: color 150ms ease-out, background 150ms ease-out, transform 150ms ease-out, box-shadow 150ms ease-out;
 }
 
 #mint-lms-root a.mint-cs-switcher__link:hover,
 #mint-lms-root a.mint-cs-switcher__link:focus-visible {
   color: #0B4F3F;
+  background: rgba(255, 255, 255, 0.72);
   outline: none;
+  transform: translateY(-1px);
 }
 
 #mint-lms-root .mint-cs-switcher__link.is-active {
   font-weight: 700;
   color: #0B4F3F;
+  background: #fff;
+  border-color: #CFF5E2;
+  box-shadow: 0 1px 3px rgba(11, 79, 63, 0.08);
+}
+
+#mint-lms-root .mint-cs-switcher__course {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  min-width: 0;
+  max-width: min(360px, 42vw);
+  height: 40px;
+  padding: 0 8px 0 12px;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid #CFF5E2;
+}
+
+#mint-lms-root .mint-cs-switcher__course-kicker {
+  flex: none;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #5C5C77;
 }
 
 #mint-lms-root .mint-cs-switcher__title {
-  display: inline-flex;
-  align-items: center;
-  margin-left: auto;
-  height: 34px;
-  max-width: min(280px, 36vw);
-  padding: 0 16px;
-  border-radius: 999px;
-  background: #fff;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: #17222B;
   font-size: 14px;
   font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 #mint-lms-root .mint-cs-crumb {
@@ -8736,8 +8964,15 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   gap: 28px 32px;
 }
 #mint-lms-root .mint-quiz-editor-layout__main {
-  flex: 1 1 420px;
+  flex: 1 1 0;
   min-width: 0;
+}
+#mint-lms-root .mint-editor-rail .mint-quiz-attach {
+  flex: none;
+  width: 100%;
+  max-width: 340px;
+  margin-top: 0;
+  align-self: flex-end;
 }
 #mint-lms-root .mint-quiz-attach {
   flex: 0 1 320px;
@@ -9722,15 +9957,52 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   overflow: visible;
 }
 
-#mint-lms-root .mint-settings-featured--rail {
-  flex: 0 1 320px;
-  width: 100%;
-  max-width: 340px;
-  margin-top: 8px;
+#mint-lms-root .mint-editor-rail {
+  flex: 0 0 auto;
+  width: auto;
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 20px;
   align-self: flex-start;
   position: sticky;
   top: 12px;
   z-index: 5;
+}
+
+#mint-lms-root .mint-editor-rail__actions {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+#mint-lms-root .mint-editor-rail__actions .mint-quiz-settings-btn,
+#mint-lms-root .mint-editor-rail__actions button.mint-quiz-settings-btn,
+#mint-lms-root .mint-editor-rail__actions .mint-builder-btn-secondary,
+#mint-lms-root .mint-editor-rail__actions button.mint-builder-btn-secondary,
+#mint-lms-root .mint-editor-rail__actions .mint-builder-btn-save,
+#mint-lms-root .mint-editor-rail__actions button.mint-builder-btn-save,
+#mint-lms-root .mint-editor-rail__actions .mint-builder-delete--header,
+#mint-lms-root .mint-editor-rail__actions button.mint-builder-delete--header {
+  flex: none;
+  height: 36px;
+  padding: 0 12px;
+  font-size: 14px;
+}
+
+#mint-lms-root .mint-settings-featured--rail {
+  flex: none;
+  width: 100%;
+  max-width: 340px;
+  margin-top: 0;
+  align-self: flex-end;
+  position: static;
+  top: auto;
+  z-index: 1;
 }
 
 #mint-lms-root .mint-settings-featured__head {

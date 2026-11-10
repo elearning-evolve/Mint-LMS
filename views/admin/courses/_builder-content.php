@@ -181,7 +181,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 
 	<header class="mint-builder-toolbar">
 		<div class="mint-flex mint-min-w-0 mint-items-center mint-gap-[14px]">
-			<template x-if="fromQuestions && !fromBuilderOrigin">
+			<template x-if="!showCourseSettingsButton() && fromQuestions && !fromBuilderOrigin">
 				<a
 					:href="listDashboardUrl('questions')"
 					class="mint-builder-back-lessons mint-inline-flex mint-min-w-0 mint-items-center mint-gap-2 mint-rounded-lg mint-px-2 mint-py-1.5 mint-no-underline mint-text-ink hover:mint-bg-[#F4F3F8]"
@@ -192,18 +192,36 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 					<span class="mint-truncate mint-text-base mint-font-semibold mint-tracking-[-0.015em]"><?php esc_html_e( 'Back to questions', 'mint-lms' ); ?></span>
 				</a>
 			</template>
-			<template x-if="fromQuizzes && !fromQuestions && !fromBuilderOrigin">
-				<a
-					:href="listDashboardUrl('quizzes')"
-					class="mint-builder-back-lessons mint-inline-flex mint-min-w-0 mint-items-center mint-gap-2 mint-rounded-lg mint-px-2 mint-py-1.5 mint-no-underline mint-text-ink hover:mint-bg-[#F4F3F8]"
-					aria-label="<?php echo esc_attr__( 'Back to quizzes', 'mint-lms' ); ?>"
-					@click="rememberOriginTab()"
-				>
-					<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="mint-shrink-0"><path d="M12.5 4.5 7 10l5.5 5.5"/></svg>
-					<span class="mint-truncate mint-text-base mint-font-semibold mint-tracking-[-0.015em]"><?php esc_html_e( 'Back to quizzes', 'mint-lms' ); ?></span>
-				</a>
+			<template x-if="showQuizIdentityHeader()">
+				<div class="mint-builder-identity">
+					<a
+						:href="listDashboardUrl('quizzes')"
+						class="mint-builder-back"
+						aria-label="<?php echo esc_attr__( 'Back to quizzes', 'mint-lms' ); ?>"
+						@click="rememberOriginTab()"
+					>
+						<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.5 4.5 7 10l5.5 5.5"/></svg>
+					</a>
+					<div class="mint-builder-identity__body">
+						<div class="mint-builder-identity__meta">
+							<span class="mint-builder-identity__kicker"><?php esc_html_e( 'Quiz', 'mint-lms' ); ?></span>
+							<span
+								class="mint-status-chip"
+								:class="quizStatusChipClass()"
+								x-text="statusLabel(quizIdentityStatus())"
+							></span>
+						</div>
+						<a
+							class="mint-builder-identity__title"
+							:href="nativePostEditUrl(standaloneQuizEditId())"
+							@click.prevent="goToStandaloneQuizHome($event)"
+							:title="quizIdentityTitle()"
+							x-text="quizIdentityName()"
+						></a>
+					</div>
+				</div>
 			</template>
-			<template x-if="fromBuilderOrigin && fromQuizzes">
+			<template x-if="!showCourseSettingsButton() && fromBuilderOrigin && fromQuizzes">
 				<a
 					:href="parentCourseEditorUrl()"
 					class="mint-builder-back-lessons mint-inline-flex mint-min-w-0 mint-items-center mint-gap-2 mint-rounded-lg mint-px-2 mint-py-1.5 mint-no-underline mint-text-ink hover:mint-bg-[#F4F3F8]"
@@ -214,19 +232,37 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 					<span class="mint-truncate mint-text-base mint-font-semibold mint-tracking-[-0.015em]" x-text="breadcrumbCourseTitle() || t('backToCourse')"></span>
 				</a>
 			</template>
-			<template x-if="fromLessons && !fromQuizzes">
-				<a
-					:href="listDashboardUrl('lessons')"
-					class="mint-builder-back-lessons mint-inline-flex mint-min-w-0 mint-items-center mint-gap-2 mint-rounded-lg mint-px-2 mint-py-1.5 mint-no-underline mint-text-ink hover:mint-bg-[#F4F3F8]"
-					aria-label="<?php echo esc_attr__( 'Back to lessons', 'mint-lms' ); ?>"
-					@click="rememberOriginTab()"
-				>
-					<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="mint-shrink-0"><path d="M12.5 4.5 7 10l5.5 5.5"/></svg>
-					<span class="mint-truncate mint-text-base mint-font-semibold mint-tracking-[-0.015em]"><?php esc_html_e( 'Back to lessons', 'mint-lms' ); ?></span>
-				</a>
+			<template x-if="showLessonIdentityHeader()">
+				<div class="mint-builder-identity">
+					<a
+						:href="listDashboardUrl('lessons')"
+						class="mint-builder-back"
+						aria-label="<?php echo esc_attr__( 'Back to lessons', 'mint-lms' ); ?>"
+						@click="rememberOriginTab()"
+					>
+						<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.5 4.5 7 10l5.5 5.5"/></svg>
+					</a>
+					<div class="mint-builder-identity__body">
+						<div class="mint-builder-identity__meta">
+							<span class="mint-builder-identity__kicker"><?php esc_html_e( 'Lesson', 'mint-lms' ); ?></span>
+							<span
+								class="mint-status-chip"
+								:class="lessonStatusChipClass()"
+								x-text="statusLabel(lessonIdentityStatus())"
+							></span>
+						</div>
+						<a
+							class="mint-builder-identity__title"
+							:href="nativePostEditUrl(standaloneLessonEditId())"
+							@click.prevent="goToStandaloneLessonHome($event)"
+							:title="lessonIdentityTitle()"
+							x-text="lessonIdentityName()"
+						></a>
+					</div>
+				</div>
 			</template>
-			<template x-if="!fromQuizzes && !fromLessons">
-				<div class="mint-flex mint-min-w-0 mint-items-center mint-gap-[14px]">
+			<template x-if="showCourseSettingsButton()">
+				<div class="mint-builder-identity">
 					<a
 						:href="listDashboardUrl('courses')"
 						class="mint-builder-back"
@@ -235,25 +271,31 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 					>
 						<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.5 4.5 7 10l5.5 5.5"/></svg>
 					</a>
-					<div class="mint-flex mint-min-w-0 mint-items-center mint-gap-2.5">
+					<div class="mint-builder-identity__body">
+						<div class="mint-builder-identity__meta">
+							<span class="mint-builder-identity__kicker"><?php esc_html_e( 'Course', 'mint-lms' ); ?></span>
+							<span
+								class="mint-status-chip"
+								:class="courseStatusChipClass()"
+								x-show="course.status"
+								x-cloak
+								x-text="statusLabel(course.status)"
+							></span>
+						</div>
 						<a
-							class="mint-truncate mint-text-base mint-font-semibold mint-tracking-[-0.015em] mint-text-ink mint-no-underline hover:mint-underline"
+							class="mint-builder-identity__title"
 							:href="courseHomeUrl()"
 							@click.prevent="goToCourseHome($event)"
+							:title="courseIdentityTitle()"
 							x-text="course.title || t('untitledCourse')"
 						></a>
-						<span
-							class="mint-status-chip"
-							x-show="course.status"
-							x-text="statusLabel(course.status)"
-						></span>
 					</div>
 				</div>
 			</template>
 		</div>
 
 		<div class="mint-flex mint-shrink-0 mint-items-center mint-gap-2.5">
-			<div class="mint-mr-1 mint-text-[15px] mint-text-ink-2" x-text="saveStateLabel()" x-show="saveStateLabel()" x-cloak></div>
+			<div class="mint-mr-1 mint-text-[15px] mint-text-ink-2" x-text="saveStateLabel()" x-show="saveStateLabel() && !showEditorRailActions()" x-cloak></div>
 			<a
 				href="#"
 				class="mint-quiz-settings-btn"
@@ -270,48 +312,18 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 				/>
 				<?php esc_html_e( 'Course Settings', 'mint-lms' ); ?>
 			</a>
-			<button
-				type="button"
-				class="mint-quiz-settings-btn"
-				x-show="selected?.type === 'lesson' && selectedLesson?.id && !lessonSettingsView"
-				x-cloak
-				@click="openLessonSettings()"
-				:disabled="!selectedLesson?.id"
-			>
-				<img
-					class="mint-quiz-settings-btn__icon"
-					src="<?php echo esc_url( MINTLMS_URL . 'assets/img/quiz-settings-icon.png' ); ?>"
-					width="18"
-					height="18"
-					alt=""
-				/>
-				<?php esc_html_e( 'Lesson Settings', 'mint-lms' ); ?>
-			</button>
-			<button
-				type="button"
-				class="mint-quiz-settings-btn"
-				x-show="selected?.type === 'quiz' && lessonQuiz?.id && !quizSettingsView"
-				x-cloak
-				@click="openQuizSettings()"
-				:disabled="!lessonQuiz?.id"
-			>
-				<img
-					class="mint-quiz-settings-btn__icon"
-					src="<?php echo esc_url( MINTLMS_URL . 'assets/img/quiz-settings-icon.png' ); ?>"
-					width="18"
-					height="18"
-					alt=""
-				/>
-				<?php esc_html_e( 'Quiz Settings', 'mint-lms' ); ?>
-			</button>
 			<a
 				href="#"
 				class="mint-builder-btn-preview"
+				x-show="showHeaderPreviewButton()"
+				x-cloak
 				@click.prevent="openBuilderPreview($event)"
 			><?php esc_html_e( 'Preview', 'mint-lms' ); ?></a>
 			<button
 				type="button"
-				class="mint-builder-btn-secondary"
+				class="mint-builder-btn-save"
+				x-show="!showEditorRailActions()"
+				x-cloak
 				@click="headerSaveAction()"
 				:disabled="headerSaveDisabled()"
 			>
@@ -321,13 +333,13 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 			<button
 				type="button"
 				class="mint-builder-btn-publish"
-				x-show="headerShowsLive()"
+				x-show="headerShowsLive() && !showEditorRailActions()"
 				x-cloak
 				@click="headerLiveAction()"
 				:disabled="headerLiveDisabled()"
 			>
-				<span x-show="!publishing"><?php esc_html_e( 'Live', 'mint-lms' ); ?></span>
-				<span x-show="publishing" x-cloak><?php esc_html_e( 'Going live…', 'mint-lms' ); ?></span>
+				<span x-show="!publishing"><?php esc_html_e( 'Published', 'mint-lms' ); ?></span>
+				<span x-show="publishing" x-cloak><?php esc_html_e( 'Publishing…', 'mint-lms' ); ?></span>
 			</button>
 		</div>
 	</header>
@@ -2554,7 +2566,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 						<button
 							type="button"
 							class="mint-builder-btn-publish !mint-h-[38px] !mint-rounded-[9px] !mint-px-4 !mint-text-[15px]"
-							@click="saveSection(selectedSection, { toast: true })"
+							@click="saveSection(selectedSection, { toast: false, reload: true })"
 						><?php esc_html_e( 'Save changes', 'mint-lms' ); ?></button>
 					</div>
 				</div>
@@ -2725,25 +2737,15 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 									<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M10 5v10M5 10h10" /></svg>
 									<?php esc_html_e( 'Add Question', 'mint-lms' ); ?>
 								</button>
-
-								<div class="mint-mt-8 mint-border-t mint-border-rule mint-pt-5">
-									<div class="mint-flex mint-flex-wrap mint-items-center mint-justify-end mint-gap-4">
-										<button type="button" class="mint-builder-delete" @click="deleteQuiz()"><?php esc_html_e( 'Delete quiz', 'mint-lms' ); ?></button>
-										<button
-											type="button"
-											class="mint-builder-btn-publish !mint-h-[38px] !mint-rounded-[9px] !mint-px-4 !mint-text-[15px]"
-											@click="saveQuiz()"
-											:disabled="quizSaving"
-										><?php esc_html_e( 'Save changes', 'mint-lms' ); ?></button>
-									</div>
-								</div>
 								</div><!-- /quiz builder -->
 
 								</div><!-- /.mint-quiz-editor-layout__main -->
 
+								<div class="mint-editor-rail" x-show="!quizSettingsView" x-cloak>
+								<?php require MINTLMS_PATH . 'views/admin/courses/_builder-editor-rail-actions.php'; ?>
 								<aside
 									class="mint-quiz-attach"
-									x-show="!quizSettingsView && showQuizLessonAttachPanel()"
+									x-show="showQuizLessonAttachPanel()"
 									x-cloak
 								>
 									<div class="mint-quiz-attach__head">
@@ -2832,6 +2834,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 										<span x-text="attaching ? t('adding') : t('addToLesson')"></span>
 									</button>
 								</aside>
+								</div><!-- /.mint-editor-rail -->
 							</div>
 						</template>
 					</div>
@@ -3269,20 +3272,10 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 									</template>
 
 								</div>
-
-								<div class="mint-qeditor__footer">
-									<button type="button" class="mint-builder-delete" @click="deleteActiveQuestion()"><?php esc_html_e( 'Delete question', 'mint-lms' ); ?></button>
-									<button
-										type="button"
-										class="mint-qeditor__btn-solid mint-qeditor__btn-solid--wide"
-										@click="saveActiveQuestion()"
-										:disabled="quizSaving"
-									>
-										<span x-text="quizSaving ? t('saving') : t('saveQuestion')"></span>
-									</button>
-								</div>
 								</div><!-- /.mint-quiz-editor-layout__main -->
 
+								<div class="mint-editor-rail">
+								<?php require MINTLMS_PATH . 'views/admin/courses/_builder-editor-rail-actions.php'; ?>
 								<aside
 									class="mint-quiz-attach"
 									x-show="showQuestionQuizAttachPanel()"
@@ -3375,6 +3368,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 										<span x-text="attaching ? t('adding') : t('addToQuiz')"></span>
 									</button>
 								</aside>
+								</div><!-- /.mint-editor-rail -->
 							</div>
 						</template>
 					</div>
@@ -3511,22 +3505,14 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 							<svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M10 5v10M5 10h10"/></svg>
 							<?php esc_html_e( 'Add Quiz', 'mint-lms' ); ?>
 						</button>
-
-						<div class="mint-mt-8 mint-border-t mint-border-rule mint-pt-5">
-							<div class="mint-flex mint-flex-wrap mint-items-center mint-justify-end mint-gap-4">
-								<button
-									type="button"
-									class="mint-builder-delete"
-									@click="deleteLesson(selectedLesson.id, selected.sectionId)"
-								><?php esc_html_e( 'Delete lesson', 'mint-lms' ); ?></button>
-							</div>
-						</div>
 							</div><!-- /!lessonSettingsView -->
 							</div><!-- /.mint-quiz-editor-layout__main -->
 
+							<div class="mint-editor-rail" x-show="!lessonSettingsView" x-cloak>
+							<?php require MINTLMS_PATH . 'views/admin/courses/_builder-editor-rail-actions.php'; ?>
 							<aside
 								class="mint-settings-featured mint-settings-featured--rail"
-								x-show="!lessonSettingsView && showLessonCourseAttachPanel()"
+								x-show="showLessonCourseAttachPanel()"
 								x-cloak
 							>
 								<div class="mint-settings-featured__head">
@@ -3745,6 +3731,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 									</button>
 								</div>
 							</aside>
+							</div><!-- /.mint-editor-rail -->
 						</div><!-- /.mint-quiz-editor-layout -->
 					</div>
 				</div>

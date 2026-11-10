@@ -153,7 +153,7 @@ $textareaClass = 'mint-block mint-w-full mint-min-h-[100px] mint-resize-y mint-r
 								<svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>
 							</div>
 							<p class="mint-m-0 mint-text-[20px] mint-font-semibold mint-text-ink" x-text="courseTitle"></p>
-							<p class="mint-m-0 mint-mt-2 mint-text-base mint-text-ink-2"><?php esc_html_e( 'Ready to go live', 'mint-lms' ); ?></p>
+							<p class="mint-m-0 mint-mt-2 mint-text-base mint-text-ink-2"><?php esc_html_e( 'Ready to publish', 'mint-lms' ); ?></p>
 						</div>
 					</template>
 

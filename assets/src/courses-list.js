@@ -130,7 +130,7 @@ function coursesList() {
     },
 
     statusLabel(status) {
-      const labels = { draft: 'Draft', published: 'Live', archived: 'Hidden', trashed: 'Trash' };
+      const labels = { draft: 'Draft', published: 'Published', archived: 'Hidden', trashed: 'Trash' };
       return labels[status] || status;
     },
 
@@ -139,7 +139,7 @@ function coursesList() {
         { value: 'all', label: `All (${this.allTotal})` },
         {
           value: 'published',
-          label: this.publishedTotal > 0 ? `Live (${this.publishedTotal})` : 'Live',
+          label: this.publishedTotal > 0 ? `Published (${this.publishedTotal})` : 'Published',
         },
         { value: 'draft', label: `Drafts (${this.draftTotal})` },
         {
@@ -220,18 +220,18 @@ function coursesList() {
       const lessonLabel = lessons === 1 ? '1 lesson' : `${lessons} lessons`;
       if (course.status === 'published') {
         const when = this.formatShortDate(course.updatedAt);
-        return when ? `${lessonLabel} · Live ${when}` : `${lessonLabel} · Live`;
+        return when ? `${lessonLabel} · Published ${when}` : `${lessonLabel} · Published`;
       }
       if (course.status === 'archived') {
         return `${lessonLabel} · hidden from students`;
       }
-      return `${lessonLabel} · Not Live`;
+      return `${lessonLabel} · Draft`;
     },
 
     summaryLine() {
       const live = this.courses.filter((c) => c.status === 'published').length;
       const students = this.courses.reduce((sum, c) => sum + (Number(c.studentCount) || 0), 0);
-      return `${this.total} courses · ${live} live · ${students} students enrolled`;
+      return `${this.total} courses · ${live} published · ${students} students enrolled`;
     },
 
     formatShortDate(iso) {
