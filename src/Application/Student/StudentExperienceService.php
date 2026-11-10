@@ -211,15 +211,23 @@ final class StudentExperienceService {
 					continue;
 				}
 
-				$featuredImageId = null;
-				$nextLessonId    = null;
-				$lessonContent   = '';
+				$featuredImageId     = null;
+				$nextLessonId        = null;
+				$nextLessonTitle     = '';
+				$previousLessonId    = null;
+				$previousLessonTitle = '';
+				$lessonContent       = '';
 				foreach ( $flat as $index => $structureLesson ) {
 					if ( $structureLesson->id === $lessonId ) {
 						$featuredImageId = $structureLesson->featuredImageId;
 						$lessonContent   = (string) ( $structureLesson->content ?? '' );
 						if ( isset( $flat[ $index + 1 ] ) ) {
-							$nextLessonId = $flat[ $index + 1 ]->id;
+							$nextLessonId    = $flat[ $index + 1 ]->id;
+							$nextLessonTitle = (string) $flat[ $index + 1 ]->title;
+						}
+						if ( $index > 0 && isset( $flat[ $index - 1 ] ) ) {
+							$previousLessonId    = $flat[ $index - 1 ]->id;
+							$previousLessonTitle = (string) $flat[ $index - 1 ]->title;
 						}
 						break;
 					}
@@ -232,18 +240,21 @@ final class StudentExperienceService {
 				}
 
 				return array(
-					'title'           => (string) $lesson['title'],
-					'meta'            => (string) $lesson['meta'],
-					'quizzes'         => $lesson['quizzes'],
-					'content'         => $lessonContent,
-					'courseTitle'     => $course->title,
-					'sectionTitle'    => (string) ( $section['title'] ?? '' ),
-					'featuredImageId' => $featuredImageId,
-					'authorName'      => $authorName,
-					'progressPct'     => $progressPct,
-					'nextLessonId'    => $nextLessonId,
-					'courseId'        => $courseId,
-					'lessonId'        => $lessonId,
+					'title'               => (string) $lesson['title'],
+					'meta'                => (string) $lesson['meta'],
+					'quizzes'             => $lesson['quizzes'],
+					'content'             => $lessonContent,
+					'courseTitle'         => $course->title,
+					'sectionTitle'        => (string) ( $section['title'] ?? '' ),
+					'featuredImageId'     => $featuredImageId,
+					'authorName'          => $authorName,
+					'progressPct'         => $progressPct,
+					'nextLessonId'        => $nextLessonId,
+					'nextLessonTitle'     => $nextLessonTitle,
+					'previousLessonId'    => $previousLessonId,
+					'previousLessonTitle' => $previousLessonTitle,
+					'courseId'            => $courseId,
+					'lessonId'            => $lessonId,
 				);
 			}
 		}
@@ -290,18 +301,21 @@ final class StudentExperienceService {
 		}
 
 		return array(
-			'title'           => $lesson->title,
-			'meta'            => $meta,
-			'quizzes'         => $quizzes,
-			'content'         => $lesson->content,
-			'courseTitle'     => $courseTitle,
-			'sectionTitle'    => '',
-			'featuredImageId' => $lesson->featuredImageId,
-			'authorName'      => $authorName,
-			'progressPct'     => 0.0,
-			'nextLessonId'    => null,
-			'courseId'        => $lesson->courseId,
-			'lessonId'        => $lesson->id,
+			'title'               => $lesson->title,
+			'meta'                => $meta,
+			'quizzes'             => $quizzes,
+			'content'             => $lesson->content,
+			'courseTitle'         => $courseTitle,
+			'sectionTitle'        => '',
+			'featuredImageId'     => $lesson->featuredImageId,
+			'authorName'          => $authorName,
+			'progressPct'         => 0.0,
+			'nextLessonId'        => null,
+			'nextLessonTitle'     => '',
+			'previousLessonId'    => null,
+			'previousLessonTitle' => '',
+			'courseId'            => $lesson->courseId,
+			'lessonId'            => $lesson->id,
 		);
 	}
 
@@ -585,7 +599,11 @@ final class StudentExperienceService {
 			$quizDto = null;
 		}
 
-		if ( null === $quizDto || array() === $quizDto->questions ) {
+		if ( null === $quizDto ) {
+			return $quizzes;
+		}
+
+		if ( ! $isEditorPreview && array() === $quizDto->questions ) {
 			return $quizzes;
 		}
 
@@ -1017,7 +1035,7 @@ final class StudentExperienceService {
 						$quizDto = null;
 					}
 
-					if ( null !== $quizDto && array() !== $quizDto->questions ) {
+					if ( null !== $quizDto && ( $isEditorPreview || array() !== $quizDto->questions ) ) {
 						$questionCount = count( $quizDto->questions );
 						$questions     = array();
 

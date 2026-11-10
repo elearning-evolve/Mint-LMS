@@ -7,11 +7,12 @@ use MintLMS\Application\Student\Dto\StudentPlayerContextDto;
 
 /** @var StudentPlayerContextDto $context */
 /** @var callable(int): string $lessonUrl */
-$context       = $context;
-$lessonUrl     = $lessonUrl;
-$dashboardUrl  = $dashboardUrl ?? home_url( '/' );
-$attachmentUrl = $attachmentUrl ?? null;
-$videoEmbed    = $videoEmbed ?? '';
+$context        = $context;
+$lessonUrl      = $lessonUrl;
+$dashboardUrl   = $dashboardUrl ?? home_url( '/' );
+$attachmentUrl  = $attachmentUrl ?? null;
+$videoEmbed     = $videoEmbed ?? '';
+$quizPreviewUrl = is_string( $quizPreviewUrl ?? null ) ? $quizPreviewUrl : '';
 
 $completedIds = $context->completedLessonIds;
 $lesson       = $context->currentLesson;
@@ -32,7 +33,7 @@ $pct          = (int) round( $context->progressPct );
 	<?php if ( ! empty( $context->isReviewMode ) ) : ?>
 		<div class="mint-border-b mint-border-rule mint-bg-accent-wash mint-px-4 sm:mint-px-6 mint-py-2.5">
 			<div class="mint-mx-auto mint-max-w-content mint-text-sm mint-font-medium mint-text-accent">
-				<?php esc_html_e( 'Preview mode — you are previewing this course as an instructor (including draft lessons, quizzes, and questions).', 'mint-lms' ); ?>
+				<?php esc_html_e( 'Preview mode — this is how students see this lesson. Attempts and progress are not saved.', 'mint-lms' ); ?>
 			</div>
 		</div>
 	<?php endif; ?>
@@ -43,7 +44,7 @@ $pct          = (int) round( $context->progressPct );
 				<svg class="mint-h-3.5 mint-w-3.5 mint-shrink-0 mint-text-ink-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
 				<span class="mint-truncate mint-font-medium mint-text-ink"><?php echo esc_html( $lesson->title ); ?></span>
 			</div>
-			<?php if ( $context->isEnrolled ) : ?>
+			<?php if ( $context->isEnrolled && empty( $context->isReviewMode ) ) : ?>
 				<div class="mint-flex mint-min-w-[200px] mint-flex-col mint-gap-1.5 sm:mint-w-48">
 					<span class="mint-text-xs mint-font-medium mint-text-ink-3" x-text="Math.round(progressPct) + '% complete'"></span>
 					<progress
@@ -65,12 +66,6 @@ $pct          = (int) round( $context->progressPct );
 				<div class="mint-aspect-video mint-w-full mint-overflow-hidden mint-rounded-xl mint-border mint-border-rule mint-bg-bg-ink [&_iframe]:mint-h-full [&_iframe]:mint-w-full">
 					<?php echo $videoEmbed; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				</div>
-			<?php else : ?>
-				<div class="mint-flex mint-aspect-video mint-w-full mint-items-center mint-justify-center mint-rounded-xl mint-border mint-border-rule mint-bg-bg-subtle">
-					<div class="mint-flex mint-h-16 mint-w-16 mint-items-center mint-justify-center mint-rounded-full mint-bg-accent mint-text-neutral-50">
-						<svg class="mint-h-7 mint-w-7" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-					</div>
-				</div>
 			<?php endif; ?>
 
 			<h1 class="mint-mt-6 mint-text-h2 mint-font-semibold mint-text-ink mint-tracking-tight"><?php echo esc_html( $lesson->title ); ?></h1>
@@ -91,12 +86,34 @@ $pct          = (int) round( $context->progressPct );
 			<?php endif; ?>
 
 			<?php
-			$quiz          = $context->quiz;
-			$quizRequired  = $context->quizRequired;
-			$hasPassedQuiz = $context->hasPassedQuiz;
-			$isEnrolled    = $context->isEnrolled;
-			$isReviewMode  = ! empty( $context->isReviewMode );
-			require MINTLMS_PATH . 'templates/student/quiz.php';
+			$isReviewMode = ! empty( $context->isReviewMode );
+			if ( $isReviewMode && null !== $context->quiz && '' !== $quizPreviewUrl ) :
+				?>
+				<div class="mint-mt-8 mint-rounded-xl mint-border mint-border-rule mint-bg-bg mint-p-6">
+					<div class="mint-flex mint-flex-col mint-gap-3 sm:mint-flex-row sm:mint-items-center sm:mint-justify-between">
+						<div>
+							<div class="mint-text-over mint-font-semibold mint-uppercase mint-tracking-widest mint-text-ink"><?php echo esc_html( $context->quiz->title ); ?></div>
+							<p class="mint-mt-1 mint-mb-0 mint-text-sm mint-text-ink-2">
+								<?php
+								printf(
+									/* translators: %d: minimum pass percentage */
+									esc_html__( 'Pass: %d%%', 'mint-lms' ),
+									(int) $context->quiz->passPercent
+								);
+								?>
+							</p>
+						</div>
+						<a href="<?php echo esc_url( $quizPreviewUrl ); ?>" class="mint-inline-flex mint-h-[42px] mint-items-center mint-justify-center mint-rounded-lg mint-border-0 mint-bg-cta mint-px-[18px] mint-text-sm mint-font-bold mint-text-cta-ink mint-no-underline hover:mint-bg-cta-hover"><?php esc_html_e( 'Start quiz', 'mint-lms' ); ?></a>
+					</div>
+				</div>
+				<?php
+			elseif ( ! $isReviewMode ) :
+				$quiz          = $context->quiz;
+				$quizRequired  = $context->quizRequired;
+				$hasPassedQuiz = $context->hasPassedQuiz;
+				$isEnrolled    = $context->isEnrolled;
+				require MINTLMS_PATH . 'templates/student/quiz.php';
+			endif;
 			?>
 
 			<div class="mint-mt-8 mint-flex mint-flex-col mint-gap-3 sm:mint-flex-row sm:mint-items-center sm:mint-justify-between">
@@ -118,7 +135,7 @@ $pct          = (int) round( $context->progressPct );
 						>
 							<span x-text="marking ? mintLmsStudent.i18n.marking : (isComplete ? mintLmsStudent.i18n.completed : (<?php echo null !== $context->nextLessonId ? 'true' : 'false'; ?> ? '<?php echo esc_js( __( 'Mark complete & continue', 'mint-lms' ) ); ?>' : mintLmsStudent.i18n.markComplete))"></span>
 						</button>
-					<?php elseif ( $context->isEnrolled && ! $context->canMarkComplete ) : ?>
+					<?php elseif ( $context->isEnrolled && ! $context->canMarkComplete && empty( $context->isReviewMode ) ) : ?>
 						<p class="mint-m-0 mint-text-sm mint-text-ink-3"><?php esc_html_e( 'Your instructor marks lessons complete.', 'mint-lms' ); ?></p>
 					<?php endif; ?>
 				</div>
@@ -138,8 +155,8 @@ $pct          = (int) round( $context->progressPct );
 						foreach ( $section->lessons as $sectionLesson ) :
 							$isCurrent   = $sectionLesson->id === $lesson->id;
 							$isCompleted = in_array( $sectionLesson->id, $completedIds, true );
-							$accessible  = ( $context->isEnrolled || $sectionLesson->isPreview ) && ! $sectionLesson->isDripLocked;
-							$hasContent  = '' !== $sectionLesson->content || null !== $sectionLesson->videoUrl || $sectionLesson->isDripLocked;
+							$accessible  = ( $context->isEnrolled || $sectionLesson->isPreview || ! empty( $context->isReviewMode ) ) && ! $sectionLesson->isDripLocked;
+							$hasContent  = $isCurrent || '' !== $sectionLesson->content || null !== $sectionLesson->videoUrl || $sectionLesson->isDripLocked;
 							$lessonId    = (int) $sectionLesson->id;
 							?>
 							<?php if ( $accessible && $hasContent ) : ?>

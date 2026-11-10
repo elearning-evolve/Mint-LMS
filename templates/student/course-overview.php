@@ -73,21 +73,6 @@ $showCta = $overview->isEnrolled || $overview->canEnroll || ( 'paid' === $overvi
 					alt="<?php echo esc_attr( $overview->title ); ?>"
 				/>
 			</div>
-		<?php else : ?>
-			<div class="mint-s3-hero__countdown">
-				<div class="mint-text-[13px] mint-font-bold mint-uppercase mint-tracking-[0.18em] mint-text-cta-ink"><?php esc_html_e( 'Publishing in', 'mint-lms' ); ?></div>
-				<div class="mint-mt-2 mint-text-[44px] mint-font-bold mint-leading-none mint-tracking-[0.02em] mint-text-cta-ink mint-tabular-nums">00 : 00 : 00 : 00</div>
-				<div class="mint-mt-1.5 mint-flex mint-justify-center mint-gap-11">
-					<div class="mint-text-xs mint-text-cta-ink"><?php esc_html_e( 'days', 'mint-lms' ); ?></div>
-					<div class="mint-text-xs mint-text-cta-ink"><?php esc_html_e( 'hours', 'mint-lms' ); ?></div>
-					<div class="mint-text-xs mint-text-cta-ink"><?php esc_html_e( 'minutes', 'mint-lms' ); ?></div>
-					<div class="mint-text-xs mint-text-cta-ink"><?php esc_html_e( 'seconds', 'mint-lms' ); ?></div>
-				</div>
-				<div class="mint-mt-3.5 mint-text-[13px] mint-text-cta-ink">
-					<?php esc_html_e( 'Not redirected after countdown?', 'mint-lms' ); ?>
-					<a href="<?php echo esc_url( $continueUrl ); ?>" class="mint-text-cta-ink mint-underline"><?php esc_html_e( 'Click here', 'mint-lms' ); ?></a>
-				</div>
-			</div>
 		<?php endif; ?>
 
 		<?php if ( '' !== $overview->authorName || '' !== $categoryName ) : ?>
