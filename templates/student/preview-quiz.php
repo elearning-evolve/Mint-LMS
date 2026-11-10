@@ -10,9 +10,11 @@ use MintLMS\Application\Quiz\Dto\QuizDto;
  *
  * @var QuizDto|null $quiz
  * @var string       $courseUrl
+ * @var string       $lessonUrl
  */
 $quiz      = $quiz ?? null;
 $courseUrl = is_string( $courseUrl ?? null ) ? $courseUrl : '';
+$lessonUrl = is_string( $lessonUrl ?? null ) ? $lessonUrl : '';
 
 $quizRequired  = true;
 $hasPassedQuiz = false;
@@ -33,9 +35,14 @@ $isReviewMode  = true;
 		<?php require MINTLMS_PATH . 'templates/student/quiz.php'; ?>
 	<?php endif; ?>
 
-	<?php if ( '' !== $courseUrl ) : ?>
-		<div class="mint-mt-6">
-			<a href="<?php echo esc_url( $courseUrl ); ?>" class="mint-s3b-nav__back">← <?php esc_html_e( 'Back to course', 'mint-lms' ); ?></a>
+	<?php if ( '' !== $lessonUrl || '' !== $courseUrl ) : ?>
+		<div class="mint-mt-6 mint-flex mint-flex-wrap mint-gap-4">
+			<?php if ( '' !== $lessonUrl ) : ?>
+				<a href="<?php echo esc_url( $lessonUrl ); ?>" class="mint-s3b-nav__back">← <?php esc_html_e( 'Back to lesson', 'mint-lms' ); ?></a>
+			<?php endif; ?>
+			<?php if ( '' !== $courseUrl ) : ?>
+				<a href="<?php echo esc_url( $courseUrl ); ?>" class="mint-s3b-nav__back">← <?php esc_html_e( 'Back to course', 'mint-lms' ); ?></a>
+			<?php endif; ?>
 		</div>
 	<?php endif; ?>
 </div>
