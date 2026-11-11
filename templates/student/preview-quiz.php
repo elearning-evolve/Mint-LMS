@@ -112,93 +112,67 @@ $associated    = '' !== $lessonTitle;
 				</p>
 			</div>
 
-			<?php if ( ! $quiz instanceof QuizDto || array() === $questions ) : ?>
-				<div class="mint-s3-empty"><?php esc_html_e( 'No questions in this quiz yet.', 'mint-lms' ); ?></div>
-			<?php else : ?>
-				<div class="mint-s3-curriculum">
-					<?php if ( $associated ) : ?>
-					<div class="mint-s3-rail--lesson">
-						<details class="mint-s3-lesson mint-s3b-stack__item" open>
-							<summary class="mint-s3-row">
-								<span class="mint-s3b-stack__icon" aria-hidden="true">
-									<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-								</span>
-								<div class="mint-s3b-stack__quiz-copy">
-									<div class="mint-s3b-stack__quiz-title"><?php echo esc_html( $lessonTitle ); ?></div>
-									<div class="mint-s3b-stack__quiz-meta">
-										<span class="mint-s3b-badge mint-s3b-badge--sm"><?php esc_html_e( 'Lesson', 'mint-lms' ); ?></span>
-										<span><?php esc_html_e( '1 quiz', 'mint-lms' ); ?></span>
-									</div>
+			<div class="mint-s3-curriculum">
+				<div class="mint-s3-rail--quiz">
+					<details class="mint-s3-quiz mint-s3b-stack__item" <?php echo array() !== $questions ? 'open' : ''; ?>>
+						<summary class="mint-s3b-stack__quiz">
+							<span class="mint-s3b-stack__icon mint-s3b-stack__icon--quiz" aria-hidden="true">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+							</span>
+							<div class="mint-s3b-stack__quiz-copy">
+								<div class="mint-s3b-stack__quiz-title">
+									<button
+										type="button"
+										class="mint-s3-quiz-name-link"
+										@click.stop="started = false"
+									><?php echo esc_html( $displayQuiz ); ?></button>
 								</div>
-								<span class="mint-s3b-expand">
-									<span class="mint-s3b-expand__label mint-s3b-expand__label--open"><?php esc_html_e( 'Expand', 'mint-lms' ); ?></span>
-									<span class="mint-s3b-expand__label mint-s3b-expand__label--close"><?php esc_html_e( 'Collapse', 'mint-lms' ); ?></span>
-									<svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-										<path class="mint-s3b-expand__chevron--open" d="M5.5 8 10 12.5 14.5 8" />
-										<path class="mint-s3b-expand__chevron--close" d="M5.5 12 10 7.5 14.5 12" />
-									</svg>
-								</span>
-							</summary>
-							<div class="mint-s3-lesson__body">
-					<?php endif; ?>
-					<div class="mint-s3-rail--quiz">
-						<details class="mint-s3-quiz mint-s3b-stack__item" open>
-							<summary class="mint-s3b-stack__quiz">
-								<span class="mint-s3b-stack__icon mint-s3b-stack__icon--quiz" aria-hidden="true">
-									<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
-								</span>
-								<div class="mint-s3b-stack__quiz-copy">
-									<div class="mint-s3b-stack__quiz-title">
-										<button
-											type="button"
-											class="mint-s3-quiz-name-link"
-											@click.stop="started = false"
-										><?php echo esc_html( $displayQuiz ); ?></button>
-									</div>
-									<div class="mint-s3b-stack__quiz-meta">
-										<span class="mint-s3b-badge mint-s3b-badge--sm"><?php esc_html_e( 'Quiz', 'mint-lms' ); ?></span>
-										<span><?php echo esc_html( $quizMeta ); ?></span>
-									</div>
+								<div class="mint-s3b-stack__quiz-meta">
+									<span class="mint-s3b-badge mint-s3b-badge--sm"><?php esc_html_e( 'Quiz', 'mint-lms' ); ?></span>
+									<span><?php echo esc_html( $quizMeta ); ?></span>
 								</div>
-								<span class="mint-s3b-expand">
-									<span class="mint-s3b-expand__label mint-s3b-expand__label--open"><?php esc_html_e( 'Expand', 'mint-lms' ); ?></span>
-									<span class="mint-s3b-expand__label mint-s3b-expand__label--close"><?php esc_html_e( 'Collapse', 'mint-lms' ); ?></span>
-									<svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-										<path class="mint-s3b-expand__chevron--open" d="M5.5 8 10 12.5 14.5 8" />
-										<path class="mint-s3b-expand__chevron--close" d="M5.5 12 10 7.5 14.5 12" />
-									</svg>
-								</span>
-							</summary>
-							<div class="mint-s3-quiz__body">
-								<?php foreach ( $questions as $question ) : ?>
-									<?php $questionName = PostTypes::questionContentsTitle( (int) $question->id, (string) $question->prompt ); ?>
-									<div class="mint-s3-row mint-s3-row--nested">
-										<span class="mint-s3b-stack__icon mint-s3b-stack__icon--quiz" aria-hidden="true">
-											<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-										</span>
-										<div class="mint-s3b-stack__quiz-copy">
-											<div class="mint-s3b-stack__quiz-title"><?php echo esc_html( $questionName ); ?></div>
-											<div class="mint-s3b-stack__quiz-meta">
-												<span class="mint-s3b-badge mint-s3b-badge--sm"><?php esc_html_e( 'Question', 'mint-lms' ); ?></span>
-											</div>
+							</div>
+							<?php if ( array() !== $questions ) : ?>
+							<span class="mint-s3b-expand">
+								<span class="mint-s3b-expand__label mint-s3b-expand__label--open"><?php esc_html_e( 'Expand', 'mint-lms' ); ?></span>
+								<span class="mint-s3b-expand__label mint-s3b-expand__label--close"><?php esc_html_e( 'Collapse', 'mint-lms' ); ?></span>
+								<svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+									<path class="mint-s3b-expand__chevron--open" d="M5.5 8 10 12.5 14.5 8" />
+									<path class="mint-s3b-expand__chevron--close" d="M5.5 12 10 7.5 14.5 12" />
+								</svg>
+							</span>
+							<?php endif; ?>
+						</summary>
+						<?php if ( array() !== $questions ) : ?>
+						<div class="mint-s3-quiz__body">
+							<?php foreach ( $questions as $question ) : ?>
+								<?php $questionName = PostTypes::questionContentsTitle( (int) $question->id, (string) $question->prompt ); ?>
+								<div class="mint-s3-row mint-s3-row--nested">
+									<span class="mint-s3b-stack__icon mint-s3b-stack__icon--quiz" aria-hidden="true">
+										<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+									</span>
+									<div class="mint-s3b-stack__quiz-copy">
+										<div class="mint-s3b-stack__quiz-title"><?php echo esc_html( $questionName ); ?></div>
+										<div class="mint-s3b-stack__quiz-meta">
+											<span class="mint-s3b-badge mint-s3b-badge--sm"><?php esc_html_e( 'Question', 'mint-lms' ); ?></span>
 										</div>
 									</div>
-								<?php endforeach; ?>
-							</div>
-						</details>
-					</div>
-					<?php if ( $associated ) : ?>
-							</div>
-						</details>
-					</div>
-					<?php endif; ?>
+								</div>
+							<?php endforeach; ?>
+						</div>
+						<?php endif; ?>
+					</details>
 				</div>
+			</div>
 
+			<?php if ( $quiz instanceof QuizDto && array() !== $questions ) : ?>
 				<div class="mint-s3-quiz-start">
 					<button type="button" class="mint-s3b-nav__next" @click="started = true">
 						<?php esc_html_e( 'Start a Quiz', 'mint-lms' ); ?>
 					</button>
 				</div>
+			<?php else : ?>
+				<div class="mint-s3-empty"><?php esc_html_e( 'No questions in this quiz yet.', 'mint-lms' ); ?></div>
 			<?php endif; ?>
 		</div>
 
