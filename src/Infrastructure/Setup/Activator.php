@@ -17,7 +17,7 @@ final class Activator {
 
 	private function ensureDefaultOptions(): void {
 		if ( false === get_option( PageSettings::OPTION_DEFAULT_ENROLLMENT, false ) ) {
-			add_option( PageSettings::OPTION_DEFAULT_ENROLLMENT, 'open' );
+			add_option( PageSettings::OPTION_DEFAULT_ENROLLMENT, 'free' );
 		}
 
 		if ( false === get_option( PageSettings::OPTION_EMAIL_ENROLL, false ) ) {

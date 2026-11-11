@@ -14,7 +14,7 @@ $attachmentUrl  = $attachmentUrl ?? null;
 $videoEmbed     = $videoEmbed ?? '';
 $quizPreviewUrl = is_string( $quizPreviewUrl ?? null ) ? $quizPreviewUrl : '';
 $lessonSettings = is_array( $lessonSettings ?? null ) ? $lessonSettings : array();
-$videoTiming    = ( $lessonSettings['videoTiming'] ?? 'after' ) === 'before' ? 'before' : 'after';
+$videoTiming    = ( $lessonSettings['videoTiming'] ?? 'before' ) === 'after' ? 'after' : 'before';
 $showVideoBefore = '' !== $videoEmbed && 'before' === $videoTiming;
 $showVideoAfter  = '' !== $videoEmbed && 'after' === $videoTiming;
 $materialsHtml   = ! empty( $lessonSettings['materialsEnabled'] )

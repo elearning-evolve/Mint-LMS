@@ -58,6 +58,7 @@ use MintLMS\Infrastructure\Database\Migration\Migration_006_CptHybrid;
 use MintLMS\Infrastructure\Database\Migration\Migration_007_MultiQuizPerLesson;
 use MintLMS\Infrastructure\Database\Migration\Migration_008_CourseAccessSettings;
 use MintLMS\Infrastructure\Database\Migration\Migration_009_LdCourseSettingDefaults;
+use MintLMS\Infrastructure\Database\Migration\Migration_010_LdEnrollmentDefaultFree;
 use MintLMS\Infrastructure\Database\Migration\MigrationRunner;
 use MintLMS\Infrastructure\Database\Repository\WpdbAdminDashboardRepository;
 use MintLMS\Infrastructure\Database\Repository\WpdbEnrollmentRepository;
@@ -344,6 +345,7 @@ final class Bootstrap {
 				new Migration_007_MultiQuizPerLesson(),
 				new Migration_008_CourseAccessSettings(),
 				new Migration_009_LdCourseSettingDefaults(),
+				new Migration_010_LdEnrollmentDefaultFree(),
 			)
 		);
 

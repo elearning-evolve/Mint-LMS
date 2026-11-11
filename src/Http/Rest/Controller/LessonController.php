@@ -600,9 +600,9 @@ final class LessonController {
 			'materialsContent'  => '',
 			'videoProgression'  => false,
 			'videoUrl'          => '',
-			'videoTiming'       => 'after',
+			'videoTiming'       => 'before',
 			'videoAutoplay'     => false,
-			'videoControls'     => true,
+			'videoControls'     => false,
 			'videoPauseHidden'  => false,
 			'videoResume'       => false,
 			'assignmentUploads' => false,
@@ -648,9 +648,9 @@ final class LessonController {
 		if ( ! in_array( $schedule, array( 'immediately', 'enrollment', 'specific_date' ), true ) ) {
 			$schedule = 'immediately';
 		}
-		$timing = sanitize_key( (string) ( $settings['videoTiming'] ?? 'after' ) );
+		$timing = sanitize_key( (string) ( $settings['videoTiming'] ?? 'before' ) );
 		if ( ! in_array( $timing, array( 'before', 'after' ), true ) ) {
-			$timing = 'after';
+			$timing = 'before';
 		}
 		$grading = sanitize_key( (string) ( $settings['grading'] ?? 'auto' ) );
 		if ( ! in_array( $grading, array( 'auto', 'manual' ), true ) ) {

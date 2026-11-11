@@ -74,7 +74,7 @@ final class CourseBuilderPage {
 
 		try {
 			$enrollmentRaw = ( new PageSettings() )->getDefaultEnrollment();
-			$enrollment    = EnrollmentType::tryFrom( $enrollmentRaw ) ?? EnrollmentType::Open;
+			$enrollment    = EnrollmentType::tryFrom( $enrollmentRaw ) ?? EnrollmentType::Free;
 
 			$course = Plugin::courseService()->create(
 				new CreateCourseDto(
