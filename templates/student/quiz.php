@@ -27,16 +27,30 @@ if ( ! $quizRequired && ! $isReviewMode ) {
 }
 
 $questionCount = count( $quiz->questions );
+$quizBoot      = wp_json_encode(
+	array(
+		'quizId'      => (int) $quiz->id,
+		'passPercent' => (int) $quiz->passPercent,
+		'hasPassed'   => (bool) $hasPassedQuiz,
+		'previewMode' => (bool) $isReviewMode,
+		'questions'   => array_map(
+			static function ( $question ): array {
+				$row             = $question->toArray();
+				$row['prompt']   = wp_kses_post( (string) ( $row['prompt'] ?? '' ) );
+				$row['options']  = array_map( 'strval', is_array( $row['options'] ?? null ) ? $row['options'] : array() );
+				return $row;
+			},
+			$quiz->questions
+		),
+	)
+);
+if ( ! is_string( $quizBoot ) ) {
+	$quizBoot = '{}';
+}
 ?>
 <div
 	class="mint-s3-quiz-runner"
-	x-data="mintLessonQuiz({
-		quizId: <?php echo (int) $quiz->id; ?>,
-		passPercent: <?php echo (int) $quiz->passPercent; ?>,
-		hasPassed: <?php echo $hasPassedQuiz ? 'true' : 'false'; ?>,
-		previewMode: <?php echo $isReviewMode ? 'true' : 'false'; ?>,
-		questions: <?php echo wp_json_encode( array_map( static fn( $q ) => $q->toArray(), $quiz->questions ) ); ?>
-	})"
+	x-data="mintLessonQuiz(<?php echo esc_attr( $quizBoot ); ?>)"
 >
 	<?php if ( $quizHeading ) : ?>
 		<div class="mint-s3-quiz-runner__head">
