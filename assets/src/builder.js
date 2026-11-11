@@ -258,7 +258,12 @@ function courseBuilder(courseId, opts = {}) {
       if (wantQuiz) {
         if (quizId <= 0 && lessonId <= 0) return '#';
         params.set('mint_preview', 'quiz');
-        if (lessonId > 0) params.set('mint_lesson', String(lessonId));
+        const quizMeta = this.lessonQuiz || this.selected || {};
+        const realLessonParent =
+          lessonId > 0 &&
+          !this.quizUsesDisposableHost() &&
+          (this.quizHasRealLessonParent() || this.isLinkedCourseQuiz(quizMeta));
+        if (realLessonParent) params.set('mint_lesson', String(lessonId));
         if (quizId > 0) params.set('mint_quiz', String(quizId));
         if (questionId > 0) params.set('mint_question', String(questionId));
       } else if (lessonId > 0) {

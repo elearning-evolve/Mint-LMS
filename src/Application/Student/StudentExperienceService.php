@@ -351,10 +351,9 @@ final class StudentExperienceService {
 		$questions = array();
 		if ( null !== $quiz ) {
 			foreach ( $quiz->questions as $question ) {
-				$text = trim( wp_strip_all_tags( $question->prompt ) );
 				$questions[] = array(
 					'id'   => $question->id,
-					'text' => '' !== $text ? $text : __( 'Untitled question', 'mint-lms' ),
+					'text' => \MintLMS\Infrastructure\PostType\PostTypes::questionContentsTitle( $question->id, $question->prompt ),
 				);
 			}
 		}
@@ -628,13 +627,9 @@ final class StudentExperienceService {
 		$questions     = array();
 
 		foreach ( $quizDto->questions as $question ) {
-			$text = trim( strip_tags( $question->prompt ) );
-			if ( '' === $text ) {
-				$text = 'Untitled question';
-			}
 			$questions[] = array(
 				'id'   => $question->id,
-				'text' => $text,
+				'text' => \MintLMS\Infrastructure\PostType\PostTypes::questionContentsTitle( $question->id, $question->prompt ),
 			);
 		}
 

@@ -98,4 +98,29 @@ final class PostTypes {
 
 		return true;
 	}
+
+	/**
+	 * Builder question name for contents lists (created title, not the prompt body).
+	 */
+	public static function questionContentsTitle( int $questionId, string $promptFallback = '' ): string {
+		if ( $questionId > 0 ) {
+			$raw     = get_post_meta( $questionId, self::META_QUESTION_SETTINGS, true );
+			$display = is_array( $raw ) ? sanitize_text_field( (string) ( $raw['displayTitle'] ?? '' ) ) : '';
+			if ( '' !== $display ) {
+				return $display;
+			}
+
+			$post = get_post( $questionId );
+			if ( $post instanceof \WP_Post ) {
+				$title = trim( (string) $post->post_title );
+				if ( '' !== $title ) {
+					return $title;
+				}
+			}
+		}
+
+		$prompt = trim( wp_strip_all_tags( $promptFallback ) );
+
+		return '' !== $prompt ? $prompt : __( 'Untitled question', 'mint-lms' );
+	}
 }
