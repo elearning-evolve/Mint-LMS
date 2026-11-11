@@ -562,7 +562,7 @@ $inputClass = 'mint-cs-input';
 									<span class="mint-cs-choice__radio" aria-hidden="true"><span></span></span>
 									<span class="mint-cs-choice__copy">
 										<span class="mint-cs-choice__label"><?php esc_html_e( 'Step by step', 'mint-lms' ); ?></span>
-										<span class="mint-cs-choice__desc"><?php esc_html_e( 'Students must finish each lesson before the next one opens, in the order you set. Doesn’t work with Open courses.', 'mint-lms' ); ?></span>
+										<span class="mint-cs-choice__desc"><?php esc_html_e( 'Students must finish each lesson before the next one opens, in the order you set. Open courses still follow this order after a student joins.', 'mint-lms' ); ?></span>
 									</span>
 								</button>
 								<button type="button" class="mint-cs-choice" :class="form.progression === 'freeform' ? 'is-selected' : ''" @click="form.progression = 'freeform'">
@@ -572,6 +572,28 @@ $inputClass = 'mint-cs-input';
 										<span class="mint-cs-choice__desc"><?php esc_html_e( 'Students can open any lesson they like, in any order. Nothing is locked.', 'mint-lms' ); ?></span>
 									</span>
 								</button>
+							</div>
+						</div>
+					</div>
+
+					<div class="mint-cs-divider"></div>
+
+					<div class="mint-cs-row">
+						<div class="mint-cs-row__label"><?php esc_html_e( 'Mark lessons complete', 'mint-lms' ); ?></div>
+						<div class="mint-cs-row__right">
+							<span class="mint-cs-tip" title="<?php echo esc_attr__( 'Let students click a button to mark a lesson finished, like LearnDash Mark Complete', 'mint-lms' ); ?>">?</span>
+							<div class="mint-cs-row__main">
+								<div class="mint-cs-toggle-line">
+									<button
+										type="button"
+										class="mint-cs-toggle"
+										:class="optionOn('studentComplete') ? 'is-on' : ''"
+										role="switch"
+										:aria-checked="optionOn('studentComplete') ? 'true' : 'false'"
+										@click="toggleStudentComplete()"
+									><span class="mint-cs-toggle__knob"></span></button>
+									<span class="mint-cs-toggle-hint"><?php esc_html_e( 'Students can mark each lesson complete from the lesson page', 'mint-lms' ); ?></span>
+								</div>
 							</div>
 						</div>
 					</div>

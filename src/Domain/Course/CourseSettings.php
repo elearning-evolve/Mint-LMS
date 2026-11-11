@@ -204,6 +204,10 @@ final readonly class CourseSettings {
 		return self::PROGRESSION_FREEFORM !== $this->progression;
 	}
 
+	public function lessonListVisibleToGuests(): bool {
+		return 'enrolled' !== $this->lessonListVisibility;
+	}
+
 	public function with(
 		?bool $emailOnPublish = null,
 		?bool $studentComplete = null,

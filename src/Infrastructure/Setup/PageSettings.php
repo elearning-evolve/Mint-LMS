@@ -37,9 +37,9 @@ final class PageSettings {
 	}
 
 	public function getDefaultEnrollment(): string {
-		$value = (string) $this->option( self::OPTION_DEFAULT_ENROLLMENT, 'free' );
+		$value = (string) $this->option( self::OPTION_DEFAULT_ENROLLMENT, 'open' );
 
-		return in_array( $value, array( 'open', 'free', 'manual', 'paid' ), true ) ? $value : 'free';
+		return in_array( $value, array( 'open', 'free', 'manual', 'paid' ), true ) ? $value : 'open';
 	}
 
 	public function isEmailEnrollEnabled(): bool {

@@ -156,7 +156,11 @@ $showCta = $overview->isEnrolled || $overview->canEnroll || ( 'paid' === $overvi
 			<p class="mint-m-0 mint-mt-1 mint-text-sm mint-text-[#33334A]"><?php esc_html_e( "Here's how your course is put together — open a lesson group to see its lessons, open a lesson to see its quiz.", 'mint-lms' ); ?></p>
 		</div>
 
-		<?php if ( array() === $outline ) : ?>
+		<?php if ( ! $overview->curriculumVisible ) : ?>
+			<div class="mint-mt-[18px] mint-rounded-xl mint-border mint-border-[#E4E1F0] mint-bg-[#FAFCFB] mint-px-5 mint-py-6 mint-text-center mint-text-sm mint-text-[#5C5C77]">
+				<?php esc_html_e( 'Enroll to see the lessons in this course.', 'mint-lms' ); ?>
+			</div>
+		<?php elseif ( array() === $outline ) : ?>
 			<div class="mint-mt-[18px] mint-rounded-xl mint-border mint-border-[#E4E1F0] mint-bg-[#FAFCFB] mint-px-5 mint-py-6 mint-text-center mint-text-sm mint-text-[#5C5C77]">
 				<?php esc_html_e( 'No lesson groups yet. Add content in the course builder.', 'mint-lms' ); ?>
 			</div>

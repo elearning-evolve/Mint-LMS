@@ -9835,7 +9835,7 @@ function courseEdit(courseId) {
       title: '',
       description: '',
       featuredImageId: null,
-      enrollmentType: 'free',
+      enrollmentType: 'open',
       status: 'draft',
       progression: 'linear',
       expireAccess: false,
@@ -10030,6 +10030,12 @@ function courseEdit(courseId) {
     setCertificate(on) {
       this.options = this.options.map((option) =>
         option.key === 'certificate' ? { ...option, on: !!on } : option
+      );
+    },
+
+    toggleStudentComplete() {
+      this.options = this.options.map((option) =>
+        option.key === 'studentComplete' ? { ...option, on: !option.on } : option
       );
     },
 
@@ -10292,7 +10298,7 @@ function courseEdit(courseId) {
           title: course.title,
           description: course.description || '',
           featuredImageId: course.featuredImageId || null,
-          enrollmentType: course.enrollmentType || 'free',
+          enrollmentType: course.enrollmentType || 'open',
           status: course.status === 'trashed' ? 'draft' : course.status,
           progression: 'linear',
           expireAccess: false,

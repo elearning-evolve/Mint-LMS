@@ -74,6 +74,16 @@ final class CourseServiceTest extends TestCase
         $this->assertSame(1, $result->id);
         $this->assertSame('intro-to-php', $result->slug);
         $this->assertSame('draft', $result->status);
+        $this->assertSame('open', $result->enrollmentType);
+        $this->assertTrue($result->emailOnPublish);
+        $this->assertTrue($result->studentComplete);
+        $this->assertSame('linear', $result->progression);
+        $this->assertSame('everyone', $result->lessonListVisibility);
+        $this->assertFalse($result->certificate);
+        $this->assertFalse($result->expireAccess);
+        $this->assertFalse($result->prerequisitesEnabled);
+        $this->assertFalse($result->paginationEnabled);
+        $this->assertFalse($result->materialsEnabled);
     }
 
     public function test_create_throws_forbidden_when_unauthorized(): void

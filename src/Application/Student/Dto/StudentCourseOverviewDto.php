@@ -48,6 +48,7 @@ final readonly class StudentCourseOverviewDto {
 		public ?string $lastActivityLabel = null,
 		public bool $isEditorPreview = false,
 		public array $contentOutline = array(),
+		public bool $curriculumVisible = true,
 	) {
 	}
 
@@ -75,6 +76,7 @@ final readonly class StudentCourseOverviewDto {
 			'lastActivityLabel'  => $this->lastActivityLabel,
 			'isEditorPreview'    => $this->isEditorPreview,
 			'contentOutline'     => $this->contentOutline,
+			'curriculumVisible'  => $this->curriculumVisible,
 		);
 	}
 }
