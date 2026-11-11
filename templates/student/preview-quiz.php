@@ -79,7 +79,7 @@ if ( ! is_string( $previewBoot ) ) {
 				<button
 					type="button"
 					class="mint-s3b-progress mint-s3b-progress--quiz-home"
-					@click="started = false"
+					@click="started = false; onQuizProgress({ submitted: false })"
 				>
 					<span class="mint-s3b-progress__crumb" x-text="headerTitle"><?php echo esc_html( $displayQuiz ); ?></span>
 					<span class="mint-s3b-progress__badge" x-text="headerBadge"><?php echo esc_html( $quizMeta ); ?></span>
@@ -119,7 +119,7 @@ if ( ! is_string( $previewBoot ) ) {
 									<button
 										type="button"
 										class="mint-s3-quiz-name-link"
-										@click.stop="started = false"
+										@click.stop="started = false; onQuizProgress({ submitted: false })"
 									><?php echo esc_html( $displayQuiz ); ?></button>
 								</div>
 								<div class="mint-s3b-stack__quiz-meta">

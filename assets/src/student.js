@@ -159,6 +159,7 @@ document.addEventListener('alpine:init', () => {
       });
       this.startTimer();
       this.startAutosave();
+      this.emitProgress();
     },
 
     prepareQuestions(list) {
@@ -279,12 +280,14 @@ document.addEventListener('alpine:init', () => {
       if (this.currentIndex < this.questions.length - 1) {
         this.currentIndex += 1;
         this.persistProgress();
+        this.emitProgress();
       }
     },
 
     goPrev() {
       if (this.currentIndex > 0) {
         this.currentIndex -= 1;
+        this.emitProgress();
       }
     },
 
@@ -334,15 +337,34 @@ document.addEventListener('alpine:init', () => {
       return (tmp.textContent || tmp.innerText || '').replace(/\s+/g, ' ').trim();
     },
 
+    headerQuestionId() {
+      if (this.submitted && (this.review || []).length === 1) {
+        return this.review[0].id;
+      }
+      if (this.submitted) {
+        return null;
+      }
+      if (this.settings.questionDisplay === 'all') {
+        return null;
+      }
+      const current = (this.questions || [])[this.currentIndex];
+      return current ? current.id : null;
+    },
+
     emitProgress() {
       const i18n = mintLmsStudent.i18n || {};
       let title = this.quizTitle;
       let kicker = i18n.quizKicker || 'Quiz';
       let badge = `${(this.questions || []).length}`;
-      if (this.submitted && this.review.length === 1) {
-        title = this.questionTitle(this.review[0].id) || title;
+      const questionId = this.headerQuestionId();
+      if (questionId != null) {
+        title = this.questionTitle(questionId) || title;
         kicker = i18n.questionKicker || 'Question';
-        badge = this.reviewBadge(this.review[0]);
+        if (this.submitted && this.review[0]) {
+          badge = this.reviewBadge(this.review[0]);
+        } else {
+          badge = `${this.currentIndex + 1}/${Math.max((this.questions || []).length, 1)}`;
+        }
       } else if (this.submitted) {
         kicker = i18n.resultsKicker || 'Results';
         badge = i18n.completed || 'Completed';
@@ -423,7 +445,8 @@ document.addEventListener('alpine:init', () => {
       if (named) {
         return named;
       }
-      return this.stripHtml(this.questionPrompt(id));
+      const i18n = mintLmsStudent.i18n || {};
+      return i18n.untitledQuestion || 'Untitled question';
     },
 
     reviewBadge(item) {

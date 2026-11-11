@@ -84,6 +84,7 @@ final class StudentAssetLoader {
 					'quizKicker'     => __( 'Quiz', 'mint-lms' ),
 					'questionKicker' => __( 'Question', 'mint-lms' ),
 					'resultsKicker'  => __( 'Results', 'mint-lms' ),
+					'untitledQuestion' => __( 'Untitled question', 'mint-lms' ),
 				),
 			)
 		);
