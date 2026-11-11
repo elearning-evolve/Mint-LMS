@@ -103,6 +103,7 @@ document.addEventListener('alpine:init', () => {
     submitting: false,
     scorePercent: 0,
     error: '',
+    currentIndex: 0,
 
     init() {
       (this.questions || []).forEach((question) => {
@@ -110,6 +111,22 @@ document.addEventListener('alpine:init', () => {
           this.answers[question.id] = [];
         }
       });
+    },
+
+    isChoiceSelected(questionId, option) {
+      return String(this.answers[questionId] ?? '') === String(option);
+    },
+
+    goNext() {
+      if (this.currentIndex < this.questions.length - 1) {
+        this.currentIndex += 1;
+      }
+    },
+
+    goPrev() {
+      if (this.currentIndex > 0) {
+        this.currentIndex -= 1;
+      }
     },
 
     isMultiSelected(questionId, option) {
@@ -224,6 +241,7 @@ document.addEventListener('alpine:init', () => {
       this.submitted = false;
       this.answers = {};
       this.error = '';
+      this.currentIndex = 0;
       this.init();
     },
   }));

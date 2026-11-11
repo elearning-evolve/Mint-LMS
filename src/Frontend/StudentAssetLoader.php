@@ -85,6 +85,10 @@ final class StudentAssetLoader {
 			return true;
 		}
 
+		if ( isset( $_GET['mint_lesson'] ) || isset( $_GET['mint_quiz'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return true;
+		}
+
 		$post = get_post();
 
 		if ( null === $post ) {

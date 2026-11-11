@@ -32,7 +32,7 @@ $previewHint = match ( $previewKind ) {
 	<div class="mint-mx-auto mint-flex mint-max-w-[700px] mint-flex-col mint-gap-3 mint-px-4 mint-py-4 sm:mint-flex-row sm:mint-items-center sm:mint-justify-between sm:mint-px-6">
 		<div class="mint-min-w-0 mint-flex-1">
 			<div class="mint-mb-1.5 mint-flex mint-flex-wrap mint-items-center mint-gap-2">
-				<span class="mint-inline-flex mint-items-center mint-rounded-full mint-bg-[#E8FFF3] mint-px-2.5 mint-py-1 mint-text-[10px] mint-font-bold mint-uppercase mint-tracking-[0.08em] mint-text-cta-ink">
+				<span class="mint-inline-flex mint-items-center mint-rounded-full mint-bg-[#E8FFF3] mint-px-2.5 mint-py-1 mint-text-[10px] mint-font-bold mint-uppercase mint-tracking-[0.08em] mint-text-ink">
 					<?php echo esc_html( $previewLabel ); ?>
 				</span>
 				<span class="mint-text-[12px] mint-text-[#5C5C77]"><?php echo esc_html( $previewHint ); ?></span>
@@ -40,7 +40,7 @@ $previewHint = match ( $previewKind ) {
 
 			<nav class="mint-flex mint-min-w-0 mint-flex-wrap mint-items-center mint-gap-1.5 mint-text-[14px]" aria-label="<?php esc_attr_e( 'Preview location', 'mint-lms' ); ?>">
 				<?php if ( '' !== $courseTitle ) : ?>
-					<span class="mint-truncate mint-font-semibold mint-text-cta-ink"><?php echo esc_html( $courseTitle ); ?></span>
+					<span class="mint-truncate mint-font-semibold mint-text-ink"><?php echo esc_html( $courseTitle ); ?></span>
 					<svg class="mint-h-3 mint-w-3 mint-shrink-0 mint-text-[#9A97B0]" width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 4.5 5.5 5.5L8 15.5" /></svg>
 				<?php endif; ?>
 				<?php if ( '' !== $sectionTitle ) : ?>

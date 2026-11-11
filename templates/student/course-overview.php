@@ -79,13 +79,13 @@ $showCta = $overview->isEnrolled || $overview->canEnroll || ( 'paid' === $overvi
 			<div class="mint-mt-[18px] mint-text-sm mint-text-[#5C5C77]">
 				<?php if ( '' !== $overview->authorName ) : ?>
 					<?php esc_html_e( 'Written by', 'mint-lms' ); ?>
-					<span class="mint-font-medium mint-text-cta-ink mint-underline"><?php echo esc_html( $overview->authorName ); ?></span>
+					<span class="mint-font-medium mint-text-ink mint-underline"><?php echo esc_html( $overview->authorName ); ?></span>
 				<?php endif; ?>
 				<?php if ( '' !== $categoryName ) : ?>
 					<?php if ( '' !== $overview->authorName ) : ?>
 						<?php echo esc_html( ' ' . __( 'in', 'mint-lms' ) . ' ' ); ?>
 					<?php endif; ?>
-					<span class="mint-font-medium mint-text-cta-ink mint-underline"><?php echo esc_html( $categoryName ); ?></span>
+					<span class="mint-font-medium mint-text-ink mint-underline"><?php echo esc_html( $categoryName ); ?></span>
 				<?php endif; ?>
 			</div>
 		<?php endif; ?>
@@ -100,7 +100,7 @@ $showCta = $overview->isEnrolled || $overview->canEnroll || ( 'paid' === $overvi
 			<div class="mint-h-2 mint-min-w-[120px] mint-flex-1 mint-overflow-hidden mint-rounded-full mint-bg-[#DFF7EB]">
 				<div class="mint-h-full mint-rounded-full mint-bg-cta-ink" style="width: <?php echo esc_attr( (string) absint( $pct ) ); ?>%"></div>
 			</div>
-			<div class="mint-whitespace-nowrap mint-text-[13px] mint-font-bold mint-uppercase mint-tracking-[0.04em] mint-text-cta-ink">
+			<div class="mint-whitespace-nowrap mint-text-[13px] mint-font-bold mint-uppercase mint-tracking-[0.04em] mint-text-ink">
 				<?php
 				printf(
 					/* translators: %d: progress percentage */
@@ -125,7 +125,7 @@ $showCta = $overview->isEnrolled || $overview->canEnroll || ( 'paid' === $overvi
 		<?php if ( $showCta ) : ?>
 			<div class="mint-mt-4 mint-flex mint-flex-wrap mint-gap-3">
 				<?php if ( $overview->isEnrolled ) : ?>
-					<a href="<?php echo esc_url( $continueUrl ); ?>" class="mint-inline-flex mint-h-[42px] mint-items-center mint-justify-center mint-rounded-lg mint-border-0 mint-bg-cta mint-px-[18px] mint-text-sm mint-font-bold mint-text-cta-ink mint-no-underline hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(11,79,63,0.35)]">
+					<a href="<?php echo esc_url( $continueUrl ); ?>" class="mint-inline-flex mint-h-[42px] mint-items-center mint-justify-center mint-rounded-lg mint-border-0 mint-bg-cta mint-px-[18px] mint-text-sm mint-font-bold mint-text-ink mint-no-underline hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(11,79,63,0.35)]">
 					<?php
 						echo null !== $overview->progressPct && $overview->progressPct > 0
 							? esc_html__( 'Continue lesson', 'mint-lms' )
@@ -133,9 +133,9 @@ $showCta = $overview->isEnrolled || $overview->canEnroll || ( 'paid' === $overvi
 					?>
 					</a>
 				<?php elseif ( $overview->canEnroll ) : ?>
-					<a href="<?php echo esc_url( $enrollUrl ); ?>" class="mint-inline-flex mint-h-[42px] mint-items-center mint-justify-center mint-rounded-lg mint-border-0 mint-bg-cta mint-px-[18px] mint-text-sm mint-font-bold mint-text-cta-ink mint-no-underline hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(11,79,63,0.35)]"><?php esc_html_e( 'Enroll for free', 'mint-lms' ); ?></a>
+					<a href="<?php echo esc_url( $enrollUrl ); ?>" class="mint-inline-flex mint-h-[42px] mint-items-center mint-justify-center mint-rounded-lg mint-border-0 mint-bg-cta mint-px-[18px] mint-text-sm mint-font-bold mint-text-ink mint-no-underline hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(11,79,63,0.35)]"><?php esc_html_e( 'Enroll for free', 'mint-lms' ); ?></a>
 				<?php elseif ( 'paid' === $overview->enrollmentType && '' !== $purchaseUrl ) : ?>
-					<a href="<?php echo esc_url( $purchaseUrl ); ?>" class="mint-inline-flex mint-h-[42px] mint-items-center mint-justify-center mint-rounded-lg mint-border-0 mint-bg-cta mint-px-[18px] mint-text-sm mint-font-bold mint-text-cta-ink mint-no-underline hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(11,79,63,0.35)]">
+					<a href="<?php echo esc_url( $purchaseUrl ); ?>" class="mint-inline-flex mint-h-[42px] mint-items-center mint-justify-center mint-rounded-lg mint-border-0 mint-bg-cta mint-px-[18px] mint-text-sm mint-font-bold mint-text-ink mint-no-underline hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(11,79,63,0.35)]">
 					<?php
 						echo '' !== $productPrice
 							? esc_html( sprintf( __( 'Buy course — %s', 'mint-lms' ), function_exists( 'wc_price' ) ? wp_strip_all_tags( wc_price( (float) $productPrice ) ) : $productPrice ) )
@@ -143,7 +143,7 @@ $showCta = $overview->isEnrolled || $overview->canEnroll || ( 'paid' === $overvi
 					?>
 					</a>
 				<?php elseif ( ! $overview->isLoggedIn ) : ?>
-					<a href="<?php echo esc_url( wp_login_url( get_permalink() ? get_permalink() : home_url( '/' ) ) ); ?>" class="mint-inline-flex mint-h-[42px] mint-items-center mint-justify-center mint-rounded-lg mint-border-0 mint-bg-cta mint-px-[18px] mint-text-sm mint-font-bold mint-text-cta-ink mint-no-underline hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(11,79,63,0.35)]"><?php esc_html_e( 'Log in to enroll', 'mint-lms' ); ?></a>
+					<a href="<?php echo esc_url( wp_login_url( get_permalink() ? get_permalink() : home_url( '/' ) ) ); ?>" class="mint-inline-flex mint-h-[42px] mint-items-center mint-justify-center mint-rounded-lg mint-border-0 mint-bg-cta mint-px-[18px] mint-text-sm mint-font-bold mint-text-ink mint-no-underline hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(11,79,63,0.35)]"><?php esc_html_e( 'Log in to enroll', 'mint-lms' ); ?></a>
 				<?php endif; ?>
 			</div>
 		<?php endif; ?>
@@ -152,7 +152,7 @@ $showCta = $overview->isEnrolled || $overview->canEnroll || ( 'paid' === $overvi
 	<?php /* S3 course content — max-width 960px, padding 36/48/48 */ ?>
 	<section class="mint-s3-content">
 		<div>
-			<h2 class="mint-m-0 mint-text-xl mint-font-semibold mint-tracking-[-0.02em] mint-text-cta-ink"><?php esc_html_e( 'Course content', 'mint-lms' ); ?></h2>
+			<h2 class="mint-m-0 mint-text-xl mint-font-semibold mint-tracking-[-0.02em] mint-text-ink"><?php esc_html_e( 'Course content', 'mint-lms' ); ?></h2>
 			<p class="mint-m-0 mint-mt-1 mint-text-sm mint-text-[#33334A]"><?php esc_html_e( "Here's how your course is put together — open a lesson group to see its lessons, open a lesson to see its quiz.", 'mint-lms' ); ?></p>
 		</div>
 
@@ -161,7 +161,7 @@ $showCta = $overview->isEnrolled || $overview->canEnroll || ( 'paid' === $overvi
 				<?php esc_html_e( 'No lesson groups yet. Add content in the course builder.', 'mint-lms' ); ?>
 			</div>
 		<?php else : ?>
-			<div class="mint-mt-[18px] mint-grid mint-gap-3">
+			<div class="mint-s3-curriculum">
 				<?php
 				foreach ( $outline as $section ) :
 					$sectionId    = (int) ( $section['id'] ?? 0 );
@@ -173,15 +173,20 @@ $showCta = $overview->isEnrolled || $overview->canEnroll || ( 'paid' === $overvi
 					?>
 					<div class="mint-s3-section">
 						<?php if ( ! $isUngrouped ) : ?>
-						<div class="mint-flex mint-items-center mint-gap-3.5 mint-bg-white mint-px-[18px] mint-py-4">
-							<div class="mint-shrink-0 mint-rounded-full mint-bg-[#E8FFF3] mint-px-2.5 mint-py-1 mint-text-[10px] mint-font-bold mint-uppercase mint-tracking-[0.08em] mint-text-cta-ink"><?php esc_html_e( 'Lesson Group', 'mint-lms' ); ?></div>
-							<div class="mint-min-w-0 mint-flex-1">
-								<div class="mint-text-base mint-font-bold mint-text-[#17222B]"><?php echo esc_html( $sectionTitle ); ?></div>
-								<div class="mint-mt-0.5 mint-text-[13px] mint-text-[#5C5C77]"><?php echo esc_html( $sectionMeta ); ?></div>
+						<div class="mint-s3-row">
+							<span class="mint-s3b-stack__icon" aria-hidden="true">
+								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+							</span>
+							<div class="mint-s3b-stack__quiz-copy">
+								<div class="mint-s3b-stack__quiz-title"><?php echo esc_html( $sectionTitle ); ?></div>
+								<div class="mint-s3b-stack__quiz-meta">
+									<span class="mint-s3b-badge mint-s3b-badge--sm"><?php esc_html_e( 'Lesson Group', 'mint-lms' ); ?></span>
+									<span><?php echo esc_html( $sectionMeta ); ?></span>
+								</div>
 							</div>
 							<button
 								type="button"
-								class="mint-inline-flex mint-h-[34px] mint-shrink-0 mint-items-center mint-gap-1.5 mint-rounded-lg mint-border-0 mint-bg-cta mint-px-3.5 mint-text-[13px] mint-font-semibold mint-text-cta-ink hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(11,79,63,0.35)]"
+								class="mint-s3-expand"
 								@click.stop="toggle('<?php echo esc_js( $sectionKey ); ?>')"
 								:aria-expanded="isOpen('<?php echo esc_js( $sectionKey ); ?>') ? 'true' : 'false'"
 							>
@@ -209,20 +214,27 @@ $showCta = $overview->isEnrolled || $overview->canEnroll || ( 'paid' === $overvi
 								?>
 								<div class="mint-s3-rail--lesson">
 									<div class="mint-s3-lesson">
-										<div class="mint-flex mint-items-center mint-gap-3 mint-px-4 mint-py-[13px]">
-											<div class="mint-shrink-0 mint-rounded-full mint-bg-[#E8FFF3] mint-px-2.5 mint-py-1 mint-text-[10px] mint-font-bold mint-uppercase mint-tracking-[0.08em] mint-text-cta-ink"><?php esc_html_e( 'Lesson', 'mint-lms' ); ?></div>
-											<div class="mint-min-w-0 mint-flex-1">
-												<?php if ( $accessible ) : ?>
-													<a href="<?php echo esc_url( $lessonUrl ); ?>" class="mint-text-[15px] mint-font-semibold mint-text-[#17222B] mint-no-underline hover:mint-text-cta-ink"><?php echo esc_html( $lessonTitle ); ?></a>
-												<?php else : ?>
-													<span class="mint-text-[15px] mint-font-semibold mint-text-[#17222B]"><?php echo esc_html( $lessonTitle ); ?></span>
-												<?php endif; ?>
-												<div class="mint-mt-0.5 mint-text-[13px] mint-text-[#5C5C77]"><?php echo esc_html( $lessonMeta ); ?></div>
+										<div class="mint-s3-row">
+											<span class="mint-s3b-stack__icon" aria-hidden="true">
+												<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+											</span>
+											<div class="mint-s3b-stack__quiz-copy">
+												<div class="mint-s3b-stack__quiz-title">
+													<?php if ( $accessible ) : ?>
+														<a href="<?php echo esc_url( $lessonUrl ); ?>" class="mint-no-underline mint-text-inherit"><?php echo esc_html( $lessonTitle ); ?></a>
+													<?php else : ?>
+														<?php echo esc_html( $lessonTitle ); ?>
+													<?php endif; ?>
+												</div>
+												<div class="mint-s3b-stack__quiz-meta">
+													<span class="mint-s3b-badge mint-s3b-badge--sm"><?php esc_html_e( 'Lesson', 'mint-lms' ); ?></span>
+													<span><?php echo esc_html( $lessonMeta ); ?></span>
+												</div>
 											</div>
 											<?php if ( array() !== $quizzes ) : ?>
 												<button
 													type="button"
-													class="mint-inline-flex mint-h-8 mint-shrink-0 mint-items-center mint-gap-1 mint-rounded-lg mint-border-0 mint-bg-cta mint-px-3 mint-text-xs mint-font-semibold mint-text-cta-ink hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(11,79,63,0.35)]"
+													class="mint-s3-expand"
 													@click.stop="toggle('<?php echo esc_js( $lessonKey ); ?>')"
 													:aria-expanded="isOpen('<?php echo esc_js( $lessonKey ); ?>') ? 'true' : 'false'"
 												>
@@ -246,16 +258,21 @@ $showCta = $overview->isEnrolled || $overview->canEnroll || ( 'paid' === $overvi
 													?>
 													<div class="mint-s3-rail--quiz">
 														<div class="mint-s3-quiz">
-															<div class="mint-flex mint-items-center mint-gap-2.5 mint-px-3.5 mint-py-[11px]">
-																<div class="mint-shrink-0 mint-rounded-full mint-bg-[#E8FFF3] mint-px-2 mint-py-0.5 mint-text-[10px] mint-font-bold mint-uppercase mint-tracking-[0.08em] mint-text-cta-ink"><?php esc_html_e( 'Quiz', 'mint-lms' ); ?></div>
-																<div class="mint-min-w-0 mint-flex-1">
-																	<div class="mint-text-sm mint-font-semibold mint-text-[#17222B]"><?php echo esc_html( $quizTitle ); ?></div>
-																	<div class="mint-mt-0.5 mint-text-xs mint-text-[#5C5C77]"><?php echo esc_html( $quizMeta ); ?></div>
+															<div class="mint-s3-row">
+																<span class="mint-s3b-stack__icon mint-s3b-stack__icon--quiz" aria-hidden="true">
+																	<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+																</span>
+																<div class="mint-s3b-stack__quiz-copy">
+																	<div class="mint-s3b-stack__quiz-title"><?php echo esc_html( $quizTitle ); ?></div>
+																	<div class="mint-s3b-stack__quiz-meta">
+																		<span class="mint-s3b-badge mint-s3b-badge--sm"><?php esc_html_e( 'Quiz', 'mint-lms' ); ?></span>
+																		<span><?php echo esc_html( $quizMeta ); ?></span>
+																	</div>
 																</div>
 																<?php if ( array() !== $questions ) : ?>
 																	<button
 																		type="button"
-																		class="mint-inline-flex mint-h-[30px] mint-shrink-0 mint-items-center mint-gap-1 mint-rounded-md mint-border-0 mint-bg-cta mint-px-2.5 mint-text-xs mint-font-semibold mint-text-cta-ink hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(11,79,63,0.35)]"
+																		class="mint-s3-expand"
 																		@click.stop="toggle('<?php echo esc_js( $quizKey ); ?>')"
 																		:aria-expanded="isOpen('<?php echo esc_js( $quizKey ); ?>') ? 'true' : 'false'"
 																	>
@@ -269,9 +286,16 @@ $showCta = $overview->isEnrolled || $overview->canEnroll || ( 'paid' === $overvi
 															<?php if ( array() !== $questions ) : ?>
 																<div class="mint-s3-quiz__body" x-show="isOpen('<?php echo esc_js( $quizKey ); ?>')" x-cloak>
 																	<?php foreach ( $questions as $question ) : ?>
-																		<div class="mint-s3-question">
-																			<div class="mint-shrink-0 mint-rounded-full mint-bg-white mint-px-1.5 mint-py-0.5 mint-text-[9px] mint-font-bold mint-uppercase mint-tracking-[0.06em] mint-text-cta-ink">Q</div>
-																			<div class="mint-text-[13px] mint-text-[#17222B]"><?php echo esc_html( (string) ( $question['text'] ?? '' ) ); ?></div>
+																		<div class="mint-s3-row mint-s3-row--nested">
+																			<span class="mint-s3b-stack__icon mint-s3b-stack__icon--quiz" aria-hidden="true">
+																				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+																			</span>
+																			<div class="mint-s3b-stack__quiz-copy">
+																				<div class="mint-s3b-stack__quiz-title"><?php echo esc_html( (string) ( $question['text'] ?? '' ) ); ?></div>
+																				<div class="mint-s3b-stack__quiz-meta">
+																					<span class="mint-s3b-badge mint-s3b-badge--sm"><?php esc_html_e( 'Question', 'mint-lms' ); ?></span>
+																				</div>
+																			</div>
 																		</div>
 																	<?php endforeach; ?>
 																</div>

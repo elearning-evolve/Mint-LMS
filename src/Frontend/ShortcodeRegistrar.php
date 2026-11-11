@@ -35,6 +35,7 @@ final class ShortcodeRegistrar {
 		add_shortcode( 'mint_lms_certificate', array( $this, 'renderCertificate' ) );
 		add_filter( 'request', array( $this, 'mapLmsPageRequest' ) );
 		add_action( 'template_redirect', array( $this, 'interceptBuilderPreview' ), 5 );
+		add_action( 'template_redirect', array( $this, 'interceptStudentLessonCanvas' ), 5 );
 		add_action( 'template_redirect', array( $this, 'interceptCourseOverviewChrome' ), 6 );
 	}
 
@@ -160,6 +161,50 @@ final class ShortcodeRegistrar {
 		}
 
 		$this->sendStudentCanvas( $html, $mode );
+	}
+
+	/**
+	 * Start course / lesson player links (?mint_course=&mint_lesson=) must use the
+	 * same Mint LMS lesson canvas as builder preview — not the theme Course Player page.
+	 */
+	public function interceptStudentLessonCanvas(): void {
+		$previewMode = isset( $_GET['mint_preview'] ) ? sanitize_key( (string) wp_unslash( $_GET['mint_preview'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		if ( in_array( $previewMode, array( 'lesson', 'quiz', 'question' ), true ) ) {
+			return;
+		}
+
+		$courseId = $this->queryInt( PageSettings::COURSE_QUERY_ARG );
+		if ( $courseId <= 0 ) {
+			$courseId = $this->queryInt( 'mint_course' );
+		}
+
+		$quizId = $this->queryInt( 'mint_quiz' );
+		if ( $quizId > 0 ) {
+			$html = $this->renderS3QuizHtml( $courseId, $this->queryInt( 'mint_lesson' ), $quizId );
+			if ( '' === $html ) {
+				return;
+			}
+			$this->sendStudentCanvas( $html, 'quiz' );
+
+			return;
+		}
+
+		if ( $this->queryInt( 'mint_question' ) > 0 ) {
+			return;
+		}
+
+		$lessonId = $this->queryInt( 'mint_lesson' );
+		if ( $lessonId <= 0 || $courseId <= 0 ) {
+			return;
+		}
+
+		$html = $this->renderS3LessonHtml( $courseId, $lessonId );
+		if ( '' === $html ) {
+			return;
+		}
+
+		$this->sendStudentCanvas( $html, 'lesson' );
 	}
 
 	/**
@@ -362,42 +407,7 @@ final class ShortcodeRegistrar {
 					return $this->wrap( $this->errorMessage( __( 'Lesson is required for preview.', 'mint-lms' ) ) );
 				}
 
-				$preview          = $this->studentExperience->getLessonBuilderPreview( $courseId, $lessonId, $userId );
-				$featuredId       = isset( $preview['featuredImageId'] ) ? (int) $preview['featuredImageId'] : 0;
-				$settings         = $this->settings();
-				$resolvedCourseId = $courseId > 0 ? $courseId : (int) ( $preview['courseId'] ?? 0 );
-				$resolvedLessonId = (int) ( $preview['lessonId'] ?? $lessonId );
-				$previousId       = (int) ( $preview['previousLessonId'] ?? 0 );
-				$nextId           = (int) ( $preview['nextLessonId'] ?? 0 );
-				$quizzes          = is_array( $preview['quizzes'] ?? null ) ? $preview['quizzes'] : array();
-				$quizUrls         = array();
-				$nextQuizUrl      = '';
-
-				foreach ( $quizzes as $quizRow ) {
-					$quizRowId = (int) ( $quizRow['id'] ?? 0 );
-					if ( $quizRowId <= 0 ) {
-						continue;
-					}
-					$quizUrls[ $quizRowId ] = $this->previewQuizUrl( $resolvedCourseId, $resolvedLessonId, $quizRowId );
-					if ( '' === $nextQuizUrl ) {
-						$nextQuizUrl = $quizUrls[ $quizRowId ];
-					}
-				}
-
-				return $this->wrap(
-					$this->templateLoader->render(
-						'student/preview-lesson.php',
-						array(
-							'preview'       => $preview,
-							'featuredUrl'   => $this->attachmentUrl( $featuredId > 0 ? $featuredId : null ) ?? '',
-							'courseUrl'     => $resolvedCourseId > 0 ? $settings->getCourseUrl( $resolvedCourseId ) : '',
-							'previousUrl'   => $previousId > 0 ? $this->previewLessonUrl( $resolvedCourseId, $previousId ) : '',
-							'nextLessonUrl' => $nextId > 0 ? $this->previewLessonUrl( $resolvedCourseId, $nextId ) : '',
-							'nextQuizUrl'   => $nextQuizUrl,
-							'quizUrls'      => $quizUrls,
-						)
-					)
-				);
+				return $this->renderS3LessonHtml( $courseId, $lessonId );
 			}
 
 			$quizId = $this->queryInt( 'mint_quiz' );
@@ -405,26 +415,120 @@ final class ShortcodeRegistrar {
 				$lessonId = $this->studentExperience->resolveLessonIdForQuizPreview( $quizId, $userId );
 			}
 
-			$quiz = $this->studentExperience->getQuizForBuilderLivePreview( $quizId, $lessonId, $userId );
-			$settings = $this->settings();
-			$resolvedCourseId = $courseId > 0 ? $courseId : (int) $quiz->courseId;
-			$resolvedLessonId = $lessonId > 0 ? $lessonId : (int) $quiz->lessonId;
-
-			return $this->wrap(
-				$this->templateLoader->render(
-					'student/preview-quiz.php',
-					array(
-						'quiz'      => $quiz,
-						'courseUrl' => $resolvedCourseId > 0 ? $settings->getCourseUrl( $resolvedCourseId ) : '',
-						'lessonUrl' => $resolvedLessonId > 0 ? $this->previewLessonUrl( $resolvedCourseId, $resolvedLessonId ) : '',
-					)
-				)
-			);
+			return $this->renderS3QuizHtml( $courseId, $lessonId, $quizId );
 		} catch ( NotFoundException $exception ) {
 			return $this->wrap( $this->errorMessage( __( 'Preview content not found.', 'mint-lms' ) ) );
 		} catch ( ForbiddenException $exception ) {
 			return $this->wrap( $this->errorMessage( __( 'You do not have permission to preview this content.', 'mint-lms' ) ) );
 		}
+	}
+
+	private function renderS3LessonHtml( int $courseId, int $lessonId ): string {
+		$userId = get_current_user_id();
+
+		try {
+			$preview = $this->studentExperience->getLessonBuilderPreview( $courseId, $lessonId, $userId );
+		} catch ( NotFoundException $exception ) {
+			return $this->wrap( $this->errorMessage( __( 'Lesson not found.', 'mint-lms' ) ) );
+		} catch ( ForbiddenException $exception ) {
+			$message = trim( $exception->getMessage() );
+
+			return $this->wrap(
+				$this->errorMessage(
+					'' !== $message ? $message : __( 'You do not have permission to view this lesson.', 'mint-lms' )
+				)
+			);
+		}
+
+		$featuredId       = isset( $preview['featuredImageId'] ) ? (int) $preview['featuredImageId'] : 0;
+		$settings         = $this->settings();
+		$resolvedCourseId = $courseId > 0 ? $courseId : (int) ( $preview['courseId'] ?? 0 );
+		$resolvedLessonId = (int) ( $preview['lessonId'] ?? $lessonId );
+		$previousId       = (int) ( $preview['previousLessonId'] ?? 0 );
+		$nextId           = (int) ( $preview['nextLessonId'] ?? 0 );
+		$quizzes          = is_array( $preview['quizzes'] ?? null ) ? $preview['quizzes'] : array();
+		$quizUrls         = array();
+		$nextQuizUrl      = '';
+
+		foreach ( $quizzes as $quizRow ) {
+			$quizRowId = (int) ( $quizRow['id'] ?? 0 );
+			if ( $quizRowId <= 0 ) {
+				continue;
+			}
+			$quizUrls[ $quizRowId ] = $this->previewQuizUrl( $resolvedCourseId, $resolvedLessonId, $quizRowId );
+			if ( '' === $nextQuizUrl ) {
+				$nextQuizUrl = $quizUrls[ $quizRowId ];
+			}
+		}
+
+		return $this->wrap(
+			$this->templateLoader->render(
+				'student/preview-lesson.php',
+				array(
+					'preview'       => $preview,
+					'featuredUrl'   => $this->attachmentUrl( $featuredId > 0 ? $featuredId : null ) ?? '',
+					'courseUrl'     => $resolvedCourseId > 0 ? $settings->getCourseUrl( $resolvedCourseId ) : '',
+					'previousUrl'   => $previousId > 0 ? $this->previewLessonUrl( $resolvedCourseId, $previousId ) : '',
+					'nextLessonUrl' => $nextId > 0 ? $this->previewLessonUrl( $resolvedCourseId, $nextId ) : '',
+					'nextQuizUrl'   => $nextQuizUrl,
+					'quizUrls'      => $quizUrls,
+				)
+			)
+		);
+	}
+
+	private function renderS3QuizHtml( int $courseId, int $lessonId, int $quizId ): string {
+		$userId = get_current_user_id();
+
+		try {
+			if ( $lessonId <= 0 && $quizId > 0 ) {
+				$lessonId = $this->studentExperience->resolveLessonIdForQuizPreview( $quizId, $userId );
+			}
+
+			$quiz = $this->studentExperience->getQuizForBuilderLivePreview( $quizId, $lessonId, $userId );
+		} catch ( NotFoundException $exception ) {
+			return $this->wrap( $this->errorMessage( __( 'Quiz not found.', 'mint-lms' ) ) );
+		} catch ( ForbiddenException $exception ) {
+			$message = trim( $exception->getMessage() );
+
+			return $this->wrap(
+				$this->errorMessage(
+					'' !== $message ? $message : __( 'You do not have permission to view this quiz.', 'mint-lms' )
+				)
+			);
+		}
+
+		$settings         = $this->settings();
+		$resolvedCourseId = $courseId > 0 ? $courseId : (int) $quiz->courseId;
+		$resolvedLessonId = $lessonId > 0 ? $lessonId : (int) $quiz->lessonId;
+		$courseTitle      = $this->publicPostTitle( $resolvedCourseId );
+		$lessonTitle      = $this->publicPostTitle( $resolvedLessonId );
+
+		return $this->wrap(
+			$this->templateLoader->render(
+				'student/preview-quiz.php',
+				array(
+					'quiz'        => $quiz,
+					'courseUrl'   => $resolvedCourseId > 0 ? $settings->getCourseUrl( $resolvedCourseId ) : '',
+					'lessonUrl'   => $resolvedLessonId > 0 ? $this->previewLessonUrl( $resolvedCourseId, $resolvedLessonId ) : '',
+					'courseTitle' => $courseTitle,
+					'lessonTitle' => $lessonTitle,
+				)
+			)
+		);
+	}
+
+	private function publicPostTitle( int $postId ): string {
+		if ( $postId <= 0 ) {
+			return '';
+		}
+
+		$post = get_post( $postId );
+		if ( ! $post instanceof \WP_Post ) {
+			return '';
+		}
+
+		return trim( (string) $post->post_title );
 	}
 
 	/**
