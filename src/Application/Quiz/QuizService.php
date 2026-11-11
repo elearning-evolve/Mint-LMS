@@ -13,6 +13,7 @@ use MintLMS\Application\Quiz\Dto\CreateQuestionDto;
 use MintLMS\Application\Quiz\Dto\CreateQuizDto;
 use MintLMS\Application\Quiz\Dto\QuizAttemptDto;
 use MintLMS\Application\Quiz\Dto\QuizDto;
+use MintLMS\Application\Quiz\Dto\QuizGradeDto;
 use MintLMS\Application\Quiz\Dto\ReorderQuestionsDto;
 use MintLMS\Application\Quiz\Dto\ReorderQuizzesDto;
 use MintLMS\Application\Quiz\Dto\SubmitQuizAttemptDto;
@@ -67,7 +68,7 @@ final class QuizService {
 
 		$questions = $this->quizRepository->findQuestionsByQuizId( $quiz->id, $publishedOnly );
 
-		return QuizDto::fromQuiz( $quiz, $questions, ! $forStudent || $editorReview );
+		return QuizDto::fromQuiz( $quiz, $questions, ! $forStudent );
 	}
 
 	public function get( int $quizId, int $userId, bool $forStudent = false ): QuizDto {
@@ -92,7 +93,7 @@ final class QuizService {
 		$publishedOnly = $forStudent && ! $editorReview;
 		$questions     = $this->quizRepository->findQuestionsByQuizId( $quiz->id, $publishedOnly );
 
-		return QuizDto::fromQuiz( $quiz, $questions, ! $forStudent || $editorReview );
+		return QuizDto::fromQuiz( $quiz, $questions, ! $forStudent );
 	}
 
 	public function create( int $lessonId, CreateQuizDto $dto, int $userId ): QuizDto {
@@ -544,22 +545,47 @@ final class QuizService {
 		return $this->get( $quizId, $userId );
 	}
 
-	public function submitAttempt( int $quizId, SubmitQuizAttemptDto $dto, int $userId ): QuizAttemptDto {
+	/**
+	 * Instructor / builder dry-run: grade only, never persist an attempt.
+	 */
+	public function previewGrade( int $quizId, SubmitQuizAttemptDto $dto, int $userId ): QuizGradeDto {
+		if ( $userId <= 0 ) {
+			throw new ForbiddenException( 'You must be logged in to preview this quiz.' );
+		}
+
+		$quiz      = $this->findQuizOrFail( $quizId );
+		$lesson    = $this->findLessonOrFail( $quiz->lessonId );
+		$questions = $this->quizRepository->findQuestionsByQuizId( $quizId );
+
+		$this->assertCanPreviewGrade( $userId, $lesson );
+
+		if ( array() === $questions ) {
+			throw new ValidationException( 'Validation failed.', array( 'quiz' => 'Quiz has no questions.' ) );
+		}
+
+		return $this->evaluateAttempt( $questions, $dto->answers, $quiz->passPercent, false );
+	}
+
+	public function submitAttempt( int $quizId, SubmitQuizAttemptDto $dto, int $userId, array $runtimeSettings = array() ): QuizAttemptDto {
 		if ( $userId <= 0 ) {
 			throw new ForbiddenException( 'You must be logged in to submit a quiz.' );
 		}
 
 		$quiz      = $this->findQuizOrFail( $quizId );
-		$course    = $this->findCourseOrFail( $quiz->courseId );
 		$questions = $this->quizRepository->findQuestionsByQuizId( $quizId );
 		$lesson    = $this->findLessonOrFail( $quiz->lessonId );
-		$isEditor  = $this->canEditorReviewCourse( $userId, $course->authorId );
+		$enrolled  = $quiz->courseId > 0 && $this->progressRepository->isUserEnrolled( $userId, $quiz->courseId );
 
-		if ( ! $isEditor && ! $lesson->isPreview && ! $this->progressRepository->isUserEnrolled( $userId, $quiz->courseId ) ) {
-			throw new ForbiddenException( 'You must be enrolled to submit this quiz.' );
+		if ( ! $enrolled ) {
+			if ( $this->isCourseEditor( $userId, $quiz ) ) {
+				throw new ForbiddenException( 'Preview attempts are not saved. Use quiz preview to try this quiz.' );
+			}
+			if ( ! $lesson->isPreview ) {
+				throw new ForbiddenException( 'You must be enrolled to submit this quiz.' );
+			}
 		}
 
-		if ( ! $isEditor && null !== $this->lessonAccessService ) {
+		if ( null !== $this->lessonAccessService ) {
 			$this->lessonAccessService->assertCanAccessLesson( $userId, $lesson->id );
 		}
 
@@ -567,22 +593,33 @@ final class QuizService {
 			throw new ValidationException( 'Validation failed.', array( 'quiz' => 'Quiz has no questions.' ) );
 		}
 
-		$score = $this->gradeAttempt( $questions, $dto->answers );
-		$passed = $score >= $quiz->passPercent;
+		if ( ! empty( $runtimeSettings['questionCompletion'] ) ) {
+			$this->assertAnswersComplete( $questions, $dto->answers );
+		}
+
+		if ( ! empty( $runtimeSettings['restrictRetakes'] ) ) {
+			$used = $this->countUserAttempts( $quizId, $userId );
+			$max  = max( 1, (int) ( $runtimeSettings['retriesAllowed'] ?? 0 ) + 1 );
+			if ( $used >= $max ) {
+				throw new ForbiddenException( 'No quiz retries remain.' );
+			}
+		}
+
+		$grade = $this->evaluateAttempt( $questions, $dto->answers, $quiz->passPercent, true );
 
 		$attempt = $this->quizRepository->saveAttempt(
 			new QuizAttempt(
 				0,
 				$userId,
 				$quizId,
-				$score,
-				$passed,
+				$grade->scorePercent,
+				$grade->passed,
 				$dto->answers,
 				$this->clock->now(),
 			)
 		);
 
-		return QuizAttemptDto::fromAttempt( $attempt );
+		return QuizAttemptDto::fromAttempt( $attempt, null, $grade );
 	}
 
 	/**
@@ -673,37 +710,85 @@ final class QuizService {
 	 * @param array<int, string> $answers
 	 */
 	public function gradeAttempt( array $questions, array $answers ): float {
-		if ( array() === $questions ) {
-			return 0.0;
-		}
+		return $this->evaluateAttempt( $questions, $answers, 0, false )->scorePercent;
+	}
 
-		$gradable = array_values(
-			array_filter(
-				$questions,
-				static fn( QuizQuestion $question ): bool => $question->isAutoGradable()
-			)
-		);
+	/**
+	 * @param list<QuizQuestion>   $questions
+	 * @param array<int, string>   $answers
+	 */
+	public function evaluateAttempt( array $questions, array $answers, int $passPercent, bool $persisted ): QuizGradeDto {
+		$items         = array();
+		$correctCount  = 0;
+		$gradedCount   = 0;
+		$pendingEssay  = false;
 
-		// Essay-only quizzes have no auto-gradable items; treat as complete for progression.
-		if ( array() === $gradable ) {
-			return 100.0;
-		}
-
-		$correct = 0;
-
-		foreach ( $gradable as $question ) {
+		foreach ( $questions as $question ) {
 			$submitted = $answers[ $question->id ] ?? '';
-
 			if ( is_array( $submitted ) ) {
 				$submitted = QuestionAnswerCodec::encodeMulti( array_map( 'strval', $submitted ) );
 			}
+			$given = (string) $submitted;
 
-			if ( $this->isAnswerCorrect( $question, (string) $submitted ) ) {
-				++$correct;
+			if ( QuizQuestion::TYPE_ESSAY === $question->type ) {
+				$pendingEssay = true;
+				$items[]      = array(
+					'id'            => $question->id,
+					'type'          => $question->type,
+					'pending'       => true,
+					'correct'       => null,
+					'given'         => $given,
+					'correctAnswer' => null,
+				);
+				continue;
+			}
+
+			++$gradedCount;
+			$isCorrect = $this->isAnswerCorrect( $question, $given );
+			if ( $isCorrect ) {
+				++$correctCount;
+			}
+
+			$correctAnswer = $question->correctAnswer;
+			$givenOut      = $given;
+			if ( QuizQuestion::TYPE_MCQ_MULTI === $question->type ) {
+				$correctAnswer = QuestionAnswerCodec::decodeMulti( $question->correctAnswer );
+				$givenOut      = QuestionAnswerCodec::decodeMulti( $given );
+			}
+
+			$items[] = array(
+				'id'            => $question->id,
+				'type'          => $question->type,
+				'pending'       => false,
+				'correct'       => $isCorrect,
+				'given'         => $givenOut,
+				'correctAnswer' => $correctAnswer,
+			);
+		}
+
+		$score  = $gradedCount > 0 ? round( ( $correctCount / $gradedCount ) * 100, 2 ) : 0.0;
+		$passed = $gradedCount > 0 && ( $score + 0.0001 ) >= $passPercent;
+
+		return new QuizGradeDto(
+			$score,
+			$passed,
+			$pendingEssay,
+			$gradedCount,
+			$correctCount,
+			$items,
+			$persisted,
+		);
+	}
+
+	public function countUserAttempts( int $quizId, int $userId ): int {
+		$count = 0;
+		foreach ( $this->quizRepository->findAttemptsByQuizId( $quizId ) as $attempt ) {
+			if ( $attempt->userId === $userId ) {
+				++$count;
 			}
 		}
 
-		return round( ( $correct / count( $gradable ) ) * 100, 2 );
+		return $count;
 	}
 
 	public function isAnswerCorrect( QuizQuestion $question, string $submitted ): bool {
@@ -979,5 +1064,41 @@ final class QuizService {
 
 	private function canEditorReviewCourse( int $userId, int $authorId ): bool {
 		return $userId > 0 && $this->authorization->canEditCourse( $userId, $authorId );
+	}
+
+	private function isCourseEditor( int $userId, Quiz $quiz ): bool {
+		if ( $quiz->courseId <= 0 ) {
+			return $this->authorization->canCreateCourse( $userId );
+		}
+
+		$course = $this->courseRepository->findById( $quiz->courseId );
+		if ( null === $course ) {
+			return false;
+		}
+
+		return $this->canEditorReviewCourse( $userId, $course->authorId );
+	}
+
+	private function assertCanPreviewGrade( int $userId, \MintLMS\Domain\Lesson\Lesson $lesson ): void {
+		$this->assertCanManageLessonContent( $userId, $lesson );
+	}
+
+	/**
+	 * @param list<QuizQuestion> $questions
+	 * @param array<int, string> $answers
+	 */
+	private function assertAnswersComplete( array $questions, array $answers ): void {
+		foreach ( $questions as $question ) {
+			$submitted = $answers[ $question->id ] ?? '';
+			if ( is_array( $submitted ) ) {
+				if ( array() === $submitted ) {
+					throw new ValidationException( 'Validation failed.', array( 'answers' => 'Answer every question before submitting.' ) );
+				}
+				continue;
+			}
+			if ( '' === trim( (string) $submitted ) ) {
+				throw new ValidationException( 'Validation failed.', array( 'answers' => 'Answer every question before submitting.' ) );
+			}
+		}
 	}
 }

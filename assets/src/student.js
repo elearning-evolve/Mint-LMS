@@ -95,22 +95,134 @@ document.addEventListener('alpine:init', () => {
   Alpine.data('mintLessonQuiz', (config) => ({
     quizId: config.quizId,
     passPercent: config.passPercent,
-    questions: config.questions || [],
+    questions: Array.isArray(config.questions) ? [...config.questions] : [],
     answers: {},
     hasPassed: config.hasPassed || false,
     previewMode: !!config.previewMode,
     submitted: false,
     submitting: false,
     scorePercent: 0,
+    pendingEssay: false,
+    review: [],
     error: '',
     currentIndex: 0,
+    settings: config.settings && typeof config.settings === 'object' ? config.settings : {},
+    timerSeconds: 0,
+    timerId: null,
+    saveTimerId: null,
 
     init() {
+      this.questions = this.prepareQuestions(this.questions);
+      this.restoreProgress();
       (this.questions || []).forEach((question) => {
         if (question.type === 'mcq_multi' && !Array.isArray(this.answers[question.id])) {
           this.answers[question.id] = [];
         }
       });
+      this.startTimer();
+      this.startAutosave();
+    },
+
+    prepareQuestions(list) {
+      const rows = (list || []).map((question) => {
+        const options = Array.isArray(question.options) ? [...question.options] : [];
+        if (this.settings.randomizeAnswers) {
+          options.sort(() => Math.random() - 0.5);
+        }
+        return { ...question, options };
+      });
+      if (this.settings.randomizeOrder) {
+        rows.sort(() => Math.random() - 0.5);
+      }
+      return rows;
+    },
+
+    storageKey() {
+      return `mintlms_quiz_${this.previewMode ? 'preview' : 'live'}_${this.quizId}`;
+    },
+
+    restoreProgress() {
+      if (!this.settings.quizSavingEnabled || this.hasPassed) return;
+      try {
+        const raw = window.sessionStorage.getItem(this.storageKey());
+        if (!raw) return;
+        const data = JSON.parse(raw);
+        if (data && typeof data === 'object' && data.answers) {
+          this.answers = data.answers;
+          this.currentIndex = Number(data.currentIndex || 0);
+        }
+      } catch {
+        /* ignore */
+      }
+    },
+
+    persistProgress() {
+      if (!this.settings.quizSavingEnabled || this.submitted) return;
+      try {
+        window.sessionStorage.setItem(
+          this.storageKey(),
+          JSON.stringify({ answers: this.answers, currentIndex: this.currentIndex })
+        );
+      } catch {
+        /* ignore */
+      }
+    },
+
+    startAutosave() {
+      if (!this.settings.quizSavingEnabled) return;
+      const ms = Math.max(5, Number(this.settings.quizSavingIntervalSeconds || 20)) * 1000;
+      this.saveTimerId = window.setInterval(() => this.persistProgress(), ms);
+    },
+
+    startTimer() {
+      if (!this.settings.timeLimitEnabled) return;
+      const hours = Number(this.settings.timeLimitHours || 0);
+      const minutes = Number(this.settings.timeLimitMinutes || 0);
+      const seconds = Number(this.settings.timeLimitSeconds || 0);
+      this.timerSeconds = hours * 3600 + minutes * 60 + seconds;
+      if (this.timerSeconds <= 0) return;
+      this.timerId = window.setInterval(() => {
+        this.timerSeconds -= 1;
+        if (this.timerSeconds <= 0) {
+          this.timerSeconds = 0;
+          window.clearInterval(this.timerId);
+          this.submitQuiz(true);
+        }
+      }, 1000);
+    },
+
+    formatTimer() {
+      const total = Math.max(0, this.timerSeconds);
+      const h = Math.floor(total / 3600);
+      const m = Math.floor((total % 3600) / 60);
+      const s = total % 60;
+      const pad = (n) => String(n).padStart(2, '0');
+      return h > 0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
+    },
+
+    isAnswered(question) {
+      const value = this.answers[question.id];
+      if (question.type === 'mcq_multi') {
+        return Array.isArray(value) && value.length > 0;
+      }
+      return String(value ?? '').trim() !== '';
+    },
+
+    canLeaveQuestion(index) {
+      if (this.settings.skipQuestion || !this.settings.questionCompletion) return true;
+      const question = this.questions[index];
+      return question ? this.isAnswered(question) : true;
+    },
+
+    canSubmit() {
+      if (this.settings.skipQuestion || !this.settings.questionCompletion) return true;
+      return (this.questions || []).every((question) => this.isAnswered(question));
+    },
+
+    canRetry() {
+      if (this.previewMode) return true;
+      if (this.settings.restartButton) return true;
+      return !this.settings.restrictRetakes;
     },
 
     isChoiceSelected(questionId, option) {
@@ -118,8 +230,14 @@ document.addEventListener('alpine:init', () => {
     },
 
     goNext() {
+      if (!this.canLeaveQuestion(this.currentIndex)) {
+        this.error = mintLmsStudent.i18n.answerRequired || 'Answer this question before continuing.';
+        return;
+      }
+      this.error = '';
       if (this.currentIndex < this.questions.length - 1) {
         this.currentIndex += 1;
+        this.persistProgress();
       }
     },
 
@@ -154,65 +272,93 @@ document.addEventListener('alpine:init', () => {
       return payload;
     },
 
-    previewAnswerMatches(question) {
-      const given = this.answers[question.id];
-      if (question.type === 'mcq_multi') {
-        const expected = Array.isArray(question.correctAnswers)
-          ? [...question.correctAnswers].map((value) => String(value)).sort()
-          : [];
-        const actual = Array.isArray(given) ? [...given].map((value) => String(value)).sort() : [];
-        return expected.length > 0 && JSON.stringify(expected) === JSON.stringify(actual);
-      }
-      if (question.type === 'essay') {
-        return String(given || '').trim() !== '';
-      }
-      return String(given ?? '').trim().toLowerCase() === String(question.correctAnswer ?? '').trim().toLowerCase();
-    },
-
-    submitPreviewScore() {
-      let graded = 0;
-      let correct = 0;
-      (this.questions || []).forEach((question) => {
-        if (question.type === 'essay') {
-          return;
-        }
-        if (question.correctAnswer == null && !Array.isArray(question.correctAnswers)) {
-          return;
-        }
-        graded += 1;
-        if (this.previewAnswerMatches(question)) {
-          correct += 1;
-        }
-      });
-      this.scorePercent = graded > 0 ? (correct / graded) * 100 : 100;
+    applyGrade(data) {
+      this.scorePercent = Number(data?.scorePercent ?? 0);
+      this.pendingEssay = !!data?.pendingEssay;
+      this.review = Array.isArray(data?.questions) ? data.questions : [];
       this.submitted = true;
-      this.hasPassed = this.scorePercent + 0.0001 >= Number(this.passPercent || 0);
+      this.hasPassed = !!data?.passed;
+      try {
+        window.sessionStorage.removeItem(this.storageKey());
+      } catch {
+        /* ignore */
+      }
     },
 
-    async submitQuiz() {
-      if (this.submitting || this.hasPassed) return;
+    resultToneClass() {
+      if (this.pendingEssay && !this.hasPassed) return 'mint-s3-quiz-result--pending';
+      return this.hasPassed ? 'mint-s3-quiz-result--pass' : 'mint-s3-quiz-result--fail';
+    },
+
+    resultTitle() {
+      const i18n = mintLmsStudent.i18n || {};
+      if (this.pendingEssay && this.review.every((item) => item.pending)) {
+        return i18n.quizPending || 'Submitted — essay answers need grading.';
+      }
+      if (this.previewMode && this.hasPassed) {
+        return i18n.quizPreviewPassed || 'Preview passed — this attempt was not saved.';
+      }
+      if (this.hasPassed) return i18n.quizPassed || 'Quiz passed.';
+      return i18n.quizFailed || 'Quiz not passed.';
+    },
+
+    resultMeta() {
+      const i18n = mintLmsStudent.i18n || {};
+      const score = `${Math.round(this.scorePercent)}%`;
+      if (this.previewMode) {
+        return `${score} — ${i18n.quizPreviewNotSaved || 'Preview only. Results are not recorded.'}`;
+      }
+      if (this.pendingEssay) {
+        return `${score} — ${i18n.quizEssayPending || 'Auto-graded score. Essays are pending review.'}`;
+      }
+      return `${score} — ${i18n.quizRetry || 'Review and try again.'}`;
+    },
+
+    questionPrompt(id) {
+      const match = (this.questions || []).find((question) => Number(question.id) === Number(id));
+      return match?.prompt || '';
+    },
+
+    reviewBadge(item) {
+      const i18n = mintLmsStudent.i18n || {};
+      if (item.pending) return i18n.pending || 'Pending';
+      return item.correct ? i18n.correct || 'Correct' : i18n.incorrect || 'Incorrect';
+    },
+
+    reviewItemClass(item) {
+      if (item.pending) return 'is-pending';
+      return item.correct ? 'is-correct' : 'is-incorrect';
+    },
+
+    formatAnswer(value) {
+      if (value == null || value === '') return '—';
+      if (Array.isArray(value)) return value.join(', ');
+      return String(value);
+    },
+
+    async submitQuiz(force = false) {
+      if (this.submitting || (this.hasPassed && !this.previewMode)) return;
+      if (!force && !this.canSubmit()) {
+        this.error = mintLmsStudent.i18n.answerRequired || 'Answer every question before submitting.';
+        return;
+      }
 
       this.submitting = true;
       this.error = '';
 
-      if (this.previewMode) {
-        this.submitPreviewScore();
-        this.submitting = false;
-        return;
-      }
+      const path = this.previewMode
+        ? `quizzes/${this.quizId}/preview-grade`
+        : `quizzes/${this.quizId}/attempt`;
 
       try {
-        const response = await fetch(
-          joinRestUrl(mintLmsStudent.restUrl, `quizzes/${this.quizId}/attempt`),
-          {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'X-WP-Nonce': mintLmsStudent.nonce,
-            },
-            body: JSON.stringify({ answers: this.buildSubmitAnswers() }),
-          }
-        );
+        const response = await fetch(joinRestUrl(mintLmsStudent.restUrl, path), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-WP-Nonce': mintLmsStudent.nonce,
+          },
+          body: JSON.stringify({ answers: this.buildSubmitAnswers() }),
+        });
 
         const payload = await response.json();
 
@@ -220,12 +366,13 @@ document.addEventListener('alpine:init', () => {
           throw new Error(payload?.error?.message || mintLmsStudent.i18n.quizSubmitError);
         }
 
-        this.submitted = true;
-        this.scorePercent = payload.data?.scorePercent ?? 0;
+        const data = payload.data || {};
+        this.applyGrade(data.review || data);
 
-        if (payload.data?.passed) {
+        if (!this.previewMode && data.passed) {
           this.hasPassed = true;
-          const player = Alpine.$data(document.querySelector('[x-data*="mintCoursePlayer"]'));
+          const playerEl = document.querySelector('[x-data*="mintCoursePlayer"]');
+          const player = playerEl ? Alpine.$data(playerEl) : null;
           if (player) {
             player.hasPassedQuiz = true;
           }
@@ -238,10 +385,17 @@ document.addEventListener('alpine:init', () => {
     },
 
     retry() {
+      if (this.timerId) window.clearInterval(this.timerId);
+      if (this.saveTimerId) window.clearInterval(this.saveTimerId);
+      this.timerId = null;
+      this.saveTimerId = null;
       this.submitted = false;
+      this.pendingEssay = false;
+      this.review = [];
       this.answers = {};
       this.error = '';
       this.currentIndex = 0;
+      this.hasPassed = false;
       this.init();
     },
   }));

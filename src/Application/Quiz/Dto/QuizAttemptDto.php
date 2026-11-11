@@ -19,10 +19,11 @@ final readonly class QuizAttemptDto {
 		public array $answers,
 		public string $completedAt,
 		public ?string $userDisplayName = null,
+		public ?QuizGradeDto $grade = null,
 	) {
 	}
 
-	public static function fromAttempt( QuizAttempt $attempt, ?string $userDisplayName = null ): self {
+	public static function fromAttempt( QuizAttempt $attempt, ?string $userDisplayName = null, ?QuizGradeDto $grade = null ): self {
 		return new self(
 			$attempt->id,
 			$attempt->userId,
@@ -32,6 +33,7 @@ final readonly class QuizAttemptDto {
 			$attempt->answers,
 			$attempt->completedAt->format( 'c' ),
 			$userDisplayName,
+			$grade,
 		);
 	}
 
@@ -51,6 +53,10 @@ final readonly class QuizAttemptDto {
 
 		if ( null !== $this->userDisplayName ) {
 			$data['userDisplayName'] = $this->userDisplayName;
+		}
+
+		if ( null !== $this->grade ) {
+			$data['review'] = $this->grade->toArray();
 		}
 
 		return $data;

@@ -239,6 +239,19 @@ final class QuizController {
 
 		register_rest_route(
 			self::NAMESPACE,
+			'/quizzes/(?P<id>\d+)/preview-grade',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'previewGrade' ),
+					'permission_callback' => array( $this, 'canTrackProgress' ),
+					'args'                => $this->attemptArgs(),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
 			'/quizzes/(?P<id>\d+)/attempts',
 			array(
 				array(
@@ -714,23 +727,27 @@ final class QuizController {
 		try {
 			$userId  = $this->authorization->getCurrentUserId();
 			$id      = (int) $request->get_param( 'id' );
-			$raw     = $request->get_param( 'answers' );
-			$answers = array();
-
-			if ( is_array( $raw ) ) {
-				foreach ( $raw as $questionId => $answer ) {
-					if ( is_array( $answer ) ) {
-						$answers[ (int) $questionId ] = QuestionAnswerCodec::encodeMulti( array_map( 'strval', $answer ) );
-					} else {
-						$answers[ (int) $questionId ] = (string) $answer;
-					}
-				}
-			}
-
-			$dto     = new SubmitQuizAttemptDto( $answers );
-			$attempt = $this->quizService->submitAttempt( $id, $dto, $userId );
+			$dto     = new SubmitQuizAttemptDto( $this->answersFromRequest( $request ) );
+			$attempt = $this->quizService->submitAttempt( $id, $dto, $userId, $this->readQuizSettings( $id ) );
 
 			return ApiResponse::success( $attempt->toArray() );
+		} catch ( ValidationException $exception ) {
+			return ApiResponse::error( 'validation_error', $exception->getMessage(), 400, $exception->errors() );
+		} catch ( NotFoundException $exception ) {
+			return ApiResponse::error( 'not_found', $exception->getMessage(), 404 );
+		} catch ( ForbiddenException $exception ) {
+			return ApiResponse::error( 'forbidden', $exception->getMessage(), 403 );
+		}
+	}
+
+	public function previewGrade( \WP_REST_Request $request ): \WP_REST_Response {
+		try {
+			$userId = $this->authorization->getCurrentUserId();
+			$id     = (int) $request->get_param( 'id' );
+			$dto    = new SubmitQuizAttemptDto( $this->answersFromRequest( $request ) );
+			$grade  = $this->quizService->previewGrade( $id, $dto, $userId );
+
+			return ApiResponse::success( $grade->toArray() );
 		} catch ( ValidationException $exception ) {
 			return ApiResponse::error( 'validation_error', $exception->getMessage(), 400, $exception->errors() );
 		} catch ( NotFoundException $exception ) {
@@ -890,6 +907,28 @@ final class QuizController {
 				'required' => true,
 			),
 		);
+	}
+
+	/**
+	 * @return array<int, string>
+	 */
+	private function answersFromRequest( \WP_REST_Request $request ): array {
+		$raw     = $request->get_param( 'answers' );
+		$answers = array();
+
+		if ( ! is_array( $raw ) ) {
+			return $answers;
+		}
+
+		foreach ( $raw as $questionId => $answer ) {
+			if ( is_array( $answer ) ) {
+				$answers[ (int) $questionId ] = QuestionAnswerCodec::encodeMulti( array_map( 'strval', $answer ) );
+			} else {
+				$answers[ (int) $questionId ] = (string) $answer;
+			}
+		}
+
+		return $answers;
 	}
 
 	private function questionDtoFromRequest( \WP_REST_Request $request ): CreateQuestionDto {
