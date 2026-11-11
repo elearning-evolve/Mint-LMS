@@ -11,6 +11,7 @@ use MintLMS\Application\Quiz\QuizService;
 use MintLMS\Application\Student\StudentExperienceService;
 use MintLMS\Domain\Course\Course;
 use MintLMS\Domain\Course\CourseRepositoryInterface;
+use MintLMS\Domain\Course\CourseSettings;
 use MintLMS\Domain\Course\CourseStatus;
 use MintLMS\Domain\Course\EnrollmentType;
 use MintLMS\Domain\Enrollment\Enrollment;
@@ -179,6 +180,37 @@ final class StudentExperienceServiceTest extends TestCase
         $this->assertSame('', $lessons[0]->content);
         $this->assertNull($lessons[0]->videoUrl);
         $this->assertSame('Preview body', $lessons[1]->content);
+        $this->assertTrue($overview->curriculumVisible);
+        $this->assertNotSame([], $overview->contentOutline);
+    }
+
+    public function test_free_course_shows_lesson_list_to_guests_without_access(): void
+    {
+        $course = $this->sampleCourse(10, 'Free Course', EnrollmentType::Free);
+
+        $this->courseRepository->method('findById')->with(10)->willReturn($course);
+        $this->sectionRepository->method('loadStructureRows')->with(10)->willReturn($this->sampleStructureRows());
+
+        $overview = $this->service->getCourseOverview(10, 0);
+
+        $this->assertTrue($overview->curriculumVisible);
+        $this->assertNotSame([], $overview->contentOutline);
+        $this->assertFalse($overview->contentOutline[0]['lessons'][0]['accessible']);
+        $this->assertSame('', $overview->structure->sections[0]->lessons[0]->content);
+    }
+
+    public function test_enrolled_only_lesson_list_hides_curriculum_from_guests(): void
+    {
+        $settings = CourseSettings::fromArray(array('lessonListVisibility' => 'enrolled'));
+        $course   = $this->sampleCourse(10, 'Hidden List', EnrollmentType::Free, $settings);
+
+        $this->courseRepository->method('findById')->with(10)->willReturn($course);
+        $this->sectionRepository->method('loadStructureRows')->with(10)->willReturn($this->sampleStructureRows());
+
+        $overview = $this->service->getCourseOverview(10, 0);
+
+        $this->assertFalse($overview->curriculumVisible);
+        $this->assertSame([], $overview->contentOutline);
     }
 
     public function test_player_context_blocks_non_preview_lesson_for_guest(): void
@@ -325,7 +357,7 @@ final class StudentExperienceServiceTest extends TestCase
         $this->service->getCourseOverview(10, 0);
     }
 
-    private function sampleCourse(int $id, string $title): Course
+    private function sampleCourse(int $id, string $title, EnrollmentType $enrollmentType = EnrollmentType::Open, ?CourseSettings $settings = null): Course
     {
         return new Course(
             $id,
@@ -334,10 +366,11 @@ final class StudentExperienceServiceTest extends TestCase
             'Description',
             null,
             CourseStatus::Published,
-            EnrollmentType::Open,
+            $enrollmentType,
             1,
             new \DateTimeImmutable('2026-01-01 00:00:00'),
             new \DateTimeImmutable('2026-01-01 00:00:00'),
+            $settings ?? new CourseSettings(),
         );
     }
 

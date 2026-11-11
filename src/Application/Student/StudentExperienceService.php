@@ -133,7 +133,9 @@ final class StudentExperienceService {
 		$isEditorPreview = $this->canEditorPreviewCourse( $userId, $course->status, $course->authorId );
 		$publicBrowse    = $course->enrollmentType->allowsPublicBrowse();
 		$isEnrolled      = ( $userId > 0 && $this->progressRepository->isUserEnrolled( $userId, $courseId ) ) || $isEditorPreview;
-		$structure       = $this->loadGatedStructure( $courseId, $isEnrolled || $publicBrowse, $userId, $isEditorPreview, $isEnrolled );
+		$canBrowse       = $isEnrolled || $publicBrowse;
+		$showCurriculum  = $canBrowse || $course->settings->lessonListVisibleToGuests();
+		$structure       = $this->loadGatedStructure( $courseId, $canBrowse, $userId, $isEditorPreview, $isEnrolled );
 		$flat            = $this->flattenLessons( $structure );
 
 		$progressPct        = null;
@@ -178,7 +180,8 @@ final class StudentExperienceService {
 			$authorName,
 			$lastActivityLabel,
 			$isEditorPreview,
-			$this->buildContentOutline( $structure, $userId, $isEditorPreview ),
+			$showCurriculum ? $this->buildContentOutline( $structure, $userId, $isEditorPreview, $canBrowse ) : array(),
+			$showCurriculum,
 		);
 	}
 
@@ -1031,7 +1034,7 @@ final class StudentExperienceService {
 	 *
 	 * @return list<array<string, mixed>>
 	 */
-	private function buildContentOutline( CourseStructureDto $structure, int $userId, bool $isEditorPreview ): array {
+	private function buildContentOutline( CourseStructureDto $structure, int $userId, bool $isEditorPreview, bool $canBrowseContent = true ): array {
 		$outline = array();
 
 		foreach ( $structure->sections as $section ) {
@@ -1079,7 +1082,8 @@ final class StudentExperienceService {
 					$metaParts[] = 1 === $quizCount ? '1 quiz' : $quizCount . ' quizzes';
 				}
 
-				$accessible = $isEditorPreview || ! $lesson->isDripLocked;
+				$accessible = $isEditorPreview
+					|| ( ! $lesson->isDripLocked && ( $canBrowseContent || $lesson->isPreview ) );
 
 				$lessons[] = array(
 					'id'         => $lesson->id,

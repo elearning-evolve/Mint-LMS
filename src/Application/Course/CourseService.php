@@ -15,6 +15,7 @@ use MintLMS\Application\Exception\NotFoundException;
 use MintLMS\Application\Exception\ValidationException;
 use MintLMS\Application\Event\DomainEventPublisher;
 use MintLMS\Domain\Course\Course;
+use MintLMS\Domain\Course\CourseSettings;
 use MintLMS\Domain\Course\CourseRepositoryInterface;
 use MintLMS\Domain\Course\CourseStatus;
 use MintLMS\Domain\Course\EnrollmentType;
@@ -67,6 +68,7 @@ final class CourseService {
 			$userId,
 			$now,
 			$now,
+			CourseSettings::defaults(),
 		);
 
 		return CourseDto::fromCourse( $this->repository->save( $course ) );
