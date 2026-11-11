@@ -20,6 +20,7 @@ $courseUrl           = is_string( $courseUrl ?? null ) ? $courseUrl : '';
 $previousUrl         = is_string( $previousUrl ?? null ) ? $previousUrl : '';
 $nextLessonUrl       = is_string( $nextLessonUrl ?? null ) ? $nextLessonUrl : '';
 $nextQuizUrl         = is_string( $nextQuizUrl ?? null ) ? $nextQuizUrl : '';
+$quizUrls            = is_array( $quizUrls ?? null ) ? $quizUrls : array();
 $displayLesson       = '' !== $lessonTitle ? $lessonTitle : __( 'Untitled lesson', 'mint-lms' );
 $forwardUrl          = '' !== $nextQuizUrl ? $nextQuizUrl : $nextLessonUrl;
 $forwardLabel        = '' !== $nextQuizUrl
@@ -121,6 +122,8 @@ $forwardLabel        = '' !== $nextQuizUrl
 				<?php foreach ( $quizzes as $quiz ) : ?>
 					<?php
 					$quizTitle     = (string) ( $quiz['title'] ?? __( 'Quiz', 'mint-lms' ) );
+					$quizId        = (int) ( $quiz['id'] ?? 0 );
+					$quizPreview   = $quizId > 0 && isset( $quizUrls[ $quizId ] ) ? (string) $quizUrls[ $quizId ] : '';
 					$questions     = is_array( $quiz['questions'] ?? null ) ? $quiz['questions'] : array();
 					$questionCount = count( $questions );
 					$quizMeta      = trim( (string) ( $quiz['meta'] ?? '' ) );
@@ -141,7 +144,13 @@ $forwardLabel        = '' !== $nextQuizUrl
 								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
 							</span>
 							<div class="mint-s3b-stack__quiz-copy">
-								<div class="mint-s3b-stack__quiz-title"><?php echo esc_html( $quizTitle ); ?></div>
+								<div class="mint-s3b-stack__quiz-title">
+									<?php if ( '' !== $quizPreview ) : ?>
+										<a href="<?php echo esc_url( $quizPreview ); ?>" class="mint-s3-quiz-name-link" @click.stop><?php echo esc_html( $quizTitle ); ?></a>
+									<?php else : ?>
+										<?php echo esc_html( $quizTitle ); ?>
+									<?php endif; ?>
+								</div>
 								<div class="mint-s3b-stack__quiz-meta">
 									<span class="mint-s3b-badge mint-s3b-badge--sm"><?php esc_html_e( 'Quiz', 'mint-lms' ); ?></span>
 									<span><?php echo esc_html( $quizMeta ); ?></span>

@@ -84,7 +84,7 @@ $questionCount = count( $quiz->questions );
 
 			<template x-for="(question, qIndex) in questions" :key="question.id">
 				<div class="mint-s3-question-card" x-show="qIndex === currentIndex" x-cloak>
-					<p class="mint-s3-question-card__prompt" x-text="question.prompt"></p>
+					<div class="mint-s3-question-card__prompt" x-html="question.prompt"></div>
 
 					<template x-if="question.type === 'true_false'">
 						<div class="mint-s3-choice-list">

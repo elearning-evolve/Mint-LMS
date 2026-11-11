@@ -692,6 +692,38 @@ final class CourseController {
 				'type'              => 'integer',
 				'sanitize_callback' => 'absint',
 			),
+			'materials_enabled' => array(
+				'type'              => 'boolean',
+				'sanitize_callback' => static fn( $value ): bool => (bool) $value,
+			),
+			'materials_content' => array(
+				'type'              => 'string',
+				'sanitize_callback' => array( RestContentSanitizer::class, 'richText' ),
+			),
+			'lesson_list_visibility' => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'pagination_enabled' => array(
+				'type'              => 'boolean',
+				'sanitize_callback' => static fn( $value ): bool => (bool) $value,
+			),
+			'lessons_per_page'  => array(
+				'type'              => 'integer',
+				'sanitize_callback' => 'absint',
+			),
+			'groups_per_page'   => array(
+				'type'              => 'integer',
+				'sanitize_callback' => 'absint',
+			),
+			'completion_redirect' => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'esc_url_raw',
+			),
+			'points_on_complete' => array(
+				'type'              => 'integer',
+				'sanitize_callback' => 'absint',
+			),
 		);
 	}
 

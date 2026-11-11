@@ -46,7 +46,11 @@ $associated    = '' !== $lessonTitle;
 <div class="mint-s3b-wrap" x-data="{ started: false }">
 	<article class="mint-s3-hero mint-s3-hero--wide">
 		<div class="mint-s3b-kicker"><?php esc_html_e( 'Quiz', 'mint-lms' ); ?></div>
-		<h1 class="mint-s3b-title"><?php echo esc_html( $displayQuiz ); ?></h1>
+		<h1 class="mint-s3b-title">
+			<button type="button" class="mint-s3-quiz-name-link" @click="started = false">
+				<?php echo esc_html( $displayQuiz ); ?>
+			</button>
+		</h1>
 
 		<?php if ( $associated ) : ?>
 			<p class="mint-s3-quiz-associate">
@@ -79,7 +83,9 @@ $associated    = '' !== $lessonTitle;
 							<?php endif; ?>
 							<span aria-hidden="true"> › </span>
 						<?php endif; ?>
-						<?php echo esc_html( $displayQuiz ); ?>
+						<button type="button" class="mint-s3b-progress__crumb-link mint-s3-quiz-name-link" @click="started = false">
+							<?php echo esc_html( $displayQuiz ); ?>
+						</button>
 					</div>
 					<div class="mint-s3b-progress__badge"><?php echo esc_html( $quizMeta ); ?></div>
 				</div>
@@ -142,7 +148,13 @@ $associated    = '' !== $lessonTitle;
 									<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
 								</span>
 								<div class="mint-s3b-stack__quiz-copy">
-									<div class="mint-s3b-stack__quiz-title"><?php echo esc_html( $displayQuiz ); ?></div>
+									<div class="mint-s3b-stack__quiz-title">
+										<button
+											type="button"
+											class="mint-s3-quiz-name-link"
+											@click.stop="started = false"
+										><?php echo esc_html( $displayQuiz ); ?></button>
+									</div>
 									<div class="mint-s3b-stack__quiz-meta">
 										<span class="mint-s3b-badge mint-s3b-badge--sm"><?php esc_html_e( 'Quiz', 'mint-lms' ); ?></span>
 										<span><?php echo esc_html( $quizMeta ); ?></span>
