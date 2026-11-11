@@ -35,6 +35,8 @@ document.addEventListener('alpine:init', () => {
     isEnrolled: config.isEnrolled,
     quizRequired: config.quizRequired || false,
     hasPassedQuiz: config.hasPassedQuiz || false,
+    videoProgression: !!config.videoProgression,
+    videoWatched: !config.videoProgression,
     sidebarOpen: false,
     marking: false,
     error: '',
@@ -46,6 +48,11 @@ document.addEventListener('alpine:init', () => {
 
       if (this.quizRequired && !this.hasPassedQuiz) {
         this.error = mintLmsStudent.i18n.quizRequired;
+        return;
+      }
+
+      if (this.videoProgression && !this.videoWatched) {
+        this.error = mintLmsStudent.i18n.watchVideo || 'Watch the lesson video first.';
         return;
       }
 

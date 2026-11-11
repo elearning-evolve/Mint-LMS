@@ -707,7 +707,7 @@ function courseBuilder(courseId, opts = {}) {
         materialsContent: '',
         videoProgression: false,
         videoUrl: '',
-        videoTiming: 'before',
+        videoTiming: 'after',
         videoAutoplay: false,
         videoControls: true,
         videoPauseHidden: false,
