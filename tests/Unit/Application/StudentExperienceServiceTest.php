@@ -229,6 +229,37 @@ final class StudentExperienceServiceTest extends TestCase
         $this->service->getPlayerContext(10, 100, $userId);
     }
 
+    public function test_lesson_preview_allows_enrolled_student(): void
+    {
+        $userId = 7;
+        $course = $this->sampleCourse(10, 'Sample Course');
+
+        $this->courseRepository->method('findById')->with(10)->willReturn($course);
+        $this->sectionRepository->method('loadStructureRows')->with(10)->willReturn($this->sampleStructureRows());
+        $this->progressRepository->method('isUserEnrolled')->willReturn(true);
+        $this->progressRepository->method('getSummary')->willReturn(null);
+        $this->progressRepository->method('getCompletedLessonIds')->willReturn([]);
+
+        $preview = $this->service->getLessonBuilderPreview(10, 100, $userId);
+
+        $this->assertSame('Locked lesson', $preview['title']);
+        $this->assertSame('Sample Course', $preview['courseTitle']);
+        $this->assertSame(100, $preview['lessonId']);
+    }
+
+    public function test_lesson_preview_blocks_guest_for_non_preview_lesson(): void
+    {
+        $course = $this->sampleCourse(10, 'Sample Course');
+
+        $this->courseRepository->method('findById')->with(10)->willReturn($course);
+        $this->sectionRepository->method('loadStructureRows')->with(10)->willReturn($this->sampleStructureRows());
+        $this->progressRepository->method('isUserEnrolled')->willReturn(false);
+
+        $this->expectException(ForbiddenException::class);
+
+        $this->service->getLessonBuilderPreview(10, 100, 0);
+    }
+
     public function test_player_context_includes_quiz_when_present(): void
     {
         $userId = 7;

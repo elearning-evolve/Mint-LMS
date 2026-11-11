@@ -10,11 +10,13 @@ use MintLMS\Application\Quiz\Dto\QuizDto;
 /** @var bool $hasPassedQuiz */
 /** @var bool $isEnrolled */
 /** @var bool $isReviewMode */
+/** @var bool $quizHeading */
 $quiz          = $quiz ?? null;
 $quizRequired  = $quizRequired ?? false;
 $hasPassedQuiz = $hasPassedQuiz ?? true;
 $isEnrolled    = $isEnrolled ?? false;
 $isReviewMode  = ! empty( $isReviewMode );
+$quizHeading   = ! isset( $quizHeading ) || (bool) $quizHeading;
 
 if ( null === $quiz || ( ! $isEnrolled && ! $isReviewMode ) ) {
 	return;
@@ -23,9 +25,11 @@ if ( null === $quiz || ( ! $isEnrolled && ! $isReviewMode ) ) {
 if ( ! $quizRequired && ! $isReviewMode ) {
 	return;
 }
+
+$questionCount = count( $quiz->questions );
 ?>
 <div
-	class="mint-my-8 mint-rounded-xl mint-border mint-border-rule mint-bg-bg mint-p-6"
+	class="mint-s3-quiz-runner"
 	x-data="mintLessonQuiz({
 		quizId: <?php echo (int) $quiz->id; ?>,
 		passPercent: <?php echo (int) $quiz->passPercent; ?>,
@@ -34,95 +38,134 @@ if ( ! $quizRequired && ! $isReviewMode ) {
 		questions: <?php echo wp_json_encode( array_map( static fn( $q ) => $q->toArray(), $quiz->questions ) ); ?>
 	})"
 >
-	<div class="mint-mb-5 mint-flex mint-items-center mint-justify-between mint-gap-4">
-		<h2 class="mint-text-over mint-font-semibold mint-uppercase mint-tracking-widest mint-text-ink"><?php echo esc_html( $quiz->title ); ?></h2>
-		<span class="mint-shrink-0 mint-text-sm mint-text-ink-2">
-			<?php
-			printf(
-				/* translators: %d: minimum pass percentage */
-				esc_html__( 'Pass: %d%%', 'mint-lms' ),
-				(int) $quiz->passPercent
-			);
-			?>
-		</span>
-	</div>
+	<?php if ( $quizHeading ) : ?>
+		<div class="mint-s3-quiz-runner__head">
+			<h2 class="mint-s3-quiz-runner__title"><?php echo esc_html( $quiz->title ); ?></h2>
+			<?php if ( $questionCount > 0 ) : ?>
+				<div class="mint-s3-quiz-runner__count">
+					<?php
+					echo esc_html(
+						1 === $questionCount
+							? __( '1 question', 'mint-lms' )
+							: sprintf(
+								/* translators: %d: question count */
+								__( '%d questions', 'mint-lms' ),
+								$questionCount
+							)
+					);
+					?>
+				</div>
+			<?php endif; ?>
+		</div>
+	<?php endif; ?>
 
 	<template x-if="hasPassed">
-		<div class="mint-mb-4 mint-rounded-lg mint-bg-success-wash mint-px-4 mint-py-4">
-			<p class="mint-text-sm mint-font-medium mint-text-success" x-text="previewMode ? mintLmsStudent.i18n.quizPreviewPassed : mintLmsStudent.i18n.quizPassed"></p>
+		<div class="mint-s3-quiz-result mint-s3-quiz-result--pass">
+			<p class="mint-s3-quiz-result__title" x-text="previewMode ? mintLmsStudent.i18n.quizPreviewPassed : mintLmsStudent.i18n.quizPassed"></p>
+		</div>
+	</template>
+
+	<template x-if="submitted && !hasPassed">
+		<div class="mint-s3-quiz-result mint-s3-quiz-result--fail">
+			<p class="mint-s3-quiz-result__title" x-text="mintLmsStudent.i18n.quizFailed"></p>
+			<p class="mint-s3-quiz-result__meta" x-text="Math.round(scorePercent) + '% — ' + mintLmsStudent.i18n.quizRetry"></p>
+			<button type="button" class="mint-s3b-nav__next mint-mt-4" @click="retry()"><?php esc_html_e( 'Try again', 'mint-lms' ); ?></button>
 		</div>
 	</template>
 
 	<template x-if="!hasPassed && !submitted">
-		<div class="mint-flex mint-flex-col mint-gap-5">
+		<div class="mint-s3-quiz-take">
+			<div class="mint-s3-quiz-take__progress">
+				<span><?php esc_html_e( 'Question', 'mint-lms' ); ?> <span x-text="currentIndex + 1"></span> <?php esc_html_e( 'of', 'mint-lms' ); ?> <span x-text="questions.length"></span></span>
+				<div class="mint-s3-quiz-take__bar" aria-hidden="true">
+					<div class="mint-s3-quiz-take__bar-fill" :style="'width:' + (((currentIndex + 1) / Math.max(questions.length, 1)) * 100) + '%'"></div>
+				</div>
+			</div>
+
 			<template x-for="(question, qIndex) in questions" :key="question.id">
-				<div class="mint-rounded-lg mint-bg-bg-subtle mint-p-4">
-					<p class="mint-mb-3 mint-text-base mint-font-semibold mint-text-ink" x-text="(qIndex + 1) + '. ' + question.prompt"></p>
+				<div class="mint-s3-question-card" x-show="qIndex === currentIndex" x-cloak>
+					<p class="mint-s3-question-card__prompt" x-text="question.prompt"></p>
+
 					<template x-if="question.type === 'true_false'">
-						<div class="mint-flex mint-gap-4">
-							<label class="mint-flex mint-cursor-pointer mint-items-center mint-gap-2 mint-text-sm mint-text-ink-2">
-								<input type="radio" class="mint-h-4 mint-w-4 mint-accent-accent" :name="'q-' + question.id" value="true" x-model="answers[question.id]" />
-								<?php esc_html_e( 'True', 'mint-lms' ); ?>
+						<div class="mint-s3-choice-list">
+							<label class="mint-s3-choice" :class="isChoiceSelected(question.id, 'true') ? 'is-selected' : ''">
+								<input type="radio" class="mint-s3-choice__input" :name="'q-' + question.id" value="true" x-model="answers[question.id]" />
+								<span class="mint-s3-choice__dot" aria-hidden="true"></span>
+								<span><?php esc_html_e( 'True', 'mint-lms' ); ?></span>
 							</label>
-							<label class="mint-flex mint-cursor-pointer mint-items-center mint-gap-2 mint-text-sm mint-text-ink-2">
-								<input type="radio" class="mint-h-4 mint-w-4 mint-accent-accent" :name="'q-' + question.id" value="false" x-model="answers[question.id]" />
-								<?php esc_html_e( 'False', 'mint-lms' ); ?>
+							<label class="mint-s3-choice" :class="isChoiceSelected(question.id, 'false') ? 'is-selected' : ''">
+								<input type="radio" class="mint-s3-choice__input" :name="'q-' + question.id" value="false" x-model="answers[question.id]" />
+								<span class="mint-s3-choice__dot" aria-hidden="true"></span>
+								<span><?php esc_html_e( 'False', 'mint-lms' ); ?></span>
 							</label>
 						</div>
 					</template>
+
 					<template x-if="question.type === 'mcq'">
-						<div class="mint-flex mint-flex-col mint-gap-2">
+						<div class="mint-s3-choice-list">
 							<template x-for="(option, oIndex) in question.options" :key="oIndex">
-								<label class="mint-flex mint-cursor-pointer mint-items-center mint-gap-2 mint-text-sm mint-text-ink-2">
-									<input type="radio" class="mint-h-4 mint-w-4 mint-accent-accent" :name="'q-' + question.id" :value="option" x-model="answers[question.id]" />
+								<label class="mint-s3-choice" :class="isChoiceSelected(question.id, option) ? 'is-selected' : ''">
+									<input type="radio" class="mint-s3-choice__input" :name="'q-' + question.id" :value="option" x-model="answers[question.id]" />
+									<span class="mint-s3-choice__dot" aria-hidden="true"></span>
 									<span x-text="option"></span>
 								</label>
 							</template>
 						</div>
 					</template>
+
 					<template x-if="question.type === 'mcq_multi'">
-						<div class="mint-flex mint-flex-col mint-gap-2">
+						<div class="mint-s3-choice-list">
 							<template x-for="(option, oIndex) in question.options" :key="oIndex">
-								<label class="mint-flex mint-cursor-pointer mint-items-center mint-gap-2 mint-text-sm mint-text-ink-2">
+								<label class="mint-s3-choice" :class="isMultiSelected(question.id, option) ? 'is-selected' : ''">
 									<input
 										type="checkbox"
-										class="mint-h-4 mint-w-4 mint-accent-accent"
+										class="mint-s3-choice__input"
 										:value="option"
 										:checked="isMultiSelected(question.id, option)"
 										@change="toggleMultiAnswer(question.id, option, $event.target.checked)"
 									/>
+									<span class="mint-s3-choice__box" aria-hidden="true"></span>
 									<span x-text="option"></span>
 								</label>
 							</template>
 						</div>
 					</template>
+
 					<template x-if="question.type === 'essay'">
 						<textarea
-							class="mint-w-full mint-min-h-[110px] mint-rounded-md mint-border mint-border-rule mint-bg-bg mint-px-3 mint-py-2 mint-text-sm mint-text-ink"
-							rows="4"
+							class="mint-s3-essay"
+							rows="5"
 							x-model="answers[question.id]"
 							placeholder="<?php echo esc_attr__( 'Write your answer…', 'mint-lms' ); ?>"
 						></textarea>
 					</template>
 				</div>
 			</template>
-			<div>
-				<button type="button" class="mint-inline-flex mint-items-center mint-justify-center mint-h-control mint-px-4 mint-text-sm mint-font-medium mint-rounded-md mint-bg-accent mint-text-neutral-50 hover:mint-bg-accent-hover mint-transition-colors mint-duration-hover" @click="submitQuiz()" :disabled="submitting">
+
+			<div class="mint-s3-quiz-take__nav">
+				<button
+					type="button"
+					class="mint-s3b-nav__prev"
+					@click="goPrev()"
+					:disabled="currentIndex === 0"
+				><?php esc_html_e( 'Previous', 'mint-lms' ); ?></button>
+				<button
+					type="button"
+					class="mint-s3b-nav__next"
+					x-show="currentIndex < questions.length - 1"
+					@click="goNext()"
+				><?php esc_html_e( 'Next question', 'mint-lms' ); ?> ›</button>
+				<button
+					type="button"
+					class="mint-s3b-nav__next"
+					x-show="currentIndex === questions.length - 1"
+					x-cloak
+					@click="submitQuiz()"
+					:disabled="submitting"
+				>
 					<span x-text="submitting ? mintLmsStudent.i18n.submittingQuiz : mintLmsStudent.i18n.submitQuiz"></span>
 				</button>
 			</div>
-		</div>
-	</template>
-
-	<template x-if="submitted && !hasPassed">
-		<div>
-			<div class="mint-mb-4 mint-rounded-lg mint-bg-danger-wash mint-px-4 mint-py-4">
-				<p class="mint-mb-1 mint-text-sm mint-font-medium mint-text-danger" x-text="mintLmsStudent.i18n.quizFailed"></p>
-				<p class="mint-text-sm mint-text-ink-2" x-text="Math.round(scorePercent) + '% — ' + mintLmsStudent.i18n.quizRetry"></p>
-			</div>
-			<button type="button" class="mint-inline-flex mint-items-center mint-justify-center mint-h-control mint-px-4 mint-text-sm mint-font-medium mint-rounded-md mint-border mint-border-control mint-bg-bg mint-text-ink hover:mint-bg-bg-hover mint-transition-colors mint-duration-hover" @click="retry()">
-				<?php esc_html_e( 'Try again', 'mint-lms' ); ?>
-			</button>
 		</div>
 	</template>
 

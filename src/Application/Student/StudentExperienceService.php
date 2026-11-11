@@ -192,9 +192,18 @@ final class StudentExperienceService {
 			return $this->getStandaloneLessonBuilderPreview( $lessonId, $userId );
 		}
 
-		$course    = $this->requireEditableCourse( $courseId, $userId );
-		$structure = $this->loadGatedStructure( $courseId, true, $userId, true );
-		$outline   = $this->buildContentOutline( $structure, $userId, true );
+		$course = $this->courseRepository->findById( $courseId );
+		if ( null === $course ) {
+			throw new NotFoundException( 'Course not found.' );
+		}
+
+		$isEditorPreview = $this->canEditorPreviewCourse( $userId, $course->status, $course->authorId );
+		if ( ! $isEditorPreview ) {
+			$this->getPlayerContext( $courseId, $lessonId, $userId );
+		}
+
+		$structure = $this->loadGatedStructure( $courseId, true, $userId, $isEditorPreview );
+		$outline   = $this->buildContentOutline( $structure, $userId, $isEditorPreview );
 		$flat      = $this->flattenLessons( $structure );
 
 		$authorName = '';
@@ -385,14 +394,22 @@ final class StudentExperienceService {
 		}
 
 		if ( $quizId > 0 ) {
-			return $this->quizService->get( $quizId, $userId, false );
+			try {
+				return $this->quizService->get( $quizId, $userId, false );
+			} catch ( ForbiddenException $exception ) {
+				return $this->quizService->get( $quizId, $userId, true );
+			}
 		}
 
 		if ( $lessonId <= 0 ) {
 			throw new NotFoundException( 'Quiz not found.' );
 		}
 
-		$quiz = $this->quizService->getByLessonId( $lessonId, $userId, false );
+		try {
+			$quiz = $this->quizService->getByLessonId( $lessonId, $userId, false );
+		} catch ( ForbiddenException $exception ) {
+			$quiz = $this->quizService->getByLessonId( $lessonId, $userId, true );
+		}
 
 		if ( null === $quiz ) {
 			throw new NotFoundException( 'Quiz not found.' );

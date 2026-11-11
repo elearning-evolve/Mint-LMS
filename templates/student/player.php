@@ -103,7 +103,7 @@ $pct          = (int) round( $context->progressPct );
 								?>
 							</p>
 						</div>
-						<a href="<?php echo esc_url( $quizPreviewUrl ); ?>" class="mint-inline-flex mint-h-[42px] mint-items-center mint-justify-center mint-rounded-lg mint-border-0 mint-bg-cta mint-px-[18px] mint-text-sm mint-font-bold mint-text-cta-ink mint-no-underline hover:mint-bg-cta-hover"><?php esc_html_e( 'Start quiz', 'mint-lms' ); ?></a>
+						<a href="<?php echo esc_url( $quizPreviewUrl ); ?>" class="mint-inline-flex mint-h-[42px] mint-items-center mint-justify-center mint-rounded-lg mint-border-0 mint-bg-cta mint-px-[18px] mint-text-sm mint-font-bold mint-text-ink mint-no-underline hover:mint-bg-cta-hover"><?php esc_html_e( 'Start quiz', 'mint-lms' ); ?></a>
 					</div>
 				</div>
 				<?php
