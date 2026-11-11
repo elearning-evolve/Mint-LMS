@@ -253,6 +253,16 @@ $showCta = $overview->isEnrolled || $overview->canEnroll || ( 'paid' === $overvi
 													$quizId    = (int) ( $quiz['id'] ?? 0 );
 													$quizKey   = $lessonKey . '-quiz-' . $quizId;
 													$quizTitle = (string) ( $quiz['title'] ?? '' );
+													$quizUrl   = $quizId > 0 && $lessonId > 0
+														? add_query_arg(
+															array(
+																'mint_course' => (string) $overview->courseId,
+																'mint_lesson' => (string) $lessonId,
+																'mint_quiz'   => (string) $quizId,
+															),
+															$playerUrl
+														)
+														: '';
 													$quizMeta  = (string) ( $quiz['meta'] ?? '' );
 													$questions = is_array( $quiz['questions'] ?? null ) ? $quiz['questions'] : array();
 													?>
@@ -263,7 +273,13 @@ $showCta = $overview->isEnrolled || $overview->canEnroll || ( 'paid' === $overvi
 																	<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
 																</span>
 																<div class="mint-s3b-stack__quiz-copy">
-																	<div class="mint-s3b-stack__quiz-title"><?php echo esc_html( $quizTitle ); ?></div>
+																	<div class="mint-s3b-stack__quiz-title">
+																		<?php if ( '' !== $quizUrl ) : ?>
+																			<a href="<?php echo esc_url( $quizUrl ); ?>" class="mint-s3-quiz-name-link"><?php echo esc_html( $quizTitle ); ?></a>
+																		<?php else : ?>
+																			<?php echo esc_html( $quizTitle ); ?>
+																		<?php endif; ?>
+																	</div>
 																	<div class="mint-s3b-stack__quiz-meta">
 																		<span class="mint-s3b-badge mint-s3b-badge--sm"><?php esc_html_e( 'Quiz', 'mint-lms' ); ?></span>
 																		<span><?php echo esc_html( $quizMeta ); ?></span>

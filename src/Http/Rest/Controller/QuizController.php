@@ -20,6 +20,7 @@ use MintLMS\Application\Quiz\QuestionAnswerCodec;
 use MintLMS\Application\Quiz\QuizService;
 use MintLMS\Domain\Quiz\QuizQuestion;
 use MintLMS\Http\Rest\Response\ApiResponse;
+use MintLMS\Infrastructure\Http\RestContentSanitizer;
 use MintLMS\Infrastructure\PostType\PostTypes;
 
 final class QuizController {
@@ -865,7 +866,7 @@ final class QuizController {
 			'prompt'         => array(
 				'type'              => 'string',
 				'required'          => $requireAll,
-				'sanitize_callback' => 'sanitize_textarea_field',
+				'sanitize_callback' => array( RestContentSanitizer::class, 'richText' ),
 			),
 			'options'        => array(
 				'type'     => 'array',
@@ -1281,7 +1282,7 @@ final class QuizController {
 			}
 			$clean[] = array(
 				'id'             => absint( $item['id'] ?? 0 ) ?: null,
-				'prompt'         => sanitize_textarea_field( (string) ( $item['prompt'] ?? '' ) ),
+				'prompt'         => RestContentSanitizer::richText( (string) ( $item['prompt'] ?? '' ) ),
 				'correctAnswer'  => $answer,
 				'freePreview'    => ! empty( $item['freePreview'] ),
 				'attachmentId'   => absint( $item['attachmentId'] ?? 0 ),

@@ -5778,8 +5778,12 @@ function courseBuilder(courseId, opts = {}) {
     },
 
     isBlankQuestionPrompt(prompt) {
-      const value = (prompt || '').trim();
-      return value === '' || value === 'New Question';
+      const text = String(prompt || '')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/&nbsp;/gi, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      return text === '' || text === 'New Question';
     },
 
     isQuestionAnswerReady(question) {
@@ -5847,7 +5851,11 @@ function courseBuilder(courseId, opts = {}) {
             ? ''
             : type === 'essay'
               ? ''
-              : question.correctAnswer || '',
+              : type === 'true_false'
+                ? question.correctAnswer === 'false'
+                  ? 'false'
+                  : 'true'
+                : question.correctAnswer || '',
         correctAnswers: type === 'mcq_multi' ? correctAnswers : [],
         featuredImageId: question.featuredImageId || null,
         featuredImageUrl: question.featuredImageUrl || '',
@@ -6199,7 +6207,7 @@ function courseBuilder(courseId, opts = {}) {
           this.activeQuestion.extraTf = [];
         }
         if (this.activeQuestion.correctAnswer !== 'true' && this.activeQuestion.correctAnswer !== 'false') {
-          this.activeQuestion.correctAnswer = '';
+          this.activeQuestion.correctAnswer = 'true';
         }
         this.activeQuestion.settings.answerTypePending = false;
         this.questionAnswerReady = true;
@@ -6412,39 +6420,38 @@ function courseBuilder(courseId, opts = {}) {
         // Preserve pending answer-type drafts across title-only saves.
         settings.answerTypePending = !!this.activeQuestion.settings?.answerTypePending;
 
-        let correctAnswer = this.activeQuestion.correctAnswer || '';
-        if (type === 'mcq_multi') {
-          correctAnswer = Array.isArray(this.activeQuestion.correctAnswers)
-            ? this.activeQuestion.correctAnswers
-            : [];
-          if (!Array.isArray(correctAnswer) || correctAnswer.length === 0) {
-            // Keep existing stored answer; send current prompt/settings only via PATCH fields that validate.
-            correctAnswer = this.activeQuestion.options?.[0] || 'Option 1';
-          }
-        } else if (type === 'true_false' && correctAnswer !== 'true' && correctAnswer !== 'false') {
-          correctAnswer = 'true';
-        } else if (type === 'mcq') {
-          const options = (this.activeQuestion.options || []).filter((o) => String(o || '').trim());
-          if (!options.includes(correctAnswer)) {
-            correctAnswer = options[0] || 'Option 1';
-          }
-        } else if (type === 'essay') {
-          correctAnswer = '';
-        }
+        const options =
+          type === 'true_false'
+            ? ['True', 'False']
+            : type === 'essay'
+              ? []
+              : (this.activeQuestion.options || []).filter((o) => String(o || '').trim());
 
         const payload = {
           type,
           prompt,
-          options:
-            type === 'true_false'
-              ? ['True', 'False']
-              : type === 'essay'
-                ? []
-                : (this.activeQuestion.options || []).filter((o) => String(o || '').trim()),
-          correct_answer: correctAnswer,
+          options,
           featured_image_id: this.activeQuestion.featuredImageId || 0,
           settings,
         };
+
+        if (type === 'essay') {
+          payload.correct_answer = '';
+        } else if (type === 'true_false') {
+          const tf = this.activeQuestion.correctAnswer;
+          if (tf === 'true' || tf === 'false') {
+            payload.correct_answer = tf;
+          }
+        } else if (type === 'mcq_multi') {
+          const multi = Array.isArray(this.activeQuestion.correctAnswers)
+            ? this.activeQuestion.correctAnswers.filter((item) => options.includes(item))
+            : [];
+          if (multi.length > 0) {
+            payload.correct_answer = multi;
+          }
+        } else if (type === 'mcq' && options.includes(this.activeQuestion.correctAnswer)) {
+          payload.correct_answer = this.activeQuestion.correctAnswer;
+        }
 
         const quiz = await mintApi(`quizzes/${this.lessonQuiz.id}/questions/${this.activeQuestion.id}`, {
           method: 'PATCH',
@@ -8129,6 +8136,10 @@ function courseBuilder(courseId, opts = {}) {
 
     async saveSection(section, { toast = false, reload = false } = {}) {
       if (!section) return false;
+      if (Number(section.id) <= 0) {
+        window.MintLMS.toast.info('Ungrouped lessons have no group title to save');
+        return false;
+      }
       this.setSaving();
       try {
         await mintApi(`sections/${section.id}`, {
@@ -8627,8 +8638,6 @@ function courseBuilder(courseId, opts = {}) {
       } else if (this.selected?.type === 'section' && this.selectedSection) {
         saved = (await this.saveSection(this.selectedSection, { toast: false })) === true;
         this.syncBuilderSelectionUrl({ type: 'section' });
-      } else if (Number(this.courseId) > 0) {
-        saved = true;
       } else {
         window.MintLMS.toast.info('Nothing to save here');
         return;
@@ -9308,7 +9317,7 @@ function courseBuilder(courseId, opts = {}) {
         title: 'New Question',
         prompt: '',
         options: normalizedType === 'true_false' ? ['True', 'False'] : normalizedType === 'essay' ? [] : ['Option 1', 'Option 2'],
-        correctAnswer: '',
+        correctAnswer: normalizedType === 'true_false' ? 'true' : '',
         correctAnswers: [],
         featuredImageId: null,
         featuredImageUrl: '',
@@ -9701,11 +9710,32 @@ function courseBuilder(courseId, opts = {}) {
       if (!this.lessonQuiz?.id) return false;
 
       const type = this.normalizeQuestionType(question.type);
+      const options =
+        type === 'true_false'
+          ? ['True', 'False']
+          : type === 'essay'
+            ? []
+            : (question.options || []).filter((o) => String(o || '').trim());
+      if ((type === 'mcq' || type === 'mcq_multi') && options.length < 2) {
+        window.MintLMS.toast.info('Add at least two answer options');
+        return false;
+      }
       let correctAnswer = question.correctAnswer || '';
       if (type === 'mcq_multi') {
         correctAnswer = Array.isArray(question.correctAnswers) ? question.correctAnswers : [];
+        if (!Array.isArray(correctAnswer) || correctAnswer.length === 0) {
+          window.MintLMS.toast.info('Select at least one correct answer');
+          return false;
+        }
       } else if (type === 'essay') {
         correctAnswer = '';
+      } else if (type === 'true_false') {
+        if (correctAnswer !== 'true' && correctAnswer !== 'false') {
+          correctAnswer = 'true';
+        }
+      } else if (!options.includes(String(correctAnswer))) {
+        window.MintLMS.toast.info('Select a correct answer');
+        return false;
       }
 
       const settings = this.normalizeQuestionSettings(question.settings, (question.options || []).length);
@@ -9718,7 +9748,7 @@ function courseBuilder(courseId, opts = {}) {
       const payload = {
         type,
         prompt: this.isBlankQuestionPrompt(question.prompt) ? 'New Question' : question.prompt,
-        options: type === 'true_false' ? ['True', 'False'] : type === 'essay' ? [] : question.options.filter((o) => o.trim()),
+        options,
         correct_answer: correctAnswer,
         featured_image_id: question.featuredImageId || 0,
         settings,

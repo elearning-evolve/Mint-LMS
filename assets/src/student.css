@@ -424,6 +424,32 @@
   color: #17222b;
 }
 
+#mint-lms-root.mint-lms-student .mint-s3-quiz-name-link {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-weight: inherit;
+  color: inherit;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+#mint-lms-root.mint-lms-student .mint-s3-quiz-name-link:hover {
+  opacity: 0.72;
+}
+
+#mint-lms-root.mint-lms-student h1.mint-s3b-title .mint-s3-quiz-name-link {
+  text-decoration: none;
+}
+
+#mint-lms-root.mint-lms-student h1.mint-s3b-title .mint-s3-quiz-name-link:hover {
+  text-decoration: underline;
+}
+
 #mint-lms-root.mint-lms-student .mint-s3b-stack__quiz-copy .mint-s3b-badge {
   margin-top: 4px;
 }
@@ -824,6 +850,14 @@
   line-height: 1.45;
   font-weight: 600;
   color: #0f0e1a;
+}
+
+#mint-lms-root.mint-lms-student .mint-s3-question-card__prompt :is(h1, h2, h3, h4, h5, h6, p, pre, ul, ol) {
+  margin: 0 0 0.45em;
+}
+
+#mint-lms-root.mint-lms-student .mint-s3-question-card__prompt :last-child {
+  margin-bottom: 0;
 }
 
 #mint-lms-root.mint-lms-student .mint-s3-choice-list {
