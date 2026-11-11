@@ -198,6 +198,7 @@ final class LessonController {
 			);
 
 			$lesson = $this->lessonService->create( $sectionId, $dto, $userId );
+			$this->stampDefaultLessonSettings( (int) $lesson->id );
 
 			return ApiResponse::success( $this->lessonPayload( $lesson ), 201 );
 		} catch ( ValidationException $exception ) {
@@ -230,6 +231,7 @@ final class LessonController {
 				$userId,
 				$sectionId > 0 ? $sectionId : null
 			);
+			$this->stampDefaultLessonSettings( (int) $lesson->id );
 
 			return ApiResponse::success( $this->lessonPayload( $lesson ), 201 );
 		} catch ( ValidationException $exception ) {
@@ -255,6 +257,7 @@ final class LessonController {
 			);
 
 			$lesson = $this->lessonService->createStandalone( $dto, $userId );
+			$this->stampDefaultLessonSettings( (int) $lesson->id );
 
 			return ApiResponse::success( $this->lessonPayload( $lesson ), 201 );
 		} catch ( ValidationException $exception ) {
@@ -597,7 +600,7 @@ final class LessonController {
 			'materialsContent'  => '',
 			'videoProgression'  => false,
 			'videoUrl'          => '',
-			'videoTiming'       => 'before',
+			'videoTiming'       => 'after',
 			'videoAutoplay'     => false,
 			'videoControls'     => true,
 			'videoPauseHidden'  => false,
@@ -645,9 +648,9 @@ final class LessonController {
 		if ( ! in_array( $schedule, array( 'immediately', 'enrollment', 'specific_date' ), true ) ) {
 			$schedule = 'immediately';
 		}
-		$timing = sanitize_key( (string) ( $settings['videoTiming'] ?? 'before' ) );
+		$timing = sanitize_key( (string) ( $settings['videoTiming'] ?? 'after' ) );
 		if ( ! in_array( $timing, array( 'before', 'after' ), true ) ) {
-			$timing = 'before';
+			$timing = 'after';
 		}
 		$grading = sanitize_key( (string) ( $settings['grading'] ?? 'auto' ) );
 		if ( ! in_array( $grading, array( 'auto', 'manual' ), true ) ) {
@@ -694,6 +697,19 @@ final class LessonController {
 		);
 
 		update_post_meta( $lessonId, PostTypes::META_LESSON_SETTINGS, array_merge( $defaults, $clean ) );
+	}
+
+	private function stampDefaultLessonSettings( int $lessonId ): void {
+		if ( $lessonId <= 0 ) {
+			return;
+		}
+
+		$existing = get_post_meta( $lessonId, PostTypes::META_LESSON_SETTINGS, true );
+		if ( is_array( $existing ) ) {
+			return;
+		}
+
+		$this->saveLessonSettings( $lessonId, $this->defaultLessonSettings() );
 	}
 
 	private function sanitizeLessonTimePart( mixed $value ): string {

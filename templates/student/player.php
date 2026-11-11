@@ -13,6 +13,14 @@ $dashboardUrl   = $dashboardUrl ?? home_url( '/' );
 $attachmentUrl  = $attachmentUrl ?? null;
 $videoEmbed     = $videoEmbed ?? '';
 $quizPreviewUrl = is_string( $quizPreviewUrl ?? null ) ? $quizPreviewUrl : '';
+$lessonSettings = is_array( $lessonSettings ?? null ) ? $lessonSettings : array();
+$videoTiming    = ( $lessonSettings['videoTiming'] ?? 'after' ) === 'before' ? 'before' : 'after';
+$showVideoBefore = '' !== $videoEmbed && 'before' === $videoTiming;
+$showVideoAfter  = '' !== $videoEmbed && 'after' === $videoTiming;
+$materialsHtml   = ! empty( $lessonSettings['materialsEnabled'] )
+	? (string) ( $lessonSettings['materialsContent'] ?? '' )
+	: '';
+$videoProgression = ! empty( $lessonSettings['videoProgression'] ) && str_contains( $videoEmbed, '<video' );
 
 $completedIds = $context->completedLessonIds;
 $lesson       = $context->currentLesson;
@@ -27,7 +35,8 @@ $pct          = (int) round( $context->progressPct );
 		completedIds: <?php echo wp_json_encode( $completedIds ); ?>,
 		isEnrolled: <?php echo $context->isEnrolled ? 'true' : 'false'; ?>,
 		quizRequired: <?php echo $context->quizRequired ? 'true' : 'false'; ?>,
-		hasPassedQuiz: <?php echo $context->hasPassedQuiz ? 'true' : 'false'; ?>
+		hasPassedQuiz: <?php echo $context->hasPassedQuiz ? 'true' : 'false'; ?>,
+		videoProgression: <?php echo $videoProgression ? 'true' : 'false'; ?>
 	})"
 >
 	<?php if ( ! empty( $context->isReviewMode ) ) : ?>
@@ -62,7 +71,7 @@ $pct          = (int) round( $context->progressPct );
 
 		<main class="mint-min-w-0">
 
-			<?php if ( '' !== $videoEmbed ) : ?>
+			<?php if ( $showVideoBefore ) : ?>
 				<div class="mint-aspect-video mint-w-full mint-overflow-hidden mint-rounded-xl mint-border mint-border-rule mint-bg-bg-ink [&_iframe]:mint-h-full [&_iframe]:mint-w-full">
 					<?php echo $videoEmbed; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				</div>
@@ -116,6 +125,22 @@ $pct          = (int) round( $context->progressPct );
 			endif;
 			?>
 
+			<?php if ( $showVideoAfter ) : ?>
+				<div class="mint-mt-8 mint-aspect-video mint-w-full mint-overflow-hidden mint-rounded-xl mint-border mint-border-rule mint-bg-bg-ink [&_iframe]:mint-h-full [&_iframe]:mint-w-full">
+					<?php echo $videoEmbed; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				</div>
+			<?php endif; ?>
+
+			<?php if ( '' !== trim( wp_strip_all_tags( $materialsHtml ) ) || str_contains( $materialsHtml, '<img' ) ) : ?>
+				<aside class="mint-mt-8 mint-rounded-xl mint-border mint-border-rule mint-bg-bg mint-p-5">
+					<div class="mint-text-over mint-font-semibold mint-uppercase mint-tracking-widest mint-text-ink"><?php esc_html_e( 'Lesson materials', 'mint-lms' ); ?></div>
+					<div class="mint-mt-3 mint-text-prose mint-text-ink-2 [&_p]:mint-mb-3 [&_p:last-child]:mint-mb-0">
+						<?php echo wp_kses_post( $materialsHtml ); ?>
+					</div>
+				</aside>
+			<?php endif; ?>
+
+			<p class="mint-mt-6 mint-mb-0 mint-text-sm mint-text-danger" x-show="error" x-cloak x-text="error"></p>
 			<div class="mint-mt-8 mint-flex mint-flex-col mint-gap-3 sm:mint-flex-row sm:mint-items-center sm:mint-justify-between">
 				<div>
 					<?php if ( null !== $context->previousLessonId ) : ?>
@@ -130,7 +155,7 @@ $pct          = (int) round( $context->progressPct );
 							type="button"
 							class="mint-inline-flex mint-items-center mint-justify-center mint-h-control-md mint-px-5 mint-text-sm mint-font-medium mint-rounded-md mint-transition-colors mint-duration-hover"
 							:class="isComplete ? 'mint-bg-success-wash mint-text-success mint-cursor-default' : 'mint-bg-accent mint-text-neutral-50 hover:mint-bg-accent-hover'"
-							:disabled="isComplete || marking || (quizRequired && !hasPassedQuiz)"
+							:disabled="isComplete || marking || (quizRequired && !hasPassedQuiz) || (videoProgression && !videoWatched)"
 							@click="markComplete()"
 						>
 							<span x-text="marking ? mintLmsStudent.i18n.marking : (isComplete ? mintLmsStudent.i18n.completed : (<?php echo null !== $context->nextLessonId ? 'true' : 'false'; ?> ? '<?php echo esc_js( __( 'Mark complete & continue', 'mint-lms' ) ); ?>' : mintLmsStudent.i18n.markComplete))"></span>

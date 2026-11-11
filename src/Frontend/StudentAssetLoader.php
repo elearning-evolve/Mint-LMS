@@ -63,6 +63,7 @@ final class StudentAssetLoader {
 					'completeError'  => __( 'Could not mark lesson complete.', 'mint-lms' ),
 					'courseComplete' => __( 'Course complete!', 'mint-lms' ),
 					'quizRequired'   => __( 'Pass the quiz before marking this lesson complete.', 'mint-lms' ),
+					'watchVideo'     => __( 'Watch the lesson video first.', 'mint-lms' ),
 					'submitQuiz'     => __( 'Submit quiz', 'mint-lms' ),
 					'submittingQuiz' => __( 'Submitting…', 'mint-lms' ),
 					'quizPassed'     => __( 'Quiz passed! You can now mark this lesson complete.', 'mint-lms' ),

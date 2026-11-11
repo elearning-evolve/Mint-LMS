@@ -723,19 +723,21 @@ final class ShortcodeRegistrar {
 			);
 		}
 
-		$attachmentUrl = $this->attachmentUrl( $context->currentLesson->attachmentId );
-		$lessonUrl     = fn( int $id ): string => $this->lessonUrl( $courseId, $id );
+		$attachmentUrl  = $this->attachmentUrl( $context->currentLesson->attachmentId );
+		$lessonUrl      = fn( int $id ): string => $this->lessonUrl( $courseId, $id );
+		$lessonSettings = $this->lessonPlayerSettings( (int) $context->currentLesson->id );
 
 		return $this->wrap(
 			$this->templateLoader->render(
 				'student/player.php',
 				array(
-					'context'       => $context,
-					'playerBaseUrl' => $settings->resolvePlayerUrl( '' ),
-					'dashboardUrl'  => $settings->resolveDashboardUrl( $atts['dashboard_page'] ),
-					'lessonUrl'     => $lessonUrl,
-					'attachmentUrl' => $attachmentUrl,
-					'videoEmbed'    => $this->videoEmbed( $context->currentLesson->videoUrl ),
+					'context'        => $context,
+					'playerBaseUrl'  => $settings->resolvePlayerUrl( '' ),
+					'dashboardUrl'   => $settings->resolveDashboardUrl( $atts['dashboard_page'] ),
+					'lessonUrl'      => $lessonUrl,
+					'attachmentUrl'  => $attachmentUrl,
+					'videoEmbed'     => $this->videoEmbed( $this->lessonVideoUrl( $context->currentLesson->videoUrl, $lessonSettings ), $lessonSettings ),
+					'lessonSettings' => $lessonSettings,
 				)
 			)
 		);
@@ -854,6 +856,8 @@ final class ShortcodeRegistrar {
 			$quizPreviewUrl = $this->previewQuizUrl( $courseId, $lessonId, (int) $context->quiz->id );
 		}
 
+		$lessonSettings = $this->lessonPlayerSettings( (int) $context->currentLesson->id );
+
 		return $this->wrap(
 			$this->templateLoader->render(
 				'student/player.php',
@@ -863,8 +867,9 @@ final class ShortcodeRegistrar {
 					'dashboardUrl'   => $settings->resolveDashboardUrl( '' ),
 					'lessonUrl'      => $lessonUrl,
 					'attachmentUrl'  => $attachmentUrl,
-					'videoEmbed'     => $this->videoEmbed( $context->currentLesson->videoUrl ),
+					'videoEmbed'     => $this->videoEmbed( $this->lessonVideoUrl( $context->currentLesson->videoUrl, $lessonSettings ), $lessonSettings ),
 					'quizPreviewUrl' => $quizPreviewUrl,
+					'lessonSettings' => $lessonSettings,
 				)
 			)
 		);
@@ -1080,10 +1085,47 @@ final class ShortcodeRegistrar {
 		return is_string( $url ) ? $url : null;
 	}
 
-	private function videoEmbed( ?string $videoUrl ): string {
+	/**
+	 * @param array<string, mixed> $settings
+	 */
+	private function lessonVideoUrl( ?string $lessonVideoUrl, array $settings ): ?string {
+		if ( is_string( $lessonVideoUrl ) && '' !== $lessonVideoUrl ) {
+			return $lessonVideoUrl;
+		}
+
+		$fromSettings = isset( $settings['videoUrl'] ) ? (string) $settings['videoUrl'] : '';
+
+		return '' !== $fromSettings ? $fromSettings : null;
+	}
+
+	/**
+	 * @return array<string, mixed>
+	 */
+	private function lessonPlayerSettings( int $lessonId ): array {
+		$raw = $lessonId > 0 ? get_post_meta( $lessonId, PostTypes::META_LESSON_SETTINGS, true ) : array();
+		$raw = is_array( $raw ) ? $raw : array();
+
+		return array(
+			'materialsEnabled' => ! empty( $raw['materialsEnabled'] ),
+			'materialsContent' => wp_kses_post( (string) ( $raw['materialsContent'] ?? '' ) ),
+			'videoProgression' => ! empty( $raw['videoProgression'] ),
+			'videoUrl'         => sanitize_text_field( (string) ( $raw['videoUrl'] ?? '' ) ),
+			'videoTiming'      => ( $raw['videoTiming'] ?? 'after' ) === 'before' ? 'before' : 'after',
+			'videoAutoplay'    => ! empty( $raw['videoAutoplay'] ),
+			'videoControls'    => array_key_exists( 'videoControls', $raw ) ? ! empty( $raw['videoControls'] ) : true,
+		);
+	}
+
+	/**
+	 * @param array<string, mixed> $settings
+	 */
+	private function videoEmbed( ?string $videoUrl, array $settings = array() ): string {
 		if ( null === $videoUrl || '' === $videoUrl ) {
 			return '';
 		}
+
+		$controls = ! array_key_exists( 'videoControls', $settings ) || ! empty( $settings['videoControls'] );
+		$autoplay = ! empty( $settings['videoAutoplay'] );
 
 		$embed = wp_oembed_get( $videoUrl );
 
@@ -1091,9 +1133,16 @@ final class ShortcodeRegistrar {
 			return $embed;
 		}
 
+		$attrs = $controls ? ' controls' : '';
+		if ( $autoplay ) {
+			$attrs .= ' autoplay playsinline';
+		}
+
 		return sprintf(
-			'<video class="mint-w-full mint-rounded-lg" controls src="%s"></video>',
-			esc_url( $videoUrl )
+			'<video class="mint-w-full mint-rounded-lg" %s src="%s"%s></video>',
+			trim( $attrs ),
+			esc_url( $videoUrl ),
+			! empty( $settings['videoProgression'] ) ? ' x-on:ended="videoWatched = true"' : ''
 		);
 	}
 }
