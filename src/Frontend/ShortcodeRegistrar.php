@@ -11,6 +11,7 @@ use MintLMS\Application\Exception\ForbiddenException;
 use MintLMS\Application\Exception\NotFoundException;
 use MintLMS\Application\Exception\ValidationException;
 use MintLMS\Application\Student\StudentExperienceService;
+use MintLMS\Infrastructure\PostType\PostTypes;
 use MintLMS\Infrastructure\Setup\PageSettings;
 use MintLMS\Infrastructure\Ui\UiRoot;
 use MintLMS\Infrastructure\WooCommerce\WooCommerceIntegration;
@@ -501,8 +502,11 @@ final class ShortcodeRegistrar {
 		$settings         = $this->settings();
 		$resolvedCourseId = $courseId > 0 ? $courseId : (int) $quiz->courseId;
 		$resolvedLessonId = $lessonId > 0 ? $lessonId : (int) $quiz->lessonId;
-		$courseTitle      = $this->publicPostTitle( $resolvedCourseId );
-		$lessonTitle      = $this->publicPostTitle( $resolvedLessonId );
+		if ( $resolvedLessonId > 0 && PostTypes::isDisposableHostLesson( $resolvedLessonId ) ) {
+			$resolvedLessonId = 0;
+		}
+		$courseTitle = $this->publicPostTitle( $resolvedCourseId );
+		$lessonTitle = $resolvedLessonId > 0 ? $this->publicPostTitle( $resolvedLessonId ) : '';
 
 		return $this->wrap(
 			$this->templateLoader->render(
