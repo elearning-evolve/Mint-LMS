@@ -292,6 +292,9 @@ function courseBuilder(courseId, opts = {}) {
         event.preventDefault();
         event.stopPropagation();
       }
+      if (this.selected?.type === 'question' || this.questionEditorActive) {
+        return;
+      }
       const url = this.buildPreviewUrl();
       this.previewUrl = url;
       if (!url || url === '#') {
@@ -2331,8 +2334,8 @@ function courseBuilder(courseId, opts = {}) {
     },
 
     /**
-     * Course Settings + Preview stay in the top header for the whole
-     * Course → Lesson → Quiz → Question builder flow.
+     * Course Settings stays in the top header for Course → Lesson → Quiz.
+     * Preview is for lesson and quiz only — never the question editor.
      */
     showCourseSettingsButton() {
       return (
@@ -2357,17 +2360,14 @@ function courseBuilder(courseId, opts = {}) {
       if (this.isOverviewOrHierarchyPage()) {
         return false;
       }
+      if (this.selected?.type === 'question' || this.questionEditorActive) {
+        return false;
+      }
       if (this.selected?.type === 'lesson') {
         return Number(this.selectedLesson?.id || this.selected?.id || 0) > 0;
       }
       if (this.selected?.type === 'quiz') {
         return Number(this.lessonQuiz?.id || this.selected?.quizId || 0) > 0;
-      }
-      if (this.selected?.type === 'question') {
-        return (
-          Number(this.lessonQuiz?.id || this.selected?.quizId || 0) > 0 ||
-          Number(this.activeQuestion?.id || this.selected?.id || 0) > 0
-        );
       }
       return false;
     },
