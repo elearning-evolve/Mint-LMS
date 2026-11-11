@@ -239,19 +239,58 @@ final class QuizServiceTest extends TestCase
         $this->assertSame(100.0, $score);
     }
 
-    public function test_grade_attempt_essay_only_scores_100(): void
+    public function test_grade_attempt_essay_only_scores_zero_pending(): void
     {
         $questions = [
             new QuizQuestion(1, 5, QuizQuestion::TYPE_ESSAY, 'Explain A', [], '', 0),
             new QuizQuestion(2, 5, QuizQuestion::TYPE_ESSAY, 'Explain B', [], '', 1),
         ];
 
-        $score = $this->service->gradeAttempt($questions, [
-            1 => 'Answer A',
-            2 => 'Answer B',
-        ]);
+        $grade = $this->service->evaluateAttempt(
+            $questions,
+            [
+                1 => 'Answer A',
+                2 => 'Answer B',
+            ],
+            70,
+            false
+        );
 
-        $this->assertSame(100.0, $score);
+        $this->assertSame(0.0, $grade->scorePercent);
+        $this->assertFalse($grade->passed);
+        $this->assertTrue($grade->pendingEssay);
+        $this->assertFalse($grade->persisted);
+    }
+
+    public function test_submit_attempt_rejects_editor_without_enrollment(): void
+    {
+        $quiz = new Quiz(5, 10, 1, 'Quiz', 70, 0);
+        $questions = [$this->mcqQuestion(1, 'A')];
+
+        $this->quizRepository->method('findById')->with(5)->willReturn($quiz);
+        $this->quizRepository->method('findQuestionsByQuizId')->with(5)->willReturn($questions);
+        $this->lessonRepository->method('findById')->with(1)->willReturn($this->sampleLesson(1, false));
+        $this->progressRepository->method('isUserEnrolled')->with(7, 10)->willReturn(false);
+        $this->courseRepository->method('findById')->willReturn(
+            new \MintLMS\Domain\Course\Course(
+                10,
+                'Course',
+                'course',
+                '',
+                null,
+                \MintLMS\Domain\Course\CourseStatus::Published,
+                \MintLMS\Domain\Course\EnrollmentType::Free,
+                7,
+                new \DateTimeImmutable('2026-01-01 00:00:00'),
+                new \DateTimeImmutable('2026-01-01 00:00:00'),
+            )
+        );
+        $this->authorization->method('canEditCourse')->willReturn(true);
+        $this->quizRepository->expects($this->never())->method('saveAttempt');
+
+        $this->expectException(ForbiddenException::class);
+
+        $this->service->submitAttempt(5, new SubmitQuizAttemptDto([1 => 'A']), 7);
     }
 
     private function mcqQuestion(int $id, string $correct): QuizQuestion

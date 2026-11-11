@@ -46,11 +46,7 @@ $associated    = '' !== $lessonTitle;
 <div class="mint-s3b-wrap" x-data="{ started: false }">
 	<article class="mint-s3-hero mint-s3-hero--wide">
 		<div class="mint-s3b-kicker"><?php esc_html_e( 'Quiz', 'mint-lms' ); ?></div>
-		<h1 class="mint-s3b-title">
-			<button type="button" class="mint-s3-quiz-name-link" @click="started = false">
-				<?php echo esc_html( $displayQuiz ); ?>
-			</button>
-		</h1>
+		<h1 class="mint-s3b-title"><?php echo esc_html( $displayQuiz ); ?></h1>
 
 		<?php if ( $associated ) : ?>
 			<p class="mint-s3-quiz-associate">
@@ -63,32 +59,16 @@ $associated    = '' !== $lessonTitle;
 			</p>
 		<?php endif; ?>
 
-		<?php if ( '' !== $courseTitle || $associated || '' !== $displayQuiz ) : ?>
+		<?php if ( '' !== $displayQuiz ) : ?>
 			<div class="mint-s3b-progress-row">
-				<div class="mint-s3b-progress">
-					<div class="mint-s3b-progress__crumb">
-						<?php if ( '' !== $courseTitle ) : ?>
-							<?php if ( '' !== $courseUrl ) : ?>
-								<a href="<?php echo esc_url( $courseUrl ); ?>" class="mint-s3b-progress__crumb-link"><?php echo esc_html( $courseTitle ); ?></a>
-							<?php else : ?>
-								<?php echo esc_html( $courseTitle ); ?>
-							<?php endif; ?>
-							<span aria-hidden="true"> › </span>
-						<?php endif; ?>
-						<?php if ( $associated ) : ?>
-							<?php if ( '' !== $lessonUrl ) : ?>
-								<a href="<?php echo esc_url( $lessonUrl ); ?>" class="mint-s3b-progress__crumb-link"><?php echo esc_html( $lessonTitle ); ?></a>
-							<?php else : ?>
-								<?php echo esc_html( $lessonTitle ); ?>
-							<?php endif; ?>
-							<span aria-hidden="true"> › </span>
-						<?php endif; ?>
-						<button type="button" class="mint-s3b-progress__crumb-link mint-s3-quiz-name-link" @click="started = false">
-							<?php echo esc_html( $displayQuiz ); ?>
-						</button>
-					</div>
-					<div class="mint-s3b-progress__badge"><?php echo esc_html( $quizMeta ); ?></div>
-				</div>
+				<button
+					type="button"
+					class="mint-s3b-progress mint-s3b-progress--quiz-home"
+					@click="started = false"
+				>
+					<span class="mint-s3b-progress__crumb"><?php echo esc_html( $displayQuiz ); ?></span>
+					<span class="mint-s3b-progress__badge"><?php echo esc_html( $quizMeta ); ?></span>
+				</button>
 			</div>
 		<?php endif; ?>
 	</article>

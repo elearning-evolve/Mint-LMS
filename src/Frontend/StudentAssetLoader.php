@@ -67,9 +67,16 @@ final class StudentAssetLoader {
 					'submittingQuiz' => __( 'Submitting…', 'mint-lms' ),
 					'quizPassed'     => __( 'Quiz passed! You can now mark this lesson complete.', 'mint-lms' ),
 					'quizPreviewPassed' => __( 'Preview passed — this attempt was not saved.', 'mint-lms' ),
+					'quizPreviewNotSaved' => __( 'Preview only. Results are not recorded.', 'mint-lms' ),
 					'quizFailed'     => __( 'Quiz not passed.', 'mint-lms' ),
 					'quizRetry'      => __( 'Review the lesson and try again.', 'mint-lms' ),
 					'quizSubmitError' => __( 'Could not submit quiz.', 'mint-lms' ),
+					'quizPending'    => __( 'Submitted — essay answers need grading.', 'mint-lms' ),
+					'quizEssayPending' => __( 'Auto-graded score. Essays are pending review.', 'mint-lms' ),
+					'answerRequired' => __( 'Answer this question before continuing.', 'mint-lms' ),
+					'correct'        => __( 'Correct', 'mint-lms' ),
+					'incorrect'      => __( 'Incorrect', 'mint-lms' ),
+					'pending'        => __( 'Pending', 'mint-lms' ),
 				),
 			)
 		);
