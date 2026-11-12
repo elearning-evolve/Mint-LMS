@@ -30,9 +30,19 @@ if ( ! $quizRequired && ! $isReviewMode ) {
 $questionCount = count( $quiz->questions );
 $storedSettings = get_post_meta( (int) $quiz->id, PostTypes::META_QUIZ_SETTINGS, true );
 $storedSettings = is_array( $storedSettings ) ? $storedSettings : array();
+$showQuizTitle  = array_key_exists( 'showQuizTitle', $storedSettings ) ? ! empty( $storedSettings['showQuizTitle'] ) : true;
+$materialsHtml  = ! empty( $storedSettings['materialsEnabled'] )
+	? (string) ( $storedSettings['materialsContent'] ?? '' )
+	: '';
+$restartDefault = array_key_exists( 'restartButton', $storedSettings ) ? ! empty( $storedSettings['restartButton'] ) : true;
+$viewQsDefault  = array_key_exists( 'viewQuestionsButton', $storedSettings ) ? ! empty( $storedSettings['viewQuestionsButton'] ) : true;
+$showOverall    = array_key_exists( 'showOverallScore', $storedSettings ) ? ! empty( $storedSettings['showOverallScore'] ) : true;
+$showCorrect    = array_key_exists( 'showCorrectCount', $storedSettings ) ? ! empty( $storedSettings['showCorrectCount'] ) : true;
+$showTimeSpent  = array_key_exists( 'showTimeSpent', $storedSettings ) ? ! empty( $storedSettings['showTimeSpent'] ) : true;
 $quizBoot       = wp_json_encode(
 	array(
 		'quizId'      => (int) $quiz->id,
+		'quizTitle'   => (string) $quiz->title,
 		'passPercent' => (int) $quiz->passPercent,
 		'hasPassed'   => (bool) $hasPassedQuiz,
 		'previewMode' => (bool) $isReviewMode,
@@ -50,15 +60,23 @@ $quizBoot       = wp_json_encode(
 			'retriesAllowed'             => absint( $storedSettings['retriesAllowed'] ?? 0 ),
 			'quizSavingEnabled'          => ! empty( $storedSettings['quizSavingEnabled'] ),
 			'quizSavingIntervalSeconds'  => max( 5, absint( $storedSettings['quizSavingIntervalSeconds'] ?? 20 ) ),
-			'restartButton'              => ! empty( $storedSettings['restartButton'] ),
+			'restartButton'              => $restartDefault,
 			'randomizeOrder'             => ! empty( $storedSettings['randomizeOrder'] ),
 			'randomizeAnswers'           => ! empty( $storedSettings['randomizeAnswers'] ),
+			'showOverallScore'           => $showOverall,
+			'showCorrectCount'           => $showCorrect,
+			'showTimeSpent'              => $showTimeSpent,
+			'customAnswerFeedback'       => array_key_exists( 'customAnswerFeedback', $storedSettings ) ? ! empty( $storedSettings['customAnswerFeedback'] ) : true,
+			'correctIncorrectMessages'   => array_key_exists( 'correctIncorrectMessages', $storedSettings ) ? ! empty( $storedSettings['correctIncorrectMessages'] ) : true,
+			'correctIncorrectMarks'      => array_key_exists( 'correctIncorrectMarks', $storedSettings ) ? ! empty( $storedSettings['correctIncorrectMarks'] ) : true,
+			'viewQuestionsButton'        => $viewQsDefault,
 		),
 		'questions'   => array_map(
 			static function ( $question ): array {
 				$row = $question->toArray();
 				unset( $row['correctAnswer'], $row['correctAnswers'] );
 				$row['prompt']  = wp_kses_post( (string) ( $row['prompt'] ?? '' ) );
+				$row['title']   = PostTypes::questionContentsTitle( (int) $question->id, (string) $question->prompt );
 				$row['options'] = array_map( 'strval', is_array( $row['options'] ?? null ) ? $row['options'] : array() );
 				return $row;
 			},
@@ -74,7 +92,7 @@ if ( ! is_string( $quizBoot ) ) {
 	class="mint-s3-quiz-runner"
 	x-data="mintLessonQuiz(<?php echo esc_attr( $quizBoot ); ?>)"
 >
-	<?php if ( $quizHeading ) : ?>
+	<?php if ( $quizHeading && $showQuizTitle ) : ?>
 		<div class="mint-s3-quiz-runner__head">
 			<h2 class="mint-s3-quiz-runner__title"><?php echo esc_html( $quiz->title ); ?></h2>
 			<?php if ( $questionCount > 0 ) : ?>
@@ -101,21 +119,45 @@ if ( ! is_string( $quizBoot ) ) {
 		</div>
 	</template>
 
+	<?php if ( '' !== trim( wp_strip_all_tags( $materialsHtml ) ) || str_contains( $materialsHtml, '<img' ) ) : ?>
+		<aside class="mint-mt-4 mint-rounded-xl mint-border mint-border-rule mint-bg-bg mint-p-5">
+			<div class="mint-text-over mint-font-semibold mint-uppercase mint-tracking-widest mint-text-ink"><?php esc_html_e( 'Quiz materials', 'mint-lms' ); ?></div>
+			<div class="mint-mt-3 mint-text-prose mint-text-ink-2 [&_p]:mint-mb-3 [&_p:last-child]:mint-mb-0">
+				<?php echo wp_kses_post( $materialsHtml ); ?>
+			</div>
+		</aside>
+	<?php endif; ?>
+
 	<template x-if="submitted">
-		<div class="mint-s3-quiz-result" :class="resultToneClass()">
+		<div class="mint-s3-quiz-result mint-s3-quiz-result--center" :class="resultToneClass()">
 			<p class="mint-s3-quiz-result__title" x-text="resultTitle()"></p>
-			<p class="mint-s3-quiz-result__meta" x-text="resultMeta()"></p>
-			<template x-if="review.length">
+			<p class="mint-s3-quiz-result__highlight" x-show="resultHighlight()" x-text="resultHighlight()"></p>
+			<div class="mint-s3-quiz-result__actions" x-show="canRestart() || (canViewQuestions() && review.length)">
+				<button
+					type="button"
+					class="mint-s3b-nav__next"
+					x-show="canRestart()"
+					@click="retry()"
+				><?php esc_html_e( 'Restart Quiz', 'mint-lms' ); ?></button>
+				<button
+					type="button"
+					class="mint-s3-quiz-result__view"
+					x-show="canViewQuestions() && review.length"
+					@click="showReview = !showReview"
+					x-text="showReview ? (mintLmsStudent.i18n.hideQuestions || 'Hide Questions') : (mintLmsStudent.i18n.viewQuestions || 'View Questions')"
+				></button>
+			</div>
+			<template x-if="showReview && canViewQuestions() && review.length">
 				<div class="mint-s3-quiz-review">
 					<template x-for="item in review" :key="'rv-' + item.id">
 						<div class="mint-s3-quiz-review__item" :class="reviewItemClass(item)">
 							<div class="mint-s3-quiz-review__prompt" x-html="questionPrompt(item.id)"></div>
-							<div class="mint-s3-quiz-review__badge" x-text="reviewBadge(item)"></div>
-							<p class="mint-s3-quiz-review__line">
+							<div class="mint-s3-quiz-review__badge" x-show="settings.correctIncorrectMarks !== false" x-text="reviewBadge(item)"></div>
+							<p class="mint-s3-quiz-review__line" x-show="settings.correctIncorrectMessages !== false">
 								<span><?php esc_html_e( 'Your answer', 'mint-lms' ); ?>:</span>
 								<span x-text="formatAnswer(item.given)"></span>
 							</p>
-							<p class="mint-s3-quiz-review__line" x-show="!item.pending">
+							<p class="mint-s3-quiz-review__line" x-show="settings.correctIncorrectMessages !== false && !item.pending">
 								<span><?php esc_html_e( 'Correct answer', 'mint-lms' ); ?>:</span>
 								<span x-text="formatAnswer(item.correctAnswer)"></span>
 							</p>
@@ -123,12 +165,6 @@ if ( ! is_string( $quizBoot ) ) {
 					</template>
 				</div>
 			</template>
-			<button
-				type="button"
-				class="mint-s3b-nav__next mint-mt-4"
-				x-show="canRetry()"
-				@click="retry()"
-			><?php esc_html_e( 'Try again', 'mint-lms' ); ?></button>
 		</div>
 	</template>
 

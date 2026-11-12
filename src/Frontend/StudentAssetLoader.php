@@ -78,6 +78,13 @@ final class StudentAssetLoader {
 					'correct'        => __( 'Correct', 'mint-lms' ),
 					'incorrect'      => __( 'Incorrect', 'mint-lms' ),
 					'pending'        => __( 'Pending', 'mint-lms' ),
+					'restartQuiz'    => __( 'Restart Quiz', 'mint-lms' ),
+					'viewQuestions'  => __( 'View Questions', 'mint-lms' ),
+					'hideQuestions'  => __( 'Hide Questions', 'mint-lms' ),
+					'quizKicker'     => __( 'Quiz', 'mint-lms' ),
+					'questionKicker' => __( 'Question', 'mint-lms' ),
+					'resultsKicker'  => __( 'Results', 'mint-lms' ),
+					'untitledQuestion' => __( 'Untitled question', 'mint-lms' ),
 				),
 			)
 		);

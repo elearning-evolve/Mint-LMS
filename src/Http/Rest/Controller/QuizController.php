@@ -360,6 +360,7 @@ final class QuizController {
 			);
 
 			$quiz = $this->quizService->createForCourse( $courseId, $dto, $userId );
+			$this->stampDefaultQuizSettings( (int) $quiz->id );
 
 			return ApiResponse::success( $this->quizPayload( $quiz ), 201 );
 		} catch ( ValidationException $exception ) {
@@ -380,6 +381,7 @@ final class QuizController {
 			$questionId = (int) $result['questionId'];
 			$quizId     = (int) $result['quiz']->id;
 			update_post_meta( $quizId, PostTypes::META_QUESTION_SHELL, 1 );
+			$this->stampDefaultQuizSettings( $quizId );
 			$this->saveQuestionSettings(
 				$questionId,
 				array(
@@ -431,11 +433,12 @@ final class QuizController {
 
 			$dto = new CreateQuizDto(
 				(string) $request->get_param( 'title' ),
-				(int) ( $request->get_param( 'pass_percent' ) ?? 70 ),
+				(int) ( $request->get_param( 'pass_percent' ) ?? 80 ),
 				is_array( $request->get_param( 'questions' ) ) ? $request->get_param( 'questions' ) : null,
 			);
 
 			$quiz = $this->quizService->create( $lessonId, $dto, $userId );
+			$this->stampDefaultQuizSettings( (int) $quiz->id );
 
 			return ApiResponse::success( $this->quizPayload( $quiz ), 201 );
 		} catch ( ValidationException $exception ) {
@@ -803,7 +806,7 @@ final class QuizController {
 			),
 			'pass_percent' => array(
 				'type'              => 'integer',
-				'default'           => 70,
+				'default'           => 80,
 				'sanitize_callback' => 'absint',
 			),
 			'questions'    => array(
@@ -1047,17 +1050,17 @@ final class QuizController {
 			'showQuizTitle'              => true,
 			'resultMessagesEnabled'      => false,
 			'resultMessages'             => array(),
-			'restartButton'              => false,
-			'customResults'              => false,
+			'restartButton'              => true,
+			'customResults'              => true,
 			'showAverageScore'           => false,
 			'showCategoryScore'          => false,
 			'showOverallScore'           => true,
-			'showCorrectCount'           => false,
-			'showTimeSpent'              => false,
-			'customAnswerFeedback'       => false,
-			'correctIncorrectMessages'   => false,
-			'correctIncorrectMarks'      => false,
-			'viewQuestionsButton'        => false,
+			'showCorrectCount'           => true,
+			'showTimeSpent'              => true,
+			'customAnswerFeedback'       => true,
+			'correctIncorrectMessages'   => true,
+			'correctIncorrectMarks'      => true,
+			'viewQuestionsButton'        => true,
 		);
 	}
 
@@ -1181,6 +1184,19 @@ final class QuizController {
 		}
 
 		update_post_meta( $quizId, PostTypes::META_QUIZ_SETTINGS, array_merge( $defaults, $clean ) );
+	}
+
+	private function stampDefaultQuizSettings( int $quizId ): void {
+		if ( $quizId <= 0 ) {
+			return;
+		}
+
+		$existing = get_post_meta( $quizId, PostTypes::META_QUIZ_SETTINGS, true );
+		if ( is_array( $existing ) ) {
+			return;
+		}
+
+		$this->saveQuizSettings( $quizId, $this->defaultQuizSettings() );
 	}
 
 	/**

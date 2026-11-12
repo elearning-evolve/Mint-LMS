@@ -332,7 +332,7 @@ function coursesList() {
           method: 'POST',
           body: JSON.stringify({
             title: 'Untitled Course',
-            enrollment_type: window.mintLmsAdmin?.defaultEnrollment || 'open',
+            enrollment_type: window.mintLmsAdmin?.defaultEnrollment || 'free',
           }),
         });
         window.location.href = this.wpEditUrl(course.id);

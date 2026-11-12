@@ -21,13 +21,13 @@ final class PageSettingsTest extends TestCase
         $this->assertSame(30, $settings->getPlayerPageId());
     }
 
-    public function test_getDefaultEnrollment_falls_back_to_open_for_invalid_value(): void
+    public function test_getDefaultEnrollment_falls_back_to_free_for_invalid_value(): void
     {
         $settings = new PageSettings([
             PageSettings::OPTION_DEFAULT_ENROLLMENT => 'invalid',
         ]);
 
-        $this->assertSame('open', $settings->getDefaultEnrollment());
+        $this->assertSame('free', $settings->getDefaultEnrollment());
     }
 
     public function test_getDefaultEnrollment_accepts_manual(): void

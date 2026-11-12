@@ -1110,9 +1110,9 @@ final class ShortcodeRegistrar {
 			'materialsContent' => wp_kses_post( (string) ( $raw['materialsContent'] ?? '' ) ),
 			'videoProgression' => ! empty( $raw['videoProgression'] ),
 			'videoUrl'         => sanitize_text_field( (string) ( $raw['videoUrl'] ?? '' ) ),
-			'videoTiming'      => ( $raw['videoTiming'] ?? 'after' ) === 'before' ? 'before' : 'after',
+			'videoTiming'      => ( $raw['videoTiming'] ?? 'before' ) === 'after' ? 'after' : 'before',
 			'videoAutoplay'    => ! empty( $raw['videoAutoplay'] ),
-			'videoControls'    => array_key_exists( 'videoControls', $raw ) ? ! empty( $raw['videoControls'] ) : true,
+			'videoControls'    => ! empty( $raw['videoControls'] ),
 		);
 	}
 
@@ -1124,7 +1124,7 @@ final class ShortcodeRegistrar {
 			return '';
 		}
 
-		$controls = ! array_key_exists( 'videoControls', $settings ) || ! empty( $settings['videoControls'] );
+		$controls = ! empty( $settings['videoControls'] );
 		$autoplay = ! empty( $settings['videoAutoplay'] );
 
 		$embed = wp_oembed_get( $videoUrl );

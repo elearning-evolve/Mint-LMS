@@ -41,12 +41,27 @@ $quizMeta      = 1 === $questionCount
 		$questionCount
 	);
 $associated    = '' !== $lessonTitle;
+$previewBoot   = wp_json_encode(
+	array(
+		'quizTitle'      => $displayQuiz,
+		'quizMeta'       => $quizMeta,
+		'quizKicker'     => __( 'Quiz', 'mint-lms' ),
+		'questionKicker' => __( 'Question', 'mint-lms' ),
+	)
+);
+if ( ! is_string( $previewBoot ) ) {
+	$previewBoot = '{}';
+}
 ?>
 
-<div class="mint-s3b-wrap" x-data="{ started: false }">
+<div
+	class="mint-s3b-wrap"
+	x-data="mintQuizPreview(<?php echo esc_attr( $previewBoot ); ?>)"
+	@mint-quiz-progress="onQuizProgress($event.detail)"
+>
 	<article class="mint-s3-hero mint-s3-hero--wide">
-		<div class="mint-s3b-kicker"><?php esc_html_e( 'Quiz', 'mint-lms' ); ?></div>
-		<h1 class="mint-s3b-title"><?php echo esc_html( $displayQuiz ); ?></h1>
+		<div class="mint-s3b-kicker" x-text="headerKicker"><?php esc_html_e( 'Quiz', 'mint-lms' ); ?></div>
+		<h1 class="mint-s3b-title" x-text="headerTitle"><?php echo esc_html( $displayQuiz ); ?></h1>
 
 		<?php if ( $associated ) : ?>
 			<p class="mint-s3-quiz-associate">
@@ -64,10 +79,10 @@ $associated    = '' !== $lessonTitle;
 				<button
 					type="button"
 					class="mint-s3b-progress mint-s3b-progress--quiz-home"
-					@click="started = false"
+					@click="started = false; onQuizProgress({ submitted: false })"
 				>
-					<span class="mint-s3b-progress__crumb"><?php echo esc_html( $displayQuiz ); ?></span>
-					<span class="mint-s3b-progress__badge"><?php echo esc_html( $quizMeta ); ?></span>
+					<span class="mint-s3b-progress__crumb" x-text="headerTitle"><?php echo esc_html( $displayQuiz ); ?></span>
+					<span class="mint-s3b-progress__badge" x-text="headerBadge"><?php echo esc_html( $quizMeta ); ?></span>
 				</button>
 			</div>
 		<?php endif; ?>
@@ -104,7 +119,7 @@ $associated    = '' !== $lessonTitle;
 									<button
 										type="button"
 										class="mint-s3-quiz-name-link"
-										@click.stop="started = false"
+										@click.stop="started = false; onQuizProgress({ submitted: false })"
 									><?php echo esc_html( $displayQuiz ); ?></button>
 								</div>
 								<div class="mint-s3b-stack__quiz-meta">

@@ -99,8 +99,35 @@ document.addEventListener('alpine:init', () => {
     },
   }));
 
+  Alpine.data('mintQuizPreview', (config) => ({
+    started: false,
+    headerKicker: config.quizKicker || 'Quiz',
+    headerTitle: config.quizTitle || '',
+    headerBadge: config.quizMeta || '',
+    quizTitle: config.quizTitle || '',
+    quizMeta: config.quizMeta || '',
+    quizKicker: config.quizKicker || 'Quiz',
+    questionKicker: config.questionKicker || 'Question',
+
+    onQuizProgress(detail) {
+      if (!detail) {
+        return;
+      }
+      if (detail.submitted) {
+        this.headerKicker = detail.kicker || this.questionKicker;
+        this.headerTitle = detail.title || this.quizTitle;
+        this.headerBadge = detail.badge || this.quizMeta;
+        return;
+      }
+      this.headerKicker = this.quizKicker;
+      this.headerTitle = this.quizTitle;
+      this.headerBadge = this.quizMeta;
+    },
+  }));
+
   Alpine.data('mintLessonQuiz', (config) => ({
     quizId: config.quizId,
+    quizTitle: config.quizTitle || '',
     passPercent: config.passPercent,
     questions: Array.isArray(config.questions) ? [...config.questions] : [],
     answers: {},
@@ -117,8 +144,12 @@ document.addEventListener('alpine:init', () => {
     timerSeconds: 0,
     timerId: null,
     saveTimerId: null,
+    startedAt: Date.now(),
+    timeSpentSeconds: 0,
+    showReview: false,
 
     init() {
+      this.startedAt = Date.now();
       this.questions = this.prepareQuestions(this.questions);
       this.restoreProgress();
       (this.questions || []).forEach((question) => {
@@ -128,6 +159,7 @@ document.addEventListener('alpine:init', () => {
       });
       this.startTimer();
       this.startAutosave();
+      this.emitProgress();
     },
 
     prepareQuestions(list) {
@@ -226,10 +258,13 @@ document.addEventListener('alpine:init', () => {
       return (this.questions || []).every((question) => this.isAnswered(question));
     },
 
-    canRetry() {
-      if (this.previewMode) return true;
-      if (this.settings.restartButton) return true;
-      return !this.settings.restrictRetakes;
+    canRestart() {
+      if (this.settings.restrictRetakes && !this.previewMode) return false;
+      return this.settings.restartButton !== false;
+    },
+
+    canViewQuestions() {
+      return this.settings.viewQuestionsButton !== false;
     },
 
     isChoiceSelected(questionId, option) {
@@ -245,12 +280,14 @@ document.addEventListener('alpine:init', () => {
       if (this.currentIndex < this.questions.length - 1) {
         this.currentIndex += 1;
         this.persistProgress();
+        this.emitProgress();
       }
     },
 
     goPrev() {
       if (this.currentIndex > 0) {
         this.currentIndex -= 1;
+        this.emitProgress();
       }
     },
 
@@ -284,12 +321,60 @@ document.addEventListener('alpine:init', () => {
       this.pendingEssay = !!data?.pendingEssay;
       this.review = Array.isArray(data?.questions) ? data.questions : [];
       this.submitted = true;
+      this.showReview = false;
       this.hasPassed = !!data?.passed;
       try {
         window.sessionStorage.removeItem(this.storageKey());
       } catch {
         /* ignore */
       }
+      this.emitProgress();
+    },
+
+    stripHtml(html) {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = String(html || '');
+      return (tmp.textContent || tmp.innerText || '').replace(/\s+/g, ' ').trim();
+    },
+
+    headerQuestionId() {
+      if (this.submitted && (this.review || []).length === 1) {
+        return this.review[0].id;
+      }
+      if (this.submitted) {
+        return null;
+      }
+      if (this.settings.questionDisplay === 'all') {
+        return null;
+      }
+      const current = (this.questions || [])[this.currentIndex];
+      return current ? current.id : null;
+    },
+
+    emitProgress() {
+      const i18n = mintLmsStudent.i18n || {};
+      let title = this.quizTitle;
+      let kicker = i18n.quizKicker || 'Quiz';
+      let badge = `${(this.questions || []).length}`;
+      const questionId = this.headerQuestionId();
+      if (questionId != null) {
+        title = this.questionTitle(questionId) || title;
+        kicker = i18n.questionKicker || 'Question';
+        if (this.submitted && this.review[0]) {
+          badge = this.reviewBadge(this.review[0]);
+        } else {
+          badge = `${this.currentIndex + 1}/${Math.max((this.questions || []).length, 1)}`;
+        }
+      } else if (this.submitted) {
+        kicker = i18n.resultsKicker || 'Results';
+        badge = i18n.completed || 'Completed';
+      }
+      this.$dispatch('mint-quiz-progress', {
+        submitted: this.submitted,
+        title,
+        kicker,
+        badge,
+      });
     },
 
     resultToneClass() {
@@ -309,21 +394,59 @@ document.addEventListener('alpine:init', () => {
       return i18n.quizFailed || 'Quiz not passed.';
     },
 
-    resultMeta() {
+    resultStats() {
+      const parts = [];
+      if (this.settings.showOverallScore !== false) {
+        parts.push(`${Math.round(this.scorePercent)}%`);
+      }
+      if (this.settings.showCorrectCount) {
+        const graded = (this.review || []).filter((item) => !item.pending);
+        const correct = graded.filter((item) => item.correct).length;
+        parts.push(`${correct}/${graded.length || (this.questions || []).length}`);
+      }
+      if (this.settings.showTimeSpent) {
+        parts.push(this.formatElapsed(this.timeSpentSeconds));
+      }
+      return parts.join(' · ');
+    },
+
+    resultNote() {
       const i18n = mintLmsStudent.i18n || {};
-      const score = `${Math.round(this.scorePercent)}%`;
       if (this.previewMode) {
-        return `${score} — ${i18n.quizPreviewNotSaved || 'Preview only. Results are not recorded.'}`;
+        return i18n.quizPreviewNotSaved || 'Preview only. Results are not recorded.';
       }
       if (this.pendingEssay) {
-        return `${score} — ${i18n.quizEssayPending || 'Auto-graded score. Essays are pending review.'}`;
+        return i18n.quizEssayPending || 'Auto-graded score. Essays are pending review.';
       }
-      return `${score} — ${i18n.quizRetry || 'Review and try again.'}`;
+      return '';
+    },
+
+    resultHighlight() {
+      return [this.resultStats(), this.resultNote()].filter(Boolean).join(' — ');
+    },
+
+    formatElapsed(total) {
+      const seconds = Math.max(0, Number(total) || 0);
+      const h = Math.floor(seconds / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      const s = seconds % 60;
+      const pad = (n) => String(n).padStart(2, '0');
+      return h > 0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
     },
 
     questionPrompt(id) {
       const match = (this.questions || []).find((question) => Number(question.id) === Number(id));
       return match?.prompt || '';
+    },
+
+    questionTitle(id) {
+      const match = (this.questions || []).find((question) => Number(question.id) === Number(id));
+      const named = this.stripHtml(match?.title || '');
+      if (named) {
+        return named;
+      }
+      const i18n = mintLmsStudent.i18n || {};
+      return i18n.untitledQuestion || 'Untitled question';
     },
 
     reviewBadge(item) {
@@ -374,6 +497,7 @@ document.addEventListener('alpine:init', () => {
         }
 
         const data = payload.data || {};
+        this.timeSpentSeconds = Math.max(0, Math.round((Date.now() - this.startedAt) / 1000));
         this.applyGrade(data.review || data);
 
         if (!this.previewMode && data.passed) {
@@ -397,6 +521,7 @@ document.addEventListener('alpine:init', () => {
       this.timerId = null;
       this.saveTimerId = null;
       this.submitted = false;
+      this.showReview = false;
       this.pendingEssay = false;
       this.review = [];
       this.answers = {};
@@ -404,6 +529,7 @@ document.addEventListener('alpine:init', () => {
       this.currentIndex = 0;
       this.hasPassed = false;
       this.init();
+      this.emitProgress();
     },
   }));
 });

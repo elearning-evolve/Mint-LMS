@@ -160,7 +160,7 @@ final class WpPostCourseRepository implements CourseRepositoryInterface {
 
 		$enrollmentRaw  = get_post_meta( $post->ID, PostTypes::META_ENROLLMENT_TYPE, true );
 		$enrollmentType = EnrollmentType::tryFrom( is_string( $enrollmentRaw ) ? $enrollmentRaw : '' )
-			?? EnrollmentType::Open;
+			?? EnrollmentType::Free;
 
 		$settingsRaw = get_post_meta( $post->ID, PostTypes::META_COURSE_SETTINGS, true );
 		$settings    = CourseSettings::defaults();

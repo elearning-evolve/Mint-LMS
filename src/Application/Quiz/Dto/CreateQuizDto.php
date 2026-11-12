@@ -10,7 +10,7 @@ final readonly class CreateQuizDto {
 	 */
 	public function __construct(
 		public string $title,
-		public int $passPercent = 70,
+		public int $passPercent = 80,
 		public ?array $questions = null,
 	) {
 	}

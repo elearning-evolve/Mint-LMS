@@ -70,7 +70,7 @@ final class SettingsPage {
 			array(
 				'type'              => 'string',
 				'sanitize_callback' => array( $this, 'sanitizeDefaultEnrollment' ),
-				'default'           => 'open',
+				'default'           => 'free',
 			)
 		);
 
