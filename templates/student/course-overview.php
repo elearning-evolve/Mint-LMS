@@ -79,7 +79,11 @@ $showCta = $overview->isEnrolled || $overview->canEnroll || ( 'paid' === $overvi
 			<div class="mint-mt-[18px] mint-text-sm mint-text-[#5C5C77]">
 				<?php if ( '' !== $overview->authorName ) : ?>
 					<?php esc_html_e( 'Written by', 'mint-lms' ); ?>
-					<span class="mint-font-medium mint-text-ink mint-underline"><?php echo esc_html( $overview->authorName ); ?></span>
+					<?php if ( '' !== $overview->authorUrl ) : ?>
+						<a href="<?php echo esc_url( $overview->authorUrl ); ?>" class="mint-font-medium mint-text-ink mint-underline"><?php echo esc_html( $overview->authorName ); ?></a>
+					<?php else : ?>
+						<span class="mint-font-medium mint-text-ink mint-underline"><?php echo esc_html( $overview->authorName ); ?></span>
+					<?php endif; ?>
 				<?php endif; ?>
 				<?php if ( '' !== $categoryName ) : ?>
 					<?php if ( '' !== $overview->authorName ) : ?>

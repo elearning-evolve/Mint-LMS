@@ -319,7 +319,16 @@ document.addEventListener('alpine:init', () => {
     applyGrade(data) {
       this.scorePercent = Number(data?.scorePercent ?? 0);
       this.pendingEssay = !!data?.pendingEssay;
-      this.review = Array.isArray(data?.questions) ? data.questions : [];
+      const rows = Array.isArray(data?.questions) ? data.questions : [];
+      this.review = rows.map((item) => {
+        const question = this.questionById(item.id);
+        const row = {
+          ...item,
+          type: item.type || question?.type || '',
+        };
+        row.optionRows = this.buildReviewOptionRows(row);
+        return row;
+      });
       this.submitted = true;
       this.showReview = false;
       this.hasPassed = !!data?.passed;
@@ -425,6 +434,19 @@ document.addEventListener('alpine:init', () => {
       return [this.resultStats(), this.resultNote()].filter(Boolean).join(' — ');
     },
 
+    resultHasBoard() {
+      return this.settings.showOverallScore !== false
+        || !!this.settings.showCorrectCount
+        || !!this.settings.showTimeSpent;
+    },
+
+    resultPointsLabel() {
+      const graded = (this.review || []).filter((item) => !item.pending);
+      const correct = graded.filter((item) => item.correct).length;
+      const total = graded.length || (this.questions || []).length || 0;
+      return `${correct}/${total}`;
+    },
+
     formatElapsed(total) {
       const seconds = Math.max(0, Number(total) || 0);
       const h = Math.floor(seconds / 3600);
@@ -451,8 +473,227 @@ document.addEventListener('alpine:init', () => {
 
     reviewBadge(item) {
       const i18n = mintLmsStudent.i18n || {};
-      if (item.pending) return i18n.pending || 'Pending';
+      if (item.pending) return i18n.waitingInstructor || i18n.pending || 'Waiting for instructor';
       return item.correct ? i18n.correct || 'Correct' : i18n.incorrect || 'Incorrect';
+    },
+
+    questionById(id) {
+      return (this.questions || []).find((question) => Number(question.id) === Number(id)) || null;
+    },
+
+    reviewQuestionType(item) {
+      return String(item?.type || this.questionById(item?.id)?.type || '');
+    },
+
+    answerTypeLabel(item) {
+      const i18n = mintLmsStudent.i18n || {};
+      const type = this.reviewQuestionType(item);
+      if (type === 'mcq_multi') return i18n.typeMcqMulti || 'MCQ · Multiple choice';
+      if (type === 'true_false') return i18n.typeTrueFalse || 'True / False';
+      if (type === 'essay') return i18n.typeEssay || 'Essay · Written answer';
+      if (type === 'mcq') return i18n.typeMcq || 'MCQ · Single choice';
+      return type || (i18n.typeMcq || 'MCQ · Single choice');
+    },
+
+    reviewQuestionTitle(item) {
+      const named = this.questionTitle(item.id);
+      const i18n = mintLmsStudent.i18n || {};
+      const untitled = i18n.untitledQuestion || 'Untitled question';
+      if (named && named !== untitled) {
+        return named;
+      }
+      const fromPrompt = this.stripHtml(this.questionPrompt(item.id));
+      return fromPrompt || named || untitled;
+    },
+
+    reviewHasPrompt(item) {
+      const prompt = this.stripHtml(this.questionPrompt(item.id));
+      if (!prompt) {
+        return false;
+      }
+      return prompt !== this.reviewQuestionTitle(item);
+    },
+
+    isChoiceReview(item) {
+      const type = this.reviewQuestionType(item);
+      return type === 'mcq' || type === 'mcq_multi' || type === 'true_false';
+    },
+
+    isWrittenReview(item) {
+      return this.reviewQuestionType(item) === 'essay' || !!item.pending;
+    },
+
+    isEssayReview(item) {
+      return this.isWrittenReview(item);
+    },
+
+    reviewOptions(item) {
+      return Array.isArray(item?.optionRows) ? item.optionRows : this.buildReviewOptionRows(item);
+    },
+
+    optionLabel(item, value) {
+      const rows = this.reviewOptions(item);
+      const match = rows.find((row) => String(row.value) === String(value));
+      if (match?.label) {
+        return match.label;
+      }
+      const i18n = mintLmsStudent.i18n || {};
+      if (String(value) === 'true') return i18n.trueLabel || 'True';
+      if (String(value) === 'false') return i18n.falseLabel || 'False';
+      return String(value);
+    },
+
+    reviewGivenText(item) {
+      const i18n = mintLmsStudent.i18n || {};
+      const given = this.givenList(item).filter((value) => String(value).trim() !== '');
+      if (!given.length) {
+        return i18n.noAnswer || 'No answer submitted';
+      }
+      return given.map((value) => this.optionLabel(item, value)).join(', ');
+    },
+
+    reviewCorrectText(item) {
+      const values = this.correctList(item).filter((value) => String(value).trim() !== '');
+      if (!values.length) {
+        return '—';
+      }
+      return values.map((value) => this.optionLabel(item, value)).join(', ');
+    },
+
+    reviewShowsCorrectKey(item) {
+      if (item.pending || this.isWrittenReview(item)) {
+        return false;
+      }
+      if (this.settings.correctIncorrectMarks === false) {
+        return false;
+      }
+      const text = this.reviewCorrectText(item);
+      return text !== '' && text !== '—';
+    },
+
+    reviewStatusTitle(item) {
+      return this.reviewBadge(item);
+    },
+
+    reviewStatusDetail(item) {
+      const i18n = mintLmsStudent.i18n || {};
+      if (item.pending) {
+        return i18n.pendingDetail || 'This written answer is with the instructor. It is not marked correct or incorrect yet.';
+      }
+      if (item.correct) {
+        return i18n.correctDetail || 'This answer is correct.';
+      }
+      return i18n.incorrectDetail || 'This answer is not correct.';
+    },
+
+    buildReviewOptionRows(item) {
+      const question = this.questionById(item.id);
+      const type = this.reviewQuestionType(item);
+      if (type === 'essay' || question?.type === 'essay') {
+        return [];
+      }
+      const i18n = mintLmsStudent.i18n || {};
+      if (type === 'true_false' || question?.type === 'true_false') {
+        return [
+          { value: 'true', label: i18n.trueLabel || 'True' },
+          { value: 'false', label: i18n.falseLabel || 'False' },
+        ];
+      }
+      const fromQuestion = Array.isArray(question?.options)
+        ? question.options.map((option) => String(option)).filter((option) => option !== '')
+        : [];
+      const extras = [...this.givenList(item), ...this.correctList(item)];
+      const unique = [];
+      [...fromQuestion, ...extras].forEach((option) => {
+        if (!unique.includes(option)) {
+          unique.push(option);
+        }
+      });
+      return unique.map((option) => ({
+        value: option,
+        label: option,
+      }));
+    },
+
+    givenList(item) {
+      if (Array.isArray(item.given)) {
+        return item.given.map((value) => String(value));
+      }
+      if (item.given == null || item.given === '') {
+        return [];
+      }
+      return [String(item.given)];
+    },
+
+    correctList(item) {
+      if (Array.isArray(item.correctAnswer)) {
+        return item.correctAnswer.map((value) => String(value));
+      }
+      if (item.correctAnswer == null || item.correctAnswer === '') {
+        return [];
+      }
+      return [String(item.correctAnswer)];
+    },
+
+    isReviewGiven(item, value) {
+      return this.givenList(item).includes(String(value));
+    },
+
+    isReviewCorrectOption(item, value) {
+      return this.correctList(item).includes(String(value));
+    },
+
+    reviewOptionClass(item, value) {
+      if (item.pending || this.settings.correctIncorrectMarks === false) {
+        return '';
+      }
+      const given = this.isReviewGiven(item, value);
+      const correct = this.isReviewCorrectOption(item, value);
+      if (given && correct) {
+        return 'is-right';
+      }
+      if (given && !correct) {
+        return 'is-wrong';
+      }
+      if (!given && correct && !item.correct) {
+        return 'is-key';
+      }
+      return '';
+    },
+
+    reviewOptionTag(item, value) {
+      if (this.settings.correctIncorrectMarks === false || item.pending) {
+        return '';
+      }
+      const i18n = mintLmsStudent.i18n || {};
+      const given = this.isReviewGiven(item, value);
+      const correct = this.isReviewCorrectOption(item, value);
+      if (given && correct) {
+        return i18n.correct || 'Correct';
+      }
+      if (given && !correct) {
+        return i18n.incorrect || 'Incorrect';
+      }
+      if (!given && correct && !item.correct) {
+        return i18n.correctAnswer || 'Correct answer';
+      }
+      return '';
+    },
+
+    reviewOptionMark(item, value, index) {
+      const showMarks = this.settings.correctIncorrectMarks !== false && !item.pending;
+      const given = this.isReviewGiven(item, value);
+      const correct = this.isReviewCorrectOption(item, value);
+      if (showMarks && given && correct) {
+        return '✓';
+      }
+      if (showMarks && given && !correct) {
+        return '×';
+      }
+      if (this.reviewQuestionType(item) === 'true_false') {
+        return String(value) === 'true' ? 'T' : 'F';
+      }
+      return String.fromCharCode(65 + Number(index || 0));
     },
 
     reviewItemClass(item) {

@@ -507,6 +507,7 @@ final class ShortcodeRegistrar {
 		}
 		$courseTitle = $this->publicPostTitle( $resolvedCourseId );
 		$lessonTitle = $resolvedLessonId > 0 ? $this->publicPostTitle( $resolvedLessonId ) : '';
+		[ $authorName, $authorUrl ] = $this->publicPostAuthor( (int) $quiz->id );
 
 		return $this->wrap(
 			$this->templateLoader->render(
@@ -517,9 +518,38 @@ final class ShortcodeRegistrar {
 					'lessonUrl'   => $resolvedLessonId > 0 ? $this->previewLessonUrl( $resolvedCourseId, $resolvedLessonId ) : '',
 					'courseTitle' => $courseTitle,
 					'lessonTitle' => $lessonTitle,
+					'authorName'  => $authorName,
+					'authorUrl'   => $authorUrl,
 				)
 			)
 		);
+	}
+
+	/**
+	 * @return array{0: string, 1: string}
+	 */
+	private function publicPostAuthor( int $postId ): array {
+		$authorId = 0;
+		if ( $postId > 0 ) {
+			$post = get_post( $postId );
+			if ( $post instanceof \WP_Post ) {
+				$authorId = (int) $post->post_author;
+			}
+		}
+
+		if ( $authorId <= 0 ) {
+			$authorId = get_current_user_id();
+		}
+
+		$name = '';
+		if ( $authorId > 0 ) {
+			$author = get_userdata( $authorId );
+			if ( $author instanceof \WP_User ) {
+				$name = trim( (string) $author->display_name );
+			}
+		}
+
+		return array( $name, PostTypes::authorArchiveUrl( $authorId ) );
 	}
 
 	private function publicPostTitle( int $postId ): string {

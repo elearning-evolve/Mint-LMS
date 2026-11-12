@@ -123,4 +123,27 @@ final class PostTypes {
 
 		return '' !== $prompt ? $prompt : __( 'Untitled question', 'mint-lms' );
 	}
+
+	/**
+	 * True while the builder is still waiting for an answer type (placeholder essay).
+	 */
+	public static function authorArchiveUrl( int $userId ): string {
+		if ( $userId <= 0 || ! function_exists( 'get_author_posts_url' ) ) {
+			return '';
+		}
+
+		$url = get_author_posts_url( $userId );
+
+		return is_string( $url ) ? $url : '';
+	}
+
+	public static function questionAnswerTypePending( int $questionId ): bool {
+		if ( $questionId <= 0 ) {
+			return false;
+		}
+
+		$raw = get_post_meta( $questionId, self::META_QUESTION_SETTINGS, true );
+
+		return is_array( $raw ) && ! empty( $raw['answerTypePending'] );
+	}
 }

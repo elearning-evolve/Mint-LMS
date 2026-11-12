@@ -31,6 +31,7 @@ use MintLMS\Domain\Progress\ProgressRepositoryInterface;
 use MintLMS\Domain\Quiz\QuizQuestion;
 use MintLMS\Domain\Section\SectionRepositoryInterface;
 use MintLMS\Domain\Shared\Clock;
+use MintLMS\Infrastructure\PostType\PostTypes;
 
 final class StudentExperienceService {
 
@@ -153,13 +154,7 @@ final class StudentExperienceService {
 			}
 		}
 
-		$authorName = '';
-		if ( function_exists( 'get_userdata' ) ) {
-			$author = get_userdata( $course->authorId );
-			if ( $author instanceof \WP_User ) {
-				$authorName = (string) $author->display_name;
-			}
-		}
+		[ $authorName, $authorUrl ] = $this->authorDisplay( $course->authorId );
 
 		return new StudentCourseOverviewDto(
 			$course->id,
@@ -178,6 +173,7 @@ final class StudentExperienceService {
 			$structure,
 			$course->status->value,
 			$authorName,
+			$authorUrl,
 			$lastActivityLabel,
 			$isEditorPreview,
 			$showCurriculum ? $this->buildContentOutline( $structure, $userId, $isEditorPreview, $canBrowse ) : array(),
@@ -209,13 +205,7 @@ final class StudentExperienceService {
 		$outline   = $this->buildContentOutline( $structure, $userId, $isEditorPreview );
 		$flat      = $this->flattenLessons( $structure );
 
-		$authorName = '';
-		if ( function_exists( 'get_userdata' ) ) {
-			$author = get_userdata( $course->authorId );
-			if ( $author ) {
-				$authorName = (string) $author->display_name;
-			}
-		}
+		[ $authorName, $authorUrl ] = $this->authorDisplay( $course->authorId );
 
 		foreach ( $outline as $section ) {
 			foreach ( $section['lessons'] as $lesson ) {
@@ -260,6 +250,7 @@ final class StudentExperienceService {
 					'sectionTitle'        => (string) ( $section['title'] ?? '' ),
 					'featuredImageId'     => $featuredImageId,
 					'authorName'          => $authorName,
+					'authorUrl'           => $authorUrl,
 					'progressPct'         => $progressPct,
 					'nextLessonId'        => $nextLessonId,
 					'nextLessonTitle'     => $nextLessonTitle,
@@ -304,13 +295,7 @@ final class StudentExperienceService {
 					$quizCount
 				) );
 
-		$authorName = '';
-		if ( function_exists( 'get_userdata' ) ) {
-			$author = get_userdata( $userId );
-			if ( $author ) {
-				$authorName = (string) $author->display_name;
-			}
-		}
+		[ $authorName, $authorUrl ] = $this->authorDisplayForPost( $lessonId, $userId );
 
 		return array(
 			'title'               => $lesson->title,
@@ -321,6 +306,7 @@ final class StudentExperienceService {
 			'sectionTitle'        => '',
 			'featuredImageId'     => $lesson->featuredImageId,
 			'authorName'          => $authorName,
+			'authorUrl'           => $authorUrl,
 			'progressPct'         => 0.0,
 			'nextLessonId'        => null,
 			'nextLessonTitle'     => '',
@@ -363,13 +349,8 @@ final class StudentExperienceService {
 
 		$count = count( $questions );
 
-		$authorName = '';
-		if ( function_exists( 'get_userdata' ) ) {
-			$author = get_userdata( $userId );
-			if ( $author ) {
-				$authorName = (string) $author->display_name;
-			}
-		}
+		$quizPostId                 = null !== $quiz ? (int) $quiz->id : 0;
+		[ $authorName, $authorUrl ] = $this->authorDisplayForPost( $quizPostId, $userId );
 
 		return array(
 			'title'       => null !== $quiz && '' !== trim( $quiz->title ) ? $quiz->title : __( 'Quiz', 'mint-lms' ),
@@ -383,6 +364,7 @@ final class StudentExperienceService {
 			'questions'   => $questions,
 			'courseTitle' => $courseTitle,
 			'authorName'  => $authorName,
+			'authorUrl'   => $authorUrl,
 			'progressPct' => 0.0,
 		);
 	}
@@ -1197,6 +1179,36 @@ final class StudentExperienceService {
 		}
 
 		return null;
+	}
+
+	/**
+	 * @return array{0: string, 1: string}
+	 */
+	private function authorDisplayForPost( int $postId, int $fallbackUserId ): array {
+		$authorId = $fallbackUserId;
+		if ( $postId > 0 && function_exists( 'get_post' ) ) {
+			$post = get_post( $postId );
+			if ( $post instanceof \WP_Post ) {
+				$authorId = (int) $post->post_author;
+			}
+		}
+
+		return $this->authorDisplay( $authorId );
+	}
+
+	/**
+	 * @return array{0: string, 1: string}
+	 */
+	private function authorDisplay( int $userId ): array {
+		$name = '';
+		if ( $userId > 0 && function_exists( 'get_userdata' ) ) {
+			$author = get_userdata( $userId );
+			if ( $author instanceof \WP_User ) {
+				$name = trim( (string) $author->display_name );
+			}
+		}
+
+		return array( $name, PostTypes::authorArchiveUrl( $userId ) );
 	}
 
 	/**

@@ -13,6 +13,7 @@ $quizzes             = is_array( $preview['quizzes'] ?? null ) ? $preview['quizz
 $courseTitle         = trim( (string) ( $preview['courseTitle'] ?? '' ) );
 $lessonTitle         = trim( (string) ( $preview['title'] ?? '' ) );
 $authorName          = trim( (string) ( $preview['authorName'] ?? '' ) );
+$authorUrl           = trim( (string) ( $preview['authorUrl'] ?? '' ) );
 $lessonBody          = trim( (string) ( $preview['content'] ?? '' ) );
 $previousLessonTitle = trim( (string) ( $preview['previousLessonTitle'] ?? '' ) );
 $featuredUrl         = is_string( $featuredUrl ?? null ) ? $featuredUrl : '';
@@ -44,8 +45,23 @@ $forwardLabel        = '' !== $nextQuizUrl
 		<?php if ( '' !== $authorName ) : ?>
 			<div class="mint-s3b-author">
 				<?php esc_html_e( 'Written by', 'mint-lms' ); ?>
-				<span class="mint-underline"><?php echo esc_html( $authorName ); ?></span>
+				<?php if ( '' !== $authorUrl ) : ?>
+					<a href="<?php echo esc_url( $authorUrl ); ?>" class="mint-underline"><?php echo esc_html( $authorName ); ?></a>
+				<?php else : ?>
+					<span class="mint-underline"><?php echo esc_html( $authorName ); ?></span>
+				<?php endif; ?>
 			</div>
+		<?php endif; ?>
+
+		<?php if ( '' !== $courseTitle ) : ?>
+			<p class="mint-s3-quiz-associate">
+				<?php esc_html_e( 'Associated with', 'mint-lms' ); ?>
+				<?php if ( '' !== $courseUrl ) : ?>
+					<a href="<?php echo esc_url( $courseUrl ); ?>" class="mint-s3b-progress__crumb-link"><?php echo esc_html( $courseTitle ); ?></a>
+				<?php else : ?>
+					<span><?php echo esc_html( $courseTitle ); ?></span>
+				<?php endif; ?>
+			</p>
 		<?php endif; ?>
 
 		<?php if ( '' !== $courseTitle || '' !== $displayLesson ) : ?>

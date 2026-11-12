@@ -555,7 +555,7 @@ final class QuizService {
 
 		$quiz      = $this->findQuizOrFail( $quizId );
 		$lesson    = $this->findLessonOrFail( $quiz->lessonId );
-		$questions = $this->quizRepository->findQuestionsByQuizId( $quizId );
+		$questions = $this->takeableQuestions( $this->quizRepository->findQuestionsByQuizId( $quizId ) );
 
 		$this->assertCanPreviewGrade( $userId, $lesson );
 
@@ -572,7 +572,7 @@ final class QuizService {
 		}
 
 		$quiz      = $this->findQuizOrFail( $quizId );
-		$questions = $this->quizRepository->findQuestionsByQuizId( $quizId );
+		$questions = $this->takeableQuestions( $this->quizRepository->findQuestionsByQuizId( $quizId ) );
 		$lesson    = $this->findLessonOrFail( $quiz->lessonId );
 		$enrolled  = $quiz->courseId > 0 && $this->progressRepository->isUserEnrolled( $userId, $quiz->courseId );
 
@@ -1036,6 +1036,22 @@ final class QuizService {
 		if ( ! $this->authorization->canCreateCourse( $userId ) ) {
 			throw new ForbiddenException();
 		}
+	}
+
+	/**
+	 * @param list<QuizQuestion> $questions
+	 * @return list<QuizQuestion>
+	 */
+	private function takeableQuestions( array $questions ): array {
+		$ready = array();
+		foreach ( $questions as $question ) {
+			if ( \MintLMS\Infrastructure\PostType\PostTypes::questionAnswerTypePending( $question->id ) ) {
+				continue;
+			}
+			$ready[] = $question;
+		}
+
+		return $ready;
 	}
 
 	private function findCourseOrFail( int $id ): \MintLMS\Domain\Course\Course {

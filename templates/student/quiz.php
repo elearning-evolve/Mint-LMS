@@ -27,7 +27,13 @@ if ( ! $quizRequired && ! $isReviewMode ) {
 	return;
 }
 
-$questionCount = count( $quiz->questions );
+$takeableQuestions = array_values(
+	array_filter(
+		$quiz->questions,
+		static fn( $question ): bool => ! PostTypes::questionAnswerTypePending( (int) $question->id )
+	)
+);
+$questionCount  = count( $takeableQuestions );
 $storedSettings = get_post_meta( (int) $quiz->id, PostTypes::META_QUIZ_SETTINGS, true );
 $storedSettings = is_array( $storedSettings ) ? $storedSettings : array();
 $showQuizTitle  = array_key_exists( 'showQuizTitle', $storedSettings ) ? ! empty( $storedSettings['showQuizTitle'] ) : true;
@@ -80,7 +86,7 @@ $quizBoot       = wp_json_encode(
 				$row['options'] = array_map( 'strval', is_array( $row['options'] ?? null ) ? $row['options'] : array() );
 				return $row;
 			},
-			$quiz->questions
+			$takeableQuestions
 		),
 	)
 );
@@ -131,7 +137,21 @@ if ( ! is_string( $quizBoot ) ) {
 	<template x-if="submitted">
 		<div class="mint-s3-quiz-result mint-s3-quiz-result--center" :class="resultToneClass()">
 			<p class="mint-s3-quiz-result__title" x-text="resultTitle()"></p>
-			<p class="mint-s3-quiz-result__highlight" x-show="resultHighlight()" x-text="resultHighlight()"></p>
+			<div class="mint-s3-quiz-result__board" x-show="resultHasBoard()">
+				<div class="mint-s3-quiz-result__stat" x-show="settings.showOverallScore !== false">
+					<span class="mint-s3-quiz-result__stat-label" x-text="mintLmsStudent.i18n.scoreLabel || 'Score'"></span>
+					<span class="mint-s3-quiz-result__stat-value" x-text="Math.round(scorePercent) + '%'"></span>
+				</div>
+				<div class="mint-s3-quiz-result__stat" x-show="settings.showCorrectCount">
+					<span class="mint-s3-quiz-result__stat-label" x-text="mintLmsStudent.i18n.pointsLabel || 'Points'"></span>
+					<span class="mint-s3-quiz-result__stat-value" x-text="resultPointsLabel()"></span>
+				</div>
+				<div class="mint-s3-quiz-result__stat" x-show="settings.showTimeSpent">
+					<span class="mint-s3-quiz-result__stat-label" x-text="mintLmsStudent.i18n.timeLabel || 'Time'"></span>
+					<span class="mint-s3-quiz-result__stat-value" x-text="formatElapsed(timeSpentSeconds)"></span>
+				</div>
+			</div>
+			<p class="mint-s3-quiz-result__note" x-show="resultNote()" x-text="resultNote()"></p>
 			<div class="mint-s3-quiz-result__actions" x-show="canRestart() || (canViewQuestions() && review.length)">
 				<button
 					type="button"
@@ -150,18 +170,41 @@ if ( ! is_string( $quizBoot ) ) {
 			<template x-if="showReview && canViewQuestions() && review.length">
 				<div class="mint-s3-quiz-review">
 					<template x-for="item in review" :key="'rv-' + item.id">
-						<div class="mint-s3-quiz-review__item" :class="reviewItemClass(item)">
-							<div class="mint-s3-quiz-review__prompt" x-html="questionPrompt(item.id)"></div>
-							<div class="mint-s3-quiz-review__badge" x-show="settings.correctIncorrectMarks !== false" x-text="reviewBadge(item)"></div>
-							<p class="mint-s3-quiz-review__line" x-show="settings.correctIncorrectMessages !== false">
-								<span><?php esc_html_e( 'Your answer', 'mint-lms' ); ?>:</span>
-								<span x-text="formatAnswer(item.given)"></span>
-							</p>
-							<p class="mint-s3-quiz-review__line" x-show="settings.correctIncorrectMessages !== false && !item.pending">
-								<span><?php esc_html_e( 'Correct answer', 'mint-lms' ); ?>:</span>
-								<span x-text="formatAnswer(item.correctAnswer)"></span>
-							</p>
-						</div>
+						<article class="mint-s3-quiz-review__block" :class="reviewItemClass(item)">
+							<header class="mint-s3-quiz-review__head">
+								<p class="mint-s3-quiz-review__kicker"><?php esc_html_e( 'Question', 'mint-lms' ); ?></p>
+								<h3 class="mint-s3-quiz-review__title" x-text="reviewQuestionTitle(item)"></h3>
+								<p class="mint-s3-quiz-review__type" x-text="answerTypeLabel(item)"></p>
+							</header>
+							<div class="mint-s3-quiz-review__prompt" x-show="reviewHasPrompt(item)" x-html="questionPrompt(item.id)"></div>
+							<div class="mint-s3-quiz-review__options" x-show="isChoiceReview(item) && item.optionRows && item.optionRows.length">
+								<template x-for="(opt, oIndex) in item.optionRows" :key="'rv-opt-' + item.id + '-' + oIndex">
+									<div class="mint-s3-row mint-s3-row--nested mint-s3-quiz-review__option" :class="reviewOptionClass(item, opt.value)">
+										<span class="mint-s3-choice__key" aria-hidden="true" x-text="reviewOptionMark(item, opt.value, oIndex)"></span>
+										<span class="mint-s3-choice__label" x-text="opt.label"></span>
+										<span class="mint-s3-quiz-review__tag" x-show="reviewOptionTag(item, opt.value)" x-text="reviewOptionTag(item, opt.value)"></span>
+									</div>
+								</template>
+							</div>
+							<div class="mint-s3-quiz-review__facts">
+								<div class="mint-s3-quiz-review__fact" :class="isWrittenReview(item) ? 'is-written' : ''">
+									<span class="mint-s3-quiz-review__fact-label"><?php esc_html_e( 'Your answer', 'mint-lms' ); ?></span>
+									<div class="mint-s3-quiz-review__written" x-text="reviewGivenText(item)"></div>
+								</div>
+								<div class="mint-s3-quiz-review__fact" x-show="reviewShowsCorrectKey(item)">
+									<span class="mint-s3-quiz-review__fact-label"><?php esc_html_e( 'Correct answer', 'mint-lms' ); ?></span>
+									<div class="mint-s3-quiz-review__written mint-s3-quiz-review__written--key" x-text="reviewCorrectText(item)"></div>
+								</div>
+							</div>
+							<div
+								class="mint-s3-quiz-review__verdict"
+								:class="reviewItemClass(item)"
+								x-show="item.pending || settings.correctIncorrectMessages !== false"
+							>
+								<strong x-text="reviewStatusTitle(item)"></strong>
+								<p x-text="reviewStatusDetail(item)"></p>
+							</div>
+						</article>
 					</template>
 				</div>
 			</template>
@@ -201,10 +244,10 @@ if ( ! is_string( $quizBoot ) ) {
 								<div class="mint-s3-question-card__prompt" x-html="question.prompt"></div>
 								<div class="mint-s3b-stack__quiz-meta">
 									<span class="mint-s3b-badge mint-s3b-badge--sm"><?php esc_html_e( 'Question', 'mint-lms' ); ?></span>
-									<span x-show="question.type === 'mcq'"><?php esc_html_e( 'Multiple choice', 'mint-lms' ); ?></span>
-									<span x-show="question.type === 'mcq_multi'"><?php esc_html_e( 'Select all that apply', 'mint-lms' ); ?></span>
+									<span x-show="question.type === 'mcq'"><?php esc_html_e( 'MCQ · Single choice', 'mint-lms' ); ?></span>
+									<span x-show="question.type === 'mcq_multi'"><?php esc_html_e( 'MCQ · Multiple choice', 'mint-lms' ); ?></span>
 									<span x-show="question.type === 'true_false'"><?php esc_html_e( 'True / False', 'mint-lms' ); ?></span>
-									<span x-show="question.type === 'essay'"><?php esc_html_e( 'Essay', 'mint-lms' ); ?></span>
+									<span x-show="question.type === 'essay'"><?php esc_html_e( 'Essay · Written answer', 'mint-lms' ); ?></span>
 								</div>
 							</div>
 						</div>

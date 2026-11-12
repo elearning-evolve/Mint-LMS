@@ -14,12 +14,16 @@ use MintLMS\Infrastructure\PostType\PostTypes;
  * @var string       $lessonUrl
  * @var string       $courseTitle
  * @var string       $lessonTitle
+ * @var string       $authorName
+ * @var string       $authorUrl
  */
 $quiz        = $quiz ?? null;
 $courseUrl   = is_string( $courseUrl ?? null ) ? $courseUrl : '';
 $lessonUrl   = is_string( $lessonUrl ?? null ) ? $lessonUrl : '';
 $courseTitle = trim( (string) ( $courseTitle ?? '' ) );
 $lessonTitle = trim( (string) ( $lessonTitle ?? '' ) );
+$authorName  = trim( (string) ( $authorName ?? '' ) );
+$authorUrl   = trim( (string) ( $authorUrl ?? '' ) );
 
 $quizRequired  = true;
 $hasPassedQuiz = false;
@@ -30,7 +34,13 @@ $quizHeading   = false;
 $displayQuiz = $quiz instanceof QuizDto && '' !== trim( $quiz->title )
 	? trim( $quiz->title )
 	: __( 'Untitled quiz', 'mint-lms' );
-$questions     = $quiz instanceof QuizDto ? $quiz->questions : array();
+$questions         = $quiz instanceof QuizDto ? $quiz->questions : array();
+$takeableQuestions = array_values(
+	array_filter(
+		$questions,
+		static fn( $question ): bool => ! PostTypes::questionAnswerTypePending( (int) $question->id )
+	)
+);
 $questionCount = count( $questions );
 $passPercent   = $quiz instanceof QuizDto ? (int) $quiz->passPercent : 0;
 $quizMeta      = 1 === $questionCount
@@ -62,6 +72,17 @@ if ( ! is_string( $previewBoot ) ) {
 	<article class="mint-s3-hero mint-s3-hero--wide">
 		<div class="mint-s3b-kicker" x-text="headerKicker"><?php esc_html_e( 'Quiz', 'mint-lms' ); ?></div>
 		<h1 class="mint-s3b-title" x-text="headerTitle"><?php echo esc_html( $displayQuiz ); ?></h1>
+
+		<?php if ( '' !== $authorName ) : ?>
+			<div class="mint-s3b-author">
+				<?php esc_html_e( 'Written by', 'mint-lms' ); ?>
+				<?php if ( '' !== $authorUrl ) : ?>
+					<a href="<?php echo esc_url( $authorUrl ); ?>" class="mint-underline"><?php echo esc_html( $authorName ); ?></a>
+				<?php else : ?>
+					<span class="mint-underline"><?php echo esc_html( $authorName ); ?></span>
+				<?php endif; ?>
+			</div>
+		<?php endif; ?>
 
 		<?php if ( $associated ) : ?>
 			<p class="mint-s3-quiz-associate">
@@ -160,19 +181,21 @@ if ( ! is_string( $previewBoot ) ) {
 				</div>
 			</div>
 
-			<?php if ( $quiz instanceof QuizDto && array() !== $questions ) : ?>
+			<?php if ( $quiz instanceof QuizDto && array() !== $takeableQuestions ) : ?>
 				<div class="mint-s3-quiz-start">
 					<button type="button" class="mint-s3b-nav__next" @click="started = true">
 						<?php esc_html_e( 'Start a Quiz', 'mint-lms' ); ?>
 					</button>
 				</div>
+			<?php elseif ( $quiz instanceof QuizDto && array() !== $questions ) : ?>
+				<div class="mint-s3-empty"><?php esc_html_e( 'Set an answer type on this question before starting the quiz.', 'mint-lms' ); ?></div>
 			<?php else : ?>
 				<div class="mint-s3-empty"><?php esc_html_e( 'No questions in this quiz yet.', 'mint-lms' ); ?></div>
 			<?php endif; ?>
 		</div>
 
 		<div x-show="started" x-cloak>
-			<?php if ( $quiz instanceof QuizDto && array() !== $questions ) : ?>
+			<?php if ( $quiz instanceof QuizDto && array() !== $takeableQuestions ) : ?>
 				<?php require MINTLMS_PATH . 'templates/student/quiz.php'; ?>
 			<?php endif; ?>
 		</div>
