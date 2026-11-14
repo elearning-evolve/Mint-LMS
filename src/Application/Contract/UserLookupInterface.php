@@ -6,9 +6,14 @@ namespace MintLMS\Application\Contract;
 interface UserLookupInterface {
 
 	/**
-	 * @return list<array{id: int, email: string, display_name: string}>
+	 * @return list<array{id: int, email: string, display_name: string, user_login: string}>
 	 */
 	public function searchUsers( string $query, int $limit = 10 ): array;
+
+	/**
+	 * @return array{users: list<array{id: int, email: string, display_name: string, user_login: string}>, total: int}
+	 */
+	public function listUsers( int $page = 1, int $perPage = 100, string $search = '' ): array;
 
 	public function getDisplayName( int $userId ): ?string;
 }

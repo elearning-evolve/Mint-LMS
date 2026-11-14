@@ -3,65 +3,72 @@ declare(strict_types=1);
 
 namespace MintLMS\Infrastructure\Capability;
 
+defined( 'ABSPATH' ) || exit;
+
 final class CapabilityRegistrar {
 
-	private const CAPABILITIES = array(
-		'manage_mintlms',
-		'edit_mintlms_courses',
-		'edit_others_mintlms_courses',
-		'enroll_mintlms_students',
-		'view_mintlms_reports',
-	);
-
 	public function register(): void {
-		$this->ensureInstructorRole();
-		$this->assignAdministratorCaps();
-		$this->assignInstructorCaps();
+		foreach ( Roles::customRoleSlugs() as $slug ) {
+			$this->ensureRole( $slug, Roles::displayName( $slug ), array( 'read' => true ) );
+		}
+
+		$this->syncRoleCaps( Roles::ADMINISTRATOR, Roles::administratorCaps() );
+		$this->syncRoleCaps( Roles::MANAGER, Roles::managerCaps() );
+		$this->syncRoleCaps( Roles::INSTRUCTOR, Roles::instructorCaps() );
+		$this->syncRoleCaps( Roles::STUDENT, Roles::studentCaps() );
 	}
 
-	private function ensureInstructorRole(): void {
-		$role = get_role( 'mintlms_instructor' );
+	/**
+	 * @param array<string, bool> $caps
+	 */
+	private function ensureRole( string $slug, string $label, array $caps ): void {
+		if ( null === get_role( $slug ) ) {
+			add_role( $slug, $label, $caps );
+		}
 
-		if ( null !== $role ) {
+		$this->syncRoleLabel( $slug, $label );
+	}
+
+	private function syncRoleLabel( string $slug, string $label ): void {
+		$wp_roles = wp_roles();
+		if ( ! isset( $wp_roles->roles[ $slug ] ) ) {
 			return;
 		}
 
-		add_role(
-			'mintlms_instructor',
-			__( 'Instructor', 'mint-lms' ),
-			array(
-				'read' => true,
-			)
-		);
+		$stored = (string) ( $wp_roles->roles[ $slug ]['name'] ?? '' );
+		if ( $stored === $label && ( $wp_roles->role_names[ $slug ] ?? '' ) === $label ) {
+			return;
+		}
+
+		$wp_roles->roles[ $slug ]['name'] = $label;
+		$wp_roles->role_names[ $slug ]    = $label;
+
+		if ( $wp_roles->use_db ) {
+			update_option( $wp_roles->role_key, $wp_roles->roles );
+		}
 	}
 
-	private function assignAdministratorCaps(): void {
-		$role = get_role( 'administrator' );
-
+	/**
+	 * @param array<string, bool> $granted
+	 */
+	private function syncRoleCaps( string $slug, array $granted ): void {
+		$role = get_role( $slug );
 		if ( null === $role ) {
 			return;
 		}
 
-		foreach ( self::CAPABILITIES as $cap ) {
-			$role->add_cap( $cap );
-		}
-	}
-
-	private function assignInstructorCaps(): void {
-		$role = get_role( 'mintlms_instructor' );
-
-		if ( null === $role ) {
-			return;
+		foreach ( Roles::mintCapabilities() as $cap ) {
+			if ( ! empty( $granted[ $cap ] ) ) {
+				$role->add_cap( $cap );
+			} else {
+				$role->remove_cap( $cap );
+			}
 		}
 
-		$instructorCaps = array(
-			'edit_mintlms_courses',
-			'enroll_mintlms_students',
-			'view_mintlms_reports',
-		);
-
-		foreach ( $instructorCaps as $cap ) {
-			$role->add_cap( $cap );
+		foreach ( $granted as $cap => $allow ) {
+			if ( $allow ) {
+				$role->add_cap( $cap );
+			}
 		}
 	}
 }

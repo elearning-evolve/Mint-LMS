@@ -43,6 +43,10 @@ use MintLMS\Infrastructure\Admin\NativeEditorViewLinks;
 use MintLMS\Infrastructure\Admin\QuestionPostEditUi;
 use MintLMS\Infrastructure\Admin\QuizPostEditUi;
 use MintLMS\Infrastructure\Admin\SettingsPage;
+use MintLMS\Infrastructure\Admin\UserProfileEnrollment;
+use MintLMS\Infrastructure\Capability\AdminAccessGuard;
+use MintLMS\Infrastructure\Capability\CapabilityRegistrar;
+use MintLMS\Infrastructure\Capability\StudentRoleAssigner;
 use MintLMS\Infrastructure\Cache\WpObjectCache;
 use MintLMS\Infrastructure\Clock\SystemClock;
 use MintLMS\Infrastructure\PostType\PostTypes;
@@ -99,6 +103,10 @@ final class Bootstrap {
 
 		self::runMigrations();
 
+		( new CapabilityRegistrar() )->register();
+		( new StudentRoleAssigner() )->register();
+		( new AdminAccessGuard() )->register();
+
 		( new PostTypeRegistrar() )->register();
 
 		// Needs registered CPTs + WP_Rewrite (after init). plugins_loaded is too early for wp_insert_post.
@@ -137,6 +145,7 @@ final class Bootstrap {
 		( new NativeEditorSaveGuard() )->register();
 		( new NativeEditorViewLinks() )->register();
 		( new FirstRunRedirect() )->register();
+		( new UserProfileEnrollment() )->register();
 		( new AssetLoader() )->register();
 		( new AdminAjaxHandler() )->register();
 		( new StudentAssetLoader() )->register();

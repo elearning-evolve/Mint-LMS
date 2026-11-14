@@ -995,6 +995,38 @@
   box-shadow: 0 0 0 2px #98fbcb;
 }
 
+#mint-lms-root.mint-lms-student .mint-s3-tf-item {
+  display: grid;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1.5px solid #e4e1f0;
+  border-radius: 12px;
+  background: #fff;
+}
+
+#mint-lms-root.mint-lms-student .mint-s3-tf-item__prompt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#mint-lms-root.mint-lms-student .mint-s3-tf-item__text {
+  font-size: 15px;
+  color: #0f0e1a;
+}
+
+#mint-lms-root.mint-lms-student .mint-s3-tf-item__flags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+#mint-lms-root.mint-lms-student label.mint-s3-tf-flag {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+}
+
 #mint-lms-root.mint-lms-student .mint-s3-essay {
   width: 100%;
   min-height: 120px;
@@ -1159,12 +1191,139 @@
   color: #0f0e1a;
 }
 
+#mint-lms-root.mint-lms-student .mint-s3-quiz-review__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
 #mint-lms-root.mint-lms-student .mint-s3-quiz-review__badge {
-  margin-top: 6px;
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
+}
+
+#mint-lms-root.mint-lms-student .mint-s3-quiz-review__choices {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+#mint-lms-root.mint-lms-student .mint-s3-quiz-review__choice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1.5px solid #e4e1f0;
+  border-radius: 10px;
+  background: #fff;
+}
+
+#mint-lms-root.mint-lms-student .mint-s3-quiz-review__choice.is-right {
+  border-color: #0b4f3f;
+  background: #e8fff3;
+}
+
+#mint-lms-root.mint-lms-student .mint-s3-quiz-review__choice.is-wrong {
+  border-color: #e8b4b4;
+  background: #fff7f7;
+}
+
+#mint-lms-root.mint-lms-student .mint-s3-quiz-review__choice.is-missed {
+  border-color: #0b4f3f;
+  background: #f7fffb;
+}
+
+#mint-lms-root.mint-lms-student .mint-s3-quiz-review__choice-label {
+  flex: 1;
+  font-size: 14px;
+  color: #17222b;
+}
+
+#mint-lms-root.mint-lms-student .mint-s3-quiz-review__choice-mark {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0b4f3f;
+}
+
+#mint-lms-root.mint-lms-student .mint-s3-quiz-review__choice-mark--wrong {
+  color: #9b2c2c;
+}
+
+#mint-lms-root.mint-lms-student .mint-s3-quiz-review__essay {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+#mint-lms-root.mint-lms-student .mint-s3-quiz-review__essay-status {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1.5px solid #e8d48b;
+  background: #fff;
+}
+
+#mint-lms-root.mint-lms-student .mint-s3-quiz-review__essay-status.is-waiting {
+  border-color: #d4a017;
+  background: #fffdf4;
+}
+
+#mint-lms-root.mint-lms-student .mint-s3-quiz-review__essay-status.is-ok {
+  border-color: #0b4f3f;
+  background: #e8fff3;
+}
+
+#mint-lms-root.mint-lms-student .mint-s3-quiz-review__essay-status.is-fail {
+  border-color: #e8b4b4;
+  background: #fff7f7;
+}
+
+#mint-lms-root.mint-lms-student .mint-s3-quiz-review__essay-status-title {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f0e1a;
+}
+
+#mint-lms-root.mint-lms-student .mint-s3-quiz-review__essay-status-hint {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #4b5563;
+}
+
+#mint-lms-root.mint-lms-student .mint-s3-quiz-review__essay-block {
+  display: grid;
+  gap: 6px;
+}
+
+#mint-lms-root.mint-lms-student .mint-s3-quiz-review__essay-kicker {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #5c5c77;
+}
+
+#mint-lms-root.mint-lms-student .mint-s3-quiz-review__essay-paper {
+  padding: 12px 14px;
+  border: 1.5px solid #e4e1f0;
+  border-radius: 10px;
+  background: #fff;
+  color: #17222b;
+  font-size: 15px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-height: 72px;
+}
+
+#mint-lms-root.mint-lms-student .mint-s3-quiz-review__essay-paper.is-empty {
+  color: #8b8ba3;
+  font-style: italic;
 }
 
 #mint-lms-root.mint-lms-student .mint-s3-quiz-review__line {

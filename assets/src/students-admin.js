@@ -430,4 +430,430 @@ function initStudentsAdmin() {
 
 document.addEventListener('DOMContentLoaded', initStudentsAdmin);
 
-export { mintCourseStudents, initStudentsAdmin, exportStudentsCsv, searchUsers };
+function matchesQuery(haystack, query) {
+  const q = String(query || '')
+    .trim()
+    .toLowerCase();
+  if (!q) {
+    return true;
+  }
+  return String(haystack || '')
+    .toLowerCase()
+    .includes(q);
+}
+
+function toggleId(list, id) {
+  const value = Number(id) || 0;
+  if (!value) {
+    return list;
+  }
+  return list.includes(value) ? list.filter((item) => item !== value) : [...list, value];
+}
+
+function userLabel(user) {
+  const name = String(user?.display_name || user?.name || '').trim();
+  const login = String(user?.user_login || '').trim();
+  if (name && login && name.toLowerCase() !== login.toLowerCase()) {
+    return `${name} (${login})`;
+  }
+  return name || login || `User #${user?.id || ''}`;
+}
+
+function mintCourseSettingsEnroll(courseId) {
+  return {
+    courseId: Number(courseId) || 0,
+    allUsers: [],
+    assignedUsers: [],
+    leftQuery: '',
+    rightQuery: '',
+    selectedLeft: [],
+    selectedRight: [],
+    busy: false,
+
+    userLabel,
+
+    async init() {
+      if (!this.courseId) {
+        return;
+      }
+      await Promise.all([this.loadUsers(), this.loadAssigned()]);
+    },
+
+    availableUsers() {
+      const assigned = new Set(this.assignedUsers.map((user) => Number(user.id)));
+      return this.allUsers.filter((user) => !assigned.has(Number(user.id)));
+    },
+
+    filteredAvailable() {
+      return this.availableUsers().filter((user) =>
+        matchesQuery(`${userLabel(user)} ${user.email || ''}`, this.leftQuery)
+      );
+    },
+
+    filteredAssigned() {
+      return this.assignedUsers.filter((user) =>
+        matchesQuery(`${userLabel(user)} ${user.email || ''}`, this.rightQuery)
+      );
+    },
+
+    isLeftSelected(id) {
+      return this.selectedLeft.includes(Number(id));
+    },
+
+    isRightSelected(id) {
+      return this.selectedRight.includes(Number(id));
+    },
+
+    toggleLeft(id) {
+      this.selectedLeft = toggleId(this.selectedLeft, id);
+    },
+
+    toggleRight(id) {
+      this.selectedRight = toggleId(this.selectedRight, id);
+    },
+
+    async loadUsers() {
+      try {
+        const data = await mintApi('users?per_page=100&page=1');
+        this.allUsers = Array.isArray(data?.users) ? data.users : [];
+      } catch (_error) {
+        this.allUsers = [];
+      }
+    },
+
+    async loadAssigned() {
+      try {
+        const data = await mintApi(`courses/${this.courseId}/students?per_page=100&page=1`);
+        const items = Array.isArray(data?.items) ? data.items : [];
+        this.assignedUsers = items.map((item) => ({
+          id: Number(item.userId) || 0,
+          enrollmentId: Number(item.enrollmentId) || 0,
+          display_name: item.displayName || '',
+          email: item.email || '',
+          user_login: '',
+        }));
+      } catch (_error) {
+        this.assignedUsers = [];
+      }
+    },
+
+    async persistAssign(user) {
+      const enrollment = await mintApi(`courses/${this.courseId}/enroll`, {
+        method: 'POST',
+        body: JSON.stringify({ user_id: user.id }),
+      });
+      this.assignedUsers = [
+        ...this.assignedUsers.filter((row) => Number(row.id) !== Number(user.id)),
+        {
+          id: Number(user.id),
+          enrollmentId: Number(enrollment?.id || enrollment?.enrollmentId) || 0,
+          display_name: user.display_name || user.name || '',
+          email: user.email || enrollment?.email || '',
+          user_login: user.user_login || '',
+        },
+      ];
+      this.selectedLeft = this.selectedLeft.filter((id) => id !== Number(user.id));
+    },
+
+    async persistUnassign(user) {
+      const enrollmentId = Number(user?.enrollmentId) || 0;
+      if (!enrollmentId) {
+        return;
+      }
+      await mintApi(`enrollments/${enrollmentId}`, { method: 'DELETE' });
+      this.assignedUsers = this.assignedUsers.filter((row) => Number(row.id) !== Number(user.id));
+      this.selectedRight = this.selectedRight.filter((id) => id !== Number(user.id));
+    },
+
+    async assignOne(user) {
+      if (!user?.id || this.busy) {
+        return;
+      }
+      this.busy = true;
+      try {
+        await this.persistAssign(user);
+      } catch (error) {
+        window.MintLMS?.toast?.error(error?.message || 'Could not assign user.');
+        await this.loadAssigned();
+      } finally {
+        this.busy = false;
+      }
+    },
+
+    async unassignOne(user) {
+      if (!user?.enrollmentId || this.busy) {
+        return;
+      }
+      this.busy = true;
+      try {
+        await this.persistUnassign(user);
+      } catch (error) {
+        window.MintLMS?.toast?.error(error?.message || 'Could not remove user.');
+        await this.loadAssigned();
+      } finally {
+        this.busy = false;
+      }
+    },
+
+    async assignSelected() {
+      if (this.busy || this.selectedLeft.length === 0) {
+        return;
+      }
+      const ids = [...this.selectedLeft];
+      this.busy = true;
+      try {
+        for (const id of ids) {
+          const user = this.availableUsers().find((row) => Number(row.id) === Number(id));
+          if (user) {
+            await this.persistAssign(user);
+          }
+        }
+      } catch (error) {
+        window.MintLMS?.toast?.error(error?.message || 'Could not assign user.');
+        await this.loadAssigned();
+      } finally {
+        this.busy = false;
+      }
+    },
+
+    async unassignSelected() {
+      if (this.busy || this.selectedRight.length === 0) {
+        return;
+      }
+      const ids = [...this.selectedRight];
+      this.busy = true;
+      try {
+        for (const id of ids) {
+          const user = this.assignedUsers.find((row) => Number(row.id) === Number(id));
+          if (user) {
+            await this.persistUnassign(user);
+          }
+        }
+      } catch (error) {
+        window.MintLMS?.toast?.error(error?.message || 'Could not remove user.');
+        await this.loadAssigned();
+      } finally {
+        this.busy = false;
+      }
+    },
+  };
+}
+
+function mintUserCourseEnroll(config = {}) {
+  return {
+    userId: Number(config.userId) || 0,
+    courses: [],
+    enrolled: [],
+    leftQuery: '',
+    rightQuery: '',
+    selectedLeft: [],
+    selectedRight: [],
+    busy: false,
+
+    async init() {
+      await Promise.all([this.loadCourses(), this.loadEnrolled()]);
+    },
+
+    availableCourses() {
+      const enrolledIds = new Set(this.enrolled.map((row) => Number(row.courseId)));
+      return this.courses.filter((course) => !enrolledIds.has(Number(course.id)));
+    },
+
+    filteredAvailable() {
+      return this.availableCourses().filter((course) => matchesQuery(course.title, this.leftQuery));
+    },
+
+    filteredEnrolled() {
+      return this.enrolled.filter((course) => matchesQuery(course.courseTitle, this.rightQuery));
+    },
+
+    escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    },
+
+    leftOptionsHtml() {
+      return this.filteredAvailable()
+        .map((course) => {
+          const id = Number(course.id);
+          const title = this.escapeHtml(course.title || `Course #${id}`);
+          return `<option value="${id}">${title}</option>`;
+        })
+        .join('');
+    },
+
+    rightOptionsHtml() {
+      return this.filteredEnrolled()
+        .map((course) => {
+          const id = Number(course.courseId);
+          const title = this.escapeHtml(course.courseTitle || `Course #${id}`);
+          return `<option value="${id}">${title}</option>`;
+        })
+        .join('');
+    },
+
+    captureLeft() {
+      this.selectedLeft = Array.from(this.$refs.leftSelect?.selectedOptions || []).map((option) => Number(option.value));
+    },
+
+    captureRight() {
+      this.selectedRight = Array.from(this.$refs.rightSelect?.selectedOptions || []).map((option) => Number(option.value));
+    },
+
+    isLeftSelected(id) {
+      return this.selectedLeft.includes(Number(id));
+    },
+
+    isRightSelected(id) {
+      return this.selectedRight.includes(Number(id));
+    },
+
+    toggleLeft(id) {
+      this.selectedLeft = toggleId(this.selectedLeft, id);
+    },
+
+    toggleRight(id) {
+      this.selectedRight = toggleId(this.selectedRight, id);
+    },
+
+    async loadCourses() {
+      try {
+        const data = await mintApi('courses?per_page=100');
+        const items = Array.isArray(data?.items) ? data.items : [];
+        this.courses = items.filter((course) => course.status !== 'trashed');
+      } catch (_error) {
+        this.courses = [];
+      }
+    },
+
+    async loadEnrolled() {
+      if (!this.userId) {
+        this.enrolled = [];
+        return;
+      }
+      try {
+        const data = await mintApi(`users/${this.userId}/courses?per_page=100`);
+        const items = Array.isArray(data?.items) ? data.items : [];
+        this.enrolled = items.map((item) => ({
+          enrollmentId: Number(item.enrollmentId) || 0,
+          courseId: Number(item.courseId) || 0,
+          courseTitle: item.courseTitle || `Course #${item.courseId}`,
+        }));
+      } catch (_error) {
+        this.enrolled = [];
+      }
+    },
+
+    async persistAssign(course) {
+      const enrollment = await mintApi(`courses/${course.id}/enroll`, {
+        method: 'POST',
+        body: JSON.stringify({ user_id: this.userId }),
+      });
+      this.enrolled = [
+        ...this.enrolled.filter((row) => Number(row.courseId) !== Number(course.id)),
+        {
+          enrollmentId: Number(enrollment?.id || enrollment?.enrollmentId) || 0,
+          courseId: Number(course.id),
+          courseTitle: course.title || `Course #${course.id}`,
+        },
+      ];
+      this.selectedLeft = this.selectedLeft.filter((id) => id !== Number(course.id));
+    },
+
+    async persistUnassign(row) {
+      const enrollmentId = Number(row?.enrollmentId) || 0;
+      if (!enrollmentId) {
+        return;
+      }
+      await mintApi(`enrollments/${enrollmentId}`, { method: 'DELETE' });
+      this.enrolled = this.enrolled.filter((item) => Number(item.courseId) !== Number(row.courseId));
+      this.selectedRight = this.selectedRight.filter((id) => id !== Number(row.courseId));
+    },
+
+    async assignOne(course) {
+      if (!course?.id || this.busy) {
+        return;
+      }
+      this.busy = true;
+      try {
+        await this.persistAssign(course);
+      } catch (error) {
+        window.MintLMS?.toast?.error(error?.message || 'Could not enroll in course.');
+        await this.loadEnrolled();
+      } finally {
+        this.busy = false;
+      }
+    },
+
+    async unassignOne(row) {
+      if (!row?.enrollmentId || this.busy) {
+        return;
+      }
+      this.busy = true;
+      try {
+        await this.persistUnassign(row);
+      } catch (error) {
+        window.MintLMS?.toast?.error(error?.message || 'Could not remove from course.');
+        await this.loadEnrolled();
+      } finally {
+        this.busy = false;
+      }
+    },
+
+    async assignSelected() {
+      this.captureLeft();
+      if (this.busy || this.selectedLeft.length === 0) {
+        return;
+      }
+      const ids = [...this.selectedLeft];
+      this.busy = true;
+      try {
+        for (const id of ids) {
+          const course = this.availableCourses().find((row) => Number(row.id) === Number(id));
+          if (course) {
+            await this.persistAssign(course);
+          }
+        }
+      } catch (error) {
+        window.MintLMS?.toast?.error(error?.message || 'Could not enroll in course.');
+        await this.loadEnrolled();
+      } finally {
+        this.busy = false;
+      }
+    },
+
+    async unassignSelected() {
+      this.captureRight();
+      if (this.busy || this.selectedRight.length === 0) {
+        return;
+      }
+      const ids = [...this.selectedRight];
+      this.busy = true;
+      try {
+        for (const id of ids) {
+          const course = this.enrolled.find((row) => Number(row.courseId) === Number(id));
+          if (course) {
+            await this.persistUnassign(course);
+          }
+        }
+      } catch (error) {
+        window.MintLMS?.toast?.error(error?.message || 'Could not remove from course.');
+        await this.loadEnrolled();
+      } finally {
+        this.busy = false;
+      }
+    },
+  };
+}
+
+export {
+  mintCourseStudents,
+  mintCourseSettingsEnroll,
+  mintUserCourseEnroll,
+  initStudentsAdmin,
+  exportStudentsCsv,
+  searchUsers,
+};

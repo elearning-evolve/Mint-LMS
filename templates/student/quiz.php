@@ -45,7 +45,8 @@ $quizBoot       = wp_json_encode(
 		'quizTitle'   => (string) $quiz->title,
 		'passPercent' => (int) $quiz->passPercent,
 		'hasPassed'   => (bool) $hasPassedQuiz,
-		'previewMode' => (bool) $isReviewMode,
+		'previewMode'      => (bool) $isReviewMode,
+		'focusQuestionId'  => (int) ( $focusQuestionId ?? 0 ),
 		'settings'    => array(
 			'timeLimitEnabled'           => ! empty( $storedSettings['timeLimitEnabled'] ),
 			'timeLimitHours'             => (string) ( $storedSettings['timeLimitHours'] ?? '00' ),
@@ -113,7 +114,7 @@ if ( ! is_string( $quizBoot ) ) {
 		</div>
 	<?php endif; ?>
 
-	<template x-if="hasPassed && !submitted">
+	<template x-if="hasPassed && !submitted && previewMode">
 		<div class="mint-s3-quiz-result mint-s3-quiz-result--pass">
 			<p class="mint-s3-quiz-result__title" x-text="mintLmsStudent.i18n.quizPassed"></p>
 		</div>
@@ -152,15 +153,30 @@ if ( ! is_string( $quizBoot ) ) {
 					<template x-for="item in review" :key="'rv-' + item.id">
 						<div class="mint-s3-quiz-review__item" :class="reviewItemClass(item)">
 							<div class="mint-s3-quiz-review__prompt" x-html="questionPrompt(item.id)"></div>
-							<div class="mint-s3-quiz-review__badge" x-show="settings.correctIncorrectMarks !== false" x-text="reviewBadge(item)"></div>
-							<p class="mint-s3-quiz-review__line" x-show="settings.correctIncorrectMessages !== false">
-								<span><?php esc_html_e( 'Your answer', 'mint-lms' ); ?>:</span>
-								<span x-text="formatAnswer(item.given)"></span>
-							</p>
-							<p class="mint-s3-quiz-review__line" x-show="settings.correctIncorrectMessages !== false && !item.pending">
-								<span><?php esc_html_e( 'Correct answer', 'mint-lms' ); ?>:</span>
-								<span x-text="formatAnswer(item.correctAnswer)"></span>
-							</p>
+							<div class="mint-s3-quiz-review__meta">
+								<span class="mint-s3b-badge mint-s3b-badge--sm" x-text="answerTypeLabel(item)"></span>
+								<span class="mint-s3-quiz-review__badge" x-show="settings.correctIncorrectMarks !== false && !isEssayReview(item)" x-text="reviewBadge(item)"></span>
+							</div>
+							<div class="mint-s3-quiz-review__choices" x-show="!isEssayReview(item) && item.optionRows && item.optionRows.length">
+								<template x-for="(opt, oi) in item.optionRows" :key="item.id + '-opt-' + oi">
+									<div class="mint-s3-quiz-review__choice" :class="opt.state">
+										<span class="mint-s3-choice__key" x-text="opt.key"></span>
+										<span class="mint-s3-quiz-review__choice-label" x-text="opt.label"></span>
+										<span class="mint-s3-quiz-review__choice-mark" x-show="opt.isRight && settings.correctIncorrectMarks !== false"><?php esc_html_e( 'Correct answer', 'mint-lms' ); ?></span>
+										<span class="mint-s3-quiz-review__choice-mark mint-s3-quiz-review__choice-mark--wrong" x-show="opt.isWrongPick && settings.correctIncorrectMarks !== false">✕</span>
+									</div>
+								</template>
+							</div>
+							<div class="mint-s3-quiz-review__essay" x-show="isEssayReview(item)">
+								<div class="mint-s3-quiz-review__essay-status" :class="essayStatusClass(item)">
+									<strong class="mint-s3-quiz-review__essay-status-title" x-text="essayStatusTitle(item)"></strong>
+									<p class="mint-s3-quiz-review__essay-status-hint" x-text="essayStatusHint(item)"></p>
+								</div>
+								<div class="mint-s3-quiz-review__essay-block">
+									<span class="mint-s3-quiz-review__essay-kicker"><?php esc_html_e( 'Your written answer', 'mint-lms' ); ?></span>
+									<div class="mint-s3-quiz-review__essay-paper" :class="{ 'is-empty': !essayHasAnswer(item) }" x-text="essayAnswerText(item)"></div>
+								</div>
+							</div>
 						</div>
 					</template>
 				</div>
@@ -168,7 +184,7 @@ if ( ! is_string( $quizBoot ) ) {
 		</div>
 	</template>
 
-	<template x-if="!hasPassed && !submitted">
+	<template x-if="!submitted">
 		<div class="mint-s3-quiz-take">
 			<div class="mint-s3-quiz-take__progress">
 				<div class="mint-s3b-progress mint-s3-quiz-take__pill">
@@ -211,16 +227,24 @@ if ( ! is_string( $quizBoot ) ) {
 
 						<template x-if="question.type === 'true_false'">
 							<div class="mint-s3-quiz__body mint-s3-choice-list">
-								<label class="mint-s3-row mint-s3-row--nested mint-s3-choice" :class="isChoiceSelected(question.id, 'true') ? 'is-selected' : ''">
-									<input type="radio" class="mint-s3-choice__input" :name="'q-' + question.id" value="true" x-model="answers[question.id]" />
-									<span class="mint-s3-choice__key" aria-hidden="true">T</span>
-									<span class="mint-s3-choice__label"><?php esc_html_e( 'True', 'mint-lms' ); ?></span>
-								</label>
-								<label class="mint-s3-row mint-s3-row--nested mint-s3-choice" :class="isChoiceSelected(question.id, 'false') ? 'is-selected' : ''">
-									<input type="radio" class="mint-s3-choice__input" :name="'q-' + question.id" value="false" x-model="answers[question.id]" />
-									<span class="mint-s3-choice__key" aria-hidden="true">F</span>
-									<span class="mint-s3-choice__label"><?php esc_html_e( 'False', 'mint-lms' ); ?></span>
-								</label>
+								<template x-for="(option, oIndex) in question.options" :key="'tf-' + question.id + '-' + oIndex">
+									<div class="mint-s3-tf-item">
+										<div class="mint-s3-tf-item__prompt">
+											<span class="mint-s3-choice__key" x-text="String.fromCharCode(65 + oIndex)"></span>
+											<span class="mint-s3-tf-item__text" x-text="option"></span>
+										</div>
+										<div class="mint-s3-tf-item__flags">
+											<label class="mint-s3-choice mint-s3-tf-flag" :class="isTfPicked(question.id, option, 'true') ? 'is-selected' : ''">
+												<input type="radio" class="mint-s3-choice__input" :name="'tf-' + question.id + '-' + oIndex" value="true" :checked="isTfPicked(question.id, option, 'true')" @change="setTfAnswer(question.id, option, 'true')" />
+												<span><?php esc_html_e( 'True', 'mint-lms' ); ?></span>
+											</label>
+											<label class="mint-s3-choice mint-s3-tf-flag" :class="isTfPicked(question.id, option, 'false') ? 'is-selected' : ''">
+												<input type="radio" class="mint-s3-choice__input" :name="'tf-' + question.id + '-' + oIndex" value="false" :checked="isTfPicked(question.id, option, 'false')" @change="setTfAnswer(question.id, option, 'false')" />
+												<span><?php esc_html_e( 'False', 'mint-lms' ); ?></span>
+											</label>
+										</div>
+									</div>
+								</template>
 							</div>
 						</template>
 

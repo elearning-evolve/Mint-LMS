@@ -156,6 +156,96 @@ $inputClass = 'mint-cs-input';
 				</div>
 			</section>
 
+			<!-- Enroll site users -->
+			<section class="mint-cs-card" x-data="mintCourseSettingsEnroll(<?php echo (int) $courseId; ?>)" x-init="init()">
+				<header class="mint-cs-card__head">
+					<div class="mint-cs-card__title"><?php esc_html_e( 'Course Students', 'mint-lms' ); ?></div>
+					<div class="mint-cs-card__sub"><?php esc_html_e( 'Move people into Assigned to enroll them in this course. Move them back to remove access.', 'mint-lms' ); ?></div>
+				</header>
+				<div class="mint-cs-card__body">
+					<div class="mint-assign" :class="busy ? 'is-busy' : ''">
+						<div class="mint-assign__col">
+							<div class="mint-assign__col-head">
+								<span><?php esc_html_e( 'All course users', 'mint-lms' ); ?></span>
+								<span class="mint-assign__count" x-text="availableUsers().length">0</span>
+							</div>
+							<input
+								type="search"
+								class="mint-assign__search"
+								placeholder="<?php echo esc_attr__( 'Search all course users…', 'mint-lms' ); ?>"
+								autocomplete="off"
+								x-model="leftQuery"
+							/>
+							<ul class="mint-assign__list" role="listbox" aria-multiselectable="true">
+								<template x-if="filteredAvailable().length === 0">
+									<li class="mint-assign__empty"><?php esc_html_e( 'No users to assign.', 'mint-lms' ); ?></li>
+								</template>
+								<template x-for="user in filteredAvailable()" :key="'avail-' + user.id">
+									<li
+										class="mint-assign__item"
+										role="option"
+										:class="isLeftSelected(user.id) ? 'is-selected' : ''"
+										@click="toggleLeft(user.id)"
+										@dblclick.prevent="assignOne(user)"
+										x-text="userLabel(user)"
+									></li>
+								</template>
+							</ul>
+						</div>
+						<div class="mint-assign__actions">
+							<span
+								class="mint-assign__arrow-wrap"
+								:data-tip="selectedLeft.length ? '<?php echo esc_js( __( 'Assign selected users', 'mint-lms' ) ); ?>' : '<?php echo esc_js( __( 'First select a user from the table', 'mint-lms' ) ); ?>'"
+							>
+								<button type="button" class="mint-assign__arrow" :disabled="busy || selectedLeft.length === 0" @click="assignSelected()" :aria-label="selectedLeft.length ? '<?php echo esc_js( __( 'Assign selected users', 'mint-lms' ) ); ?>' : '<?php echo esc_js( __( 'First select a user from the table', 'mint-lms' ) ); ?>'">
+									<svg class="mint-assign__arrow-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+										<path d="M4 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+									</svg>
+								</button>
+							</span>
+							<span
+								class="mint-assign__arrow-wrap"
+								:data-tip="selectedRight.length ? '<?php echo esc_js( __( 'Remove selected users', 'mint-lms' ) ); ?>' : '<?php echo esc_js( __( 'First select an assigned user from the table', 'mint-lms' ) ); ?>'"
+							>
+								<button type="button" class="mint-assign__arrow" :disabled="busy || selectedRight.length === 0" @click="unassignSelected()" :aria-label="selectedRight.length ? '<?php echo esc_js( __( 'Remove selected users', 'mint-lms' ) ); ?>' : '<?php echo esc_js( __( 'First select an assigned user from the table', 'mint-lms' ) ); ?>'">
+									<svg class="mint-assign__arrow-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+										<path d="M20 12H6M11 6l-6 6 6 6" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+									</svg>
+								</button>
+							</span>
+						</div>
+						<div class="mint-assign__col">
+							<div class="mint-assign__col-head">
+								<span><?php esc_html_e( 'Assigned course users', 'mint-lms' ); ?></span>
+								<span class="mint-assign__count" x-text="assignedUsers.length">0</span>
+							</div>
+							<input
+								type="search"
+								class="mint-assign__search"
+								placeholder="<?php echo esc_attr__( 'Search assigned course users…', 'mint-lms' ); ?>"
+								autocomplete="off"
+								x-model="rightQuery"
+							/>
+							<ul class="mint-assign__list" role="listbox" aria-multiselectable="true">
+								<template x-if="filteredAssigned().length === 0">
+									<li class="mint-assign__empty"><?php esc_html_e( 'No students assigned yet.', 'mint-lms' ); ?></li>
+								</template>
+								<template x-for="user in filteredAssigned()" :key="'asgn-' + user.id">
+									<li
+										class="mint-assign__item"
+										role="option"
+										:class="isRightSelected(user.id) ? 'is-selected' : ''"
+										@click="toggleRight(user.id)"
+										@dblclick.prevent="unassignOne(user)"
+										x-text="userLabel(user)"
+									></li>
+								</template>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</section>
+
 			<!-- Display and content options -->
 			<section class="mint-cs-card">
 				<header class="mint-cs-card__head">

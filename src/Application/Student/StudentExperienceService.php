@@ -387,6 +387,31 @@ final class StudentExperienceService {
 		);
 	}
 
+	public function isEditorPreviewing( int $courseId, int $userId ): bool {
+		if ( $userId <= 0 || null === $this->authorization ) {
+			return false;
+		}
+
+		if ( $courseId <= 0 ) {
+			return $this->authorization->canCreateCourse( $userId );
+		}
+
+		$course = $this->courseRepository->findById( $courseId );
+		if ( null === $course ) {
+			return false;
+		}
+
+		return $this->canEditorPreviewCourse( $userId, $course->status, $course->authorId );
+	}
+
+	public function isUserEnrolledInCourse( int $userId, int $courseId ): bool {
+		return $userId > 0 && $courseId > 0 && $this->progressRepository->isUserEnrolled( $userId, $courseId );
+	}
+
+	public function hasPassedQuiz( int $userId, int $quizId ): bool {
+		return $userId > 0 && $quizId > 0 && null !== $this->quizService && $this->quizService->hasPassed( $userId, $quizId );
+	}
+
 	/**
 	 * Instructor live quiz runner (does not persist student attempts).
 	 */
@@ -468,14 +493,13 @@ final class StudentExperienceService {
 		$total = 0;
 
 		if ( $lessonId > 0 ) {
-			$quizDto = $this->quizService->getByLessonId( $lessonId, $userId, false );
-			if ( null !== $quizDto ) {
+			foreach ( $this->quizService->listByLessonId( $lessonId, $userId, false ) as $quizDto ) {
 				$total = count( $quizDto->questions );
 				foreach ( $quizDto->questions as $qi => $question ) {
 					if ( $question->id === $questionId ) {
 						$found = $question;
 						$index = $qi + 1;
-						break;
+						break 2;
 					}
 				}
 			}
@@ -494,16 +518,14 @@ final class StudentExperienceService {
 
 			foreach ( $outline as $section ) {
 				foreach ( $section['lessons'] as $lesson ) {
-					$quizDto = $this->quizService->getByLessonId( (int) $lesson['id'], $userId, false );
-					if ( null === $quizDto ) {
-						continue;
-					}
-					$total = count( $quizDto->questions );
-					foreach ( $quizDto->questions as $qi => $question ) {
-						if ( $question->id === $questionId ) {
-							$found = $question;
-							$index = $qi + 1;
-							break 3;
+					foreach ( $this->quizService->listByLessonId( (int) $lesson['id'], $userId, false ) as $quizDto ) {
+						$total = count( $quizDto->questions );
+						foreach ( $quizDto->questions as $qi => $question ) {
+							if ( $question->id === $questionId ) {
+								$found = $question;
+								$index = $qi + 1;
+								break 4;
+							}
 						}
 					}
 				}
@@ -525,13 +547,14 @@ final class StudentExperienceService {
 		if ( QuizQuestion::TYPE_ESSAY === $found->type ) {
 			$options = array();
 		} elseif ( QuizQuestion::TYPE_TRUE_FALSE === $found->type ) {
-			$correct = strtolower( (string) $found->correctAnswer );
-			foreach ( array( __( 'True', 'mint-lms' ), __( 'False', 'mint-lms' ) ) as $label ) {
+			$trueSet = QuestionAnswerCodec::decodeMulti( (string) $found->correctAnswer );
+			$labels  = count( $found->options ) >= 2
+				? $found->options
+				: array( __( 'True', 'mint-lms' ), __( 'False', 'mint-lms' ) );
+			foreach ( $labels as $label ) {
 				$options[] = array(
-					'text'    => $label,
-					'correct' => strtolower( $label ) === $correct
-						|| ( '1' === $correct && 'true' === strtolower( $label ) )
-						|| ( '0' === $correct && 'false' === strtolower( $label ) ),
+					'text'    => (string) $label,
+					'correct' => in_array( (string) $label, $trueSet, true ),
 				);
 			}
 		} else {
@@ -604,48 +627,7 @@ final class StudentExperienceService {
 	 * @return list<array<string, mixed>>
 	 */
 	private function buildQuizOutlineForLesson( int $lessonId, int $userId, bool $isEditorPreview ): array {
-		$quizzes = array();
-
-		if ( null === $this->quizService || $userId <= 0 || $lessonId <= 0 ) {
-			return $quizzes;
-		}
-
-		try {
-			$quizDto = $isEditorPreview
-				? $this->quizService->getByLessonId( $lessonId, $userId, false )
-				: $this->quizService->getByLessonId( $lessonId, $userId, true, true );
-		} catch ( ForbiddenException | NotFoundException $exception ) {
-			$quizDto = null;
-		}
-
-		if ( null === $quizDto ) {
-			return $quizzes;
-		}
-
-		if ( ! $isEditorPreview && array() === $quizDto->questions ) {
-			return $quizzes;
-		}
-
-		$questionCount = count( $quizDto->questions );
-		$questions     = array();
-
-		foreach ( $quizDto->questions as $question ) {
-			$questions[] = array(
-				'id'   => $question->id,
-				'text' => \MintLMS\Infrastructure\PostType\PostTypes::questionContentsTitle( $question->id, $question->prompt ),
-			);
-		}
-
-		$quizzes[] = array(
-			'id'        => $quizDto->id,
-			'title'     => '' !== trim( $quizDto->title ) ? $quizDto->title : 'Quiz',
-			'meta'      => 1 === $questionCount
-				? '1 question'
-				: $questionCount . ' questions',
-			'questions' => $questions,
-		);
-
-		return $quizzes;
+		return $this->quizzesOutlineForLesson( $lessonId, $userId, $isEditorPreview );
 	}
 
 	public function getPlayerContext( int $courseId, int $lessonId, int $userId ): StudentPlayerContextDto {
@@ -1030,6 +1012,53 @@ final class StudentExperienceService {
 	}
 
 	/**
+	 * @return list<array<string, mixed>>
+	 */
+	private function quizzesOutlineForLesson( int $lessonId, int $userId, bool $isEditorPreview ): array {
+		$quizzes = array();
+
+		if ( null === $this->quizService || $userId <= 0 || $lessonId <= 0 ) {
+			return $quizzes;
+		}
+
+		try {
+			$quizDtos = $this->quizService->listByLessonId( $lessonId, $userId, true, $isEditorPreview );
+		} catch ( ForbiddenException | NotFoundException $exception ) {
+			return $quizzes;
+		}
+
+		foreach ( $quizDtos as $quizDto ) {
+			$questions     = array();
+			$questionCount = count( $quizDto->questions );
+
+			foreach ( $quizDto->questions as $question ) {
+				$text = trim( strip_tags( $question->prompt ) );
+				if ( '' === $text ) {
+					$text = \MintLMS\Infrastructure\PostType\PostTypes::questionContentsTitle( $question->id, $question->prompt );
+				}
+				if ( '' === trim( $text ) ) {
+					$text = 'Untitled question';
+				}
+				$questions[] = array(
+					'id'   => $question->id,
+					'text' => $text,
+				);
+			}
+
+			$quizzes[] = array(
+				'id'        => $quizDto->id,
+				'title'     => '' !== trim( $quizDto->title ) ? $quizDto->title : 'Quiz',
+				'meta'      => 1 === $questionCount
+					? '1 question'
+					: $questionCount . ' questions',
+				'questions' => $questions,
+			);
+		}
+
+		return $quizzes;
+	}
+
+	/**
 	 * Nested Section → Lesson → Quiz → Question outline for the S3 course overview.
 	 *
 	 * @return list<array<string, mixed>>
@@ -1041,40 +1070,9 @@ final class StudentExperienceService {
 			$lessons = array();
 
 			foreach ( $section->lessons as $lesson ) {
-				$quizzes = array();
-
-				if ( null !== $this->quizService && $userId > 0 ) {
-					try {
-						$quizDto = $this->quizService->getByLessonId( $lesson->id, $userId, true, $isEditorPreview );
-					} catch ( ForbiddenException | NotFoundException $exception ) {
-						$quizDto = null;
-					}
-
-					if ( null !== $quizDto && ( $isEditorPreview || array() !== $quizDto->questions ) ) {
-						$questionCount = count( $quizDto->questions );
-						$questions     = array();
-
-						foreach ( $quizDto->questions as $question ) {
-							$text = trim( strip_tags( $question->prompt ) );
-							if ( '' === $text ) {
-								$text = 'Untitled question';
-							}
-							$questions[] = array(
-								'id'   => $question->id,
-								'text' => $text,
-							);
-						}
-
-						$quizzes[] = array(
-							'id'        => $quizDto->id,
-							'title'     => '' !== trim( $quizDto->title ) ? $quizDto->title : 'Quiz',
-							'meta'      => 1 === $questionCount
-								? '1 question'
-								: $questionCount . ' questions',
-							'questions' => $questions,
-						);
-					}
-				}
+				$quizzes = $userId > 0
+					? $this->quizzesOutlineForLesson( $lesson->id, $userId, $isEditorPreview )
+					: array();
 
 				$quizCount = count( $quizzes );
 				$metaParts = array();

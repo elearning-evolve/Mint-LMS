@@ -19,7 +19,12 @@ final class AssetLoader {
 	}
 
 	public function enqueueAdminAssets( string $hookSuffix ): void {
-		if ( ! str_contains( $hookSuffix, 'mint-lms' ) ) {
+		$isUserScreen = in_array( $hookSuffix, array( 'user-edit.php', 'profile.php' ), true );
+		if ( $isUserScreen && ! current_user_can( 'enroll_mintlms_students' ) ) {
+			return;
+		}
+
+		if ( ! str_contains( $hookSuffix, 'mint-lms' ) && ! $isUserScreen ) {
 			return;
 		}
 

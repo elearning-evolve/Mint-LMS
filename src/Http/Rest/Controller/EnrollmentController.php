@@ -65,6 +65,23 @@ final class EnrollmentController {
 				'args'                => $this->paginationArgs(),
 			)
 		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/users/(?P<user_id>\d+)/courses',
+			array(
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'userCourses' ),
+				'permission_callback' => array( $this, 'canManageEnrollments' ),
+				'args'                => $this->paginationArgs(),
+			)
+		);
+	}
+
+	public function canManageEnrollments(): bool {
+		$userId = $this->authorization->getCurrentUserId();
+
+		return $userId > 0 && $this->authorization->canEnrollStudents( $userId );
 	}
 
 	public function isAuthenticated(): bool {
@@ -143,6 +160,21 @@ final class EnrollmentController {
 			$per    = (int) $request->get_param( 'per_page' );
 
 			$result = $this->enrollmentService->listCoursesForUser( $userId, $page, $per );
+
+			return ApiResponse::success( $result->toArray() );
+		} catch ( ForbiddenException $exception ) {
+			return ApiResponse::error( 'forbidden', $exception->getMessage(), 403 );
+		}
+	}
+
+	public function userCourses( \WP_REST_Request $request ): \WP_REST_Response {
+		try {
+			$actorId = $this->authorization->getCurrentUserId();
+			$userId  = (int) $request->get_param( 'user_id' );
+			$page    = (int) $request->get_param( 'page' );
+			$per     = (int) $request->get_param( 'per_page' );
+
+			$result = $this->enrollmentService->listCoursesForUser( $userId, $page, $per, $actorId );
 
 			return ApiResponse::success( $result->toArray() );
 		} catch ( ForbiddenException $exception ) {

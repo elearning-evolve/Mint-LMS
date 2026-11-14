@@ -10,6 +10,7 @@ use MintLMS\Domain\Course\CourseRepositoryInterface;
 use MintLMS\Domain\Course\CourseSettings;
 use MintLMS\Domain\Course\CourseStatus;
 use MintLMS\Domain\Course\EnrollmentType;
+use MintLMS\Infrastructure\Database\Schema;
 use MintLMS\Infrastructure\PostType\PostTypes;
 
 final class WpPostCourseRepository implements CourseRepositoryInterface {
@@ -91,6 +92,10 @@ final class WpPostCourseRepository implements CourseRepositoryInterface {
 			set_post_thumbnail( $postId, $course->featuredImageId );
 		} else {
 			delete_post_thumbnail( $postId );
+		}
+
+		if ( CourseStatus::Published === $course->status ) {
+			$this->publishNestedContent( $postId );
 		}
 
 		$saved = $this->findById( $postId );
@@ -187,6 +192,102 @@ final class WpPostCourseRepository implements CourseRepositoryInterface {
 			new \DateTimeImmutable( $createdGmt ),
 			new \DateTimeImmutable( $modifiedGmt ),
 			$settings,
+		);
+	}
+
+	private function publishNestedContent( int $courseId ): void {
+		$lessonIds = get_posts(
+			array(
+				'post_type'      => PostTypes::LESSON,
+				'post_status'    => array( 'publish', 'draft', 'private' ),
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+				'meta_key'       => PostTypes::META_COURSE_ID, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_value'     => $courseId, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			)
+		);
+
+		if ( ! is_array( $lessonIds ) ) {
+			return;
+		}
+
+		$quizIds = array();
+
+		foreach ( $lessonIds as $lessonId ) {
+			$lessonId = (int) $lessonId;
+			$this->ensurePublished( $lessonId );
+
+			$lessonQuizIds = get_posts(
+				array(
+					'post_type'      => PostTypes::QUIZ,
+					'post_status'    => array( 'publish', 'draft', 'private' ),
+					'posts_per_page' => -1,
+					'fields'         => 'ids',
+					'meta_key'       => PostTypes::META_LESSON_ID, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'meta_value'     => $lessonId, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				)
+			);
+
+			if ( ! is_array( $lessonQuizIds ) ) {
+				continue;
+			}
+
+			foreach ( $lessonQuizIds as $quizId ) {
+				$quizId = (int) $quizId;
+				$this->ensurePublished( $quizId );
+				$quizIds[] = $quizId;
+			}
+		}
+
+		$this->publishQuestionsForQuizzes( $quizIds );
+	}
+
+	/**
+	 * @param list<int> $quizIds
+	 */
+	private function publishQuestionsForQuizzes( array $quizIds ): void {
+		$quizIds = array_values( array_filter( array_map( 'intval', $quizIds ) ) );
+		if ( array() === $quizIds ) {
+			return;
+		}
+
+		global $wpdb;
+		$junction     = Schema::validateTable( Schema::quizQuestionsTable( $wpdb->prefix ), $wpdb->prefix );
+		$placeholders = implode( ',', array_fill( 0, count( $quizIds ), '%d' ) );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; IDs are integers.
+		$questionIds = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT DISTINCT question_id FROM %i WHERE quiz_id IN ({$placeholders})", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Placeholder count is bound.
+				$junction,
+				...$quizIds
+			)
+		);
+
+		if ( ! is_array( $questionIds ) ) {
+			return;
+		}
+
+		foreach ( $questionIds as $questionId ) {
+			$this->ensurePublished( (int) $questionId );
+		}
+	}
+
+	private function ensurePublished( int $postId ): void {
+		if ( $postId <= 0 ) {
+			return;
+		}
+
+		$status = get_post_status( $postId );
+		if ( ! is_string( $status ) || 'publish' === $status || 'trash' === $status ) {
+			return;
+		}
+
+		wp_update_post(
+			array(
+				'ID'          => $postId,
+				'post_status' => 'publish',
+			)
 		);
 	}
 

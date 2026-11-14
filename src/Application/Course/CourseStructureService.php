@@ -47,7 +47,7 @@ final class CourseStructureService {
 			throw new NotFoundException( 'Course not found.' );
 		}
 
-		$rows = $this->sectionRepository->loadStructureRows( $courseId, true );
+		$rows = $this->sectionRepository->loadStructureRows( $courseId );
 
 		return $this->buildStructureDto( $course, $rows );
 	}

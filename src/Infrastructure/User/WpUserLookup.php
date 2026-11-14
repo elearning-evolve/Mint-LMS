@@ -58,6 +58,44 @@ final class WpUserLookup implements UserLookupInterface {
 		return $results;
 	}
 
+	public function listUsers( int $page = 1, int $perPage = 100, string $search = '' ): array {
+		$page    = max( 1, $page );
+		$perPage = max( 1, min( 200, $perPage ) );
+		$search  = trim( $search );
+
+		$args = array(
+			'number'  => $perPage,
+			'paged'   => $page,
+			'orderby' => 'display_name',
+			'order'   => 'ASC',
+			'fields'  => 'all',
+		);
+
+		if ( '' !== $search ) {
+			$wpdb = mintlms_wpdb();
+			$like = null !== $wpdb
+				? '*' . $wpdb->esc_like( $search ) . '*'
+				: '*' . $search . '*';
+
+			$args['search']         = $like;
+			$args['search_columns'] = array( 'user_login', 'user_email', 'user_nicename', 'display_name' );
+		}
+
+		$query = new \WP_User_Query( $args );
+		$users = array();
+
+		foreach ( $query->get_results() as $user ) {
+			if ( $user instanceof \WP_User ) {
+				$users[] = $this->mapUser( $user );
+			}
+		}
+
+		return array(
+			'users' => $users,
+			'total' => (int) $query->get_total(),
+		);
+	}
+
 	public function getDisplayName( int $userId ): ?string {
 		$user = get_userdata( $userId );
 
@@ -71,13 +109,14 @@ final class WpUserLookup implements UserLookupInterface {
 	}
 
 	/**
-	 * @return array{id: int, email: string, display_name: string}
+	 * @return array{id: int, email: string, display_name: string, user_login: string}
 	 */
 	private function mapUser( \WP_User $user ): array {
 		return array(
 			'id'           => (int) $user->ID,
 			'email'        => (string) $user->user_email,
 			'display_name' => (string) $user->display_name,
+			'user_login'   => (string) $user->user_login,
 		);
 	}
 }

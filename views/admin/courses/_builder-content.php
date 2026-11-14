@@ -3021,80 +3021,84 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 									<div class="mint-qeditor__attach-row">
 										<button type="button" class="mint-qeditor__choose-file" @click="chooseQuestionAttachment()"><?php esc_html_e( 'Choose file', 'mint-lms' ); ?></button>
 										<div class="mint-qeditor__attach-label" x-text="activeQuestion.settings.attachmentName || t('noAttachment')"></div>
-										<div class="mint-qeditor__attach-spacer"></div>
-										<div class="mint-qeditor__preview-label"><?php esc_html_e( 'Free preview', 'mint-lms' ); ?></div>
-										<button
-											type="button"
-											class="mint-qeditor__switch"
-											role="switch"
-											:aria-checked="activeQuestion.settings.freePreview ? 'true' : 'false'"
-											:class="activeQuestion.settings.freePreview ? 'is-on' : ''"
-											@click="activeQuestion.settings.freePreview = !activeQuestion.settings.freePreview"
-										><span class="mint-qeditor__switch-knob"></span></button>
 									</div>
 
-									<template x-if="activeQuestion.type === 'mcq' || activeQuestion.type === 'mcq_multi'">
-										<div class="mint-qeditor__mcq">
+									<template x-if="activeQuestion.type === 'mcq' || activeQuestion.type === 'mcq_multi' || activeQuestion.type === 'true_false'">
+										<div class="mint-qeditor__answers" x-effect="initAnswerOptionSortable()">
+											<div class="mint-qeditor__answers-copy">
+												<div class="mint-qeditor__answers-title"><?php esc_html_e( 'Answer options', 'mint-lms' ); ?></div>
+												<p class="mint-qeditor__answers-hint" x-show="activeQuestion.type === 'mcq'"><?php esc_html_e( 'Write your two options, then pick the correct one. Add more options if you need them.', 'mint-lms' ); ?></p>
+												<p class="mint-qeditor__answers-hint" x-show="activeQuestion.type === 'mcq_multi'"><?php esc_html_e( 'Write your options, then select every correct answer. Add more options if you need them.', 'mint-lms' ); ?></p>
+												<p class="mint-qeditor__answers-hint" x-show="activeQuestion.type === 'true_false'"><?php esc_html_e( 'Write each option, then mark that option True or False.', 'mint-lms' ); ?></p>
+											</div>
+											<div id="mint-answer-options-sort" class="mint-qeditor__answers-list">
 											<template x-for="(option, oIndex) in activeQuestion.options" :key="'opt-' + oIndex">
-												<div class="mint-qeditor__option-card">
-													<div class="mint-qeditor__option-table">
-														<div class="mint-qeditor__option-cols mint-qeditor__option-cols--head">
-															<div class="mint-qeditor__option-cell mint-qeditor__option-cell--head"><?php esc_html_e( 'Options', 'mint-lms' ); ?></div>
-															<div class="mint-qeditor__option-cell mint-qeditor__option-cell--head"><?php esc_html_e( 'Answer', 'mint-lms' ); ?></div>
-														</div>
-														<div class="mint-qeditor__option-cols">
-															<div class="mint-qeditor__option-cell mint-qeditor__option-cell--side">
-																<button type="button" class="mint-qeditor__correct-row" @click="toggleMcqCorrect(activeQuestion, activeQuestion.options[oIndex])">
-																	<span
-																		class="mint-qeditor__correct-mark"
-																		:class="{
-																			'is-selected': isMcqOptionCorrect(activeQuestion, activeQuestion.options[oIndex]),
-																			'is-multi': activeQuestion.type === 'mcq_multi'
-																		}"
-																	>
-																		<svg x-show="activeQuestion.type === 'mcq_multi' && isMcqOptionCorrect(activeQuestion, activeQuestion.options[oIndex])" width="10" height="10" viewBox="0 0 20 20" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 10.5 8.5 14 15 6.5"/></svg>
-																		<span x-show="activeQuestion.type !== 'mcq_multi' && isMcqOptionCorrect(activeQuestion, activeQuestion.options[oIndex])" class="mint-qeditor__correct-dot"></span>
-																	</span>
-																	<span><?php esc_html_e( 'Correct', 'mint-lms' ); ?></span>
-																</button>
-																<button type="button" class="mint-qeditor__correct-row" @click="toggleOptionAllowHtml(oIndex, !activeQuestion.settings.allowHtml[oIndex])">
-																	<span class="mint-qeditor__html-box" :class="activeQuestion.settings.allowHtml[oIndex] ? 'is-checked' : ''"></span>
-																	<span><?php esc_html_e( 'Allow HTML', 'mint-lms' ); ?></span>
-																</button>
-															</div>
-															<div class="mint-qeditor__option-cell">
+												<div class="mint-qeditor__option-card" :data-option-index="oIndex">
+													<div class="mint-qeditor__option-grid">
+														<div class="mint-qeditor__option-text">
+															<span class="mint-qeditor__option-col-label"><?php esc_html_e( 'Answer text', 'mint-lms' ); ?></span>
+															<div class="mint-qeditor__option-text-row">
+																<span class="mint-qeditor__answer-num" x-text="oIndex + 1"></span>
 																<input
 																	type="text"
-																	class="mint-qeditor__answer-input"
-																	x-model="activeQuestion.options[oIndex]"
-																	:placeholder="t('option') + ' ' + (oIndex + 1)"
+																	class="mint-qeditor__answer-field"
+															x-model="activeQuestion.options[oIndex]"
+															:placeholder="'Type answer ' + (oIndex + 1) + '…'"
 																/>
 															</div>
 														</div>
-													</div>
-													<div class="mint-qeditor__option-actions">
-														<div class="mint-qeditor__option-move" role="group" aria-label="<?php echo esc_attr__( 'Reorder answer', 'mint-lms' ); ?>">
+														<div class="mint-qeditor__option-opts">
+															<span class="mint-qeditor__option-col-label"><?php esc_html_e( 'Options', 'mint-lms' ); ?></span>
+															<div class="mint-qeditor__tf-flags" x-show="activeQuestion.type === 'true_false'">
+																<button
+																	type="button"
+																	class="mint-qeditor__tf-flag"
+																	:class="tfOptionFlag(oIndex) === 'true' ? 'is-on' : ''"
+																	@click="setTfOptionFlag(oIndex, 'true')"
+																><?php esc_html_e( 'True', 'mint-lms' ); ?></button>
+																<button
+																	type="button"
+																	class="mint-qeditor__tf-flag"
+																	:class="tfOptionFlag(oIndex) === 'false' ? 'is-on' : ''"
+																	@click="setTfOptionFlag(oIndex, 'false')"
+																><?php esc_html_e( 'False', 'mint-lms' ); ?></button>
+															</div>
 															<button
 																type="button"
-																class="mint-qeditor__icon-btn"
-																@click="moveMcqOption(activeQuestion, oIndex, -1)"
-																:disabled="oIndex === 0"
-																title="<?php echo esc_attr__( 'Move up', 'mint-lms' ); ?>"
-																aria-label="<?php echo esc_attr__( 'Move up', 'mint-lms' ); ?>"
+																class="mint-qeditor__answer-correct"
+																x-show="activeQuestion.type !== 'true_false'"
+																:class="isMcqOptionCorrect(activeQuestion, activeQuestion.options[oIndex], oIndex) ? 'is-on' : ''"
+																@click="toggleMcqCorrect(activeQuestion, activeQuestion.options[oIndex], oIndex)"
 															>
-																<svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12 10 7 15 12"/></svg>
+																<span
+																	class="mint-qeditor__correct-mark is-multi"
+																	:class="isMcqOptionCorrect(activeQuestion, activeQuestion.options[oIndex], oIndex) ? 'is-selected' : ''"
+																>
+																	<svg x-show="isMcqOptionCorrect(activeQuestion, activeQuestion.options[oIndex], oIndex)" width="10" height="10" viewBox="0 0 20 20" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 10.5 8.5 14 15 6.5"/></svg>
+																</span>
+																<?php esc_html_e( 'Correct answer', 'mint-lms' ); ?>
 															</button>
 															<button
 																type="button"
-																class="mint-qeditor__icon-btn"
-																@click="moveMcqOption(activeQuestion, oIndex, 1)"
-																:disabled="oIndex === activeQuestion.options.length - 1"
-																title="<?php echo esc_attr__( 'Move down', 'mint-lms' ); ?>"
-																aria-label="<?php echo esc_attr__( 'Move down', 'mint-lms' ); ?>"
+																class="mint-qeditor__answer-html"
+																:class="activeQuestion.settings.allowHtml && activeQuestion.settings.allowHtml[oIndex] ? 'is-on' : ''"
+																@click="toggleOptionAllowHtml(oIndex, !(activeQuestion.settings.allowHtml && activeQuestion.settings.allowHtml[oIndex]))"
 															>
-																<svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 8 10 13 15 8"/></svg>
+																<span class="mint-qeditor__html-box" :class="activeQuestion.settings.allowHtml && activeQuestion.settings.allowHtml[oIndex] ? 'is-checked' : ''"></span>
+																<?php esc_html_e( 'Allow HTML', 'mint-lms' ); ?>
 															</button>
 														</div>
+													</div>
+													<div class="mint-qeditor__option-actions">
+														<button
+															type="button"
+															class="mint-qeditor__option-grip mint-handle-answer"
+															title="<?php echo esc_attr__( 'Drag to reorder', 'mint-lms' ); ?>"
+															aria-label="<?php echo esc_attr__( 'Drag to reorder', 'mint-lms' ); ?>"
+														>
+															<svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="5" cy="3" r="1.5"/><circle cx="11" cy="3" r="1.5"/><circle cx="5" cy="8" r="1.5"/><circle cx="11" cy="8" r="1.5"/><circle cx="5" cy="13" r="1.5"/><circle cx="11" cy="13" r="1.5"/></svg>
+															<span><?php esc_html_e( 'Drag to reorder', 'mint-lms' ); ?></span>
+														</button>
 														<button type="button" class="mint-qeditor__btn-outline" @click="addMediaToQuestionOption(oIndex)"><?php esc_html_e( 'Add media', 'mint-lms' ); ?></button>
 														<button
 															type="button"
@@ -3102,111 +3106,28 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 															@click="removeMcqOption(activeQuestion, oIndex)"
 															:disabled="activeQuestion.options.length <= 2"
 														><?php esc_html_e( 'Delete', 'mint-lms' ); ?></button>
+														<button
+															type="button"
+															class="mint-qeditor__btn-solid"
+															@click="saveActiveQuestion()"
+															:disabled="quizSaving"
+														><?php esc_html_e( 'Save option', 'mint-lms' ); ?></button>
 													</div>
 												</div>
 											</template>
+											</div>
+											<p class="mint-qeditor__answers-foot" x-show="activeQuestion.type === 'mcq_multi'"><?php esc_html_e( 'Select every option that should be marked correct.', 'mint-lms' ); ?></p>
+											<p class="mint-qeditor__answers-foot" x-show="activeQuestion.type === 'true_false'"><?php esc_html_e( 'Mark each option True or False.', 'mint-lms' ); ?></p>
+											<p class="mint-qeditor__answers-foot" x-show="activeQuestion.type === 'mcq'"><?php esc_html_e( 'Select which option is the correct answer.', 'mint-lms' ); ?></p>
 											<button
 												type="button"
-												class="mint-qeditor__add-answer"
+												class="mint-qeditor__add-answer mint-qeditor__add-answer--solid"
 												x-show="activeQuestion.options.length < 6"
 												@click="addMcqOption(activeQuestion)"
 											>
 												<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M10 5v10M5 10h10"/></svg>
-												<?php esc_html_e( 'Add new answer', 'mint-lms' ); ?>
+												<?php esc_html_e( 'Add new Answer', 'mint-lms' ); ?>
 											</button>
-										</div>
-									</template>
-
-									<template x-if="activeQuestion.type === 'true_false'">
-										<div class="mint-qeditor__tf">
-											<div class="mint-quiz-tf">
-												<button type="button" class="mint-quiz-tf__pill" :class="activeQuestion.correctAnswer === 'true' ? 'is-selected' : ''" @click="activeQuestion.correctAnswer = 'true'">
-													<span class="mint-quiz-tf__dot"></span>
-													<?php esc_html_e( 'True is correct', 'mint-lms' ); ?>
-												</button>
-												<button type="button" class="mint-quiz-tf__pill" :class="activeQuestion.correctAnswer === 'false' ? 'is-selected' : ''" @click="activeQuestion.correctAnswer = 'false'">
-													<span class="mint-quiz-tf__dot"></span>
-													<?php esc_html_e( 'False is correct', 'mint-lms' ); ?>
-												</button>
-											</div>
-
-											<template x-for="(extra, exIndex) in activeQuestion.extraTf" :key="extra._key || ('ex-' + exIndex)">
-												<div class="mint-qeditor__tf-extra">
-													<div class="mint-qeditor__media-row mint-qeditor__media-row--compact">
-														<button type="button" class="mint-lesson-add-media mint-lesson-add-media--sm" @click="addMediaToExtraTfPrompt(exIndex)">
-															<svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="3.5" width="15" height="13" rx="3"/><circle cx="7" cy="8" r="1.4"/><path d="m4 14 4-3.5 3 2 4.5-4"/></svg>
-															<?php esc_html_e( 'Add media', 'mint-lms' ); ?>
-														</button>
-														<div class="mint-lesson-view-toggle mint-lesson-view-toggle--sm">
-															<button type="button" class="mint-lesson-view-toggle__item" :class="(extra.editorView || 'visual') === 'visual' ? 'is-active' : ''" @click="extra.editorView = 'visual'"><?php esc_html_e( 'Visual', 'mint-lms' ); ?></button>
-															<button type="button" class="mint-lesson-view-toggle__item" :class="extra.editorView === 'code' ? 'is-active' : ''" @click="extra.editorView = 'code'"><?php esc_html_e( 'Code', 'mint-lms' ); ?></button>
-														</div>
-													</div>
-
-													<div class="mint-qeditor__frame mint-qeditor__frame--sm">
-														<div class="mint-qeditor__toolbar mint-qeditor__toolbar--sm" x-show="(extra.editorView || 'visual') === 'visual'">
-															<button type="button" class="mint-lesson-format__trigger mint-lesson-format__trigger--sm" disabled>
-																<span><?php esc_html_e( 'Paragraph', 'mint-lms' ); ?></span>
-																<svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="#0B4F3F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 8 10 12.5 14.5 8"/></svg>
-															</button>
-															<div class="mint-lesson-editor-toolbar__divider" aria-hidden="true"></div>
-															<button type="button" class="mint-lesson-editor-tool" style="font-weight: 700" @click="wrapExtraTfPrompt(exIndex, '<strong>', '</strong>')">B</button>
-															<button type="button" class="mint-lesson-editor-tool" style="font-weight: 500; font-style: italic" @click="wrapExtraTfPrompt(exIndex, '<em>', '</em>')">I</button>
-															<button type="button" class="mint-lesson-editor-tool" style="font-weight: 600" @click="wrapExtraTfPrompt(exIndex, '<h2>', '</h2>')">H2</button>
-															<button type="button" class="mint-lesson-editor-tool" style="font-weight: 600" @click="wrapExtraTfPrompt(exIndex, '<ul><li>', '</li></ul>')">•</button>
-															<button type="button" class="mint-lesson-editor-tool" style="font-weight: 500" @click="wrapExtraTfPrompt(exIndex, '<ol><li>', '</li></ol>')">1.</button>
-															<button type="button" class="mint-lesson-editor-tool" @click="insertExtraTfLink(exIndex)">🔗</button>
-														</div>
-														<textarea
-															class="mint-qeditor__textarea mint-qeditor__textarea--sm"
-															:id="'mint-extra-tf-prompt-' + exIndex"
-															x-model="extra.prompt"
-															:placeholder="t('questionPrompt')"
-														></textarea>
-													</div>
-
-													<div class="mint-qeditor__attach-row mint-qeditor__attach-row--sm">
-														<button type="button" class="mint-qeditor__choose-file mint-qeditor__choose-file--sm" @click="chooseExtraTfAttachment(exIndex)"><?php esc_html_e( 'Choose file', 'mint-lms' ); ?></button>
-														<div class="mint-qeditor__attach-label" x-text="extra.attachmentName || t('noAttachment')"></div>
-														<div class="mint-qeditor__attach-spacer"></div>
-														<div class="mint-qeditor__preview-label"><?php esc_html_e( 'Free preview', 'mint-lms' ); ?></div>
-														<button
-															type="button"
-															class="mint-qeditor__switch mint-qeditor__switch--sm"
-															role="switch"
-															:aria-checked="extra.freePreview ? 'true' : 'false'"
-															:class="extra.freePreview ? 'is-on' : ''"
-															@click="extra.freePreview = !extra.freePreview"
-														><span class="mint-qeditor__switch-knob"></span></button>
-													</div>
-
-													<div class="mint-quiz-tf">
-														<button type="button" class="mint-quiz-tf__pill" :class="extra.correctAnswer === 'true' ? 'is-selected' : ''" @click="extra.correctAnswer = 'true'">
-															<span class="mint-quiz-tf__dot"></span>
-															<?php esc_html_e( 'True is correct', 'mint-lms' ); ?>
-														</button>
-														<button type="button" class="mint-quiz-tf__pill" :class="extra.correctAnswer === 'false' ? 'is-selected' : ''" @click="extra.correctAnswer = 'false'">
-															<span class="mint-quiz-tf__dot"></span>
-															<?php esc_html_e( 'False is correct', 'mint-lms' ); ?>
-														</button>
-													</div>
-
-													<button type="button" class="mint-qeditor__btn-solid" @click="removeExtraTfAnswer(exIndex)"><?php esc_html_e( 'Delete answer', 'mint-lms' ); ?></button>
-												</div>
-											</template>
-
-											<div class="mint-qeditor__tf-actions">
-												<button type="button" class="mint-qeditor__add-answer" @click="addExtraTfAnswer()">
-													<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M10 5v10M5 10h10"/></svg>
-													<?php esc_html_e( 'Add new answer', 'mint-lms' ); ?>
-												</button>
-												<button
-													type="button"
-													class="mint-qeditor__btn-danger"
-													x-show="!activeQuestion.extraTf || activeQuestion.extraTf.length === 0"
-													@click="deleteBaseTfAnswer()"
-												><?php esc_html_e( 'Delete answer', 'mint-lms' ); ?></button>
-											</div>
 										</div>
 									</template>
 

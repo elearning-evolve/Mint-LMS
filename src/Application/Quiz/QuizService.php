@@ -43,6 +43,18 @@ final class QuizService {
 	}
 
 	public function getByLessonId( int $lessonId, int $userId, bool $forStudent = false, bool $editorReview = false ): ?QuizDto {
+		$quizzes = $this->listByLessonId( $lessonId, $userId, $forStudent, $editorReview );
+
+		return $quizzes[0] ?? null;
+	}
+
+	/**
+	 * Quizzes attached to a lesson. Visibility is enrollment / editor access,
+	 * not CPT publish — builder creates quizzes and questions as draft.
+	 *
+	 * @return list<QuizDto>
+	 */
+	public function listByLessonId( int $lessonId, int $userId, bool $forStudent = false, bool $editorReview = false ): array {
 		$lesson = $this->findLessonOrFail( $lessonId );
 
 		if ( $forStudent ) {
@@ -59,16 +71,13 @@ final class QuizService {
 			$this->assertCanManageLessonContent( $userId, $lesson );
 		}
 
-		$publishedOnly = $forStudent && ! $editorReview;
-		$quiz          = $this->quizRepository->findByLessonId( $lessonId, $publishedOnly );
-
-		if ( null === $quiz ) {
-			return null;
+		$out = array();
+		foreach ( $this->quizRepository->findAllByLessonId( $lessonId, false ) as $quiz ) {
+			$questions = $this->quizRepository->findQuestionsByQuizId( $quiz->id, false );
+			$out[]     = QuizDto::fromQuiz( $quiz, $questions, ! $forStudent );
 		}
 
-		$questions = $this->quizRepository->findQuestionsByQuizId( $quiz->id, $publishedOnly );
-
-		return QuizDto::fromQuiz( $quiz, $questions, ! $forStudent );
+		return $out;
 	}
 
 	public function get( int $quizId, int $userId, bool $forStudent = false ): QuizDto {
@@ -90,8 +99,7 @@ final class QuizService {
 			$this->assertCanManageLessonContent( $userId, $lesson );
 		}
 
-		$publishedOnly = $forStudent && ! $editorReview;
-		$questions     = $this->quizRepository->findQuestionsByQuizId( $quiz->id, $publishedOnly );
+		$questions = $this->quizRepository->findQuestionsByQuizId( $quiz->id, false );
 
 		return QuizDto::fromQuiz( $quiz, $questions, ! $forStudent );
 	}
@@ -751,7 +759,10 @@ final class QuizService {
 
 			$correctAnswer = $question->correctAnswer;
 			$givenOut      = $given;
-			if ( QuizQuestion::TYPE_MCQ_MULTI === $question->type ) {
+			if (
+				QuizQuestion::TYPE_MCQ_MULTI === $question->type
+				|| QuizQuestion::TYPE_TRUE_FALSE === $question->type
+			) {
 				$correctAnswer = QuestionAnswerCodec::decodeMulti( $question->correctAnswer );
 				$givenOut      = QuestionAnswerCodec::decodeMulti( $given );
 			}
@@ -797,7 +808,15 @@ final class QuizService {
 		}
 
 		if ( QuizQuestion::TYPE_TRUE_FALSE === $question->type ) {
-			return strtolower( trim( $submitted ) ) === strtolower( trim( $question->correctAnswer ) );
+			$raw = trim( $question->correctAnswer );
+			if ( in_array( strtolower( $raw ), array( 'true', 'false' ), true ) && ! str_starts_with( $raw, '[' ) ) {
+				return strtolower( trim( $submitted ) ) === strtolower( $raw );
+			}
+
+			$expected = QuestionAnswerCodec::decodeMulti( $question->correctAnswer );
+			$actual   = QuestionAnswerCodec::decodeMulti( $submitted );
+
+			return $expected === $actual && array() !== $expected;
 		}
 
 		if ( QuizQuestion::TYPE_MCQ_MULTI === $question->type ) {
@@ -881,25 +900,12 @@ final class QuizService {
 			return;
 		}
 
-		if ( QuizQuestion::TYPE_TRUE_FALSE === $type ) {
-			$normalized = strtolower( trim( $correctAnswer ) );
-
-			if ( ! in_array( $normalized, array( 'true', 'false' ), true ) ) {
-				throw new ValidationException(
-					'Validation failed.',
-					array( 'correct_answer' => 'Correct answer must be true or false.' )
-				);
-			}
-
-			return;
-		}
-
 		$optionCount = count( $options );
 
 		if ( $optionCount < 2 || $optionCount > 6 ) {
 			throw new ValidationException(
 				'Validation failed.',
-				array( 'options' => 'MCQ must have between 2 and 6 options.' )
+				array( 'options' => 'This question must have between 2 and 6 options.' )
 			);
 		}
 
@@ -912,13 +918,13 @@ final class QuizService {
 			}
 		}
 
-		if ( QuizQuestion::TYPE_MCQ_MULTI === $type ) {
+		if ( QuizQuestion::TYPE_MCQ_MULTI === $type || QuizQuestion::TYPE_TRUE_FALSE === $type ) {
 			$answers = QuestionAnswerCodec::decodeMulti( $correctAnswer );
 
 			if ( count( $answers ) < 1 ) {
 				throw new ValidationException(
 					'Validation failed.',
-					array( 'correct_answer' => 'Select at least one correct answer.' )
+					array( 'correct_answer' => 'Mark at least one option as True.' )
 				);
 			}
 

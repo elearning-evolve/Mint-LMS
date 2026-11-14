@@ -71,7 +71,9 @@ function mintlms_run_uninstall(): void {
 		wp_delete_post( (int) $mintlms_post_id, true );
 	}
 
+	remove_role( 'mintlms_manager' );
 	remove_role( 'mintlms_instructor' );
+	remove_role( 'mintlms_student' );
 
 	$mintlms_caps = array(
 		'manage_mintlms',
@@ -79,9 +81,10 @@ function mintlms_run_uninstall(): void {
 		'edit_others_mintlms_courses',
 		'enroll_mintlms_students',
 		'view_mintlms_reports',
+		'take_mintlms_courses',
 	);
 
-	foreach ( array( 'administrator', 'mintlms_instructor' ) as $mintlms_role_slug ) {
+	foreach ( array( 'administrator', 'mintlms_manager', 'mintlms_instructor', 'mintlms_student' ) as $mintlms_role_slug ) {
 		$mintlms_role = get_role( $mintlms_role_slug );
 		if ( null === $mintlms_role ) {
 			continue;

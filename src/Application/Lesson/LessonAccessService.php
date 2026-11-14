@@ -119,7 +119,7 @@ final class LessonAccessService {
 			return array();
 		}
 
-		$rows = $this->sectionRepository->loadStructureRows( $courseId, true );
+		$rows = $this->sectionRepository->loadStructureRows( $courseId );
 
 		/** @var array<int, list<\MintLMS\Domain\Lesson\Lesson>> $bySection */
 		$bySection = array();

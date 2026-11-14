@@ -7,7 +7,7 @@ use MintLMS\Application\Quiz\Dto\QuizDto;
 use MintLMS\Infrastructure\PostType\PostTypes;
 
 /**
- * Instructor / student quiz runner — S3B canvas (attempts not saved in preview).
+ * Quiz runner — S3B canvas. Instructors preview (ungraded persist); enrolled students submit live.
  *
  * @var QuizDto|null $quiz
  * @var string       $courseUrl
@@ -21,11 +21,12 @@ $lessonUrl   = is_string( $lessonUrl ?? null ) ? $lessonUrl : '';
 $courseTitle = trim( (string) ( $courseTitle ?? '' ) );
 $lessonTitle = trim( (string) ( $lessonTitle ?? '' ) );
 
-$quizRequired  = true;
-$hasPassedQuiz = false;
-$isEnrolled    = true;
-$isReviewMode  = true;
-$quizHeading   = false;
+$quizRequired     = true;
+$isReviewMode     = ! empty( $isReviewMode );
+$isEnrolled       = ! empty( $isEnrolled ) || $isReviewMode;
+$hasPassedQuiz    = false;
+$quizHeading      = false;
+$focusQuestionId  = (int) ( $focusQuestionId ?? 0 );
 
 $displayQuiz = $quiz instanceof QuizDto && '' !== trim( $quiz->title )
 	? trim( $quiz->title )
@@ -43,10 +44,11 @@ $quizMeta      = 1 === $questionCount
 $associated    = '' !== $lessonTitle;
 $previewBoot   = wp_json_encode(
 	array(
-		'quizTitle'      => $displayQuiz,
-		'quizMeta'       => $quizMeta,
-		'quizKicker'     => __( 'Quiz', 'mint-lms' ),
-		'questionKicker' => __( 'Question', 'mint-lms' ),
+		'quizTitle'        => $displayQuiz,
+		'quizMeta'         => $quizMeta,
+		'quizKicker'       => __( 'Quiz', 'mint-lms' ),
+		'questionKicker'   => __( 'Question', 'mint-lms' ),
+		'startOnQuestion'  => $focusQuestionId > 0,
 	)
 );
 if ( ! is_string( $previewBoot ) ) {

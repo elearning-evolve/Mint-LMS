@@ -5107,7 +5107,7 @@
   height: 18px;
   border-radius: 999px;
   background: #FFFFFF;
-  position: absolute;
+    position: absolute;
   top: 3px;
   left: 3px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
@@ -5117,10 +5117,119 @@
   left: 21px;
 }
 #mint-lms-root .mint-qeditor__mcq,
+#mint-lms-root .mint-qeditor__answers,
 #mint-lms-root .mint-qeditor__essay {
   margin-top: 16px;
   display: grid;
   gap: 14px;
+}
+#mint-lms-root .mint-qeditor__answers {
+  padding: 18px 18px 16px;
+  border: 1.5px solid #98FBCB;
+  border-radius: 16px;
+  background: #F3FFF9;
+  gap: 12px;
+}
+#mint-lms-root .mint-qeditor__answers-copy {
+  display: grid;
+  gap: 4px;
+}
+#mint-lms-root .mint-qeditor__answers-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0B4F3F;
+}
+#mint-lms-root .mint-qeditor__answers-hint,
+#mint-lms-root .mint-qeditor__answers-foot {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: #5C5C77;
+}
+#mint-lms-root .mint-qeditor__answers-foot {
+  margin-top: 2px;
+}
+#mint-lms-root .mint-qeditor__option-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 200px;
+  gap: 20px 28px;
+  align-items: start;
+}
+#mint-lms-root .mint-qeditor__option-text,
+#mint-lms-root .mint-qeditor__option-opts {
+  display: grid;
+  gap: 8px;
+}
+#mint-lms-root .mint-qeditor__option-col-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #17222B;
+}
+#mint-lms-root .mint-qeditor__option-text-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+#mint-lms-root .mint-qeditor__answer-num {
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border-radius: 999px;
+  background: #E8FFF3;
+  color: #0B4F3F;
+  font-size: 13px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+#mint-lms-root .mint-qeditor__answer-field {
+  flex: 1;
+  min-width: 0;
+  height: 42px;
+  border: 1.5px solid #E4E1F0;
+  border-radius: 10px;
+  padding: 0 14px;
+  font-size: 14px;
+  color: #0F0E1A;
+  font-family: inherit;
+  background: #FFFFFF;
+  outline: none;
+}
+#mint-lms-root .mint-qeditor__answer-field:focus {
+  border-color: #98FBCB;
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.45);
+}
+#mint-lms-root .mint-qeditor__answer-field[readonly] {
+  background: #FAFBFC;
+  color: #33334A;
+}
+#mint-lms-root .mint-qeditor__answer-correct,
+#mint-lms-root button.mint-qeditor__answer-correct,
+#mint-lms-root .mint-qeditor__answer-html,
+#mint-lms-root button.mint-qeditor__answer-html {
+  height: 36px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1.5px solid #D9D6E8;
+  background: #FFFFFF !important;
+  color: #33334A !important;
+  font-size: 13px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+  justify-content: flex-start;
+}
+#mint-lms-root button.mint-qeditor__answer-correct.is-on,
+#mint-lms-root button.mint-qeditor__answer-html.is-on {
+  border-color: #98FBCB;
+  background: #FFFFFF !important;
+}
+#mint-lms-root .mint-qeditor__picked {
+  display: none;
 }
 #mint-lms-root .mint-qeditor__tf {
   margin-top: 16px;
@@ -5210,7 +5319,11 @@
 }
 #mint-lms-root .mint-qeditor__option-card {
   display: grid;
-  gap: 10px;
+  gap: 14px;
+  padding: 16px 18px 14px;
+  border: 1.5px solid #E4E1F0;
+  border-radius: 14px;
+  background: #FFFFFF;
 }
 #mint-lms-root .mint-qeditor__option-table {
   border: 1px solid #E4E1F0;
@@ -5329,6 +5442,82 @@
   gap: 8px;
   padding: 2px 2px 4px;
 }
+#mint-lms-root .mint-qeditor__answers-list {
+  display: grid;
+  gap: 12px;
+}
+#mint-lms-root .mint-qeditor__tf-flags {
+  display: flex;
+  gap: 8px;
+}
+#mint-lms-root .mint-qeditor__tf-flag,
+#mint-lms-root button.mint-qeditor__tf-flag {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1.5px solid #D9D6E8;
+  background: #FFFFFF !important;
+  color: #33334A !important;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+#mint-lms-root button.mint-qeditor__tf-flag.is-on {
+  border-color: #0B4F3F;
+  background: #E8FFF3 !important;
+  color: #0B4F3F !important;
+}
+#mint-lms-root .mint-qeditor__tf-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+#mint-lms-root .mint-qeditor__tf-label {
+  flex: 1;
+  min-width: 0;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  border: 1.5px solid #E4E1F0;
+  border-radius: 10px;
+  background: #FAFBFC;
+  font-size: 15px;
+  font-weight: 700;
+  color: #0F0E1A;
+}
+#mint-lms-root .mint-qeditor__option-card--tf .mint-qeditor__answer-correct {
+  margin-left: auto;
+}
+#mint-lms-root .mint-qeditor__answers .mint-qeditor__option-actions {
+  justify-content: flex-end;
+  padding-top: 12px;
+  border-top: 1px solid #EEEAF6;
+}
+#mint-lms-root .mint-qeditor__option-grip,
+#mint-lms-root button.mint-qeditor__option-grip {
+  height: 32px;
+  margin-right: auto;
+  padding: 0 4px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent !important;
+  color: #8B8BA3 !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: grab;
+  flex: none;
+  font-size: 13px;
+  font-weight: 600;
+}
+#mint-lms-root button.mint-qeditor__option-grip:hover {
+  color: #0B4F3F !important;
+  background: #F3FFF9 !important;
+}
+#mint-lms-root button.mint-qeditor__option-grip:active {
+  cursor: grabbing;
+}
 #mint-lms-root .mint-qeditor__option-move {
   display: inline-flex;
   align-items: center;
@@ -5439,6 +5628,20 @@
   background: #E8FFF3 !important;
   border-color: #0B4F3F;
 }
+#mint-lms-root .mint-qeditor__add-answer--solid,
+#mint-lms-root button.mint-qeditor__add-answer--solid {
+  width: auto;
+  justify-self: start;
+  height: 40px;
+  border: none;
+  border-radius: 10px;
+  background: #98FB98 !important;
+  color: #0B4F3F !important;
+}
+#mint-lms-root button.mint-qeditor__add-answer--solid:hover {
+  background: #7FE87F !important;
+  border-color: transparent;
+}
 #mint-lms-root .mint-qeditor__footer {
   margin-top: 28px;
   padding-top: 18px;
@@ -5516,7 +5719,7 @@
 #mint-lms-root .mint-qeditor__dropdown-menu {
   position: absolute;
   top: 46px;
-  left: 0;
+    left: 0;
   right: 0;
   border: 1px solid #98FBCB;
   border-radius: 8px;
@@ -5589,6 +5792,9 @@
   #mint-lms-root .mint-qeditor__option-cell--side {
     border-right: 0;
     border-bottom: 1px solid #E4E1F0;
+  }
+  #mint-lms-root .mint-qeditor__option-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -7245,7 +7451,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
     grid-template-columns: 1fr;
   }
   #mint-lms-root .mint-settings__footer {
-    flex-direction: column;
+  flex-direction: column;
     align-items: stretch;
   }
 }
@@ -8943,7 +9149,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   }
 
   #mint-lms-root .mint-settings-row {
-    flex-direction: column;
+  flex-direction: column;
     align-items: flex-start;
   }
 
@@ -11747,4 +11953,342 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 @media (max-width: 980px) {
   #mint-lms-root .mint-reports__grid { grid-template-columns: 1fr; }
   #mint-lms-root .mint-reports__course-progress { width: 120px; }
+}
+
+#mint-lms-root .mint-user-enroll {
+  margin: 28px 0 8px;
+  max-width: 760px;
+}
+#mint-lms-root .mint-user-enroll__head {
+  margin-bottom: 16px;
+}
+#mint-lms-root .mint-user-enroll__title {
+  margin: 0 0 6px;
+  font-size: 22px;
+  line-height: 1.25;
+  font-weight: 700;
+  color: #0f0e1a;
+}
+#mint-lms-root .mint-user-enroll__sub,
+#mint-lms-root .mint-user-enroll__empty {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: #5c5c77;
+}
+#mint-lms-root .mint-user-enroll__empty {
+  margin-top: 8px;
+}
+#mint-lms-root .mint-cs-enroll {
+  margin-bottom: 16px;
+}
+#mint-lms-root .mint-user-enroll__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+#mint-lms-root .mint-user-enroll__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1.5px solid #e4e1f0;
+  border-radius: 12px;
+  background: #ffffff;
+}
+#mint-lms-root .mint-user-enroll__row-copy {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+#mint-lms-root .mint-user-enroll__row-copy strong {
+  font-size: 15px;
+  color: #17222b;
+}
+#mint-lms-root .mint-user-enroll__row-copy span {
+  font-size: 13px;
+  color: #5c5c77;
+}
+#mint-lms-root .mint-user-enroll__remove {
+  flex: none;
+  height: 36px;
+  padding: 0 12px;
+  border: 1.5px solid #e4e1f0;
+  border-radius: 8px;
+  background: #fff;
+  color: #33334a;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+#mint-lms-root .mint-user-enroll__remove:hover {
+  border-color: #e8b4b4;
+  color: #9b2c2c;
+}
+
+#mint-lms-root .mint-assign {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 52px minmax(0, 1fr);
+  gap: 14px;
+  align-items: stretch;
+  padding: 18px;
+  border: 1.5px solid #98fbcb;
+  border-radius: 16px;
+  background: #f7fffb;
+}
+#mint-lms-root .mint-assign.is-busy {
+  opacity: 0.7;
+  pointer-events: none;
+}
+#mint-lms-root .mint-assign__col {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+#mint-lms-root .mint-assign__col-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #0b4f3f;
+}
+#mint-lms-root .mint-assign__count {
+  min-width: 24px;
+  height: 24px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: #98fbcb;
+  color: #0b4f3f;
+  font-size: 12px;
+  line-height: 24px;
+  text-align: center;
+}
+#mint-lms-root .mint-assign__search {
+  width: 100%;
+  height: 40px;
+  border: 1.5px solid #c9f3dd;
+  border-radius: 999px;
+  padding: 0 14px;
+  background: #fff;
+  color: #0f0e1a;
+  font-size: 14px;
+  outline: none;
+}
+#mint-lms-root .mint-assign__search:focus {
+  border-color: #98fb98;
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.45);
+}
+#mint-lms-root .mint-assign__list {
+  list-style: none;
+  margin: 0;
+  padding: 8px;
+  min-height: 220px;
+  max-height: 280px;
+  overflow: auto;
+  border: 1.5px solid #c9f3dd;
+  border-radius: 12px;
+  background: #fff;
+}
+#mint-lms-root .mint-assign__item {
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #17222b;
+  cursor: pointer;
+}
+#mint-lms-root .mint-assign__item:hover {
+  background: #f1fff9;
+}
+#mint-lms-root .mint-assign__item.is-selected {
+  background: #98fbcb;
+  color: #0b4f3f;
+  font-weight: 600;
+}
+#mint-lms-root .mint-assign__empty {
+  padding: 28px 12px;
+  text-align: center;
+  font-size: 13px;
+  color: #5c5c77;
+}
+#mint-lms-root .mint-assign__actions {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+#mint-lms-root .mint-assign__arrow-wrap {
+  position: relative;
+  display: inline-flex;
+}
+#mint-lms-root .mint-assign__arrow-wrap::after {
+  content: attr(data-tip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 220px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: #111;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  text-align: center;
+  white-space: normal;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+#mint-lms-root .mint-assign__arrow-wrap:hover::after,
+#mint-lms-root .mint-assign__arrow-wrap:focus-within::after {
+  opacity: 1;
+}
+#mint-lms-root .mint-assign__arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: #98fb98;
+  color: #111;
+  cursor: pointer;
+}
+#mint-lms-root .mint-assign__arrow-icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+#mint-lms-root .mint-assign__arrow:hover:not(:disabled) {
+  background: #7fe87f;
+}
+#mint-lms-root .mint-assign__arrow:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+@media (max-width: 800px) {
+  #mint-lms-root .mint-assign {
+    grid-template-columns: 1fr;
+  }
+  #mint-lms-root .mint-assign__actions {
+    flex-direction: row;
+    justify-content: center;
+  }
+}
+
+#mint-lms-root .mint-user-courses {
+  margin: 24px 0 16px;
+  max-width: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  color: #1d2327;
+}
+#mint-lms-root .mint-user-courses__title {
+  margin: 0 0 12px !important;
+  padding: 0 !important;
+  font-size: 1.3em !important;
+  font-weight: 600 !important;
+  line-height: 1.3 !important;
+  color: #1d2327 !important;
+}
+#mint-lms-root .mint-user-courses__table {
+  width: 100%;
+  max-width: 100%;
+  border: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+}
+#mint-lms-root .mint-user-courses__table.is-busy {
+  opacity: 0.65;
+  pointer-events: none;
+}
+#mint-lms-root .mint-user-courses__table td {
+  padding: 0;
+  vertical-align: middle;
+  border: 0;
+}
+#mint-lms-root .mint-user-courses__pane {
+  width: 47%;
+}
+#mint-lms-root .mint-user-courses input.mint-user-courses__search {
+  display: block !important;
+  width: 100% !important;
+  max-width: none !important;
+  height: 36px;
+  margin: 0;
+  padding: 4px 8px !important;
+  border: 1px solid #8c8f94 !important;
+  border-bottom: 0 !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+  box-shadow: none !important;
+  color: #2c3338 !important;
+  font-size: 14px !important;
+  line-height: 2 !important;
+  appearance: auto !important;
+  -webkit-appearance: auto !important;
+}
+#mint-lms-root .mint-user-courses select.mint-user-courses__select {
+  display: block !important;
+  width: 100% !important;
+  max-width: none !important;
+  height: 210px !important;
+  margin: 0;
+  padding: 2px 0 !important;
+  border: 1px solid #8c8f94 !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+  color: #1d2327 !important;
+  font-size: 16px !important;
+  line-height: 1.7 !important;
+  appearance: auto !important;
+  -webkit-appearance: auto !important;
+}
+#mint-lms-root .mint-user-courses select.mint-user-courses__select option {
+  font-size: 16px !important;
+  line-height: 1.7 !important;
+  padding: 4px 8px;
+}
+#mint-lms-root .mint-user-courses__arrows {
+  width: 44px;
+  padding: 0 8px !important;
+  text-align: center;
+}
+#mint-lms-root .mint-user-courses button.mint-user-courses__arrow {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 28px !important;
+  height: 28px !important;
+  margin: 6px auto !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  background: #111 !important;
+  color: #fff !important;
+  cursor: pointer;
+}
+#mint-lms-root .mint-user-courses button.mint-user-courses__arrow .dashicons {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+  line-height: 16px;
+  color: #fff;
+}
+#mint-lms-root .mint-user-courses button.mint-user-courses__arrow:hover {
+  background: #000 !important;
 }
