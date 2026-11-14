@@ -100,7 +100,7 @@ document.addEventListener('alpine:init', () => {
   }));
 
   Alpine.data('mintQuizPreview', (config) => ({
-    started: false,
+    started: !!config.startOnQuestion,
     headerKicker: config.quizKicker || 'Quiz',
     headerTitle: config.quizTitle || '',
     headerBadge: config.quizMeta || '',
@@ -147,14 +147,24 @@ document.addEventListener('alpine:init', () => {
     startedAt: Date.now(),
     timeSpentSeconds: 0,
     showReview: false,
+    focusQuestionId: Number(config.focusQuestionId || 0),
 
     init() {
       this.startedAt = Date.now();
       this.questions = this.prepareQuestions(this.questions);
+      if (this.focusQuestionId > 0) {
+        const index = this.questions.findIndex((question) => Number(question.id) === this.focusQuestionId);
+        if (index >= 0) {
+          this.currentIndex = index;
+        }
+      }
       this.restoreProgress();
       (this.questions || []).forEach((question) => {
         if (question.type === 'mcq_multi' && !Array.isArray(this.answers[question.id])) {
           this.answers[question.id] = [];
+        }
+        if (question.type === 'true_false' && (this.answers[question.id] == null || typeof this.answers[question.id] !== 'object' || Array.isArray(this.answers[question.id]))) {
+          this.answers[question.id] = {};
         }
       });
       this.startTimer();
@@ -244,6 +254,10 @@ document.addEventListener('alpine:init', () => {
       if (question.type === 'mcq_multi') {
         return Array.isArray(value) && value.length > 0;
       }
+      if (question.type === 'true_false') {
+        const map = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+        return (question.options || []).every((option) => map[option] === 'true' || map[option] === 'false');
+      }
       return String(value ?? '').trim() !== '';
     },
 
@@ -296,6 +310,19 @@ document.addEventListener('alpine:init', () => {
       return Array.isArray(selected) && selected.includes(option);
     },
 
+    isTfPicked(questionId, option, flag) {
+      const map = this.answers[questionId];
+      return !!(map && typeof map === 'object' && !Array.isArray(map) && map[option] === flag);
+    },
+
+    setTfAnswer(questionId, option, flag) {
+      const current = this.answers[questionId] && typeof this.answers[questionId] === 'object' && !Array.isArray(this.answers[questionId])
+        ? { ...this.answers[questionId] }
+        : {};
+      current[option] = flag;
+      this.answers[questionId] = current;
+    },
+
     toggleMultiAnswer(questionId, option, checked) {
       const current = Array.isArray(this.answers[questionId]) ? [...this.answers[questionId]] : [];
       const index = current.indexOf(option);
@@ -311,6 +338,11 @@ document.addEventListener('alpine:init', () => {
       const payload = {};
       Object.keys(this.answers).forEach((key) => {
         const value = this.answers[key];
+        const question = this.questionById(key);
+        if (question?.type === 'true_false' && value && typeof value === 'object' && !Array.isArray(value)) {
+          payload[key] = Object.keys(value).filter((option) => value[option] === 'true').sort();
+          return;
+        }
         payload[key] = Array.isArray(value) ? [...value].sort() : value;
       });
       return payload;
@@ -319,7 +351,16 @@ document.addEventListener('alpine:init', () => {
     applyGrade(data) {
       this.scorePercent = Number(data?.scorePercent ?? 0);
       this.pendingEssay = !!data?.pendingEssay;
-      this.review = Array.isArray(data?.questions) ? data.questions : [];
+      const rows = Array.isArray(data?.questions) ? data.questions : [];
+      this.review = rows.map((item) => {
+        const question = this.questionById(item.id);
+        const row = {
+          ...item,
+          type: item.type || question?.type || '',
+        };
+        row.optionRows = this.buildReviewOptionRows(row);
+        return row;
+      });
       this.submitted = true;
       this.showReview = false;
       this.hasPassed = !!data?.passed;
@@ -434,9 +475,117 @@ document.addEventListener('alpine:init', () => {
       return h > 0 ? `${pad(h)}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`;
     },
 
+    questionById(id) {
+      return (this.questions || []).find((question) => Number(question.id) === Number(id)) || null;
+    },
+
     questionPrompt(id) {
-      const match = (this.questions || []).find((question) => Number(question.id) === Number(id));
-      return match?.prompt || '';
+      const match = this.questionById(id);
+      return match?.prompt || match?.title || '';
+    },
+
+    isEssayReview(item) {
+      const question = this.questionById(item.id);
+      return item.type === 'essay' || question?.type === 'essay';
+    },
+
+    essayHasAnswer(item) {
+      const given = item?.given;
+      if (given == null) {
+        return false;
+      }
+      return String(given).trim() !== '';
+    },
+
+    essayAnswerText(item) {
+      const i18n = mintLmsStudent.i18n || {};
+      if (!this.essayHasAnswer(item)) {
+        return i18n.essayEmpty || 'No answer submitted.';
+      }
+      return String(item.given);
+    },
+
+    essayStatusClass(item) {
+      if (item.pending) {
+        return 'is-waiting';
+      }
+      return item.correct ? 'is-ok' : 'is-fail';
+    },
+
+    essayStatusTitle(item) {
+      const i18n = mintLmsStudent.i18n || {};
+      if (item.pending) {
+        return i18n.essayAwaiting || 'Awaiting instructor review';
+      }
+      return item.correct
+        ? i18n.essayGradedOk || 'Instructor marked this correct'
+        : i18n.essayGradedFail || 'Instructor marked this incorrect';
+    },
+
+    essayStatusHint(item) {
+      const i18n = mintLmsStudent.i18n || {};
+      if (item.pending) {
+        return i18n.essayAwaitingHint || 'This written answer is not auto-scored. An instructor will read it and mark it.';
+      }
+      return i18n.essayGradedHint || 'This essay has been graded.';
+    },
+
+    answerTypeLabel(item) {
+      const type = item.type || this.questionById(item.id)?.type || '';
+      const i18n = mintLmsStudent.i18n || {};
+      if (type === 'mcq_multi') return i18n.selectAll || 'Select all that apply';
+      if (type === 'true_false') return i18n.trueFalse || 'True / False';
+      if (type === 'essay') return i18n.essay || 'Essay';
+      return i18n.multipleChoice || 'Multiple choice';
+    },
+
+    asAnswerList(value) {
+      if (value == null || value === '') {
+        return [];
+      }
+      if (Array.isArray(value)) {
+        return value.map((entry) => String(entry));
+      }
+      return [String(value)];
+    },
+
+    buildReviewOptionRows(item) {
+      const question = this.questionById(item.id);
+      const type = item.type || question?.type || '';
+      if (type === 'essay') {
+        return [];
+      }
+      const i18n = mintLmsStudent.i18n || {};
+      let options = Array.isArray(question?.options) ? question.options.map((option) => String(option)) : [];
+      if (type === 'true_false' && options.length === 0) {
+        options = [];
+      }
+      const given = this.asAnswerList(item.given);
+      const correct = this.asAnswerList(item.correctAnswer);
+      const labels = {
+        true: i18n.trueLabel || 'True',
+        false: i18n.falseLabel || 'False',
+      };
+      return options.map((option, index) => {
+        const selected = given.includes(option);
+        const isRight = correct.includes(option);
+        let state = '';
+        if (selected && isRight) {
+          state = 'is-right';
+        } else if (selected && !isRight) {
+          state = 'is-wrong';
+        } else if (!selected && isRight) {
+          state = 'is-missed';
+        }
+        return {
+          key: String.fromCharCode(65 + index),
+          label: labels[option.toLowerCase()] || option,
+          selected,
+          isRight,
+          isWrongPick: selected && !isRight,
+          state,
+        };
+      });
     },
 
     questionTitle(id) {
@@ -498,7 +647,8 @@ document.addEventListener('alpine:init', () => {
 
         const data = payload.data || {};
         this.timeSpentSeconds = Math.max(0, Math.round((Date.now() - this.startedAt) / 1000));
-        this.applyGrade(data.review || data);
+        const grade = data.review && Array.isArray(data.review.questions) ? data.review : data;
+        this.applyGrade(grade);
 
         if (!this.previewMode && data.passed) {
           this.hasPassed = true;

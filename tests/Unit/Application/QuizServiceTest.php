@@ -201,10 +201,27 @@ final class QuizServiceTest extends TestCase
 
     public function test_true_false_comparison_is_case_insensitive(): void
     {
-        $question = $this->trueFalseQuestion(1, 'True');
+        $question = $this->trueFalseQuestion(1, 'true');
 
         $this->assertTrue($this->service->isAnswerCorrect($question, 'true'));
         $this->assertFalse($this->service->isAnswerCorrect($question, 'false'));
+    }
+
+    public function test_true_false_marks_each_option(): void
+    {
+        $question = new QuizQuestion(
+            1,
+            5,
+            QuizQuestion::TYPE_TRUE_FALSE,
+            'What is the correct spelling of Trail?',
+            ['Trail', 'Trails'],
+            '["Trail"]',
+            1,
+        );
+
+        $this->assertTrue($this->service->isAnswerCorrect($question, '["Trail"]'));
+        $this->assertFalse($this->service->isAnswerCorrect($question, '["Trails"]'));
+        $this->assertFalse($this->service->isAnswerCorrect($question, '["Trail","Trails"]'));
     }
 
     public function test_mcq_multi_requires_exact_set_match(): void

@@ -214,8 +214,13 @@ final class EnrollmentService {
 		return new StudentListDto( $students, $result['total'], $page, $perPage );
 	}
 
-	public function listCoursesForUser( int $userId, int $page, int $perPage ): EnrolledCourseListDto {
+	public function listCoursesForUser( int $userId, int $page, int $perPage, int $actorUserId = 0 ): EnrolledCourseListDto {
 		if ( $userId <= 0 ) {
+			throw new ForbiddenException();
+		}
+
+		$actor = $actorUserId > 0 ? $actorUserId : $userId;
+		if ( $actor !== $userId && ! $this->authorization->canEnrollStudents( $actor ) ) {
 			throw new ForbiddenException();
 		}
 
@@ -230,6 +235,10 @@ final class EnrollmentService {
 			$course = $this->courseRepository->findById( $enrollment->courseId );
 
 			if ( null === $course ) {
+				continue;
+			}
+
+			if ( $actor !== $userId && ! $this->authorization->canEditCourse( $actor, $course->authorId ) ) {
 				continue;
 			}
 

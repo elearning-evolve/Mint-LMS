@@ -505,18 +505,34 @@ final class ShortcodeRegistrar {
 		if ( $resolvedLessonId > 0 && PostTypes::isDisposableHostLesson( $resolvedLessonId ) ) {
 			$resolvedLessonId = 0;
 		}
-		$courseTitle = $this->publicPostTitle( $resolvedCourseId );
-		$lessonTitle = $resolvedLessonId > 0 ? $this->publicPostTitle( $resolvedLessonId ) : '';
+		$previewMode   = isset( $_GET['mint_preview'] ) ? sanitize_key( (string) wp_unslash( $_GET['mint_preview'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$isEditor      = $this->studentExperience->isEditorPreviewing( $resolvedCourseId, $userId );
+		$isEnrolled    = $this->studentExperience->isUserEnrolledInCourse( $userId, $resolvedCourseId );
+		$explicitPreview = in_array( $previewMode, array( 'quiz', 'question' ), true );
+		$isReviewMode  = $isEditor && ( $explicitPreview || ! $isEnrolled );
+		$focusQuestionId = $this->queryInt( 'mint_question' );
+		$courseTitle   = $this->publicPostTitle( $resolvedCourseId );
+		$lessonTitle   = $resolvedLessonId > 0 ? $this->publicPostTitle( $resolvedLessonId ) : '';
+		$lessonUrl     = '';
+		if ( $resolvedLessonId > 0 ) {
+			$lessonUrl = $isReviewMode
+				? $this->previewLessonUrl( $resolvedCourseId, $resolvedLessonId )
+				: $this->lessonUrl( $resolvedCourseId, $resolvedLessonId );
+		}
 
 		return $this->wrap(
 			$this->templateLoader->render(
 				'student/preview-quiz.php',
 				array(
-					'quiz'        => $quiz,
-					'courseUrl'   => $resolvedCourseId > 0 ? $settings->getCourseUrl( $resolvedCourseId ) : '',
-					'lessonUrl'   => $resolvedLessonId > 0 ? $this->previewLessonUrl( $resolvedCourseId, $resolvedLessonId ) : '',
-					'courseTitle' => $courseTitle,
-					'lessonTitle' => $lessonTitle,
+					'quiz'             => $quiz,
+					'courseUrl'        => $resolvedCourseId > 0 ? $settings->getCourseUrl( $resolvedCourseId ) : '',
+					'lessonUrl'        => $lessonUrl,
+					'courseTitle'      => $courseTitle,
+					'lessonTitle'      => $lessonTitle,
+					'isReviewMode'     => $isReviewMode,
+					'isEnrolled'       => $isEnrolled || $isReviewMode,
+					'hasPassedQuiz'    => false,
+					'focusQuestionId'  => $focusQuestionId,
 				)
 			)
 		);

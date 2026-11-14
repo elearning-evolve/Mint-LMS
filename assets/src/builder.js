@@ -41,6 +41,7 @@ function courseBuilder(courseId, opts = {}) {
   const treePageLessonSortables = new Map();
   const treePageQuizSortables = new Map();
   const treePageQuestionSortables = new Map();
+  let answerOptionSortable = null;
   const standaloneLessonId = Number(opts?.lessonId) || 0;
 
   return {
@@ -5839,24 +5840,18 @@ function courseBuilder(courseId, opts = {}) {
         type,
         prompt,
         options:
-          type === 'true_false'
-            ? ['True', 'False']
-            : type === 'essay'
-              ? []
-              : Array.isArray(question.options) && question.options.length
-                ? [...question.options]
-                : ['Option 1', 'Option 2'],
+          type === 'essay'
+            ? []
+            : Array.isArray(question.options) && question.options.length >= 2
+              ? [...question.options]
+              : ['Option 1', 'Option 2'],
         correctAnswer:
-          type === 'mcq_multi'
+          type === 'mcq_multi' || type === 'true_false'
             ? ''
             : type === 'essay'
               ? ''
-              : type === 'true_false'
-                ? question.correctAnswer === 'false'
-                  ? 'false'
-                  : 'true'
-                : question.correctAnswer || '',
-        correctAnswers: type === 'mcq_multi' ? correctAnswers : [],
+              : question.correctAnswer || '',
+        correctAnswers: type === 'mcq_multi' || type === 'true_false' ? this.trueFalseCorrectAnswers(type, question, correctAnswers) : [],
         featuredImageId: question.featuredImageId || null,
         featuredImageUrl: question.featuredImageUrl || '',
         status: question.status || 'draft',
@@ -5917,6 +5912,9 @@ function courseBuilder(courseId, opts = {}) {
       const allowHtml = Array.isArray(merged.allowHtml) ? [...merged.allowHtml] : [];
       while (allowHtml.length < optionCount) allowHtml.push(false);
       merged.allowHtml = allowHtml.slice(0, Math.max(optionCount, allowHtml.length));
+      const tfFlags = Array.isArray(merged.tfFlags) ? [...merged.tfFlags] : [];
+      while (tfFlags.length < optionCount) tfFlags.push(tfFlags.length === 0 ? 'true' : 'false');
+      merged.tfFlags = tfFlags.slice(0, Math.max(optionCount, tfFlags.length));
       merged.freePreview = !!merged.freePreview;
       merged.attachmentId = Number(merged.attachmentId) || 0;
       merged.points = Math.max(0, Number(merged.points) || 1);
@@ -6136,8 +6134,57 @@ function courseBuilder(courseId, opts = {}) {
       return title || 'New Question';
     },
 
-    isMcqOptionCorrect(question, option) {
-      if (!question || !option) return false;
+    trueFalseCorrectAnswers(type, question, extracted) {
+      if (type !== 'true_false') {
+        return extracted;
+      }
+      const options = Array.isArray(question?.options) ? question.options : [];
+      const raw = String(question?.correctAnswer || '').trim();
+      if (raw === 'true' || raw === 'false') {
+        if (options.length >= 2) {
+          return raw === 'true' ? [options[0]] : [options[1]];
+        }
+        return [];
+      }
+      return extracted.filter((item) => options.includes(item));
+    },
+
+    tfOptionFlag(index) {
+      const question = this.activeQuestion;
+      if (!question) return '';
+      const flags = Array.isArray(question.settings?.tfFlags) ? question.settings.tfFlags : [];
+      if (flags[index] === 'true' || flags[index] === 'false') {
+        return flags[index];
+      }
+      const option = question.options?.[index];
+      const answers = Array.isArray(question.correctAnswers) ? question.correctAnswers : [];
+      return option && answers.includes(option) ? 'true' : 'false';
+    },
+
+    setTfOptionFlag(index, flag) {
+      const question = this.activeQuestion;
+      if (!question || (flag !== 'true' && flag !== 'false')) return;
+      if (!question.settings) {
+        question.settings = this.normalizeQuestionSettings(null, (question.options || []).length);
+      }
+      if (!Array.isArray(question.settings.tfFlags)) {
+        question.settings.tfFlags = [];
+      }
+      while (question.settings.tfFlags.length < (question.options || []).length) {
+        question.settings.tfFlags.push('false');
+      }
+      question.settings.tfFlags[index] = flag;
+      question.correctAnswers = (question.options || []).filter((_, optionIndex) => question.settings.tfFlags[optionIndex] === 'true');
+    },
+
+    syncTfCorrectAnswers(question) {
+      if (!question || question.type !== 'true_false') return;
+      const flags = Array.isArray(question.settings?.tfFlags) ? question.settings.tfFlags : [];
+      question.correctAnswers = (question.options || []).filter((_, index) => flags[index] === 'true');
+    },
+
+    isMcqOptionCorrect(question, option, index) {
+      if (!question) return false;
       if (question.type === 'mcq_multi') {
         const answers = Array.isArray(question.correctAnswers) ? question.correctAnswers : [];
         return answers.includes(option);
@@ -6145,21 +6192,23 @@ function courseBuilder(courseId, opts = {}) {
       return question.correctAnswer === option;
     },
 
-    toggleMcqCorrect(question, option) {
-      if (!question || !option) return;
+    toggleMcqCorrect(question, option, index) {
+      if (!question) return;
       if (question.type === 'mcq_multi') {
         if (!Array.isArray(question.correctAnswers)) {
           question.correctAnswers = [];
         }
-        const index = question.correctAnswers.indexOf(option);
-        if (index >= 0) {
-          question.correctAnswers.splice(index, 1);
-        } else {
+        const answerIndex = question.correctAnswers.indexOf(option);
+        if (answerIndex >= 0) {
+          question.correctAnswers.splice(answerIndex, 1);
+        } else if (option) {
           question.correctAnswers.push(option);
         }
         return;
       }
-      question.correctAnswer = option;
+      if (option) {
+        question.correctAnswer = option;
+      }
     },
 
     /** Clear body text that was incorrectly seeded from the question title. */
@@ -6201,14 +6250,20 @@ function courseBuilder(courseId, opts = {}) {
       }
       if (kind === 'true_false') {
         this.activeQuestion.type = 'true_false';
-        this.activeQuestion.options = ['True', 'False'];
-        this.activeQuestion.correctAnswers = [];
-        if (!Array.isArray(this.activeQuestion.extraTf)) {
-          this.activeQuestion.extraTf = [];
+        if (!Array.isArray(this.activeQuestion.options) || this.activeQuestion.options.length < 2) {
+          this.activeQuestion.options = ['Option 1', 'Option 2'];
         }
-        if (this.activeQuestion.correctAnswer !== 'true' && this.activeQuestion.correctAnswer !== 'false') {
-          this.activeQuestion.correctAnswer = 'true';
+        if (this.activeQuestion.options.includes('True') && this.activeQuestion.options.includes('False')) {
+          this.activeQuestion.options = ['Option 1', 'Option 2'];
         }
+        this.activeQuestion.correctAnswer = '';
+        this.activeQuestion.extraTf = [];
+        this.activeQuestion.settings = this.normalizeQuestionSettings(
+          this.activeQuestion.settings,
+          this.activeQuestion.options.length
+        );
+        this.activeQuestion.settings.tfFlags = this.activeQuestion.options.map((_, index) => (index === 0 ? 'true' : 'false'));
+        this.activeQuestion.correctAnswers = [this.activeQuestion.options[0]];
         this.activeQuestion.settings.answerTypePending = false;
         this.questionAnswerReady = true;
         this.$nextTick(() => {
@@ -6421,11 +6476,9 @@ function courseBuilder(courseId, opts = {}) {
         settings.answerTypePending = !!this.activeQuestion.settings?.answerTypePending;
 
         const options =
-          type === 'true_false'
-            ? ['True', 'False']
-            : type === 'essay'
-              ? []
-              : (this.activeQuestion.options || []).filter((o) => String(o || '').trim());
+          type === 'essay'
+            ? []
+            : (this.activeQuestion.options || []).filter((o) => String(o || '').trim());
 
         const payload = {
           type,
@@ -6438,10 +6491,10 @@ function courseBuilder(courseId, opts = {}) {
         if (type === 'essay') {
           payload.correct_answer = '';
         } else if (type === 'true_false') {
-          const tf = this.activeQuestion.correctAnswer;
-          if (tf === 'true' || tf === 'false') {
-            payload.correct_answer = tf;
-          }
+          this.syncTfCorrectAnswers(this.activeQuestion);
+          payload.correct_answer = Array.isArray(this.activeQuestion.correctAnswers)
+            ? this.activeQuestion.correctAnswers
+            : [];
         } else if (type === 'mcq_multi') {
           const multi = Array.isArray(this.activeQuestion.correctAnswers)
             ? this.activeQuestion.correctAnswers.filter((item) => options.includes(item))
@@ -9318,9 +9371,9 @@ function courseBuilder(courseId, opts = {}) {
         type: normalizedType,
         title: 'New Question',
         prompt: '',
-        options: normalizedType === 'true_false' ? ['True', 'False'] : normalizedType === 'essay' ? [] : ['Option 1', 'Option 2'],
-        correctAnswer: normalizedType === 'true_false' ? 'true' : '',
-        correctAnswers: [],
+        options: normalizedType === 'essay' ? [] : ['Option 1', 'Option 2'],
+        correctAnswer: '',
+        correctAnswers: normalizedType === 'true_false' ? ['Option 1'] : [],
         featuredImageId: null,
         featuredImageUrl: '',
         settings: this.normalizeQuestionSettings(null, normalizedType === 'essay' ? 0 : 2),
@@ -9341,6 +9394,7 @@ function courseBuilder(courseId, opts = {}) {
     },
 
     addMcqOption(question) {
+      if (!question || question.type === 'essay') return;
       if (question.options.length >= 6) return;
       question.options.push(`Option ${question.options.length + 1}`);
       if (!question.settings) {
@@ -9348,6 +9402,8 @@ function courseBuilder(courseId, opts = {}) {
       } else {
         if (!Array.isArray(question.settings.allowHtml)) question.settings.allowHtml = [];
         question.settings.allowHtml.push(false);
+        if (!Array.isArray(question.settings.tfFlags)) question.settings.tfFlags = [];
+        question.settings.tfFlags.push('false');
       }
     },
 
@@ -9358,11 +9414,67 @@ function courseBuilder(courseId, opts = {}) {
       if (question.settings && Array.isArray(question.settings.allowHtml)) {
         question.settings.allowHtml.splice(index, 1);
       }
-      if (question.type === 'mcq_multi' && Array.isArray(question.correctAnswers)) {
+      if (question.settings && Array.isArray(question.settings.tfFlags)) {
+        question.settings.tfFlags.splice(index, 1);
+      }
+      if ((question.type === 'mcq_multi' || question.type === 'true_false') && Array.isArray(question.correctAnswers)) {
         question.correctAnswers = question.correctAnswers.filter((answer) => answer !== removed);
       } else if (question.correctAnswer === removed) {
         question.correctAnswer = '';
       }
+    },
+
+    initAnswerOptionSortable() {
+      this.$nextTick(() => {
+        const Sortable = window.MintLMS?.Sortable;
+        const el = document.getElementById('mint-answer-options-sort');
+        if (answerOptionSortable) {
+          try {
+            answerOptionSortable.destroy();
+          } catch {
+            /* ignore */
+          }
+          answerOptionSortable = null;
+        }
+        if (!Sortable || !el) {
+          return;
+        }
+        answerOptionSortable = Sortable.create(el, {
+          handle: '.mint-handle-answer',
+          animation: 150,
+          draggable: '.mint-qeditor__option-card',
+          onEnd: () => {
+            this.reorderMcqOptionsFromDom(el);
+          },
+        });
+      });
+    },
+
+    reorderMcqOptionsFromDom(container) {
+      const question = this.activeQuestion;
+      if (!question || !container || !Array.isArray(question.options)) {
+        return;
+      }
+      const order = Array.from(container.querySelectorAll('[data-option-index]'))
+        .map((node) => Number(node.getAttribute('data-option-index')))
+        .filter((index) => Number.isInteger(index) && index >= 0 && index < question.options.length);
+      if (order.length !== question.options.length) {
+        return;
+      }
+      question.options = order.map((index) => question.options[index]);
+      if (question.settings && Array.isArray(question.settings.allowHtml)) {
+        while (question.settings.allowHtml.length < order.length) {
+          question.settings.allowHtml.push(false);
+        }
+        question.settings.allowHtml = order.map((index) => !!question.settings.allowHtml[index]);
+      }
+      if (question.settings && Array.isArray(question.settings.tfFlags)) {
+        while (question.settings.tfFlags.length < order.length) {
+          question.settings.tfFlags.push('false');
+        }
+        question.settings.tfFlags = order.map((index) => (question.settings.tfFlags[index] === 'true' ? 'true' : 'false'));
+      }
+      this.syncTfCorrectAnswers(question);
     },
 
     moveMcqOption(question, index, direction) {
@@ -9379,6 +9491,14 @@ function courseBuilder(courseId, opts = {}) {
         allow[index] = allow[target];
         allow[target] = allowTmp;
       }
+      if (question.settings && Array.isArray(question.settings.tfFlags)) {
+        const flags = question.settings.tfFlags;
+        while (flags.length < options.length) flags.push('false');
+        const flagTmp = flags[index];
+        flags[index] = flags[target];
+        flags[target] = flagTmp;
+      }
+      this.syncTfCorrectAnswers(question);
     },
 
     toggleOptionAllowHtml(index, checked) {
@@ -9713,12 +9833,10 @@ function courseBuilder(courseId, opts = {}) {
 
       const type = this.normalizeQuestionType(question.type);
       const options =
-        type === 'true_false'
-          ? ['True', 'False']
-          : type === 'essay'
-            ? []
-            : (question.options || []).filter((o) => String(o || '').trim());
-      if ((type === 'mcq' || type === 'mcq_multi') && options.length < 2) {
+        type === 'essay'
+          ? []
+          : (question.options || []).filter((o) => String(o || '').trim());
+      if ((type === 'mcq' || type === 'mcq_multi' || type === 'true_false') && options.length < 2) {
         window.MintLMS.toast.info('Add at least two answer options');
         return false;
       }
@@ -9732,8 +9850,11 @@ function courseBuilder(courseId, opts = {}) {
       } else if (type === 'essay') {
         correctAnswer = '';
       } else if (type === 'true_false') {
-        if (correctAnswer !== 'true' && correctAnswer !== 'false') {
-          correctAnswer = 'true';
+        this.syncTfCorrectAnswers(question);
+        correctAnswer = Array.isArray(question.correctAnswers) ? question.correctAnswers : [];
+        if (!Array.isArray(correctAnswer) || correctAnswer.length === 0) {
+          window.MintLMS.toast.info('Mark at least one option as True');
+          return false;
         }
       } else if (!options.includes(String(correctAnswer))) {
         window.MintLMS.toast.info('Select a correct answer');

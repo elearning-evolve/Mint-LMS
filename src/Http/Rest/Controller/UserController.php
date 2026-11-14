@@ -22,6 +22,35 @@ final class UserController {
 	public function registerRoutes(): void {
 		register_rest_route(
 			self::NAMESPACE,
+			'/users',
+			array(
+				'methods'             => \WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'list' ),
+				'permission_callback' => array( $this, 'canEnrollStudents' ),
+				'args'                => array(
+					'q'        => array(
+						'required'          => false,
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+					'page'     => array(
+						'required'          => false,
+						'type'              => 'integer',
+						'default'           => 1,
+						'sanitize_callback' => 'absint',
+					),
+					'per_page' => array(
+						'required'          => false,
+						'type'              => 'integer',
+						'default'           => 100,
+						'sanitize_callback' => 'absint',
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
 			'/users/search',
 			array(
 				'methods'             => \WP_REST_Server::READABLE,
@@ -48,6 +77,20 @@ final class UserController {
 		$userId = $this->authorization->getCurrentUserId();
 
 		return $userId > 0 && $this->authorization->canEnrollStudents( $userId );
+	}
+
+	public function list( \WP_REST_Request $request ): \WP_REST_Response {
+		$page    = (int) $request->get_param( 'page' );
+		$perPage = (int) $request->get_param( 'per_page' );
+		$search  = (string) $request->get_param( 'q' );
+		$result  = $this->userLookup->listUsers( $page > 0 ? $page : 1, $perPage > 0 ? $perPage : 100, $search );
+
+		return ApiResponse::success(
+			array(
+				'users' => $result['users'],
+				'total' => $result['total'],
+			)
+		);
 	}
 
 	public function search( \WP_REST_Request $request ): \WP_REST_Response {

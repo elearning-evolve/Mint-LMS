@@ -71,7 +71,10 @@ final class QuestionAnswerCodec {
 			return '';
 		}
 
-		if ( \MintLMS\Domain\Quiz\QuizQuestion::TYPE_MCQ_MULTI === $type ) {
+		if (
+			\MintLMS\Domain\Quiz\QuizQuestion::TYPE_MCQ_MULTI === $type
+			|| \MintLMS\Domain\Quiz\QuizQuestion::TYPE_TRUE_FALSE === $type
+		) {
 			if ( is_array( $correctAnswer ) ) {
 				$list = array_map( 'strval', $correctAnswer );
 			} elseif ( is_string( $correctAnswer ) ) {

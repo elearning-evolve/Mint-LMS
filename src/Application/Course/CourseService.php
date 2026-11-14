@@ -355,7 +355,7 @@ final class CourseService {
 		}
 
 		if ( CourseStatus::Published === $course->status ) {
-			return CourseDto::fromCourse( $course );
+			return CourseDto::fromCourse( $this->repository->save( $course ) );
 		}
 
 		$published = new Course(

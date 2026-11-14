@@ -256,6 +256,20 @@ final class EnrollmentBridge {
 			return (int) $admins[0];
 		}
 
+		$managers = get_users(
+			array(
+				'role'    => 'mintlms_manager',
+				'number'  => 1,
+				'orderby' => 'ID',
+				'order'   => 'ASC',
+				'fields'  => 'ID',
+			)
+		);
+
+		if ( isset( $managers[0] ) && $this->userCanEnroll( (int) $managers[0] ) ) {
+			return (int) $managers[0];
+		}
+
 		$instructors = get_users(
 			array(
 				'role'    => 'mintlms_instructor',

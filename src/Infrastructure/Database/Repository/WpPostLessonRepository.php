@@ -132,8 +132,7 @@ final class WpPostLessonRepository implements LessonRepositoryInterface {
 		);
 
 		if ( 0 === $lesson->id ) {
-			// New lessons stay draft until explicitly made Live (same as courses).
-			$postarr['post_status'] = 'draft';
+			$postarr['post_status'] = 'publish';
 			$postId                 = wp_insert_post( $postarr, true );
 		} else {
 			$postarr['ID'] = $lesson->id;
