@@ -32,6 +32,7 @@ final class PostTypes {
 	public const META_QUIZ_SETTINGS         = '_mint_quiz_settings';
 	public const META_QUESTION_SETTINGS     = '_mint_question_settings';
 	public const META_QUESTION_SHELL        = '_mint_question_shell';
+	public const META_DISPOSABLE_HOST       = '_mint_disposable_host';
 	public const META_LEGACY_ID             = '_mint_legacy_id';
 
 	/**
@@ -64,7 +65,10 @@ final class PostTypes {
 	}
 
 	/**
-	 * Empty library lesson used only as a quiz/question host (not a real parent).
+	 * Empty scaffolding lesson used only as a quiz/question host (not a real Attach parent).
+	 *
+	 * Author-created library lessons (even with empty content) must NOT match — otherwise the
+	 * quiz "Attach to lesson" picker hides them or falls back to the host title "New Lesson".
 	 */
 	public static function isDisposableHostLesson( int $lessonId ): bool {
 		if ( $lessonId <= 0 ) {
@@ -96,7 +100,42 @@ final class PostTypes {
 			return false;
 		}
 
-		return true;
+		if ( '1' === (string) get_post_meta( $lessonId, self::META_DISPOSABLE_HOST, true ) ) {
+			return true;
+		}
+
+		// Legacy hosts (pre-meta): empty + default scaffolding title or new-lesson-* slug.
+		$defaultTitle = __( 'New Lesson', 'mint-lms' );
+		$title        = trim( (string) $post->post_title );
+		$slug         = (string) $post->post_name;
+
+		if ( $title === $defaultTitle ) {
+			return true;
+		}
+
+		return 0 === strpos( $slug, 'new-lesson-' );
+	}
+
+	/**
+	 * Mark a lesson as an internal quiz/question host (Attach picker must hide it).
+	 */
+	public static function markDisposableHostLesson( int $lessonId ): void {
+		if ( $lessonId <= 0 ) {
+			return;
+		}
+
+		update_post_meta( $lessonId, self::META_DISPOSABLE_HOST, '1' );
+	}
+
+	/**
+	 * Author claimed this lesson (edited in builder) — no longer an internal host.
+	 */
+	public static function clearDisposableHostLesson( int $lessonId ): void {
+		if ( $lessonId <= 0 ) {
+			return;
+		}
+
+		delete_post_meta( $lessonId, self::META_DISPOSABLE_HOST );
 	}
 
 	/**

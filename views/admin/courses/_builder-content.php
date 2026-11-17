@@ -3106,12 +3106,6 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 															@click="removeMcqOption(activeQuestion, oIndex)"
 															:disabled="activeQuestion.options.length <= 2"
 														><?php esc_html_e( 'Delete', 'mint-lms' ); ?></button>
-														<button
-															type="button"
-															class="mint-qeditor__btn-solid"
-															@click="saveActiveQuestion()"
-															:disabled="quizSaving"
-														><?php esc_html_e( 'Save option', 'mint-lms' ); ?></button>
 													</div>
 												</div>
 											</template>
