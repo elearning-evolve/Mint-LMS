@@ -19,7 +19,7 @@ final class FirstRunState {
 	 * TEMP testing switch: force first-run welcome on admin.php?page=mint-lms.
 	 * Does not delete courses. Set to false (or remove) when QA is done.
 	 */
-	public const TEMP_FORCE_WELCOME_FOR_TESTING = true;
+	public const TEMP_FORCE_WELCOME_FOR_TESTING = false;
 
 	public static function isFirstRunComplete(): bool {
 		return (bool) get_option( self::OPTION_FIRST_RUN_COMPLETE, false );
