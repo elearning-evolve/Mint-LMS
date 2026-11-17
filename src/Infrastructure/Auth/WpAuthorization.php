@@ -51,6 +51,10 @@ final class WpAuthorization implements AuthorizationInterface {
 			|| $this->hasCapability( $userId, 'edit_others_mintlms_courses' );
 	}
 
+	public function canViewAllContent( int $userId ): bool {
+		return $this->canViewAllCourses( $userId );
+	}
+
 	public function canEnrollStudents( int $userId ): bool {
 		return $this->hasCapability( $userId, 'enroll_mintlms_students' )
 			|| $this->hasCapability( $userId, 'manage_mintlms' );

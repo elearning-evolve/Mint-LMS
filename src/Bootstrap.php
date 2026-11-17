@@ -45,6 +45,7 @@ use MintLMS\Infrastructure\Admin\QuizPostEditUi;
 use MintLMS\Infrastructure\Admin\SettingsPage;
 use MintLMS\Infrastructure\Admin\UserProfileEnrollment;
 use MintLMS\Infrastructure\Capability\AdminAccessGuard;
+use MintLMS\Infrastructure\Capability\AdminContentListScope;
 use MintLMS\Infrastructure\Capability\CapabilityRegistrar;
 use MintLMS\Infrastructure\Capability\StudentRoleAssigner;
 use MintLMS\Infrastructure\Cache\WpObjectCache;
@@ -106,6 +107,7 @@ final class Bootstrap {
 		( new CapabilityRegistrar() )->register();
 		( new StudentRoleAssigner() )->register();
 		( new AdminAccessGuard() )->register();
+		( new AdminContentListScope() )->register();
 
 		( new PostTypeRegistrar() )->register();
 

@@ -103,7 +103,7 @@ document.addEventListener('alpine:init', () => {
 
   Alpine.data('mintWelcomeDashboard', (steps = []) => ({
     steps: Array.isArray(steps) ? steps : [],
-    activeStep: 'courses',
+    activeStep: 'course',
     selectStep(key) {
       this.activeStep = key;
     },
