@@ -149,9 +149,8 @@ final class MenuRegistrar {
 
 		$userId = get_current_user_id();
 
-		// Same first-time welcome for Admin / Manager / Instructor until they have a course
-		// (site first-run incomplete, or this creator still has zero courses).
-		if ( ! FirstRunState::isFirstRunComplete() || 0 === FirstRunState::userCourseCount( $userId ) ) {
+		// Same first-time welcome for Admin / Manager / Instructor (Mint Admin / Instructor.dc.html).
+		if ( FirstRunState::shouldShowWelcome( $userId ) ) {
 			include MINTLMS_PATH . 'views/admin/first-run.php';
 			return;
 		}

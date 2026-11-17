@@ -90,11 +90,19 @@ final class FirstRunRedirect {
 			return;
 		}
 
+		$userId = get_current_user_id();
+
 		if ( 'mint-lms' !== $page && ! $onCoursesList ) {
 			return;
 		}
 
-		if ( ! FirstRunState::isFirstRunComplete() ) {
+		// Preview mode must not bounce Courses → Dashboard (would drop the query flag).
+		if ( FirstRunState::isWelcomePreviewRequested() ) {
+			return;
+		}
+
+		// Keep first-time users on the shared Admin/Instructor welcome until they act.
+		if ( FirstRunState::shouldShowWelcome( $userId ) ) {
 			if ( $onCoursesList ) {
 				wp_safe_redirect( admin_url( 'admin.php?page=mint-lms' ) );
 				exit;
@@ -103,7 +111,7 @@ final class FirstRunRedirect {
 			return;
 		}
 
-		if ( FirstRunState::shouldOfferGuidedFlow( get_current_user_id() ) && 'mint-lms' === $page ) {
+		if ( FirstRunState::shouldOfferGuidedFlow( $userId ) && 'mint-lms' === $page ) {
 			wp_safe_redirect( admin_url( 'admin.php?page=mint-lms-guided-course' ) );
 			exit;
 		}

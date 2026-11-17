@@ -15,17 +15,26 @@
 #mint-lms-root a.mint-welcome-cta:hover,
 #mint-lms-root a.mint-welcome-cta:active,
 #mint-lms-root a.mint-welcome-cta:focus,
-#mint-lms-root a.mint-welcome-cta:focus-visible {
-  color: #0B4F3F !important;
+#mint-lms-root a.mint-welcome-cta:focus-visible,
+#mint-lms-root button.mint-welcome-cta,
+#mint-lms-root button.mint-welcome-cta:hover,
+#mint-lms-root button.mint-welcome-cta:active,
+#mint-lms-root button.mint-welcome-cta:focus,
+#mint-lms-root button.mint-welcome-cta:focus-visible {
+  color: #0F0E1A !important;
   background-color: #98FB98 !important;
   background-image: none !important;
+  border: none !important;
   box-shadow: none !important;
   opacity: 1;
+  cursor: pointer;
   transition: background 150ms ease-out, box-shadow 150ms ease-out, transform 150ms ease-out;
 }
 
 #mint-lms-root a.mint-welcome-cta:hover,
-#mint-lms-root a.mint-welcome-cta:focus-visible {
+#mint-lms-root a.mint-welcome-cta:focus-visible,
+#mint-lms-root button.mint-welcome-cta:hover,
+#mint-lms-root button.mint-welcome-cta:focus-visible {
   background-color: #7FE87F !important;
   box-shadow: 0 4px 12px rgba(11, 79, 63, 0.18) !important;
   transform: translateY(-1px);
@@ -33,22 +42,43 @@
 
 #mint-lms-root a.mint-welcome-skip,
 #mint-lms-root a.mint-welcome-skip:visited {
-  color: #0B4F3F !important;
-  background-color: #98FB98 !important;
+  color: #0F0E1A !important;
+  background-color: #7FE87F !important;
+  box-shadow: 0 6px 16px rgba(152, 251, 203, 0.55) !important;
   transition: background 150ms ease-out, box-shadow 150ms ease-out, transform 150ms ease-out;
 }
 
 #mint-lms-root a.mint-welcome-skip:hover,
 #mint-lms-root a.mint-welcome-skip:focus-visible {
-  color: #0B4F3F !important;
-  background-color: #7FE87F !important;
+  color: #0F0E1A !important;
+  background-color: #98FB98 !important;
   border-color: transparent !important;
-  box-shadow: 0 4px 12px rgba(11, 79, 63, 0.18) !important;
+  box-shadow: 0 6px 16px rgba(152, 251, 203, 0.55) !important;
+  transform: translateY(-1px);
+}
+
+#mint-lms-root button.mint-welcome-back,
+#mint-lms-root button.mint-welcome-back:hover,
+#mint-lms-root button.mint-welcome-back:focus,
+#mint-lms-root button.mint-welcome-back:focus-visible {
+  color: #0F0E1A !important;
+  background: #FFFFFF !important;
+  border: 1.5px solid #98FBCB !important;
+  box-shadow: none !important;
+  cursor: pointer;
+  transition: background 150ms ease-out, border-color 150ms ease-out, transform 150ms ease-out;
+}
+
+#mint-lms-root button.mint-welcome-back:hover,
+#mint-lms-root button.mint-welcome-back:focus-visible {
+  background: #E8FFF3 !important;
   transform: translateY(-1px);
 }
 
 #mint-lms-root a.mint-welcome-cta:focus-visible,
-#mint-lms-root a.mint-welcome-skip:focus-visible {
+#mint-lms-root button.mint-welcome-cta:focus-visible,
+#mint-lms-root a.mint-welcome-skip:focus-visible,
+#mint-lms-root button.mint-welcome-back:focus-visible {
   box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55), 0 4px 12px rgba(11, 79, 63, 0.18) !important;
 }
 
@@ -419,69 +449,330 @@
     @apply mint-min-h-[280px] mint-border-0 mint-font-sans mint-text-base mint-text-ink;
   }
 
-  /* A1 dashboard structure tree — interactive, design-accurate */
-  #mint-lms-root .mint-structure-tree {
+  /* First-run welcome — exact sizes from Mint Admin / Instructor.dc.html */
+  #mint-lms-root .mint-welcome {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    min-height: 700px;
+    width: 100%;
+    background: #ffffff;
+    color: #0F0E1A;
+    font-size: 16px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #mint-lms-root .mint-welcome__left {
+    display: flex;
+    flex-direction: column;
+    padding: 40px 56px;
+    background: #ffffff;
+  }
+
+  #mint-lms-root .mint-welcome__right {
+    display: flex;
+    flex-direction: column;
+    padding: 56px 56px 48px;
+    background: linear-gradient(160deg, #F1FFF9 0%, #E8FFF3 55%, #98FBCB 100%);
+  }
+
+  #mint-lms-root .mint-welcome__brand-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  #mint-lms-root .mint-welcome__brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  #mint-lms-root .mint-welcome__brand-mark {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: #98FB98;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+  }
+
+  #mint-lms-root .mint-welcome__brand-name {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: #0F0E1A;
+  }
+
+  #mint-lms-root .mint-welcome__step-pill {
+    height: 32px;
+    padding: 0 14px;
+    border-radius: 999px;
+    background: #E8FFF3;
+    border: 1px solid #98FBCB;
+    display: inline-flex;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: #0F0E1A;
+    white-space: nowrap;
+  }
+
+  #mint-lms-root .mint-welcome__hero {
+    margin-top: auto;
+    padding-top: 80px;
+  }
+
+  #mint-lms-root .mint-welcome__title {
+    margin: 0;
+    max-width: 480px;
+    font-size: 56px;
+    line-height: 58px;
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    color: #0F0E1A;
+  }
+
+  #mint-lms-root .mint-welcome__lead {
+    margin: 18px 0 0;
+    max-width: 480px;
+    font-size: 19px;
+    line-height: 30px;
+    color: #33334A;
+  }
+
+  #mint-lms-root .mint-welcome__features {
+    list-style: none;
+    margin: 34px 0 0;
+    padding: 0;
+    display: grid;
+    gap: 14px;
+  }
+
+  #mint-lms-root .mint-welcome__feature {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 17px;
+    color: #0F0E1A;
+  }
+
+  #mint-lms-root .mint-welcome__feature-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: #E8FFF3;
+    border: 1px solid #98FBCB;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+  }
+
+  #mint-lms-root .mint-welcome__thanks {
+    margin: 40px 0 0;
+    font-size: 13px;
+    color: #5C5C77;
+  }
+
+  #mint-lms-root .mint-welcome__eyebrow {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #33334A;
+  }
+
+  #mint-lms-root .mint-welcome__heading {
+    margin: 10px 0 0;
+    font-size: 36px;
+    line-height: 42px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: #0F0E1A;
+  }
+
+  #mint-lms-root .mint-welcome__sub {
+    margin: 10px 0 0;
+    max-width: 460px;
+    font-size: 17px;
+    line-height: 27px;
+    color: #33334A;
+  }
+
+  #mint-lms-root .mint-welcome-tree {
+    display: grid;
+    gap: 10px;
+    width: 100%;
+    margin-top: 28px;
+  }
+
+  #mint-lms-root .mint-welcome-tree__branch {
+    display: grid;
+    gap: 10px;
+    margin-left: 26px;
+    padding-left: 18px;
+    border-left: 2px dashed #98FBCB;
+  }
+
+  #mint-lms-root .mint-welcome-tree__branch .mint-welcome-tree__branch {
+    margin-left: 22px;
+  }
+
+  #mint-lms-root .mint-welcome-tree__node {
+    border-radius: 12px;
+    border: 1.5px solid #98FBCB;
+    background: #ffffff;
+    padding: 13px 16px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #0F0E1A;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(152, 251, 203, 0.25);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+  }
+
+  #mint-lms-root .mint-welcome-tree__node.is-root {
+    background: #98FB98;
+    border-color: #98FB98;
+  }
+
+  #mint-lms-root .mint-welcome-tree__node:hover {
+    transform: translateY(-2px);
+    background: #E8FFF3;
+    border-color: #98FB98;
+    box-shadow: 0 12px 26px rgba(152, 251, 203, 0.6);
+  }
+
+  #mint-lms-root .mint-welcome-tree__node.is-root:hover {
+    background: #7FE87F;
+    border-color: #7FE87F;
+  }
+
+  #mint-lms-root .mint-welcome__step-panel {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  #mint-lms-root .mint-welcome__step-panel--right {
+    flex: 1 1 auto;
+  }
+
+  #mint-lms-root .mint-welcome-flow {
     display: grid;
     gap: 0;
     width: 100%;
+    margin-top: 28px;
   }
 
-  #mint-lms-root .mint-structure-row {
+  #mint-lms-root .mint-welcome-flow__card {
+    border-radius: 12px;
+    border: 1.5px solid #98FBCB;
+    background: #ffffff;
+    padding: 14px 16px;
+    box-shadow: 0 4px 14px rgba(152, 251, 203, 0.25);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+  }
+
+  #mint-lms-root .mint-welcome-flow__card.is-mid {
+    background: #E8FFF3;
+    border-color: #98FBCB;
+  }
+
+  #mint-lms-root .mint-welcome-flow__card.is-root {
+    background: #98FB98;
+    border-color: #98FB98;
+  }
+
+  #mint-lms-root .mint-welcome-flow__card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 26px rgba(152, 251, 203, 0.55);
+  }
+
+  #mint-lms-root .mint-welcome-flow__label {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0F0E1A;
+  }
+
+  #mint-lms-root .mint-welcome-flow__hint {
+    margin-top: 4px;
+    font-size: 14px;
+    line-height: 20px;
+    color: #33334A;
+  }
+
+  #mint-lms-root .mint-welcome-flow__arrow {
+    height: 22px;
     display: flex;
     align-items: center;
-    gap: 0;
-    width: 100%;
-  }
-
-  #mint-lms-root .mint-structure-l {
-    flex: none;
-    width: 18px;
-    height: 40px;
-    margin-right: 2px;
-    border-left: 2px solid #98FBCB;
-    border-bottom: 2px solid #98FBCB;
-    border-radius: 0 0 0 8px;
-    box-sizing: border-box;
-    pointer-events: none;
-  }
-
-  #mint-lms-root .mint-structure-node {
-    flex: 1 1 auto;
-    display: block;
-    width: 100%;
-    box-sizing: border-box;
-    margin: 4px 0;
-    padding: 0 18px;
-    border-radius: 9px;
-    border: 1.5px solid #98FBCB;
-    background-color: #ffffff;
+    justify-content: center;
     color: #0B4F3F;
-    font-weight: 600;
-    line-height: 1.25;
-    letter-spacing: -0.01em;
-    text-align: left;
-    cursor: pointer;
-    outline: none;
-    transition: background-color 120ms ease-out;
-  }
-
-  #mint-lms-root .mint-structure-node:hover {
-    background-color: #EAFFF6;
-  }
-
-  #mint-lms-root .mint-structure-node:focus-visible {
-    box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
-  }
-
-  #mint-lms-root .mint-structure-node.is-active {
-    background-color: #98FBCB;
-    color: #06281F;
+    font-size: 16px;
     font-weight: 700;
+    opacity: 0.7;
   }
 
-  #mint-lms-root .mint-structure-node.is-active:hover {
-    background-color: #EAFFF6;
-    color: #06281F;
+  #mint-lms-root .mint-welcome__actions {
+    margin-top: auto;
+    padding-top: 36px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+  }
+
+  #mint-lms-root a.mint-welcome-cta,
+  #mint-lms-root button.mint-welcome-cta,
+  #mint-lms-root a.mint-welcome-skip,
+  #mint-lms-root button.mint-welcome-back {
+    height: 48px;
+    padding: 0 22px;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  #mint-lms-root .mint-welcome__version {
+    margin: 26px 0 0;
+    font-size: 13px;
+    color: #5C5C77;
+    text-align: right;
+  }
+
+  @media (max-width: 960px) {
+    #mint-lms-root .mint-welcome {
+      grid-template-columns: 1fr;
+      min-height: 0;
+    }
+
+    #mint-lms-root .mint-welcome__left {
+      padding: 28px 22px;
+    }
+
+    #mint-lms-root .mint-welcome__right {
+      padding: 32px 22px;
+    }
+
+    #mint-lms-root .mint-welcome__title {
+      font-size: 40px;
+      line-height: 44px;
+    }
+
+    #mint-lms-root .mint-welcome__heading {
+      font-size: 28px;
+      line-height: 34px;
+    }
   }
 }
 

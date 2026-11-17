@@ -115,6 +115,24 @@ document.addEventListener('alpine:init', () => {
       return step ? step.desc : '';
     },
   }));
+
+  Alpine.data('mintWelcomeOnboarding', () => ({
+    step: 1,
+    next() {
+      if (this.step < 3) {
+        this.step += 1;
+      }
+    },
+    prev() {
+      if (this.step > 1) {
+        this.step -= 1;
+      }
+    },
+    stepPillLabel() {
+      const tpl = this.$el?.dataset?.stepLabel || 'Step %d of 3';
+      return tpl.replace('%d', String(this.step));
+    },
+  }));
 });
 
 window.Alpine = Alpine;
