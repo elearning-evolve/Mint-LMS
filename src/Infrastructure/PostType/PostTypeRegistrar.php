@@ -544,6 +544,8 @@ final class PostTypeRegistrar {
 			)
 		);
 
+		PostTypes::markDisposableHostLesson( (int) $lesson->id );
+
 		return array(
 			'course_id' => 0,
 			'lesson_id' => $lesson->id,

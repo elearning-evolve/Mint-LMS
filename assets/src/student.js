@@ -104,10 +104,25 @@ document.addEventListener('alpine:init', () => {
     headerKicker: config.quizKicker || 'Quiz',
     headerTitle: config.quizTitle || '',
     headerBadge: config.quizMeta || '',
+    headerCrumb: config.initialCrumb || config.quizTitle || '',
     quizTitle: config.quizTitle || '',
     quizMeta: config.quizMeta || '',
     quizKicker: config.quizKicker || 'Quiz',
     questionKicker: config.questionKicker || 'Question',
+    pathMode: config.pathMode || 'course',
+    firstQuestionTitle: config.firstQuestionTitle || '',
+
+    startQuiz() {
+      this.started = true;
+      // standalone_lesson / course: progress crumb is server-rendered (Lesson › Quiz).
+      if (this.pathMode === 'standalone_quiz') {
+        this.headerCrumb = this.firstQuestionTitle || this.quizTitle;
+        this.headerKicker = this.questionKicker;
+        if (this.firstQuestionTitle) {
+          this.headerTitle = this.firstQuestionTitle;
+        }
+      }
+    },
 
     onQuizProgress(detail) {
       if (!detail) {
@@ -117,11 +132,25 @@ document.addEventListener('alpine:init', () => {
         this.headerKicker = detail.kicker || this.questionKicker;
         this.headerTitle = detail.title || this.quizTitle;
         this.headerBadge = detail.badge || this.quizMeta;
+        if (this.pathMode === 'standalone_quiz' && detail.title) {
+          this.headerCrumb = detail.title;
+        }
         return;
       }
       this.headerKicker = this.quizKicker;
       this.headerTitle = this.quizTitle;
       this.headerBadge = this.quizMeta;
+      if (this.pathMode === 'standalone_quiz') {
+        // Standalone quiz: Question name while taking; Quiz name on overview.
+        if (this.started && detail.title && detail.kicker === this.questionKicker) {
+          this.headerCrumb = detail.title;
+          this.headerKicker = this.questionKicker;
+          this.headerTitle = detail.title;
+        } else {
+          this.headerCrumb = this.quizTitle;
+        }
+      }
+      // course / standalone_lesson: Lesson › Quiz crumb stays in PHP markup.
     },
   }));
 

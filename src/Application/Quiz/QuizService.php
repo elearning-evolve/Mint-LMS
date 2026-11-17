@@ -59,13 +59,19 @@ final class QuizService {
 
 		if ( $forStudent ) {
 			if ( $lesson->courseId <= 0 ) {
-				throw new NotFoundException( 'Quiz not found.' );
-			}
-			$course = $this->findCourseOrFail( $lesson->courseId );
-			if ( $editorReview || $this->canEditorReviewCourse( $userId, $course->authorId ) ) {
-				$editorReview = true;
+				// Library lesson (not in a course yet): students never see it, but instructor
+				// preview must still list quizzes after quiz→lesson associate.
+				if ( ! $editorReview ) {
+					throw new NotFoundException( 'Quiz not found.' );
+				}
+				$this->assertCanManageLessonContent( $userId, $lesson );
 			} else {
-				$this->assertStudentQuizAccess( $userId, $lesson->courseId, $lesson->isPreview, $lesson->id );
+				$course = $this->findCourseOrFail( $lesson->courseId );
+				if ( $editorReview || $this->canEditorReviewCourse( $userId, $course->authorId ) ) {
+					$editorReview = true;
+				} else {
+					$this->assertStudentQuizAccess( $userId, $lesson->courseId, $lesson->isPreview, $lesson->id );
+				}
 			}
 		} else {
 			$this->assertCanManageLessonContent( $userId, $lesson );
@@ -956,7 +962,7 @@ final class QuizService {
 		$now  = $this->clock->now();
 		$slug = 'new-lesson-' . bin2hex( random_bytes( 2 ) );
 
-		return $this->lessonRepository->save(
+		$lesson = $this->lessonRepository->save(
 			new \MintLMS\Domain\Lesson\Lesson(
 				0,
 				0,
@@ -973,30 +979,14 @@ final class QuizService {
 				$now,
 			)
 		);
+
+		\MintLMS\Infrastructure\PostType\PostTypes::markDisposableHostLesson( (int) $lesson->id );
+
+		return $lesson;
 	}
 
 	private function isDisposableHostLesson( \MintLMS\Domain\Lesson\Lesson $lesson ): bool {
-		if ( $lesson->courseId > 0 ) {
-			return false;
-		}
-
-		if ( '' !== trim( $lesson->content ) ) {
-			return false;
-		}
-
-		if ( null !== $lesson->videoUrl && '' !== trim( (string) $lesson->videoUrl ) ) {
-			return false;
-		}
-
-		if ( null !== $lesson->attachmentId && $lesson->attachmentId > 0 ) {
-			return false;
-		}
-
-		if ( null !== $lesson->featuredImageId && $lesson->featuredImageId > 0 ) {
-			return false;
-		}
-
-		return true;
+		return \MintLMS\Infrastructure\PostType\PostTypes::isDisposableHostLesson( (int) $lesson->id );
 	}
 
 	private function findQuizOrFail( int $id ): Quiz {

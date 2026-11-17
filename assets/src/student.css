@@ -478,7 +478,7 @@
 
 #mint-lms-root.mint-lms-student .mint-s3b-progress__crumb {
   min-width: 0;
-  max-width: 420px;
+  max-width: min(640px, 72vw);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

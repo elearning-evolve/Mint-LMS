@@ -333,7 +333,12 @@ final class LessonService {
 			$featuredImageId,
 		);
 
-		return LessonDto::fromLesson( $this->lessonRepository->save( $updated ) );
+		$saved = LessonDto::fromLesson( $this->lessonRepository->save( $updated ) );
+
+		// Author edited this lesson in the builder — it is no longer an internal quiz host.
+		\MintLMS\Infrastructure\PostType\PostTypes::clearDisposableHostLesson( (int) $saved->id );
+
+		return $saved;
 	}
 
 	public function delete( int $id, int $userId ): void {

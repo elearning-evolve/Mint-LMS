@@ -1843,14 +1843,21 @@ function courseBuilder(courseId, opts = {}) {
           }
           return null;
         })();
+        const selectedMatches =
+          Number(this.selectedLesson?.id) === id
+            ? String(this.selectedLesson?.title || '').trim()
+            : '';
         const row =
           fromTree ||
           {
             id,
-            title:
-              String(this.selectedLesson?.title || this.breadcrumbParentLessonTitle() || '').trim() ||
-              `Lesson #${id}`,
-            courseId: Number(this.selectedLesson?.courseId || this.courseId) || 0,
+            // Never borrow the quiz host's "New Lesson" title for a different lesson id.
+            title: selectedMatches || `Lesson #${id}`,
+            courseId: Number(
+              (Number(this.selectedLesson?.id) === id
+                ? this.selectedLesson?.courseId
+                : 0) || this.courseId
+            ) || 0,
           };
         this.attachLessons = [row, ...this.attachLessons];
         return id;
@@ -7719,7 +7726,11 @@ function courseBuilder(courseId, opts = {}) {
       if (String(lesson.videoUrl || '').trim()) return false;
       if (Number(lesson.attachmentId) > 0) return false;
       if (Number(lesson.featuredImageId) > 0) return false;
-      return true;
+      // Match PHP: empty author lessons with a real title stay selectable.
+      const title = String(lesson.title || '').trim();
+      const slug = String(lesson.slug || '').trim();
+      if (title === 'New Lesson' || slug.startsWith('new-lesson-')) return true;
+      return false;
     },
 
     quizUsesDisposableHost() {

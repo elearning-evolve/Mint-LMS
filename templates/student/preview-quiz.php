@@ -41,14 +41,43 @@ $quizMeta      = 1 === $questionCount
 		__( '%d questions', 'mint-lms' ),
 		$questionCount
 	);
-$associated    = '' !== $lessonTitle;
-$previewBoot   = wp_json_encode(
+$associated = '' !== $lessonTitle;
+// Course path: Course › Lesson › Quiz.
+// Standalone lesson (quiz associated, no course): Lesson › Quiz.
+// Standalone quiz (no course/lesson): Quiz overview; Question once started/focused.
+$pathMode = '' !== $courseTitle
+	? 'course'
+	: ( '' !== $lessonTitle ? 'standalone_lesson' : 'standalone_quiz' );
+
+$focusQuestionTitle = '';
+if ( $focusQuestionId > 0 ) {
+	foreach ( $questions as $questionRow ) {
+		if ( (int) $questionRow->id === $focusQuestionId ) {
+			$focusQuestionTitle = PostTypes::questionContentsTitle( (int) $questionRow->id, (string) $questionRow->prompt );
+			break;
+		}
+	}
+}
+
+$firstQuestionTitle = '';
+if ( isset( $questions[0] ) ) {
+	$firstQuestionTitle = PostTypes::questionContentsTitle( (int) $questions[0]->id, (string) $questions[0]->prompt );
+}
+
+$initialCrumb = 'standalone_quiz' === $pathMode && '' !== $focusQuestionTitle
+	? $focusQuestionTitle
+	: $displayQuiz;
+
+$previewBoot = wp_json_encode(
 	array(
-		'quizTitle'        => $displayQuiz,
-		'quizMeta'         => $quizMeta,
-		'quizKicker'       => __( 'Quiz', 'mint-lms' ),
-		'questionKicker'   => __( 'Question', 'mint-lms' ),
-		'startOnQuestion'  => $focusQuestionId > 0,
+		'quizTitle'          => $displayQuiz,
+		'quizMeta'           => $quizMeta,
+		'quizKicker'         => __( 'Quiz', 'mint-lms' ),
+		'questionKicker'     => __( 'Question', 'mint-lms' ),
+		'startOnQuestion'    => $focusQuestionId > 0,
+		'pathMode'           => $pathMode,
+		'initialCrumb'       => $initialCrumb,
+		'firstQuestionTitle' => $firstQuestionTitle,
 	)
 );
 if ( ! is_string( $previewBoot ) ) {
@@ -76,14 +105,49 @@ if ( ! is_string( $previewBoot ) ) {
 			</p>
 		<?php endif; ?>
 
-		<?php if ( '' !== $displayQuiz ) : ?>
+		<?php if ( '' !== $courseTitle || '' !== $displayQuiz ) : ?>
 			<div class="mint-s3b-progress-row">
 				<button
 					type="button"
 					class="mint-s3b-progress mint-s3b-progress--quiz-home"
 					@click="started = false; onQuizProgress({ submitted: false })"
+					aria-label="<?php echo esc_attr__( 'Back to quiz overview', 'mint-lms' ); ?>"
 				>
-					<span class="mint-s3b-progress__crumb" x-text="headerTitle"><?php echo esc_html( $displayQuiz ); ?></span>
+					<?php if ( 'course' === $pathMode ) : ?>
+						<span class="mint-s3b-progress__crumb">
+							<?php if ( '' !== $courseUrl ) : ?>
+								<a href="<?php echo esc_url( $courseUrl ); ?>" class="mint-s3b-progress__crumb-link" @click.stop><?php echo esc_html( $courseTitle ); ?></a>
+							<?php else : ?>
+								<span><?php echo esc_html( $courseTitle ); ?></span>
+							<?php endif; ?>
+							<?php if ( '' !== $lessonTitle ) : ?>
+								<span aria-hidden="true"> › </span>
+								<?php if ( '' !== $lessonUrl ) : ?>
+									<a href="<?php echo esc_url( $lessonUrl ); ?>" class="mint-s3b-progress__crumb-link" @click.stop><?php echo esc_html( $lessonTitle ); ?></a>
+								<?php else : ?>
+									<span><?php echo esc_html( $lessonTitle ); ?></span>
+								<?php endif; ?>
+							<?php endif; ?>
+							<?php if ( '' !== $displayQuiz ) : ?>
+								<span aria-hidden="true"> › </span>
+								<span><?php echo esc_html( $displayQuiz ); ?></span>
+							<?php endif; ?>
+						</span>
+					<?php elseif ( 'standalone_lesson' === $pathMode ) : ?>
+						<span class="mint-s3b-progress__crumb">
+							<?php if ( '' !== $lessonUrl ) : ?>
+								<a href="<?php echo esc_url( $lessonUrl ); ?>" class="mint-s3b-progress__crumb-link" @click.stop><?php echo esc_html( $lessonTitle ); ?></a>
+							<?php else : ?>
+								<span><?php echo esc_html( $lessonTitle ); ?></span>
+							<?php endif; ?>
+							<?php if ( '' !== $displayQuiz ) : ?>
+								<span aria-hidden="true"> › </span>
+								<span><?php echo esc_html( $displayQuiz ); ?></span>
+							<?php endif; ?>
+						</span>
+					<?php else : ?>
+						<span class="mint-s3b-progress__crumb" x-text="headerCrumb"><?php echo esc_html( $initialCrumb ); ?></span>
+					<?php endif; ?>
 					<span class="mint-s3b-progress__badge" x-text="headerBadge"><?php echo esc_html( $quizMeta ); ?></span>
 				</button>
 			</div>
@@ -164,7 +228,7 @@ if ( ! is_string( $previewBoot ) ) {
 
 			<?php if ( $quiz instanceof QuizDto && array() !== $questions ) : ?>
 				<div class="mint-s3-quiz-start">
-					<button type="button" class="mint-s3b-nav__next" @click="started = true">
+					<button type="button" class="mint-s3b-nav__next" @click="startQuiz()">
 						<?php esc_html_e( 'Start a Quiz', 'mint-lms' ); ?>
 					</button>
 				</div>
