@@ -118,6 +118,12 @@ document.addEventListener('alpine:init', () => {
 
   Alpine.data('mintWelcomeOnboarding', () => ({
     step: 1,
+    go(n) {
+      const next = Number(n);
+      if (next >= 1 && next <= 3) {
+        this.step = next;
+      }
+    },
     next() {
       if (this.step < 3) {
         this.step += 1;
@@ -127,10 +133,6 @@ document.addEventListener('alpine:init', () => {
       if (this.step > 1) {
         this.step -= 1;
       }
-    },
-    stepPillLabel() {
-      const tpl = this.$el?.dataset?.stepLabel || 'Step %d of 3';
-      return tpl.replace('%d', String(this.step));
     },
   }));
 });
