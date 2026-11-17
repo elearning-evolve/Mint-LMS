@@ -6,157 +6,285 @@ defined( 'ABSPATH' ) || exit;
 use MintLMS\Infrastructure\Admin\FirstRunRedirect;
 
 /**
- * Shared first-run / empty-dashboard welcome (A1 design match).
+ * Shared first-run welcome for Admin + Instructor (3 educational steps).
  *
- * Accent mint: #98FBCB · CTA: #0B4F3F · Right wash: #F1FFF9
+ * 1 Structure → 2 Create/Attach → 3 Publish + students learn
  */
 
 $createUrl = $createUrl ?? FirstRunRedirect::startGuidedUrl();
 $skipUrl   = $skipUrl ?? FirstRunRedirect::skipFirstRunUrl();
 $showSkip  = $showSkip ?? true;
+$wpVersion = get_bloginfo( 'version' );
 
-$features = array(
+$features_step1 = array(
 	array(
 		'label' => __( 'Add lessons as text or video', 'mint-lms' ),
-		'icon'  => '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 5.5h11M4.5 10h11M4.5 14.5h7"/></svg>',
+		'icon'  => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 5h12M4 9h12M4 13h7"/></svg>',
 	),
 	array(
 		'label' => __( 'Students see their progress as they go', 'mint-lms' ),
-		'icon'  => '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 14.5 8 10l3 3 4.5-6"/></svg>',
+		'icon'  => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 14l4-4 3 3 7-7"/></svg>',
 	),
 	array(
 		'label' => __( 'Works with the theme you already have', 'mint-lms' ),
-		'icon'  => '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3.5 16.5 7v6L10 16.5 3.5 13V7z"/></svg>',
+		'icon'  => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M10 3l6 3.5v7L10 17l-6-3.5v-7z"/></svg>',
 	),
 );
 
-$structure_steps = array(
+$features_step2 = array(
 	array(
-		'key'    => 'course',
-		'label'  => __( 'Course', 'mint-lms' ),
-		'desc'   => __( 'The top-level container for everything your students learn.', 'mint-lms' ),
-		'height' => 50,
-		'size'   => 17,
+		'label' => __( 'Create lessons, quizzes, and questions freely', 'mint-lms' ),
+		'icon'  => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg>',
 	),
 	array(
-		'key'    => 'lesson_group',
-		'label'  => __( 'Lesson Group', 'mint-lms' ),
-		'desc'   => __( 'Organizes related lessons together, like a chapter inside the course.', 'mint-lms' ),
-		'height' => 46,
-		'size'   => 16,
+		'label' => __( 'Attach each piece to its parent', 'mint-lms' ),
+		'icon'  => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 7H5.5A2.5 2.5 0 003 9.5v1A2.5 2.5 0 005.5 13H8M12 7h2.5A2.5 2.5 0 0117 9.5v1A2.5 2.5 0 0114.5 13H12M7 10h6"/></svg>',
 	),
 	array(
-		'key'    => 'lesson',
-		'label'  => __( 'Lesson', 'mint-lms' ),
-		'desc'   => __( 'A single page of teaching content — text, video, or both.', 'mint-lms' ),
-		'height' => 44,
-		'size'   => 16,
-	),
-	array(
-		'key'    => 'quiz',
-		'label'  => __( 'Quiz', 'mint-lms' ),
-		'desc'   => __( 'A check for understanding attached to a lesson.', 'mint-lms' ),
-		'height' => 42,
-		'size'   => 15,
-	),
-	array(
-		'key'    => 'question',
-		'label'  => __( 'Question', 'mint-lms' ),
-		'desc'   => __( 'One graded item inside a quiz.', 'mint-lms' ),
-		'height' => 40,
-		'size'   => 15,
+		'label' => __( 'Detach anytime without losing your work', 'mint-lms' ),
+		'icon'  => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 10h5M11 10h5M9 7l-3 3 3 3M11 7l3 3-3 3"/></svg>',
 	),
 );
 
-$structure_steps_json = wp_json_encode( $structure_steps );
-if ( false === $structure_steps_json ) {
-	$structure_steps_json = '[]';
-}
+$features_step3 = array(
+	array(
+		'label' => __( 'Publish when ready — or keep a draft', 'mint-lms' ),
+		'icon'  => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 10l3 3 7-7"/></svg>',
+	),
+	array(
+		'label' => __( 'Enroll students so they can start', 'mint-lms' ),
+		'icon'  => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 10a3 3 0 100-6 3 3 0 000 6z"/><path d="M4 16a6 6 0 0112 0"/></svg>',
+	),
+	array(
+		'label' => __( 'Watch progress as they learn', 'mint-lms' ),
+		'icon'  => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 14l4-4 3 3 7-7"/></svg>',
+	),
+);
+
+$tree = array(
+	__( 'Course', 'mint-lms' ),
+	__( 'Lesson Group', 'mint-lms' ),
+	__( 'Lesson', 'mint-lms' ),
+	__( 'Quiz', 'mint-lms' ),
+	__( 'Question', 'mint-lms' ),
+);
+
+$attach_steps = array(
+	array(
+		'label' => __( '1. Create a Lesson', 'mint-lms' ),
+		'hint'  => __( 'Starts on its own — not linked yet', 'mint-lms' ),
+		'mod'   => '',
+	),
+	array(
+		'label' => __( '2. Attach to a Lesson Group', 'mint-lms' ),
+		'hint'  => __( 'Connect it where it belongs', 'mint-lms' ),
+		'mod'   => ' is-mid',
+	),
+	array(
+		'label' => __( '3. It lives in your Course', 'mint-lms' ),
+		'hint'  => __( 'Students will see it in order', 'mint-lms' ),
+		'mod'   => ' is-root',
+	),
+);
+
+$outcome_steps = array(
+	array(
+		'label' => __( 'Draft course', 'mint-lms' ),
+		'hint'  => __( 'Build and edit privately', 'mint-lms' ),
+		'mod'   => '',
+	),
+	array(
+		'label' => __( 'Publish', 'mint-lms' ),
+		'hint'  => __( 'Make it available to students', 'mint-lms' ),
+		'mod'   => ' is-mid',
+	),
+	array(
+		'label' => __( 'Students learn + progress', 'mint-lms' ),
+		'hint'  => __( 'They follow lessons at their own pace', 'mint-lms' ),
+		'mod'   => ' is-root',
+	),
+);
+
+/**
+ * @param array<int, array{label:string, icon:string}> $features Features list.
+ */
+$render_features = static function ( array $features ): void {
+	echo '<ul class="mint-welcome__features">';
+	foreach ( $features as $feature ) {
+		echo '<li class="mint-welcome__feature">';
+		echo '<span class="mint-welcome__feature-icon">';
+		echo $feature['icon']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Static SVG markup.
+		echo '</span>';
+		echo '<span>' . esc_html( $feature['label'] ) . '</span>';
+		echo '</li>';
+	}
+	echo '</ul>';
+};
 ?>
 <div
-	class="mint-grid mint-min-h-[calc(100vh-32px)] mint-grid-cols-1 mint-bg-white lg:mint-grid-cols-2"
-	x-data="mintWelcomeDashboard(<?php echo esc_attr( $structure_steps_json ); ?>)"
+	class="mint-welcome"
+	x-data="mintWelcomeOnboarding()"
+	data-step-label="<?php echo esc_attr__( 'Step %d of 3', 'mint-lms' ); ?>"
+	x-cloak
 >
-	<section class="mint-flex mint-flex-col mint-justify-between mint-bg-white mint-px-10 mint-py-12 sm:mint-px-14 sm:mint-py-16 lg:mint-px-[2.5rem] lg:mint-py-12 lg:mint-border-r lg:mint-border-[#DAD7E6]">
-		<div>
-			<div class="mint-mb-11 mint-flex mint-items-center mint-justify-between mint-gap-4">
-				<div class="mint-flex mint-items-center mint-gap-2.5">
-					<div class="mint-flex mint-h-7 mint-w-7 mint-shrink-0 mint-items-center mint-justify-center mint-rounded-lg mint-bg-[#98FBCB]" aria-hidden="true">
-						<div class="mint-h-2.5 mint-w-2.5 mint-rounded-[3px] mint-border-2 mint-border-white"></div>
-					</div>
-					<span class="mint-text-[17px] mint-font-semibold mint-tracking-[-0.015em] mint-text-[#0F0E1A]"><?php esc_html_e( 'Mint LMS', 'mint-lms' ); ?></span>
+	<section class="mint-welcome__left">
+		<div class="mint-welcome__brand-row">
+			<div class="mint-welcome__brand">
+				<div class="mint-welcome__brand-mark" aria-hidden="true">
+					<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5h12M4 10h8M4 14.5h5"/></svg>
 				</div>
-				<span class="mint-inline-flex mint-items-center mint-rounded-full mint-bg-[#E8FFF3] mint-px-3 mint-py-1.5 mint-text-[13px] mint-font-bold mint-tracking-[0.04em] mint-text-[#0B4F3F]">
-					<?php esc_html_e( 'Step 1 of 3', 'mint-lms' ); ?>
-				</span>
+				<span class="mint-welcome__brand-name"><?php esc_html_e( 'Mint LMS', 'mint-lms' ); ?></span>
 			</div>
-
-			<h1 class="mint-m-0 mint-max-w-[27rem] mint-text-[2.75rem] mint-font-semibold mint-leading-[1.09] mint-tracking-[-0.04em] mint-text-[#0F0E1A] sm:mint-text-[44px] sm:mint-leading-[48px]">
-				<?php esc_html_e( 'Teach what you already know.', 'mint-lms' ); ?>
-			</h1>
-			<p class="mint-m-0 mint-mt-[18px] mint-max-w-[27rem] mint-text-[19px] mint-leading-[30px] mint-text-[#33334A]">
-				<?php esc_html_e( 'Turn what you teach into a course your students can follow at their own pace. No theme edits, no plugins to wire up.', 'mint-lms' ); ?>
-			</p>
+			<span class="mint-welcome__step-pill" x-text="stepPillLabel()"></span>
 		</div>
 
-		<ul class="mint-m-0 mint-mt-12 mint-flex mint-list-none mint-flex-col mint-gap-4 mint-p-0">
-			<?php foreach ( $features as $feature ) : ?>
-				<li class="mint-flex mint-items-center mint-gap-[13px]">
-					<span class="mint-flex mint-h-[34px] mint-w-[34px] mint-shrink-0 mint-items-center mint-justify-center mint-rounded-[10px] mint-bg-[#E8FFF3] mint-text-[#0B4F3F]">
-						<?php echo $feature['icon']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Static SVG markup. ?>
-					</span>
-					<span class="mint-text-base mint-font-medium mint-text-[#0F0E1A]"><?php echo esc_html( $feature['label'] ); ?></span>
-				</li>
-			<?php endforeach; ?>
-		</ul>
+		<template x-if="step === 1">
+			<div class="mint-welcome__step-panel">
+				<div class="mint-welcome__hero">
+					<h1 class="mint-welcome__title"><?php esc_html_e( 'Teach what you already know.', 'mint-lms' ); ?></h1>
+					<p class="mint-welcome__lead"><?php esc_html_e( 'Turn what you teach into a course your students can follow at their own pace. No theme edits, no plugins to wire up.', 'mint-lms' ); ?></p>
+				</div>
+				<?php $render_features( $features_step1 ); ?>
+			</div>
+		</template>
+
+		<template x-if="step === 2">
+			<div class="mint-welcome__step-panel">
+				<div class="mint-welcome__hero">
+					<h1 class="mint-welcome__title"><?php esc_html_e( 'Build one piece at a time.', 'mint-lms' ); ?></h1>
+					<p class="mint-welcome__lead"><?php esc_html_e( 'Create a lesson, quiz, or question first — then attach it where it belongs. Nothing has to be finished in one sitting.', 'mint-lms' ); ?></p>
+				</div>
+				<?php $render_features( $features_step2 ); ?>
+			</div>
+		</template>
+
+		<template x-if="step === 3">
+			<div class="mint-welcome__step-panel">
+				<div class="mint-welcome__hero">
+					<h1 class="mint-welcome__title"><?php esc_html_e( 'Students learn when you publish.', 'mint-lms' ); ?></h1>
+					<p class="mint-welcome__lead"><?php esc_html_e( 'When the course is ready, publish it and enroll students. They follow lessons at their own pace and see their progress as they go.', 'mint-lms' ); ?></p>
+				</div>
+				<?php $render_features( $features_step3 ); ?>
+			</div>
+		</template>
+
+		<p class="mint-welcome__thanks">
+			<?php esc_html_e( 'Thank you for creating with WordPress.', 'mint-lms' ); ?>
+		</p>
 	</section>
 
-	<section class="mint-flex mint-flex-col mint-justify-center mint-bg-[#F1FFF9] mint-px-10 mint-py-12 sm:mint-px-14 sm:mint-py-16 lg:mint-px-[2.5rem] lg:mint-py-12">
-		<div class="mint-w-full mint-max-w-[390px]">
-			<h2 class="mint-m-0 mint-text-[28px] mint-font-semibold mint-leading-[34px] mint-tracking-[-0.025em] mint-text-[#0F0E1A]">
-				<?php esc_html_e( 'What are you teaching?', 'mint-lms' ); ?>
-			</h2>
-			<p
-				class="mint-m-0 mint-mt-2 mint-min-h-[28px] mint-text-[17px] mint-leading-7 mint-text-[#33334A]"
-				x-text="stepDesc()"
-			></p>
+	<section class="mint-welcome__right">
+		<template x-if="step === 1">
+			<div class="mint-welcome__step-panel mint-welcome__step-panel--right">
+				<div class="mint-welcome__eyebrow"><?php esc_html_e( 'Step 1 · Structure', 'mint-lms' ); ?></div>
+				<h2 class="mint-welcome__heading"><?php esc_html_e( 'What are you teaching?', 'mint-lms' ); ?></h2>
+				<p class="mint-welcome__sub"><?php esc_html_e( 'Every course is built the same way, from the top down. Start with the course, then add the parts inside it.', 'mint-lms' ); ?></p>
 
-			<div class="mint-structure-tree mint-mt-[22px]" aria-label="<?php esc_attr_e( 'Course structure', 'mint-lms' ); ?>">
-				<template x-for="(step, index) in steps" :key="step.key">
-					<div class="mint-structure-row" :style="'margin-left:' + (index * 18) + 'px'">
-						<div
-							x-show="index > 0"
-							class="mint-structure-l"
-							aria-hidden="true"
-						></div>
-						<button
-							type="button"
-							class="mint-structure-node"
-							:class="{ 'is-active': isActive(step.key) }"
-							:style="'height:' + step.height + 'px;font-size:' + step.size + 'px'"
-							@click="selectStep(step.key)"
-							x-text="step.label"
-						></button>
-					</div>
-				</template>
+				<div class="mint-welcome-tree" aria-label="<?php esc_attr_e( 'Course structure', 'mint-lms' ); ?>">
+					<?php
+					$depth = count( $tree );
+					for ( $i = 0; $i < $depth; $i++ ) :
+						$is_root = 0 === $i;
+						?>
+						<?php if ( $i > 0 ) : ?>
+							<div class="mint-welcome-tree__branch">
+						<?php endif; ?>
+						<div class="mint-welcome-tree__node<?php echo $is_root ? ' is-root' : ''; ?>">
+							<?php echo esc_html( $tree[ $i ] ); ?>
+						</div>
+					<?php endfor; ?>
+					<?php for ( $i = 1; $i < $depth; $i++ ) : ?>
+						</div>
+					<?php endfor; ?>
+				</div>
 			</div>
+		</template>
 
-			<div class="mint-mt-[22px] mint-flex mint-flex-wrap mint-items-center mint-gap-[14px]">
-				<a
-					href="<?php echo esc_url( $createUrl ); ?>"
-					class="mint-welcome-cta mint-inline-flex mint-h-12 mint-items-center mint-justify-center mint-rounded-[10px] mint-px-[22px] mint-text-[17px] mint-font-semibold mint-no-underline focus-visible:mint-outline-none"
-				>
-					<?php esc_html_e( 'Create your first course', 'mint-lms' ); ?>
+		<template x-if="step === 2">
+			<div class="mint-welcome__step-panel mint-welcome__step-panel--right">
+				<div class="mint-welcome__eyebrow"><?php esc_html_e( 'Step 2 · Build', 'mint-lms' ); ?></div>
+				<h2 class="mint-welcome__heading"><?php esc_html_e( 'Create → Attach', 'mint-lms' ); ?></h2>
+				<p class="mint-welcome__sub"><?php esc_html_e( 'In Mint, new items start on their own. You connect them with Attach — Lesson to Lesson Group, Quiz to Lesson, Question to Quiz.', 'mint-lms' ); ?></p>
+
+				<div class="mint-welcome-flow" aria-label="<?php esc_attr_e( 'Create then attach', 'mint-lms' ); ?>">
+					<?php foreach ( $attach_steps as $index => $item ) : ?>
+						<div class="mint-welcome-flow__card<?php echo esc_attr( $item['mod'] ); ?>">
+							<div class="mint-welcome-flow__label"><?php echo esc_html( $item['label'] ); ?></div>
+							<div class="mint-welcome-flow__hint"><?php echo esc_html( $item['hint'] ); ?></div>
+						</div>
+						<?php if ( $index < count( $attach_steps ) - 1 ) : ?>
+							<div class="mint-welcome-flow__arrow" aria-hidden="true">↓</div>
+						<?php endif; ?>
+					<?php endforeach; ?>
+				</div>
+			</div>
+		</template>
+
+		<template x-if="step === 3">
+			<div class="mint-welcome__step-panel mint-welcome__step-panel--right">
+				<div class="mint-welcome__eyebrow"><?php esc_html_e( 'Step 3 · Go live', 'mint-lms' ); ?></div>
+				<h2 class="mint-welcome__heading"><?php esc_html_e( 'Publish + students learn', 'mint-lms' ); ?></h2>
+				<p class="mint-welcome__sub"><?php esc_html_e( 'Your course goes from draft to live. Students get access, open lessons, and their progress shows up as they learn.', 'mint-lms' ); ?></p>
+
+				<div class="mint-welcome-flow" aria-label="<?php esc_attr_e( 'Publish and learn', 'mint-lms' ); ?>">
+					<?php foreach ( $outcome_steps as $index => $item ) : ?>
+						<div class="mint-welcome-flow__card<?php echo esc_attr( $item['mod'] ); ?>">
+							<div class="mint-welcome-flow__label"><?php echo esc_html( $item['label'] ); ?></div>
+							<div class="mint-welcome-flow__hint"><?php echo esc_html( $item['hint'] ); ?></div>
+						</div>
+						<?php if ( $index < count( $outcome_steps ) - 1 ) : ?>
+							<div class="mint-welcome-flow__arrow" aria-hidden="true">↓</div>
+						<?php endif; ?>
+					<?php endforeach; ?>
+				</div>
+			</div>
+		</template>
+
+		<div class="mint-welcome__actions">
+			<button
+				type="button"
+				class="mint-welcome-back"
+				x-show="step > 1"
+				x-cloak
+				@click="prev()"
+			>
+				<?php esc_html_e( 'Back', 'mint-lms' ); ?>
+			</button>
+
+			<button
+				type="button"
+				class="mint-welcome-cta"
+				x-show="step < 3"
+				x-cloak
+				@click="next()"
+			>
+				<?php esc_html_e( 'Continue', 'mint-lms' ); ?>
+			</button>
+
+			<a
+				href="<?php echo esc_url( $createUrl ); ?>"
+				class="mint-welcome-cta"
+				x-show="step === 3"
+				x-cloak
+			>
+				<?php esc_html_e( 'Create your first course', 'mint-lms' ); ?>
+			</a>
+
+			<?php if ( $showSkip ) : ?>
+				<a href="<?php echo esc_url( $skipUrl ); ?>" class="mint-welcome-skip">
+					<?php esc_html_e( 'Skip for now', 'mint-lms' ); ?>
 				</a>
-				<?php if ( $showSkip ) : ?>
-					<a
-						href="<?php echo esc_url( $skipUrl ); ?>"
-						class="mint-welcome-skip mint-inline-flex mint-h-12 mint-items-center mint-justify-center mint-rounded-[10px] mint-border-[1.5px] mint-border-transparent mint-bg-transparent mint-px-4 mint-text-base mint-font-semibold mint-text-[#33334A] mint-no-underline focus-visible:mint-outline-none"
-					>
-						<?php esc_html_e( 'Skip for now', 'mint-lms' ); ?>
-					</a>
-				<?php endif; ?>
-			</div>
+			<?php endif; ?>
 		</div>
+
+		<p class="mint-welcome__version">
+			<?php
+			printf(
+				/* translators: %s: WordPress version */
+				esc_html__( 'Version %s', 'mint-lms' ),
+				esc_html( $wpVersion )
+			);
+			?>
+		</p>
 	</section>
 </div>
