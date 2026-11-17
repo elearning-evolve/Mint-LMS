@@ -124,7 +124,6 @@ $render_features = static function ( array $features ): void {
 <div
 	class="mint-welcome"
 	x-data="mintWelcomeOnboarding()"
-	data-step-label="<?php echo esc_attr__( 'Step %d of 3', 'mint-lms' ); ?>"
 	x-cloak
 >
 	<section class="mint-welcome__left">
@@ -135,7 +134,35 @@ $render_features = static function ( array $features ): void {
 				</div>
 				<span class="mint-welcome__brand-name"><?php esc_html_e( 'Mint LMS', 'mint-lms' ); ?></span>
 			</div>
-			<span class="mint-welcome__step-pill" x-text="stepPillLabel()"></span>
+			<nav class="mint-welcome__step-nav" aria-label="<?php esc_attr_e( 'Welcome steps', 'mint-lms' ); ?>">
+				<button
+					type="button"
+					class="mint-welcome__step-nav-btn"
+					:class="{ 'is-active': step === 1 }"
+					:aria-current="step === 1 ? 'step' : null"
+					@click="go(1)"
+				>
+					<?php esc_html_e( 'Step 1', 'mint-lms' ); ?>
+				</button>
+				<button
+					type="button"
+					class="mint-welcome__step-nav-btn"
+					:class="{ 'is-active': step === 2 }"
+					:aria-current="step === 2 ? 'step' : null"
+					@click="go(2)"
+				>
+					<?php esc_html_e( 'Step 2', 'mint-lms' ); ?>
+				</button>
+				<button
+					type="button"
+					class="mint-welcome__step-nav-btn"
+					:class="{ 'is-active': step === 3 }"
+					:aria-current="step === 3 ? 'step' : null"
+					@click="go(3)"
+				>
+					<?php esc_html_e( 'Step 3', 'mint-lms' ); ?>
+				</button>
+			</nav>
 		</div>
 
 		<template x-if="step === 1">
@@ -241,35 +268,9 @@ $render_features = static function ( array $features ): void {
 		</template>
 
 		<div class="mint-welcome__actions">
-			<button
-				type="button"
-				class="mint-welcome-back"
-				x-show="step > 1"
-				x-cloak
-				@click="prev()"
-			>
-				<?php esc_html_e( 'Back', 'mint-lms' ); ?>
-			</button>
-
-			<button
-				type="button"
-				class="mint-welcome-cta"
-				x-show="step < 3"
-				x-cloak
-				@click="next()"
-			>
-				<?php esc_html_e( 'Continue', 'mint-lms' ); ?>
-			</button>
-
-			<a
-				href="<?php echo esc_url( $createUrl ); ?>"
-				class="mint-welcome-cta"
-				x-show="step === 3"
-				x-cloak
-			>
+			<a href="<?php echo esc_url( $createUrl ); ?>" class="mint-welcome-cta">
 				<?php esc_html_e( 'Create your first course', 'mint-lms' ); ?>
 			</a>
-
 			<?php if ( $showSkip ) : ?>
 				<a href="<?php echo esc_url( $skipUrl ); ?>" class="mint-welcome-skip">
 					<?php esc_html_e( 'Skip for now', 'mint-lms' ); ?>

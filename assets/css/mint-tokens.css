@@ -28,15 +28,15 @@
   --mint-check-border: #98FB98;
 
   /* Radio / joining-method choice cards — one hover language everywhere */
-  --mint-choice-border: #DAD7E6;
-  --mint-choice-hover-border: #98FBCB;
-  --mint-choice-hover-bg: #E8FFF6;
-  --mint-choice-hover-ring: 0 0 0 3px rgba(152, 251, 203, 0.45);
+  --mint-choice-border: #E4E1F0;
+  --mint-choice-hover-border: #98FB98;
+  --mint-choice-hover-bg: #F1FFF9;
+  --mint-choice-hover-ring: 0 0 0 3px rgba(152, 251, 152, 0.35);
   --mint-choice-selected-border: #98FB98;
   --mint-choice-selected-bg: #F1FFF9;
-  --mint-choice-selected-hover-border: #7FE87F;
-  --mint-choice-selected-hover-bg: #E5FBF0;
-  --mint-choice-selected-hover-ring: 0 0 0 3px rgba(152, 251, 203, 0.35);
+  --mint-choice-selected-hover-border: #98FB98;
+  --mint-choice-selected-hover-bg: #F1FFF9;
+  --mint-choice-selected-hover-ring: 0 0 0 3px rgba(152, 251, 152, 0.35);
 
   /* Surfaces — white page, not grey */
   --mint-bg: #FFFFFF;
@@ -97,6 +97,15 @@
   /* Text / box hover+focus — soft mint glow (no dark #0B4F3F border) */
   --mint-field-border: #98FBCB;
   --mint-field-focus: 0 0 0 3px rgba(152, 251, 203, 0.45);
+
+  /* Content row / card — idle grey-purple, hover mint green */
+  --mint-content-border: #E4E1F0;
+  --mint-content-hover-bg: #F1FFF9;
+  --mint-content-hover-border: #98FB98;
+  --mint-content-hover-shadow: 0 6px 18px rgba(152, 251, 152, 0.28);
+  --mint-content-hover-ring:
+    inset 0 0 0 1.5px #98FB98,
+    0 4px 12px rgba(152, 251, 152, 0.28);
 
   /* Float shadows only */
   --mint-shadow-menu: 0 6px 16px rgba(15, 14, 26, 0.08);

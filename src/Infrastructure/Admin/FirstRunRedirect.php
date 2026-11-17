@@ -5,6 +5,7 @@ namespace MintLMS\Infrastructure\Admin;
 
 defined( 'ABSPATH' ) || exit;
 
+use MintLMS\Application\Admin\SampleCourseSeeder;
 use MintLMS\Infrastructure\PostType\PostTypes;
 
 final class FirstRunRedirect {
@@ -49,6 +50,30 @@ final class FirstRunRedirect {
 		}
 
 		check_admin_referer( self::START_GUIDED_ACTION );
+
+		// Admin only: seed a full sample course and open Course Builder.
+		if ( current_user_can( 'manage_options' ) ) {
+			try {
+				$courseId = SampleCourseSeeder::make()->seedForUser( get_current_user_id() );
+			} catch ( \Throwable $e ) {
+				wp_die(
+					esc_html(
+						sprintf(
+							/* translators: %s: error message */
+							__( 'Could not create the sample course: %s', 'mint-lms' ),
+							$e->getMessage()
+						)
+					)
+				);
+			}
+
+			FirstRunState::markOnboardingComplete();
+
+			wp_safe_redirect(
+				admin_url( 'admin.php?page=mint-lms-builder&course_id=' . absint( $courseId ) )
+			);
+			exit;
+		}
 
 		FirstRunState::markFirstRunStarted();
 

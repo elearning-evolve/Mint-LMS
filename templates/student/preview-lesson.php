@@ -21,11 +21,8 @@ $previousUrl         = is_string( $previousUrl ?? null ) ? $previousUrl : '';
 $nextLessonUrl       = is_string( $nextLessonUrl ?? null ) ? $nextLessonUrl : '';
 $nextQuizUrl         = is_string( $nextQuizUrl ?? null ) ? $nextQuizUrl : '';
 $quizUrls            = is_array( $quizUrls ?? null ) ? $quizUrls : array();
-$displayLesson       = '' !== $lessonTitle ? $lessonTitle : __( 'Untitled lesson', 'mint-lms' );
-$forwardUrl          = '' !== $nextQuizUrl ? $nextQuizUrl : $nextLessonUrl;
-$forwardLabel        = '' !== $nextQuizUrl
-	? __( 'Next Quiz', 'mint-lms' )
-	: __( 'Next Lesson', 'mint-lms' );
+$displayLesson = '' !== $lessonTitle ? $lessonTitle : __( 'Untitled lesson', 'mint-lms' );
+unset( $nextQuizUrl ); // Quizzes are started from the list below — not a single "Next Quiz".
 ?>
 
 <div class="mint-s3b-wrap">
@@ -97,7 +94,7 @@ $forwardLabel        = '' !== $nextQuizUrl
 			?>
 			<div class="mint-s3-curriculum">
 				<div class="mint-s3-rail--lesson">
-					<details class="mint-s3-lesson mint-s3b-stack__item">
+					<details class="mint-s3-lesson mint-s3b-stack__item" open>
 						<summary class="mint-s3-row">
 							<span class="mint-s3b-stack__icon" aria-hidden="true">
 								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
@@ -138,7 +135,7 @@ $forwardLabel        = '' !== $nextQuizUrl
 					}
 					?>
 					<div class="mint-s3-rail--quiz">
-					<details class="mint-s3-quiz mint-s3b-stack__item">
+					<details class="mint-s3-quiz mint-s3b-stack__item" open>
 						<summary class="mint-s3b-stack__quiz">
 							<span class="mint-s3b-stack__icon mint-s3b-stack__icon--quiz" aria-hidden="true">
 								<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
@@ -156,13 +153,22 @@ $forwardLabel        = '' !== $nextQuizUrl
 									<span><?php echo esc_html( $quizMeta ); ?></span>
 								</div>
 							</div>
-							<span class="mint-s3b-expand">
-								<span class="mint-s3b-expand__label mint-s3b-expand__label--open"><?php esc_html_e( 'Expand', 'mint-lms' ); ?></span>
-								<span class="mint-s3b-expand__label mint-s3b-expand__label--close"><?php esc_html_e( 'Collapse', 'mint-lms' ); ?></span>
-								<svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-									<path class="mint-s3b-expand__chevron--open" d="M5.5 8 10 12.5 14.5 8" />
-									<path class="mint-s3b-expand__chevron--close" d="M5.5 12 10 7.5 14.5 12" />
-								</svg>
+							<span class="mint-s3-quiz-actions">
+								<?php if ( '' !== $quizPreview ) : ?>
+									<a
+										href="<?php echo esc_url( $quizPreview ); ?>"
+										class="mint-s3-quiz-start"
+										@click.stop
+									><?php esc_html_e( 'Start quiz', 'mint-lms' ); ?></a>
+								<?php endif; ?>
+								<span class="mint-s3b-expand">
+									<span class="mint-s3b-expand__label mint-s3b-expand__label--open"><?php esc_html_e( 'Expand', 'mint-lms' ); ?></span>
+									<span class="mint-s3b-expand__label mint-s3b-expand__label--close"><?php esc_html_e( 'Collapse', 'mint-lms' ); ?></span>
+									<svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+										<path class="mint-s3b-expand__chevron--open" d="M5.5 8 10 12.5 14.5 8" />
+										<path class="mint-s3b-expand__chevron--close" d="M5.5 12 10 7.5 14.5 12" />
+									</svg>
+								</span>
 							</span>
 						</summary>
 						<div class="mint-s3-quiz__body">
@@ -208,8 +214,8 @@ $forwardLabel        = '' !== $nextQuizUrl
 				<span></span>
 			<?php endif; ?>
 
-			<?php if ( '' !== $forwardUrl ) : ?>
-				<a href="<?php echo esc_url( $forwardUrl ); ?>" class="mint-s3b-nav__next"><?php echo esc_html( $forwardLabel ); ?> ›</a>
+			<?php if ( '' !== $nextLessonUrl ) : ?>
+				<a href="<?php echo esc_url( $nextLessonUrl ); ?>" class="mint-s3b-nav__next"><?php esc_html_e( 'Next Lesson', 'mint-lms' ); ?> ›</a>
 			<?php else : ?>
 				<span></span>
 			<?php endif; ?>

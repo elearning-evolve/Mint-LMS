@@ -2530,16 +2530,32 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 
 			<template x-if="selected && selected.type === 'section' && selectedSection">
 				<div class="mint-builder-editor__canvas mint-flex mint-h-full mint-w-full mint-flex-col">
-					<div class="mint-flex mint-items-center mint-gap-2 mint-text-[13px] mint-font-bold mint-uppercase mint-tracking-[0.06em] mint-text-[#0B4F3F]">
-						<div class="mint-flex mint-h-[22px] mint-w-[22px] mint-items-center mint-justify-center mint-rounded-md mint-bg-[#E8FFF3]">
-							<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="#0B4F3F" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 8 10 12.5 14.5 8"/></svg>
-						</div>
-						<?php esc_html_e( 'Lesson Group', 'mint-lms' ); ?>
-					</div>
+					<nav
+						class="mint-flex mint-items-center mint-gap-2.5 mint-text-[15px] mint-text-ink-2"
+						aria-label="<?php echo esc_attr__( 'Lesson group location', 'mint-lms' ); ?>"
+						x-show="breadcrumbCourseTitle() || breadcrumbSectionTitle()"
+						x-cloak
+					>
+						<template x-if="breadcrumbCourseTitle()">
+							<span class="mint-inline-flex mint-min-w-0 mint-items-center mint-gap-2.5">
+								<a
+									class="mint-breadcrumb__link mint-truncate"
+									:href="parentCourseEditorUrl()"
+									@click="goToParentCourse($event)"
+									x-text="breadcrumbCourseTitle()"
+								></a>
+								<svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 4.5 5.5 5.5L8 15.5"/></svg>
+							</span>
+						</template>
+						<span
+							class="mint-breadcrumb__current"
+							x-text="breadcrumbSectionTitle() || selectedSection.title || t('newLessonGroup')"
+						></span>
+					</nav>
 
 					<input
 						type="text"
-						class="mint-section-title-input"
+						class="mint-section-title-input mint-mt-3.5"
 						x-model="selectedSection.title"
 						@input="debouncedSaveSection(selectedSection)"
 						:placeholder="t('newLessonGroup')"
@@ -2547,26 +2563,93 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 					/>
 					<div class="mint-mt-2 mint-text-[15px] mint-text-ink-2"><?php esc_html_e( 'Click the title to rename it.', 'mint-lms' ); ?></div>
 
-					<div class="mint-mt-8 mint-rounded-[14px] mint-border mint-border-[#E4E1F0] mint-bg-[#FAF9FE] mint-px-5 mint-py-[18px]">
-						<div class="mint-text-[15px] mint-font-semibold mint-text-ink" x-text="sectionLessonSummary()"></div>
-						<div class="mint-mt-1 mint-text-[15px] mint-text-ink-3"><?php esc_html_e( 'Add a lesson to this lesson group, or keep building from the top menu.', 'mint-lms' ); ?></div>
-						<button
-							type="button"
-							class="mint-builder-empty__cta mint-mt-4"
-							:disabled="addingLesson"
-							@click="addLesson(selectedSection?.id || selected?.id)"
-						><?php esc_html_e( 'Add lesson', 'mint-lms' ); ?></button>
+					<div class="mint-quiz-type-chip mint-mt-8">
+						<svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 6.5h15M4.5 12h15M4.5 17.5h9"/></svg>
+						<?php esc_html_e( 'Lesson Group', 'mint-lms' ); ?>
 					</div>
 
-					<div class="mint-mt-8 mint-flex mint-flex-wrap mint-items-center mint-justify-between mint-gap-4 mint-border-t mint-border-rule mint-pt-5">
+					<div class="mint-section-lessons mint-mt-8">
+						<div class="mint-section-lessons__head">
+							<div class="mint-section-lessons__head-copy">
+								<div class="mint-section-lessons__title"><?php esc_html_e( 'Lessons in this group', 'mint-lms' ); ?></div>
+								<div class="mint-section-lessons__subtitle"><?php esc_html_e( 'Students see these lessons from top to bottom.', 'mint-lms' ); ?></div>
+							</div>
+							<span class="mint-section-lessons__count" x-text="sectionLessonCountLabel()"></span>
+						</div>
+
+						<ul
+							class="mint-section-lessons__list"
+							x-show="(selectedSection.lessons || []).length"
+							x-cloak
+							aria-label="<?php echo esc_attr__( 'Lessons in this lesson group', 'mint-lms' ); ?>"
+						>
+							<template x-for="(lesson, lessonIndex) in (selectedSection.lessons || [])" :key="'sec-les-' + lesson.id">
+								<li>
+									<button
+										type="button"
+										class="mint-section-lessons__row"
+										@click="selectItem('lesson', lesson.id, selectedSection.id)"
+									>
+										<span class="mint-section-lessons__index" x-text="lessonIndex + 1" aria-hidden="true"></span>
+										<span class="mint-section-lessons__row-copy">
+											<span
+												class="mint-section-lessons__row-title"
+												x-text="lesson.title || t('untitledLesson')"
+											></span>
+											<span
+												class="mint-status-chip mint-section-lessons__status"
+												:class="sectionLessonStatusChipClass(lesson)"
+												x-text="statusLabel(sectionLessonStatus(lesson))"
+											></span>
+										</span>
+										<span class="mint-section-lessons__open">
+											<?php esc_html_e( 'Open lesson', 'mint-lms' ); ?>
+											<svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 4.5 5.5 5.5L8 15.5"/></svg>
+										</span>
+									</button>
+								</li>
+							</template>
+						</ul>
+
+						<div
+							class="mint-section-lessons__empty"
+							x-show="!(selectedSection.lessons || []).length"
+						><?php esc_html_e( 'No lessons in this group yet.', 'mint-lms' ); ?></div>
+
+						<div class="mint-section-lessons__tip" role="note">
+							<svg width="16" height="16" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+								<circle cx="10" cy="10" r="8" stroke="currentColor" stroke-width="1.8"/>
+								<path d="M10 9v5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+								<circle cx="10" cy="6.2" r="1.05" fill="currentColor"/>
+							</svg>
+							<span><?php esc_html_e( 'Click any lesson to open it and edit its content, quizzes and settings.', 'mint-lms' ); ?></span>
+						</div>
+
 						<button
 							type="button"
-							class="mint-builder-delete"
+							class="mint-section-lessons__add"
+							:disabled="addingLesson"
+							@click="addLesson(selectedSection?.id || selected?.id)"
+						>+ <?php esc_html_e( 'Add a new lesson to this group', 'mint-lms' ); ?></button>
+					</div>
+
+					<div class="mint-section-lessons__footer">
+						<button
+							type="button"
+							class="mint-section-lessons__delete"
 							@click="deleteSection(selected.id)"
-						><?php esc_html_e( 'Delete lesson group', 'mint-lms' ); ?></button>
+						>
+							<svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+								<path d="M4.5 6.5h11"/>
+								<path d="M8 6.5V5a1.5 1.5 0 0 1 1.5-1.5h1A1.5 1.5 0 0 1 12 5v1.5"/>
+								<path d="M6.5 6.5v8A1.5 1.5 0 0 0 8 16h4a1.5 1.5 0 0 0 1.5-1.5v-8"/>
+								<path d="M9 9.5v4M11 9.5v4"/>
+							</svg>
+							<?php esc_html_e( 'Delete lesson group', 'mint-lms' ); ?>
+						</button>
 						<button
 							type="button"
-							class="mint-builder-btn-publish !mint-h-[38px] !mint-rounded-[9px] !mint-px-4 !mint-text-[15px]"
+							class="mint-section-lessons__save"
 							@click="saveSection(selectedSection, { toast: false, reload: true })"
 						><?php esc_html_e( 'Save changes', 'mint-lms' ); ?></button>
 					</div>

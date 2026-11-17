@@ -7358,6 +7358,28 @@ function courseBuilder(courseId, opts = {}) {
       return `${count} lessons in this lesson group`;
     },
 
+    sectionLessonCountLabel() {
+      const count = Array.isArray(this.selectedSection?.lessons)
+        ? this.selectedSection.lessons.length
+        : 0;
+      return count === 1 ? '1 lesson' : `${count} lessons`;
+    },
+
+    sectionLessonStatus(lesson) {
+      const raw = String(lesson?.status || 'draft').toLowerCase();
+      if (raw === 'publish' || raw === 'published') return 'published';
+      if (raw === 'private' || raw === 'archived') return 'archived';
+      if (raw === 'trash' || raw === 'trashed') return 'trashed';
+      return 'draft';
+    },
+
+    sectionLessonStatusChipClass(lesson) {
+      const status = this.sectionLessonStatus(lesson);
+      if (status === 'published') return 'mint-status-chip--published';
+      if (status === 'archived' || status === 'trashed') return 'mint-status-chip--archived';
+      return 'mint-status-chip--draft';
+    },
+
     saveStateLabel() {
       if (this.saveStatus === 'saving') return 'Saving…';
       if (this.saveStatus === 'saved') return 'Saved';
@@ -7367,6 +7389,10 @@ function courseBuilder(courseId, opts = {}) {
     breadcrumbSectionTitle() {
       if (this.isStandalone) return '';
       let sectionId = Number(this.selected?.sectionId);
+      // Section editor selects { type: 'section', id } — id is the lesson group.
+      if (!sectionId && this.selected?.type === 'section') {
+        sectionId = Number(this.selected?.id) || 0;
+      }
       if (!sectionId) {
         const lessonId = Number(
           this.selected?.lessonId ||
@@ -7377,6 +7403,14 @@ function courseBuilder(courseId, opts = {}) {
         sectionId = this.resolveSectionIdForLesson(lessonId);
       }
       if (!sectionId) return '';
+      const liveTitle = String(this.selectedSection?.title || '').trim();
+      if (
+        this.selected?.type === 'section' &&
+        Number(this.selectedSection?.id) === sectionId &&
+        liveTitle
+      ) {
+        return liveTitle;
+      }
       const section = this.sections.find((s) => Number(s.id) === sectionId);
       const title = String(section?.title || '').trim();
       return title || '';
@@ -8101,7 +8135,12 @@ function courseBuilder(courseId, opts = {}) {
           }
         }
         if (!Array.isArray(section.lessons)) section.lessons = [];
-        section.lessons.push({ ...lesson, id: lessonId, sectionId: linkedSid });
+        section.lessons.push({
+          ...lesson,
+          id: lessonId,
+          sectionId: linkedSid,
+          status: this.sectionLessonStatus(lesson),
+        });
         this.expanded = { ...this.expanded, [linkedSid]: true };
         this.attach.sectionId = linkedSid > 0 ? linkedSid : 0;
 

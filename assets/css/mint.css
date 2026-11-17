@@ -520,6 +520,50 @@
     white-space: nowrap;
   }
 
+  #mint-lms-root .mint-welcome__step-nav {
+    display: inline-flex;
+    align-items: center;
+    height: 32px;
+    padding: 2px;
+    border-radius: 999px;
+    background: #E8FFF3;
+    border: 1px solid #98FBCB;
+    gap: 2px;
+  }
+
+  #mint-lms-root .mint-welcome__step-nav-btn,
+  #mint-lms-root .mint-welcome__step-nav-btn:hover,
+  #mint-lms-root .mint-welcome__step-nav-btn:focus,
+  #mint-lms-root .mint-welcome__step-nav-btn:focus-visible,
+  #mint-lms-root .mint-welcome__step-nav-btn:active {
+    height: 26px;
+    padding: 0 12px;
+    border: none !important;
+    border-radius: 999px;
+    background: transparent !important;
+    color: #33334A !important;
+    font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    box-shadow: none !important;
+    transition: background 150ms ease-out, color 150ms ease-out, transform 150ms ease-out;
+  }
+
+  #mint-lms-root .mint-welcome__step-nav-btn:hover,
+  #mint-lms-root .mint-welcome__step-nav-btn:focus-visible {
+    background: rgba(152, 251, 203, 0.55) !important;
+    color: #0F0E1A !important;
+  }
+
+  #mint-lms-root .mint-welcome__step-nav-btn.is-active,
+  #mint-lms-root .mint-welcome__step-nav-btn.is-active:hover,
+  #mint-lms-root .mint-welcome__step-nav-btn.is-active:focus-visible {
+    background: #98FB98 !important;
+    color: #0F0E1A !important;
+  }
+
   #mint-lms-root .mint-welcome__hero {
     margin-top: auto;
     padding-top: 80px;
