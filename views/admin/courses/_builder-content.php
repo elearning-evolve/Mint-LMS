@@ -3388,9 +3388,20 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 						<nav
 							class="mint-flex mint-items-center mint-gap-2.5 mint-text-[15px] mint-text-ink-2"
 							aria-label="<?php echo esc_attr__( 'Lesson location', 'mint-lms' ); ?>"
-							x-show="breadcrumbSectionTitle()"
+							x-show="(!isLessonsLibraryFlow() && breadcrumbCourseTitle()) || breadcrumbSectionTitle()"
 							x-cloak
 						>
+							<template x-if="!isLessonsLibraryFlow() && breadcrumbCourseTitle()">
+								<span class="mint-inline-flex mint-min-w-0 mint-items-center mint-gap-2.5">
+									<a
+										class="mint-breadcrumb__link mint-truncate"
+										:href="parentCourseEditorUrl()"
+										@click="goToParentCourse($event)"
+										x-text="breadcrumbCourseTitle()"
+									></a>
+									<svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 4.5 5.5 5.5L8 15.5"/></svg>
+								</span>
+							</template>
 							<template x-if="breadcrumbSectionTitle()">
 								<span class="mint-inline-flex mint-min-w-0 mint-items-center mint-gap-2.5">
 									<button
@@ -3398,7 +3409,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 										class="mint-breadcrumb__link mint-truncate"
 										x-show="!isLessonsLibraryFlow()"
 										x-cloak
-										@click="selectItem('section', selected.sectionId)"
+										@click="selectItem('section', selected.sectionId || resolveSectionIdForLesson(selectedLesson?.id))"
 										x-text="breadcrumbSectionTitle()"
 									></button>
 									<span

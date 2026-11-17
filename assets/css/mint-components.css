@@ -9176,10 +9176,15 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   flex-wrap: wrap;
   align-items: flex-start;
   gap: 28px 32px;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 #mint-lms-root .mint-quiz-editor-layout__main {
   flex: 1 1 0;
   min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 #mint-lms-root .mint-editor-rail .mint-quiz-attach {
   flex: none;
@@ -10576,11 +10581,16 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 
 /* —— Lesson: quizzes in this lesson (design match) —— */
 #mint-lms-root .mint-lesson-quizzes {
-  border: 1px solid #E4E1F0;
+  border: 1px solid var(--mint-content-border);
   border-radius: 16px;
   padding: 22px;
   box-shadow: 0 6px 20px rgba(28, 20, 80, 0.06);
   background: #FFFFFF;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 #mint-lms-root .mint-lesson-quizzes__label {
@@ -10660,18 +10670,31 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   display: grid;
   gap: 10px;
   margin-top: 12px;
+  width: 100%;
+  min-width: 0;
 }
 
 #mint-lms-root .mint-lesson-quizzes__row {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  flex-wrap: wrap;
-  gap: 12px;
-  padding: 14px 16px;
-  border: 1.5px solid #98FBCB;
+  flex-wrap: nowrap;
+  gap: 10px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1.5px solid var(--mint-content-border);
   border-radius: 12px;
-  background: #F1FFF9;
+  background: #FFFFFF;
+  box-sizing: border-box;
+  transition: background 140ms ease-out, border-color 140ms ease-out, box-shadow 140ms ease-out;
+}
+
+#mint-lms-root .mint-lesson-quizzes__row:hover {
+  background: var(--mint-content-hover-bg);
+  border-color: var(--mint-content-hover-border);
+  box-shadow: var(--mint-content-hover-shadow);
 }
 
 #mint-lms-root .mint-lesson-quizzes__grip {
@@ -10716,21 +10739,23 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root .mint-lesson-quizzes__meta {
-  /* Size to title — do not stretch and push Edit/Remove to the far edge. */
-  flex: 0 1 auto;
+  /* Grow + truncate so badge/actions stay inside the card. */
+  flex: 1 1 0%;
   min-width: 0;
-  max-width: min(100%, 28rem);
+  max-width: none;
+  overflow: hidden;
 }
 
 #mint-lms-root .mint-lesson-quizzes__atype {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex: none;
-  margin-left: auto;
-  max-width: min(100%, 200px);
+  flex: 0 1 auto;
+  margin-left: 0;
+  min-width: 0;
+  max-width: 168px;
   min-height: 34px;
-  padding: 6px 14px;
+  padding: 6px 12px;
   border: 1.5px solid #98FBCB;
   border-radius: 999px;
   background: #FFFFFF;
@@ -10762,9 +10787,10 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  flex: none;
-  margin-left: auto;
-  max-width: min(100%, 220px);
+  flex: 0 1 auto;
+  margin-left: 0;
+  min-width: 0;
+  max-width: 180px;
   min-height: 34px;
   padding: 4px 12px 4px 6px;
   border: 1.5px solid #98FBCB;
@@ -10795,13 +10821,38 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   align-items: center;
   flex: none;
   gap: 8px;
-  margin-left: 4px;
+  margin-left: auto;
 }
 
 #mint-lms-root .mint-lesson-quizzes__title {
   font-size: 16px;
   font-weight: 700;
   color: #17222B;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* When the Attach rail shares the row, stack actions before they overflow. */
+@media (max-width: 1280px) {
+  #mint-lms-root .mint-lesson-quizzes__row {
+    flex-wrap: wrap;
+  }
+
+  #mint-lms-root .mint-lesson-quizzes__meta {
+    flex: 1 1 calc(100% - 100px);
+  }
+
+  #mint-lms-root .mint-lesson-quizzes__atype,
+  #mint-lms-root .mint-lesson-quizzes__qcount {
+    margin-left: auto;
+  }
+
+  #mint-lms-root .mint-lesson-quizzes__actions {
+    width: 100%;
+    margin-left: 0;
+    justify-content: flex-end;
+  }
 }
 
 #mint-lms-root .mint-lesson-quizzes__badge {
@@ -10824,12 +10875,13 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   border-radius: 8px;
   border: none;
   background: #98FB98;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-size: 14px;
   font-weight: 700;
   font-family: var(--mint-font);
   cursor: pointer;
   flex: none;
+  white-space: nowrap;
 }
 
 #mint-lms-root button.mint-lesson-quizzes__edit:hover {
@@ -10849,6 +10901,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   font-family: var(--mint-font);
   cursor: pointer;
   flex: none;
+  white-space: nowrap;
 }
 
 #mint-lms-root button.mint-lesson-quizzes__remove:hover {
