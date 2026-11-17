@@ -21,5 +21,10 @@ interface AuthorizationInterface {
 
 	public function canViewAllCourses( int $userId ): bool;
 
+	/**
+	 * Same scope as courses: Manager/Admin see all Mint content; Instructor sees own.
+	 */
+	public function canViewAllContent( int $userId ): bool;
+
 	public function canEnrollStudents( int $userId ): bool;
 }

@@ -14,7 +14,7 @@ if ( null === $wpdb ) {
 
 $renderer = new ViewRenderer();
 $userId   = get_current_user_id();
-$canAll   = Plugin::authorization()->canViewAllCourses( $userId );
+$canAll   = Plugin::authorization()->canViewAllContent( $userId );
 $authorId = $canAll ? null : $userId;
 
 $repo      = new WpdbAdminDashboardRepository( $wpdb );

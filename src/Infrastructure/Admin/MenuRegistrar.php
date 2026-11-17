@@ -147,7 +147,11 @@ final class MenuRegistrar {
 			wp_die( esc_html__( 'You do not have permission to access Mint LMS.', 'mint-lms' ) );
 		}
 
-		if ( ! FirstRunState::isFirstRunComplete() ) {
+		$userId = get_current_user_id();
+
+		// Same first-time welcome for Admin / Manager / Instructor until they have a course
+		// (site first-run incomplete, or this creator still has zero courses).
+		if ( ! FirstRunState::isFirstRunComplete() || 0 === FirstRunState::userCourseCount( $userId ) ) {
 			include MINTLMS_PATH . 'views/admin/first-run.php';
 			return;
 		}

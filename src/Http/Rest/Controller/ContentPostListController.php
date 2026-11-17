@@ -6,6 +6,7 @@ namespace MintLMS\Http\Rest\Controller;
 defined( 'ABSPATH' ) || exit;
 
 use MintLMS\Http\Rest\Response\ApiResponse;
+use MintLMS\Infrastructure\Capability\ContentOwnership;
 use MintLMS\Infrastructure\PostType\PostTypes;
 use MintLMS\Infrastructure\PostType\QuestionLinkResolver;
 use MintLMS\Infrastructure\PostType\QuizLinkResolver;
@@ -85,17 +86,19 @@ final class ContentPostListController {
 		$search   = trim( (string) $request->get_param( 'search' ) );
 		$status   = (string) $request->get_param( 'status' );
 
-		$queryArgs = array(
-			'post_type'              => $postType,
-			'post_status'            => $this->wpStatusesForFilter( $status ),
-			'posts_per_page'         => $perPage,
-			'paged'                  => $page,
-			'orderby'                => 'modified',
-			'order'                  => 'DESC',
-			'ignore_sticky_posts'    => true,
-			'no_found_rows'          => false,
-			'update_post_meta_cache' => true,
-			'update_post_term_cache' => false,
+		$queryArgs = ContentOwnership::applyAuthorRestriction(
+			array(
+				'post_type'              => $postType,
+				'post_status'            => $this->wpStatusesForFilter( $status ),
+				'posts_per_page'         => $perPage,
+				'paged'                  => $page,
+				'orderby'                => 'modified',
+				'order'                  => 'DESC',
+				'ignore_sticky_posts'    => true,
+				'no_found_rows'          => false,
+				'update_post_meta_cache' => true,
+				'update_post_term_cache' => false,
+			)
 		);
 
 		if ( '' !== $search ) {
@@ -131,13 +134,15 @@ final class ContentPostListController {
 	 * @return array{allTotal: int, publishedTotal: int, draftTotal: int, archivedTotal: int, trashTotal: int}
 	 */
 	private function statusTotals( string $postType ): array {
-		$base = array(
-			'post_type'              => $postType,
-			'posts_per_page'         => 1,
-			'fields'                 => 'ids',
-			'no_found_rows'          => false,
-			'update_post_meta_cache' => false,
-			'update_post_term_cache' => false,
+		$base = ContentOwnership::applyAuthorRestriction(
+			array(
+				'post_type'              => $postType,
+				'posts_per_page'         => 1,
+				'fields'                 => 'ids',
+				'no_found_rows'          => false,
+				'update_post_meta_cache' => false,
+				'update_post_term_cache' => false,
+			)
 		);
 
 		$all = new \WP_Query(
