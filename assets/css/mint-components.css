@@ -6372,7 +6372,9 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   justify-content: center;
   flex: none;
 }
-#mint-lms-root .mint-admin-brand__mark-inner { width: 9px; height: 9px; border: 2px solid #FFFFFF; border-radius: 2.5px; }
+#mint-lms-root .mint-admin-brand__mark svg {
+  display: block;
+}
 #mint-lms-root .mint-admin-brand__name { font-size: 16px; font-weight: 600; letter-spacing: -0.015em; color: var(--mint-ink); }
 #mint-lms-root .mint-admin-brand__sep { width: 1px; height: 16px; background: #C4C1D6; margin: 0 3px; }
 #mint-lms-root .mint-admin-brand__page { font-size: 16px; color: var(--mint-ink-2); }
@@ -6395,6 +6397,28 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 #mint-lms-root .mint-dash-zero__shell,
 #mint-lms-root .mint-admin-header__inner.mint-dash-zero__shell {
   max-width: 1100px;
+}
+/* Zero-course header brand — match model (larger lime mark + 20px name). */
+#mint-lms-root .mint-admin-header__inner.mint-dash-zero__shell {
+  height: 64px;
+}
+#mint-lms-root .mint-admin-header__inner.mint-dash-zero__shell .mint-admin-brand {
+  gap: 14px;
+}
+#mint-lms-root .mint-admin-header__inner.mint-dash-zero__shell .mint-admin-brand__mark {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #98FB98;
+}
+#mint-lms-root .mint-admin-header__inner.mint-dash-zero__shell .mint-admin-brand__mark svg {
+  width: 18px;
+  height: 18px;
+}
+#mint-lms-root .mint-admin-header__inner.mint-dash-zero__shell .mint-admin-brand__name {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 #mint-lms-root main.mint-dash-zero__shell {
   padding-left: 40px;
