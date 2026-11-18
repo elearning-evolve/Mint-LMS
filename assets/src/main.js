@@ -116,25 +116,29 @@ document.addEventListener('alpine:init', () => {
     },
   }));
 
-  Alpine.data('mintWelcomeOnboarding', () => ({
-    step: 1,
-    go(n) {
-      const next = Number(n);
-      if (next >= 1 && next <= 3) {
-        this.step = next;
-      }
-    },
-    next() {
-      if (this.step < 3) {
-        this.step += 1;
-      }
-    },
-    prev() {
-      if (this.step > 1) {
-        this.step -= 1;
-      }
-    },
-  }));
+  Alpine.data('mintWelcomeOnboarding', (config = {}) => {
+    const maxStep = Math.min(3, Math.max(1, Number(config.maxStep) || 3));
+    return {
+      step: 1,
+      maxStep,
+      go(n) {
+        const next = Number(n);
+        if (next >= 1 && next <= this.maxStep) {
+          this.step = next;
+        }
+      },
+      next() {
+        if (this.step < this.maxStep) {
+          this.step += 1;
+        }
+      },
+      prev() {
+        if (this.step > 1) {
+          this.step -= 1;
+        }
+      },
+    };
+  });
 });
 
 window.Alpine = Alpine;

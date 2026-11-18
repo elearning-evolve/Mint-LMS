@@ -4,17 +4,23 @@ declare(strict_types=1);
 defined( 'ABSPATH' ) || exit;
 
 use MintLMS\Infrastructure\Admin\FirstRunRedirect;
+use MintLMS\Infrastructure\Capability\ContentOwnership;
 
 /**
- * Shared first-run welcome for Admin + Instructor (3 educational steps).
+ * Shared first-run welcome for Admin + Instructor.
  *
- * 1 Structure → 2 Create/Attach → 3 Publish + students learn
+ * Admin / Manager: 1 Structure → 2 Create/Attach → 3 Publish + students learn
+ * Instructor:      1 Structure → 2 Teach flow (no step 3)
  */
 
 $createUrl = $createUrl ?? FirstRunRedirect::startGuidedUrl();
 $skipUrl   = $skipUrl ?? FirstRunRedirect::skipFirstRunUrl();
 $showSkip  = $showSkip ?? true;
 $wpVersion = get_bloginfo( 'version' );
+
+// Instructors (own content only) get a 2-step classroom welcome; Admin/Manager keep 3 steps.
+$is_instructor_welcome = ContentOwnership::currentUserMustOwnContent();
+$max_steps             = $is_instructor_welcome ? 2 : 3;
 
 $features_step1 = array(
 	array(
@@ -31,7 +37,7 @@ $features_step1 = array(
 	),
 );
 
-$features_step2 = array(
+$features_step2_admin = array(
 	array(
 		'label' => __( 'Create lessons, quizzes, and questions freely', 'mint-lms' ),
 		'icon'  => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg>',
@@ -45,6 +51,23 @@ $features_step2 = array(
 		'icon'  => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 10h5M11 10h5M9 7l-3 3 3 3M11 7l3 3-3 3"/></svg>',
 	),
 );
+
+$features_step2_instructor = array(
+	array(
+		'label' => __( 'Create freely — lesson, quiz, or question first; finish later', 'mint-lms' ),
+		'icon'  => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg>',
+	),
+	array(
+		'label' => __( 'Attach where it belongs — Lesson → Lesson Group, Quiz → Lesson, Question → Quiz', 'mint-lms' ),
+		'icon'  => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 7H5.5A2.5 2.5 0 003 9.5v1A2.5 2.5 0 005.5 13H8M12 7h2.5A2.5 2.5 0 0117 9.5v1A2.5 2.5 0 0114.5 13H12M7 10h6"/></svg>',
+	),
+	array(
+		'label' => __( 'Your students, your progress — enroll and follow reports on your own courses', 'mint-lms' ),
+		'icon'  => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 10a3 3 0 100-6 3 3 0 000 6z"/><path d="M4 16a6 6 0 0112 0"/></svg>',
+	),
+);
+
+$features_step2 = $is_instructor_welcome ? $features_step2_instructor : $features_step2_admin;
 
 $features_step3 = array(
 	array(
@@ -87,6 +110,27 @@ $attach_steps = array(
 	),
 );
 
+$teach_steps = array(
+	array(
+		'label' => __( '1. Create a Lesson / Quiz', 'mint-lms' ),
+		'hint'  => __( 'Starts on its own — not linked yet', 'mint-lms' ),
+		'mod'   => '',
+	),
+	array(
+		'label' => __( '2. Attach into your Course', 'mint-lms' ),
+		'hint'  => __( 'Lesson Group → Lesson → Quiz → Question', 'mint-lms' ),
+		'mod'   => ' is-mid',
+	),
+	array(
+		'label' => __( '3. Enroll & teach', 'mint-lms' ),
+		'hint'  => __( 'Invite students; watch their progress', 'mint-lms' ),
+		'mod'   => ' is-root',
+	),
+);
+
+$step2_flow       = $is_instructor_welcome ? $teach_steps : $attach_steps;
+$step2_flow_class = $is_instructor_welcome ? ' mint-welcome-flow--teach' : '';
+
 $outcome_steps = array(
 	array(
 		'label' => __( 'Draft course', 'mint-lms' ),
@@ -122,8 +166,8 @@ $render_features = static function ( array $features ): void {
 };
 ?>
 <div
-	class="mint-welcome"
-	x-data="mintWelcomeOnboarding()"
+	class="mint-welcome<?php echo $is_instructor_welcome ? ' mint-welcome--instructor' : ''; ?>"
+	x-data="mintWelcomeOnboarding({ maxStep: <?php echo (int) $max_steps; ?> })"
 	x-cloak
 >
 	<section class="mint-welcome__left">
@@ -153,15 +197,17 @@ $render_features = static function ( array $features ): void {
 				>
 					<?php esc_html_e( 'Step 2', 'mint-lms' ); ?>
 				</button>
-				<button
-					type="button"
-					class="mint-welcome__step-nav-btn"
-					:class="{ 'is-active': step === 3 }"
-					:aria-current="step === 3 ? 'step' : null"
-					@click="go(3)"
-				>
-					<?php esc_html_e( 'Step 3', 'mint-lms' ); ?>
-				</button>
+				<?php if ( ! $is_instructor_welcome ) : ?>
+					<button
+						type="button"
+						class="mint-welcome__step-nav-btn"
+						:class="{ 'is-active': step === 3 }"
+						:aria-current="step === 3 ? 'step' : null"
+						@click="go(3)"
+					>
+						<?php esc_html_e( 'Step 3', 'mint-lms' ); ?>
+					</button>
+				<?php endif; ?>
 			</nav>
 		</div>
 
@@ -178,22 +224,29 @@ $render_features = static function ( array $features ): void {
 		<template x-if="step === 2">
 			<div class="mint-welcome__step-panel">
 				<div class="mint-welcome__hero">
-					<h1 class="mint-welcome__title"><?php esc_html_e( 'Build one piece at a time.', 'mint-lms' ); ?></h1>
-					<p class="mint-welcome__lead"><?php esc_html_e( 'Create a lesson, quiz, or question first — then attach it where it belongs. Nothing has to be finished in one sitting.', 'mint-lms' ); ?></p>
+					<?php if ( $is_instructor_welcome ) : ?>
+						<h1 class="mint-welcome__title"><?php esc_html_e( 'Your course, your classroom.', 'mint-lms' ); ?></h1>
+						<p class="mint-welcome__lead"><?php esc_html_e( 'Build lessons and quizzes at your pace, attach them into your course, then open it for your students.', 'mint-lms' ); ?></p>
+					<?php else : ?>
+						<h1 class="mint-welcome__title"><?php esc_html_e( 'Build one piece at a time.', 'mint-lms' ); ?></h1>
+						<p class="mint-welcome__lead"><?php esc_html_e( 'Create a lesson, quiz, or question first — then attach it where it belongs. Nothing has to be finished in one sitting.', 'mint-lms' ); ?></p>
+					<?php endif; ?>
 				</div>
 				<?php $render_features( $features_step2 ); ?>
 			</div>
 		</template>
 
-		<template x-if="step === 3">
-			<div class="mint-welcome__step-panel">
-				<div class="mint-welcome__hero">
-					<h1 class="mint-welcome__title"><?php esc_html_e( 'Students learn when you publish.', 'mint-lms' ); ?></h1>
-					<p class="mint-welcome__lead"><?php esc_html_e( 'When the course is ready, publish it and enroll students. They follow lessons at their own pace and see their progress as they go.', 'mint-lms' ); ?></p>
+		<?php if ( ! $is_instructor_welcome ) : ?>
+			<template x-if="step === 3">
+				<div class="mint-welcome__step-panel">
+					<div class="mint-welcome__hero">
+						<h1 class="mint-welcome__title"><?php esc_html_e( 'Students learn when you publish.', 'mint-lms' ); ?></h1>
+						<p class="mint-welcome__lead"><?php esc_html_e( 'When the course is ready, publish it and enroll students. They follow lessons at their own pace and see their progress as they go.', 'mint-lms' ); ?></p>
+					</div>
+					<?php $render_features( $features_step3 ); ?>
 				</div>
-				<?php $render_features( $features_step3 ); ?>
-			</div>
-		</template>
+			</template>
+		<?php endif; ?>
 
 		<p class="mint-welcome__thanks">
 			<?php esc_html_e( 'Thank you for creating with WordPress.', 'mint-lms' ); ?>
@@ -229,17 +282,26 @@ $render_features = static function ( array $features ): void {
 
 		<template x-if="step === 2">
 			<div class="mint-welcome__step-panel mint-welcome__step-panel--right">
-				<div class="mint-welcome__eyebrow"><?php esc_html_e( 'Step 2 · Build', 'mint-lms' ); ?></div>
-				<h2 class="mint-welcome__heading"><?php esc_html_e( 'Create → Attach', 'mint-lms' ); ?></h2>
-				<p class="mint-welcome__sub"><?php esc_html_e( 'In Mint, new items start on their own. You connect them with Attach — Lesson to Lesson Group, Quiz to Lesson, Question to Quiz.', 'mint-lms' ); ?></p>
+				<?php if ( $is_instructor_welcome ) : ?>
+					<div class="mint-welcome__eyebrow"><?php esc_html_e( 'Step 2 · Teach', 'mint-lms' ); ?></div>
+					<h2 class="mint-welcome__heading"><?php esc_html_e( 'Create → Attach → Open for students', 'mint-lms' ); ?></h2>
+					<p class="mint-welcome__sub"><?php esc_html_e( 'Create content first, attach it into your course, then enroll students and follow their progress.', 'mint-lms' ); ?></p>
+				<?php else : ?>
+					<div class="mint-welcome__eyebrow"><?php esc_html_e( 'Step 2 · Build', 'mint-lms' ); ?></div>
+					<h2 class="mint-welcome__heading"><?php esc_html_e( 'Create → Attach', 'mint-lms' ); ?></h2>
+					<p class="mint-welcome__sub"><?php esc_html_e( 'In Mint, new items start on their own. You connect them with Attach — Lesson to Lesson Group, Quiz to Lesson, Question to Quiz.', 'mint-lms' ); ?></p>
+				<?php endif; ?>
 
-				<div class="mint-welcome-flow" aria-label="<?php esc_attr_e( 'Create then attach', 'mint-lms' ); ?>">
-					<?php foreach ( $attach_steps as $index => $item ) : ?>
+				<div
+					class="mint-welcome-flow<?php echo esc_attr( $step2_flow_class ); ?>"
+					aria-label="<?php echo esc_attr( $is_instructor_welcome ? __( 'Teach flow', 'mint-lms' ) : __( 'Create then attach', 'mint-lms' ) ); ?>"
+				>
+					<?php foreach ( $step2_flow as $index => $item ) : ?>
 						<div class="mint-welcome-flow__card<?php echo esc_attr( $item['mod'] ); ?>">
 							<div class="mint-welcome-flow__label"><?php echo esc_html( $item['label'] ); ?></div>
 							<div class="mint-welcome-flow__hint"><?php echo esc_html( $item['hint'] ); ?></div>
 						</div>
-						<?php if ( $index < count( $attach_steps ) - 1 ) : ?>
+						<?php if ( $index < count( $step2_flow ) - 1 ) : ?>
 							<div class="mint-welcome-flow__arrow" aria-hidden="true">↓</div>
 						<?php endif; ?>
 					<?php endforeach; ?>
@@ -247,25 +309,27 @@ $render_features = static function ( array $features ): void {
 			</div>
 		</template>
 
-		<template x-if="step === 3">
-			<div class="mint-welcome__step-panel mint-welcome__step-panel--right">
-				<div class="mint-welcome__eyebrow"><?php esc_html_e( 'Step 3 · Go live', 'mint-lms' ); ?></div>
-				<h2 class="mint-welcome__heading"><?php esc_html_e( 'Publish + students learn', 'mint-lms' ); ?></h2>
-				<p class="mint-welcome__sub"><?php esc_html_e( 'Your course goes from draft to live. Students get access, open lessons, and their progress shows up as they learn.', 'mint-lms' ); ?></p>
+		<?php if ( ! $is_instructor_welcome ) : ?>
+			<template x-if="step === 3">
+				<div class="mint-welcome__step-panel mint-welcome__step-panel--right">
+					<div class="mint-welcome__eyebrow"><?php esc_html_e( 'Step 3 · Go live', 'mint-lms' ); ?></div>
+					<h2 class="mint-welcome__heading"><?php esc_html_e( 'Publish + students learn', 'mint-lms' ); ?></h2>
+					<p class="mint-welcome__sub"><?php esc_html_e( 'Your course goes from draft to live. Students get access, open lessons, and their progress shows up as they learn.', 'mint-lms' ); ?></p>
 
-				<div class="mint-welcome-flow" aria-label="<?php esc_attr_e( 'Publish and learn', 'mint-lms' ); ?>">
-					<?php foreach ( $outcome_steps as $index => $item ) : ?>
-						<div class="mint-welcome-flow__card<?php echo esc_attr( $item['mod'] ); ?>">
-							<div class="mint-welcome-flow__label"><?php echo esc_html( $item['label'] ); ?></div>
-							<div class="mint-welcome-flow__hint"><?php echo esc_html( $item['hint'] ); ?></div>
-						</div>
-						<?php if ( $index < count( $outcome_steps ) - 1 ) : ?>
-							<div class="mint-welcome-flow__arrow" aria-hidden="true">↓</div>
-						<?php endif; ?>
-					<?php endforeach; ?>
+					<div class="mint-welcome-flow" aria-label="<?php esc_attr_e( 'Publish and learn', 'mint-lms' ); ?>">
+						<?php foreach ( $outcome_steps as $index => $item ) : ?>
+							<div class="mint-welcome-flow__card<?php echo esc_attr( $item['mod'] ); ?>">
+								<div class="mint-welcome-flow__label"><?php echo esc_html( $item['label'] ); ?></div>
+								<div class="mint-welcome-flow__hint"><?php echo esc_html( $item['hint'] ); ?></div>
+							</div>
+							<?php if ( $index < count( $outcome_steps ) - 1 ) : ?>
+								<div class="mint-welcome-flow__arrow" aria-hidden="true">↓</div>
+							<?php endif; ?>
+						<?php endforeach; ?>
+					</div>
 				</div>
-			</div>
-		</template>
+			</template>
+		<?php endif; ?>
 
 		<div class="mint-welcome__actions">
 			<a href="<?php echo esc_url( $createUrl ); ?>" class="mint-welcome-cta">
