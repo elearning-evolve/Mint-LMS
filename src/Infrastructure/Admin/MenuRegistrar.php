@@ -15,6 +15,18 @@ final class MenuRegistrar {
 		add_filter( 'submenu_file', array( $this, 'highlightMintCptSubmenu' ) );
 	}
 
+	/**
+	 * Model Mint mark for wp-admin left menu (lime tile + list lines).
+	 */
+	private static function menuIconDataUri(): string {
+		$svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 36" fill="none">'
+			. '<rect width="36" height="36" rx="10" fill="#98FBCB"/>'
+			. '<path d="M9 11.5h18M9 18h12M9 24.5h7.5" stroke="#0F0E1A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>'
+			. '</svg>';
+
+		return 'data:image/svg+xml;base64,' . base64_encode( $svg );
+	}
+
 	public function registerMenu(): void {
 		add_menu_page(
 			__( 'Mint LMS', 'mint-lms' ),
@@ -22,7 +34,7 @@ final class MenuRegistrar {
 			'edit_mintlms_courses',
 			'mint-lms',
 			array( $this, 'renderDashboard' ),
-			'dashicons-welcome-learn-more',
+			self::menuIconDataUri(),
 			30
 		);
 

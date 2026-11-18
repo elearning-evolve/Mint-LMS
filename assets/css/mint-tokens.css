@@ -15,28 +15,29 @@
   --mint-accent-hover: #3200CC;
   --mint-accent-wash: #EFEBFF;
 
-  /* Primary CTA buttons — Admin Screens.dc (#98FB98) */
-  --mint-cta: #98FB98;
-  --mint-cta-hover: #7FE87F;
+  /* Primary CTA — Mint blue theme */
+  --mint-cta: #98FBCB;
+  --mint-cta-hover: #7FE8B8;
+  --mint-cta-active: #6ED9AE;
   --mint-cta-ink: #0B4F3F;
   --mint-cta-shadow: 0 4px 12px rgba(11, 79, 63, 0.18);
   --mint-cta-focus: 0 0 0 3px rgba(152, 251, 203, 0.55);
 
   /* Selected / checked chrome — mint fill, never solid dark green. */
-  --mint-check-fill: #98FB98;
+  --mint-check-fill: #98FBCB;
   --mint-check-ink: #17222B;
-  --mint-check-border: #98FB98;
+  --mint-check-border: #98FBCB;
 
   /* Radio / joining-method choice cards — one hover language everywhere */
   --mint-choice-border: #E4E1F0;
-  --mint-choice-hover-border: #98FB98;
+  --mint-choice-hover-border: #98FBCB;
   --mint-choice-hover-bg: #F1FFF9;
-  --mint-choice-hover-ring: 0 0 0 3px rgba(152, 251, 152, 0.35);
-  --mint-choice-selected-border: #98FB98;
+  --mint-choice-hover-ring: 0 0 0 3px rgba(152, 251, 203, 0.35);
+  --mint-choice-selected-border: #98FBCB;
   --mint-choice-selected-bg: #F1FFF9;
-  --mint-choice-selected-hover-border: #98FB98;
+  --mint-choice-selected-hover-border: #98FBCB;
   --mint-choice-selected-hover-bg: #F1FFF9;
-  --mint-choice-selected-hover-ring: 0 0 0 3px rgba(152, 251, 152, 0.35);
+  --mint-choice-selected-hover-ring: 0 0 0 3px rgba(152, 251, 203, 0.35);
 
   /* Surfaces — white page, not grey */
   --mint-bg: #FFFFFF;
@@ -98,14 +99,14 @@
   --mint-field-border: #98FBCB;
   --mint-field-focus: 0 0 0 3px rgba(152, 251, 203, 0.45);
 
-  /* Content row / card — idle grey-purple, hover mint green */
+  /* Content row / card — idle grey-purple, hover mint blue */
   --mint-content-border: #E4E1F0;
   --mint-content-hover-bg: #F1FFF9;
-  --mint-content-hover-border: #98FB98;
-  --mint-content-hover-shadow: 0 6px 18px rgba(152, 251, 152, 0.28);
+  --mint-content-hover-border: #98FBCB;
+  --mint-content-hover-shadow: 0 6px 18px rgba(152, 251, 203, 0.28);
   --mint-content-hover-ring:
-    inset 0 0 0 1.5px #98FB98,
-    0 4px 12px rgba(152, 251, 152, 0.28);
+    inset 0 0 0 1.5px #98FBCB,
+    0 4px 12px rgba(152, 251, 203, 0.28);
 
   /* Float shadows only */
   --mint-shadow-menu: 0 6px 16px rgba(15, 14, 26, 0.08);

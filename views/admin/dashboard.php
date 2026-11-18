@@ -33,20 +33,8 @@ $dashboardService = new CreatorDashboardService(
 $dashboard    = $dashboardService->getDashboard( $userId );
 $newCourseUrl = \MintLMS\Infrastructure\Admin\CourseBuilderPage::newCourseUrl();
 
-// Empty dashboard: zero-course workspace + header New course (no search yet).
+// Empty dashboard: brand-only header — create CTAs live in the page body.
 if ( $dashboard->isEmpty ) {
-	ob_start();
-	?>
-	<a
-		href="<?php echo esc_url( $newCourseUrl ); ?>"
-		class="mint-dash-new-course mint-inline-flex mint-h-9 mint-items-center mint-justify-center mint-gap-2 mint-rounded-md mint-border-0 mint-px-[14px] mint-text-sm mint-font-semibold mint-no-underline focus-visible:mint-outline-none"
-	>
-		<svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg>
-		<?php esc_html_e( 'New course', 'mint-lms' ); ?>
-	</a>
-	<?php
-	$headerActions = (string) ob_get_clean();
-
 	$content = $renderer->render(
 		'admin/dashboard/_empty-content',
 		array(
@@ -58,9 +46,9 @@ if ( $dashboard->isEmpty ) {
 	$renderer->echo(
 		'admin/layout',
 		array(
-			'content'       => $content,
-			'headerActions' => $headerActions,
-			'maxWidthClass' => 'mint-dash-zero__shell',
+			'content'           => $content,
+			'showHeaderActions' => false,
+			'maxWidthClass'     => 'mint-dash-zero__shell',
 		)
 	);
 	return;

@@ -2429,7 +2429,7 @@
   padding: 0 12px;
   border: none;
   border-radius: 7px;
-  background: #98FB98;
+  background: #98FBCB;
   color: #0B4F3F;
   font-family: inherit;
   font-size: 13px;
@@ -2455,7 +2455,7 @@
 }
 
 #mint-lms-root .mint-builder-tree-page__new:hover:not(:disabled) {
-  background: #7FE87F;
+  background: #7FE8B8;
 }
 
 #mint-lms-root .mint-builder-tree-page__new:disabled {
@@ -2582,7 +2582,7 @@
   padding: 8px 16px;
   border: 1.5px solid rgb(120, 220, 140);
   border-radius: 8px;
-  background: #98FB98;
+  background: #98FBCB;
   color: #0B4F3F;
   font-family: inherit;
   font-size: 14px;
@@ -2594,7 +2594,7 @@
 }
 
 #mint-lms-root .mint-builder-tree-page__inline-confirm:hover:not(:disabled) {
-  background: #7FE87F;
+  background: #7FE8B8;
   border-color: rgb(100, 200, 120);
 }
 
@@ -3379,7 +3379,7 @@
   border-style: solid;
   border-width: 1.5px;
   border-color: rgb(120, 220, 140);
-  background: rgb(152, 251, 152);
+  background: rgb(152, 251, 203);
   color: #0B2E22;
   white-space: nowrap;
   gap: 7px;
@@ -3511,7 +3511,7 @@
   padding: 0 16px;
   border-radius: 9px;
   border: none !important;
-  background: #98FB98 !important;
+  background: #98FBCB !important;
   color: #0B4F3F !important;
   font-size: 15px;
   font-weight: 600;
@@ -3527,7 +3527,7 @@
 #mint-lms-root .mint-builder-btn-preview:focus-visible,
 #mint-lms-root a.mint-builder-btn-preview:hover,
 #mint-lms-root a.mint-builder-btn-preview:focus-visible {
-  background: #7FE87F !important;
+  background: #7FE8B8 !important;
   color: #0B4F3F !important;
   box-shadow: 0 4px 12px rgba(11, 79, 63, 0.18) !important;
   transform: translateY(-1px);
@@ -3535,7 +3535,7 @@
 }
 #mint-lms-root .mint-builder-btn-preview:active,
 #mint-lms-root a.mint-builder-btn-preview:active {
-  background: #7FE87F !important;
+  background: #7FE8B8 !important;
   box-shadow: none !important;
   transform: translateY(0);
 }
@@ -3546,7 +3546,7 @@
   padding: 0 14px;
   border-radius: 8px;
   border: none;
-  background: #98FB98 !important;
+  background: #98FBCB !important;
   color: #0B4F3F !important;
   font-size: 14px;
   font-weight: 600;
@@ -3555,7 +3555,7 @@
 }
 #mint-lms-root button.mint-builder-btn-publish:hover:not(:disabled),
 #mint-lms-root button.mint-builder-btn-publish:focus-visible:not(:disabled) {
-  background: #7FE87F !important;
+  background: #7FE8B8 !important;
   box-shadow: 0 4px 12px rgba(11, 79, 63, 0.18) !important;
   transform: translateY(-1px);
 }
@@ -3811,7 +3811,7 @@
   background: #FFFFFF;
 }
 #mint-lms-root .mint-lesson-editor-tool.is-active {
-  background: #98FB98;
+  background: #98FBCB;
   color: #0B4F3F;
   box-shadow: inset 0 0 0 1.5px rgba(11, 79, 63, 0.28);
 }
@@ -3846,9 +3846,9 @@
   transition: background 120ms ease-out, color 120ms ease-out, border-color 120ms ease-out;
 }
 #mint-lms-root .mint-lesson-code-chip:hover {
-  background: #98FB98;
+  background: #98FBCB;
   color: #0B4F3F;
-  border-color: #98FB98;
+  border-color: #98FBCB;
 }
 #mint-lms-root .mint-lesson-code-chip:focus-visible {
   box-shadow: 0 0 0 2px rgba(152, 251, 203, 0.7);
@@ -3984,7 +3984,7 @@
   padding: 0 18px;
   border-radius: 10px;
   border: none;
-  background: #98FB98 !important;
+  background: #98FBCB !important;
   color: #0B4F3F !important;
   font-size: 15px;
   font-weight: 600;
@@ -3994,7 +3994,7 @@
 }
 #mint-lms-root button.mint-builder-empty__cta:hover,
 #mint-lms-root button.mint-builder-empty__cta:focus-visible {
-  background: #7FE87F !important;
+  background: #7FE8B8 !important;
   box-shadow: 0 4px 12px rgba(11, 79, 63, 0.18) !important;
   transform: translateY(-1px);
 }
@@ -4074,7 +4074,7 @@
   font-family: var(--mint-font);
 }
 #mint-lms-root .mint-lesson-view-toggle__item.is-active {
-  background: #98FB98;
+  background: #98FBCB;
   color: #0B4F3F;
   font-weight: 600;
 }
@@ -4085,7 +4085,7 @@
   padding: 0 16px;
   border-radius: 9px;
   border: none;
-  background: #98FB98 !important;
+  background: #98FBCB !important;
   color: #0B4F3F !important;
   font-size: 15px;
   font-weight: 600;
@@ -4095,7 +4095,7 @@
 }
 #mint-lms-root button.mint-lesson-choose-file:hover,
 #mint-lms-root button.mint-lesson-choose-file:focus-visible {
-  background: #7FE87F !important;
+  background: #7FE8B8 !important;
   box-shadow: 0 4px 12px rgba(11, 79, 63, 0.18) !important;
   transform: translateY(-1px);
 }
@@ -4299,8 +4299,8 @@
 }
 
 #mint-lms-root .mint-quiz-checkbox.is-checked {
-  background: var(--mint-check-fill, #98FB98);
-  border-color: var(--mint-check-border, #98FB98);
+  background: var(--mint-check-fill, #98FBCB);
+  border-color: var(--mint-check-border, #98FBCB);
   color: var(--mint-check-ink, #17222B);
 }
 
@@ -4392,7 +4392,7 @@
   padding: 0 16px;
   border-radius: 9px;
   border: none !important;
-  background: #98FB98 !important;
+  background: #98FBCB !important;
   color: #0B4F3F !important;
   font-size: 15px;
   font-weight: 600;
@@ -4481,7 +4481,7 @@
 }
 
 #mint-lms-root .mint-quiz-release__option .mint-radio.is-selected {
-  border: 7px solid #98FB98;
+  border: 7px solid #98FBCB;
 }
 
 #mint-lms-root .mint-quiz-release__option .mint-radio:focus-visible {
@@ -4687,7 +4687,7 @@
   padding: 0 18px;
   border-radius: 10px;
   border: none;
-  background: #98FB98;
+  background: #98FBCB;
   color: #0B4F3F;
   font-size: 15px;
   font-weight: 700;
@@ -4697,13 +4697,13 @@
 }
 
 #mint-lms-root button.mint-quiz-add-question:hover:not(:disabled) {
-  background: #7FE87F;
+  background: #7FE8B8;
   box-shadow: 0 4px 12px rgba(11, 79, 63, 0.18);
   transform: translateY(-1px);
 }
 
 #mint-lms-root button.mint-quiz-add-question:focus-visible {
-  box-shadow: 0 0 0 3px rgba(152, 251, 152, 0.55);
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
 }
 
 #mint-lms-root button.mint-quiz-add-question:disabled {
@@ -4744,7 +4744,7 @@
   padding: 0 18px;
   border-radius: 9px;
   border: none;
-  background: #98FB98 !important;
+  background: #98FBCB !important;
   color: #0B4F3F !important;
   font-size: 15px;
   font-weight: 600;
@@ -4755,7 +4755,7 @@
 }
 #mint-lms-root button.mint-quiz-save:hover:not(:disabled),
 #mint-lms-root button.mint-quiz-save:focus-visible:not(:disabled) {
-  background: #7FE87F !important;
+  background: #7FE8B8 !important;
   box-shadow: 0 4px 12px rgba(11, 79, 63, 0.18) !important;
   transform: translateY(-1px);
 }
@@ -4808,7 +4808,7 @@
   outline: none;
 }
 #mint-lms-root .mint-quiz-option-mark.is-selected {
-  background: #98FB98;
+  background: #98FBCB;
   border-color: #0B4F3F;
   box-shadow: inset 0 0 0 3px #FFFFFF;
 }
@@ -4818,7 +4818,7 @@
 #mint-lms-root .mint-quiz-option-mark--multi.is-selected {
   box-shadow: none;
   background:
-    #98FB98
+    #98FBCB
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%230B4F3F' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' d='M3.5 8.2 6.4 11l6-6'/%3E%3C/svg%3E")
     center / 12px 12px no-repeat;
 }
@@ -4874,8 +4874,8 @@
   outline: none;
 }
 #mint-lms-root .mint-quiz-tf__pill.is-selected {
-  border-color: #98FB98;
-  background: #98FB98;
+  border-color: #98FBCB;
+  background: #98FBCB;
   color: #0B4F3F;
   font-weight: 700;
 }
@@ -4898,7 +4898,7 @@
   padding: 0 16px;
   border-radius: 8px;
   border: none;
-  background: #98FB98 !important;
+  background: #98FBCB !important;
   color: #0B4F3F !important;
   font-size: 14px;
   font-weight: 600;
@@ -4908,7 +4908,7 @@
 }
 #mint-lms-root button.mint-quiz-save-question:hover:not(:disabled),
 #mint-lms-root button.mint-quiz-save-question:focus-visible:not(:disabled) {
-  background: #7FE87F !important;
+  background: #7FE8B8 !important;
   box-shadow: 0 4px 12px rgba(11, 79, 63, 0.18) !important;
   transform: translateY(-1px);
 }
@@ -4933,7 +4933,7 @@
 }
 #mint-lms-root button.mint-question-type-btn.is-active {
   background: #FFFFFF;
-  box-shadow: 0 0 0 2px rgba(152, 251, 152, 0.55);
+  box-shadow: 0 0 0 2px rgba(152, 251, 203, 0.55);
 }
 #mint-lms-root button.mint-question-type-btn:focus-visible {
   box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
@@ -5072,7 +5072,7 @@
   padding: 0 15px;
   border-radius: 8px;
   border: none;
-  background: #98FB98 !important;
+  background: #98FBCB !important;
   color: #0B4F3F !important;
   font-size: 15px;
   font-weight: 600;
@@ -5103,7 +5103,7 @@
   flex: none;
 }
 #mint-lms-root .mint-qeditor__switch.is-on {
-  background: #98FB98;
+  background: #98FBCB;
 }
 #mint-lms-root .mint-qeditor__switch-knob {
   width: 18px;
@@ -5394,15 +5394,15 @@
   border-radius: 4px;
 }
 #mint-lms-root .mint-qeditor__correct-mark.is-selected {
-  border-color: var(--mint-check-border, #98FB98);
-  background: var(--mint-check-fill, #98FB98);
+  border-color: var(--mint-check-border, #98FBCB);
+  background: var(--mint-check-fill, #98FBCB);
   color: var(--mint-check-ink, #17222B);
 }
 #mint-lms-root .mint-qeditor__correct-dot {
   width: 8px;
   height: 8px;
   border-radius: 999px;
-  background: var(--mint-check-fill, #98FB98);
+  background: var(--mint-check-fill, #98FBCB);
 }
 #mint-lms-root .mint-qeditor__correct-mark.is-selected:not(.is-multi) {
   background: transparent;
@@ -5416,8 +5416,8 @@
   box-sizing: border-box;
 }
 #mint-lms-root .mint-qeditor__html-box.is-checked {
-  border-color: var(--mint-check-border, #98FB98);
-  background: var(--mint-check-fill, #98FB98);
+  border-color: var(--mint-check-border, #98FBCB);
+  background: var(--mint-check-fill, #98FBCB);
   color: var(--mint-check-ink, #17222B);
   box-shadow: inset 0 0 0 2px #FFFFFF;
 }
@@ -5554,7 +5554,7 @@
   padding: 0 15px;
   border-radius: 8px;
   border: none;
-  background: #98FB98 !important;
+  background: #98FBCB !important;
   color: #0B4F3F !important;
   font-size: 14px;
   font-weight: 600;
@@ -5568,7 +5568,7 @@
   width: fit-content;
 }
 #mint-lms-root button.mint-qeditor__btn-solid:hover:not(:disabled) {
-  background: #7FE87F !important;
+  background: #7FE8B8 !important;
 }
 #mint-lms-root button.mint-qeditor__btn-solid:disabled {
   opacity: 0.55;
@@ -5638,11 +5638,11 @@
   height: 40px;
   border: none;
   border-radius: 10px;
-  background: #98FB98 !important;
+  background: #98FBCB !important;
   color: #0B4F3F !important;
 }
 #mint-lms-root button.mint-qeditor__add-answer--solid:hover {
-  background: #7FE87F !important;
+  background: #7FE8B8 !important;
   border-color: transparent;
 }
 #mint-lms-root .mint-qeditor__footer {
@@ -6353,7 +6353,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   border-bottom: 1px solid rgba(15, 14, 26, 0.07);
 }
 #mint-lms-root .mint-admin-header__inner {
-  height: 60px;
+  height: 64px;
   padding: 0 40px;
   display: flex;
   align-items: center;
@@ -6361,19 +6361,29 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   gap: 24px;
   max-width: 1000px;
 }
-#mint-lms-root .mint-admin-brand { display: flex; align-items: center; gap: 11px; min-width: 0; }
+#mint-lms-root .mint-admin-brand { display: flex; align-items: center; gap: 14px; min-width: 0; }
+/* Model brand mark — global for all Mint admin headers. */
 #mint-lms-root .mint-admin-brand__mark {
-  width: 24px;
-  height: 24px;
-  border-radius: 7px;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
   background: #98FBCB;
   display: flex;
   align-items: center;
   justify-content: center;
   flex: none;
 }
-#mint-lms-root .mint-admin-brand__mark-inner { width: 9px; height: 9px; border: 2px solid #FFFFFF; border-radius: 2.5px; }
-#mint-lms-root .mint-admin-brand__name { font-size: 16px; font-weight: 600; letter-spacing: -0.015em; color: var(--mint-ink); }
+#mint-lms-root .mint-admin-brand__mark svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+}
+#mint-lms-root .mint-admin-brand__name {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--mint-ink);
+}
 #mint-lms-root .mint-admin-brand__sep { width: 1px; height: 16px; background: #C4C1D6; margin: 0 3px; }
 #mint-lms-root .mint-admin-brand__page { font-size: 16px; color: var(--mint-ink-2); }
 #mint-lms-root .mint-admin-header__actions { display: flex; align-items: center; gap: 8px; flex: none; }
@@ -6429,7 +6439,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #98fb98;
+  background: #98fbcb;
   flex: none;
 }
 #mint-lms-root .mint-dash-zero__title {
@@ -6460,7 +6470,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   padding: 0 22px;
   border: none;
   border-radius: 12px;
-  background: #98fb98 !important;
+  background: #98fbcb !important;
   color: #0f0e1a !important;
   font-size: 16px;
   font-weight: 600;
@@ -6474,9 +6484,14 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 #mint-lms-root a.mint-dash-zero__cta:hover,
 #mint-lms-root a.mint-dash-zero__cta:focus-visible {
-  background: #7fe87f !important;
+  background: #7fe8b8 !important;
   transform: translateY(-1px);
   box-shadow: 0 8px 18px rgba(152, 251, 203, 0.55) !important;
+}
+#mint-lms-root a.mint-dash-zero__cta:active {
+  background: #6ed9ae !important;
+  transform: translateY(0);
+  box-shadow: none !important;
 }
 #mint-lms-root a.mint-dash-zero__cta:focus-visible {
   box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55), 0 8px 18px rgba(152, 251, 203, 0.55) !important;
@@ -6502,7 +6517,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 #mint-lms-root a.mint-dash-zero__ghost:hover,
 #mint-lms-root a.mint-dash-zero__ghost:focus-visible {
   background: #eafff6 !important;
-  border-color: #98fb98 !important;
+  border-color: #98fbcb !important;
 }
 #mint-lms-root a.mint-dash-zero__ghost:focus-visible {
   box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
@@ -6527,7 +6542,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 #mint-lms-root button.mint-dash-zero__link-struct:hover,
 #mint-lms-root button.mint-dash-zero__link-struct:focus-visible {
   color: #0f0e1a !important;
-  text-decoration-color: #98fb98;
+  text-decoration-color: #98fbcb;
 }
 #mint-lms-root button.mint-dash-zero__link-struct:focus-visible {
   box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
@@ -6548,7 +6563,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   top: 21px;
   height: 3px;
   border-radius: 3px;
-  background: linear-gradient(90deg, #98fb98 0%, #98fbcb 60%, #e4e1f0 100%);
+  background: linear-gradient(90deg, #98fbcb 0%, #98fbcb 60%, #e4e1f0 100%);
 }
 #mint-lms-root .mint-dash-zero__step {
   position: relative;
@@ -6558,7 +6573,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   height: 44px;
   border-radius: 50%;
   background: #ffffff;
-  border: 2px solid #98fb98;
+  border: 2px solid #98fbcb;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -6569,10 +6584,10 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   transition: background 0.2s ease, transform 0.2s ease;
 }
 #mint-lms-root .mint-dash-zero__step:first-child .mint-dash-zero__step-n {
-  background: #98fb98;
+  background: #98fbcb;
 }
 #mint-lms-root .mint-dash-zero__step:hover .mint-dash-zero__step-n {
-  background: #98fb98;
+  background: #98fbcb;
   transform: scale(1.06);
 }
 #mint-lms-root .mint-dash-zero__step-t {
@@ -6674,7 +6689,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 #mint-lms-root .mint-dash-zero__slot:hover,
 #mint-lms-root .mint-dash-zero__slot:focus-visible {
   border-style: solid;
-  border-color: #98fb98;
+  border-color: #98fbcb;
   background: #f1fff9;
   transform: translateY(-2px);
   box-shadow: 0 12px 24px rgba(152, 251, 203, 0.4);
@@ -6694,7 +6709,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   color: #0f0e1a;
 }
 #mint-lms-root .mint-dash-zero__slot.is-first .mint-dash-zero__slot-no {
-  background: #98fb98;
+  background: #98fbcb;
 }
 #mint-lms-root .mint-dash-zero__slot-t {
   font-size: 15px;
@@ -6708,7 +6723,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: #98fb98;
+  background: #98fbcb;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -6790,7 +6805,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 #mint-lms-root button.mint-dash-zero__bo-row:hover:not(:disabled) {
   transform: translateX(3px);
-  border-color: #98fb98 !important;
+  border-color: #98fbcb !important;
   background: #fbfffd !important;
   box-shadow: 0 10px 20px rgba(152, 251, 203, 0.45);
 }
@@ -6805,7 +6820,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   width: 30px;
   height: 30px;
   border-radius: 9px;
-  background: #98fb98;
+  background: #98fbcb;
   font-size: 13px;
   font-weight: 700;
   display: inline-flex;
@@ -6827,11 +6842,11 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   transition: background 0.2s ease, transform 0.2s ease;
 }
 #mint-lms-root button.mint-dash-zero__bo-row:hover .mint-dash-zero__bo-go {
-  background: #98fb98;
+  background: #98fbcb;
   transform: translateX(2px);
 }
 #mint-lms-root button.mint-dash-zero__bo-row.is-open .mint-dash-zero__bo-go {
-  background: #98fb98;
+  background: #98fbcb;
 }
 #mint-lms-root button.mint-dash-zero__bo-row.is-open .mint-dash-zero__bo-go svg {
   transform: rotate(90deg);
@@ -7524,7 +7539,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 #mint-lms-root .mint-settings-select.is-open .mint-settings-select__trigger,
 #mint-lms-root .mint-settings-select__trigger:hover,
 #mint-lms-root .mint-settings-select__trigger:focus {
-  border-color: #98FB98;
+  border-color: #98FBCB;
 }
 #mint-lms-root .mint-settings-select__trigger:focus {
   box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
@@ -7560,7 +7575,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   cursor: pointer;
 }
 #mint-lms-root .mint-settings-select__option.is-active { font-weight: 700; background: #E8FFF3; }
-#mint-lms-root .mint-settings-select__option:hover { background: #98FB98; }
+#mint-lms-root .mint-settings-select__option:hover { background: #98FBCB; }
 #mint-lms-root .mint-settings-input,
 #mint-lms-root .mint-settings-textarea {
   display: block;
@@ -7588,10 +7603,10 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   resize: vertical;
 }
 #mint-lms-root .mint-settings-input:hover,
-#mint-lms-root .mint-settings-textarea:hover { border-color: #98FB98; }
+#mint-lms-root .mint-settings-textarea:hover { border-color: #98FBCB; }
 #mint-lms-root .mint-settings-input:focus,
 #mint-lms-root .mint-settings-textarea:focus {
-  border-color: #98FB98;
+  border-color: #98FBCB;
   box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
 }
 #mint-lms-root .mint-settings-tags {
@@ -7622,7 +7637,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   transition: background 120ms ease-out;
 }
 #mint-lms-root .mint-settings-tag:hover,
-#mint-lms-root .mint-settings-tag:focus { background: #98FB98; }
+#mint-lms-root .mint-settings-tag:focus { background: #98FBCB; }
 #mint-lms-root .mint-settings-toggle-row {
   display: flex;
   align-items: center;
@@ -7690,7 +7705,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 #mint-lms-root .mint-settings-progress__fill {
   height: 100%;
   border-radius: 999px;
-  background: #98FB98;
+  background: #98FBCB;
   transition: width 200ms ease-out;
 }
 #mint-lms-root .mint-settings-progress__label {
@@ -7733,7 +7748,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   color: #5C5C77;
 }
 #mint-lms-root .mint-settings-checklist__item.is-done .mint-settings-checklist__icon {
-  background: #98FB98;
+  background: #98FBCB;
   color: #17222B;
 }
 #mint-lms-root .mint-settings-checklist__text {
@@ -7769,7 +7784,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 #mint-lms-root .mint-settings-enroll:hover,
 #mint-lms-root .mint-settings-enroll:focus {
-  border-color: #98FB98;
+  border-color: #98FBCB;
   background: #F1FFF9;
   box-shadow: 0 4px 14px rgba(152, 251, 203, 0.5);
 }
@@ -7868,12 +7883,12 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 #mint-lms-root .mint-settings-btn--primary {
   border: none;
-  background: #98FB98;
+  background: #98FBCB;
   color: #17222B;
 }
 #mint-lms-root .mint-settings-btn--primary:hover:not(:disabled),
 #mint-lms-root .mint-settings-btn--primary:focus:not(:disabled) {
-  background: #7FE87F;
+  background: #7FE8B8;
   box-shadow: 0 4px 12px rgba(152, 251, 203, 0.7);
   transform: translateY(-1px);
 }
@@ -7951,7 +7966,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   left: 0;
   width: 3px;
   border-radius: 0 3px 3px 0;
-  background: #98FB98;
+  background: #98FBCB;
 }
 #mint-lms-root .mint-assoc-card__title {
   margin: 0 0 4px;
@@ -8156,12 +8171,12 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   color: var(--mint-ink);
 }
 #mint-lms-root .mint-assoc-select__option.is-active {
-  background: #98FB98;
+  background: #98FBCB;
   color: #0B4F3F;
   font-weight: 600;
 }
 #mint-lms-root .mint-assoc-select__option.is-active:hover {
-  background: #7FE87F;
+  background: #7FE8B8;
   color: #0B4F3F;
 }
 #mint-lms-root .mint-assoc-select__option.is-disabled,
@@ -8234,7 +8249,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 
 #mint-lms-root .mint-cs-switcher__back:hover,
 #mint-lms-root .mint-cs-switcher__back:focus-visible {
-  background: #98FB98;
+  background: #98FBCB;
   box-shadow: var(--mint-cta-shadow);
   transform: translateY(-1px);
   outline: none;
@@ -8470,14 +8485,14 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root button.mint-cs-choice.is-selected .mint-cs-choice__radio {
-  border-color: var(--mint-check-border, #98FB98);
+  border-color: var(--mint-check-border, #98FBCB);
 }
 
 #mint-lms-root button.mint-cs-choice.is-selected .mint-cs-choice__radio span {
   width: 8px;
   height: 8px;
   border-radius: 999px;
-  background: var(--mint-check-fill, #98FB98);
+  background: var(--mint-check-fill, #98FBCB);
 }
 
 #mint-lms-root .mint-cs-choice__copy {
@@ -8612,11 +8627,11 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root .mint-cs-input:hover {
-  border-color: #98FB98;
+  border-color: #98FBCB;
 }
 
 #mint-lms-root .mint-cs-input:focus {
-  border-color: #98FB98;
+  border-color: #98FBCB;
   box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
 }
 
@@ -8668,7 +8683,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root .mint-cs-materials__add-media:hover {
-  background: #98FB98;
+  background: #98FBCB;
 }
 
 #mint-lms-root .mint-cs-materials__add-media:focus-visible {
@@ -8780,7 +8795,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 
 #mint-lms-root .mint-cs-materials__format-option:hover,
 #mint-lms-root .mint-cs-materials__format-option.is-active {
-  background: #98FB98;
+  background: #98FBCB;
   font-weight: 700;
 }
 
@@ -8800,7 +8815,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root .mint-cs-materials__tool:hover {
-  background: #98FB98;
+  background: #98FBCB;
 }
 
 #mint-lms-root .mint-cs-materials__code-chip {
@@ -8817,7 +8832,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root .mint-cs-materials__code-chip:hover {
-  background: #98FB98;
+  background: #98FBCB;
 }
 
 #mint-lms-root .mint-cs-materials__visual,
@@ -8922,7 +8937,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root .mint-cs-btn-mint:hover:not(:disabled) {
-  background: #98FB98;
+  background: #98FBCB;
 }
 
 #mint-lms-root .mint-cs-btn-mint:disabled {
@@ -8973,8 +8988,8 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root .mint-cs-prereq:hover {
-  background: #98FB98;
-  border-color: #98FB98;
+  background: #98FBCB;
+  border-color: #98FBCB;
 }
 
 #mint-lms-root .mint-cs-prereq.is-selected {
@@ -9018,7 +9033,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 #mint-lms-root .mint-cs-select__btn.is-open,
 #mint-lms-root .mint-cs-select__btn:hover,
 #mint-lms-root .mint-cs-select__btn:focus-visible {
-  border-color: #98FB98;
+  border-color: #98FBCB;
   outline: none;
 }
 
@@ -9058,7 +9073,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 
 #mint-lms-root .mint-cs-select__option:hover,
 #mint-lms-root .mint-cs-select__option.is-selected {
-  background: #98FB98;
+  background: #98FBCB;
   font-weight: 700;
 }
 
@@ -9115,7 +9130,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   padding: 18px;
   border-radius: 18px;
   background:
-    linear-gradient(180deg, rgba(152, 251, 152, 0.22) 0%, rgba(152, 251, 152, 0.08) 88px, #fff 88px);
+    linear-gradient(180deg, rgba(152, 251, 203, 0.22) 0%, rgba(152, 251, 203, 0.08) 88px, #fff 88px);
   border: 1.5px solid rgba(11, 79, 63, 0.12);
 }
 
@@ -9445,7 +9460,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root .mint-settings-choice.is-selected .mint-settings-choice__radio {
-  border-color: var(--mint-check-border, #98FB98);
+  border-color: var(--mint-check-border, #98FBCB);
   background: #E8FFF3;
 }
 
@@ -9454,7 +9469,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   position: absolute;
   inset: 3px;
   border-radius: 999px;
-  background: var(--mint-check-fill, #98FB98);
+  background: var(--mint-check-fill, #98FBCB);
 }
 
 #mint-lms-root .mint-settings-choice__copy {
@@ -9582,7 +9597,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root .mint-prereq-row.is-selected {
-  border-color: var(--mint-check-border, #98FB98);
+  border-color: var(--mint-check-border, #98FBCB);
   background: #F3FBF7;
 }
 
@@ -9598,8 +9613,8 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root .mint-prereq-row.is-selected .mint-prereq-row__check {
-  border-color: var(--mint-check-border, #98FB98);
-  background: var(--mint-check-fill, #98FB98);
+  border-color: var(--mint-check-border, #98FBCB);
+  background: var(--mint-check-fill, #98FBCB);
 }
 
 #mint-lms-root .mint-prereq-row.is-selected .mint-prereq-row__check::after {
@@ -9696,12 +9711,12 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  background: #98FB98;
+  background: #98FBCB;
   color: #17222B;
 }
 #mint-lms-root .mint-quiz-attach__icon--quiz,
 #mint-lms-root .mint-quiz-attach__icon--section {
-  background: #98FB98;
+  background: #98FBCB;
   color: #17222B;
 }
 #mint-lms-root .mint-quiz-attach__head-text {
@@ -9727,7 +9742,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   gap: 10px;
   margin-bottom: 12px;
   padding: 10px 12px;
-  border: 1.5px solid var(--mint-check-border, #98FB98);
+  border: 1.5px solid var(--mint-check-border, #98FBCB);
   border-radius: 10px;
   background: #E8FFF3;
   box-sizing: border-box;
@@ -9740,7 +9755,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   width: 22px;
   height: 22px;
   border-radius: 999px;
-  background: var(--mint-check-fill, #98FB98);
+  background: var(--mint-check-fill, #98FBCB);
   color: var(--mint-check-ink, #17222B);
 }
 #mint-lms-root .mint-quiz-attach__selected-title {
@@ -9770,7 +9785,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   opacity: 0.5;
   cursor: not-allowed;
 }
-/* Reuses mint-settings-select (search + #98FB98 hover) — same as Course picker. */
+/* Reuses mint-settings-select (search + #98FBCB hover) — same as Course picker. */
 #mint-lms-root .mint-quiz-attach__select {
   position: relative;
   margin-bottom: 12px;
@@ -9794,7 +9809,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   padding: 10px 14px;
   border: 0;
   border-radius: 10px;
-  background: #98FB98;
+  background: #98FBCB;
   color: #0B4F3F;
   font-family: var(--mint-font);
   font-size: 15px;
@@ -10176,7 +10191,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root .mint-settings-choice.is-selected .mint-settings-choice__dot {
-  border-color: var(--mint-check-border, #98FB98);
+  border-color: var(--mint-check-border, #98FBCB);
 }
 
 #mint-lms-root .mint-settings-choice__dot-inner {
@@ -10187,7 +10202,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root .mint-settings-choice.is-selected .mint-settings-choice__dot-inner {
-  background: var(--mint-check-fill, #98FB98);
+  background: var(--mint-check-fill, #98FBCB);
 }
 
 #mint-lms-root .mint-settings-choice__title {
@@ -10232,7 +10247,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   width: 20px;
   height: 20px;
   border-radius: 5px;
-  border: 1.5px solid var(--mint-check-border, #98FB98);
+  border: 1.5px solid var(--mint-check-border, #98FBCB);
   background: transparent;
   display: inline-flex;
   align-items: center;
@@ -10242,7 +10257,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root .mint-settings-check__box.is-checked {
-  background: var(--mint-check-fill, #98FB98);
+  background: var(--mint-check-fill, #98FBCB);
 }
 
 #mint-lms-root .mint-settings-check__label {
@@ -10281,7 +10296,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root .mint-settings-radio-inline.is-selected .mint-settings-radio-inline__dot {
-  border-color: var(--mint-check-border, #98FB98);
+  border-color: var(--mint-check-border, #98FBCB);
 }
 
 #mint-lms-root .mint-settings-radio-inline__dot-inner {
@@ -10292,7 +10307,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root .mint-settings-radio-inline.is-selected .mint-settings-radio-inline__dot-inner {
-  background: var(--mint-check-fill, #98FB98);
+  background: var(--mint-check-fill, #98FBCB);
 }
 
 #mint-lms-root .mint-settings-radio-inline__label {
@@ -10391,11 +10406,11 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root .mint-settings-select__search-input:hover {
-  border-color: #98FB98;
+  border-color: #98FBCB;
 }
 
 #mint-lms-root .mint-settings-select__search-input:focus {
-  border-color: #98FB98;
+  border-color: #98FBCB;
   box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
 }
 
@@ -10432,7 +10447,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 
 #mint-lms-root .mint-settings-select__option:hover,
 #mint-lms-root .mint-settings-select__option.is-active {
-  background: #98FB98;
+  background: #98FBCB;
   font-weight: 700;
 }
 
@@ -10555,7 +10570,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root button.mint-settings-editor__chip:hover {
-  background: #98FB98;
+  background: #98FBCB;
   color: #0B4F3F;
   border-color: #0B4F3F;
 }
@@ -10582,7 +10597,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   padding: 0 12px;
   border-radius: 7px;
   border: 0;
-  background: #98FB98;
+  background: #98FBCB;
   color: #0B4F3F;
   font-size: 13px;
   font-weight: 700;
@@ -10592,7 +10607,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root .mint-settings-editor__media:hover {
-  background: #7FE87F;
+  background: #7FE8B8;
 }
 
 #mint-lms-root .mint-settings-editor__textarea {
@@ -10623,7 +10638,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   padding: 0 20px;
   border-radius: 9px;
   border: none;
-  background: #98FB98;
+  background: #98FBCB;
   color: #0B4F3F;
   font-size: 15px;
   font-weight: 700;
@@ -10633,9 +10648,14 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root button.mint-settings-save:hover:not(:disabled) {
-  background: #7FE87F;
+  background: #7FE8B8;
   box-shadow: 0 4px 12px rgba(11, 79, 63, 0.18);
   transform: translateY(-1px);
+}
+#mint-lms-root button.mint-settings-save:active:not(:disabled) {
+  background: #6ED9AE;
+  box-shadow: none;
+  transform: translateY(0);
 }
 
 #mint-lms-root button.mint-settings-save:focus-visible:not(:disabled) {
@@ -10714,7 +10734,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   width: 36px;
   height: 36px;
   border-radius: 10px;
-  background: #98FB98;
+  background: #98FBCB;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -10822,7 +10842,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 
 #mint-lms-root button.mint-settings-days__step:hover,
 #mint-lms-root button.mint-settings-days__step:focus-visible {
-  background: #98FB98;
+  background: #98FBCB;
 }
 
 #mint-lms-root button.mint-settings-days__step:focus-visible {
@@ -10845,11 +10865,11 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root .mint-settings-days__input:hover {
-  border-color: #98FB98;
+  border-color: #98FBCB;
 }
 
 #mint-lms-root .mint-settings-days__input:focus {
-  border-color: #98FB98;
+  border-color: #98FBCB;
   box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
 }
 
@@ -10894,7 +10914,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 
 #mint-lms-root button.mint-settings-days__chip:hover,
 #mint-lms-root button.mint-settings-days__chip.is-active {
-  background: #98FB98;
+  background: #98FBCB;
 }
 
 #mint-lms-root button.mint-settings-days__chip:focus-visible {
@@ -11011,7 +11031,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   padding: 0 16px;
   border-radius: 9px;
   border: none;
-  background: #98FB98;
+  background: #98FBCB;
   color: #0B4F3F;
   font-size: 15px;
   font-weight: 700;
@@ -11020,7 +11040,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root button.mint-settings-add-grad:hover {
-  background: #7FE87F;
+  background: #7FE8B8;
 }
 
 #mint-lms-root .mint-settings-delete-grad {
@@ -11118,7 +11138,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   padding: 0 20px;
   border: none;
   border-radius: 10px;
-  background: #98FB98;
+  background: #98FBCB;
   color: #0B4F3F;
   font-size: 15px;
   font-weight: 700;
@@ -11128,7 +11148,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root button.mint-lesson-quizzes__draft-save:hover:not(:disabled) {
-  background: #7FE87F;
+  background: #7FE8B8;
 }
 
 #mint-lms-root button.mint-lesson-quizzes__draft-save:disabled {
@@ -11350,7 +11370,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   padding: 0 16px;
   border-radius: 8px;
   border: none;
-  background: #98FB98;
+  background: #98FBCB;
   color: #0F0E1A;
   font-size: 14px;
   font-weight: 700;
@@ -11361,7 +11381,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root button.mint-lesson-quizzes__edit:hover {
-  background: #7FE87F;
+  background: #7FE8B8;
 }
 
 #mint-lms-root .mint-lesson-quizzes__remove,
@@ -11395,7 +11415,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   padding: 0 18px;
   border-radius: 10px;
   border: none;
-  background: #98FB98;
+  background: #98FBCB;
   color: #0B4F3F;
   font-size: 15px;
   font-weight: 700;
@@ -11404,7 +11424,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root button.mint-lesson-add-quiz:hover:not(:disabled) {
-  background: #7FE87F;
+  background: #7FE8B8;
   box-shadow: 0 4px 12px rgba(11, 79, 63, 0.18);
   transform: translateY(-1px);
 }
@@ -11425,7 +11445,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   padding: 0 18px;
   border-radius: 999px;
   border: none;
-  background: #98FB98;
+  background: #98FBCB;
   color: #0B4F3F;
   font-size: 15px;
   font-weight: 700;
@@ -11434,7 +11454,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root button.mint-lesson-settings-pill:hover:not(:disabled) {
-  background: #7FE87F;
+  background: #7FE8B8;
 }
 
 #mint-lms-root button.mint-lesson-settings-pill:disabled {
@@ -11510,10 +11530,10 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   transition: border-color 120ms ease-out, box-shadow 120ms ease-out;
 }
 #mint-lms-root .mint-students-picker__search-input:hover {
-  border-color: #98FB98;
+  border-color: #98FBCB;
 }
 #mint-lms-root .mint-students-picker__search-input:focus {
-  border-color: #98FB98;
+  border-color: #98FBCB;
   box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
 }
 #mint-lms-root .mint-students-picker__layout {
@@ -11617,7 +11637,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 #mint-lms-root .mint-students-course-card__fill {
   height: 100%;
   border-radius: 999px;
-  background: #98FB98;
+  background: #98FBCB;
   width: 0%;
 }
 #mint-lms-root .mint-students-course-card__finished {
@@ -11869,10 +11889,10 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   outline: none;
 }
 #mint-lms-root .mint-students-course__search-input:hover {
-  border-color: #98FB98;
+  border-color: #98FBCB;
 }
 #mint-lms-root .mint-students-course__search-input:focus {
-  border-color: #98FB98;
+  border-color: #98FBCB;
   box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
 }
 #mint-lms-root .mint-students-course__add {
@@ -11915,10 +11935,10 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   outline: none;
 }
 #mint-lms-root .mint-students-course__add-input:hover {
-  border-color: #98FB98;
+  border-color: #98FBCB;
 }
 #mint-lms-root .mint-students-course__add-input:focus {
-  border-color: #98FB98;
+  border-color: #98FBCB;
   box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
 }
 #mint-lms-root .mint-students-enroll-suggestions {
@@ -12081,7 +12101,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 #mint-lms-root .mint-students-table__fill {
   height: 100%;
   border-radius: 999px;
-  background: #98FB98;
+  background: #98FBCB;
   width: 0%;
 }
 #mint-lms-root .mint-students-table__pct {
@@ -12205,7 +12225,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   outline: none;
   transition: background 150ms ease-out, box-shadow 150ms ease-out;
 }
-#mint-lms-root .mint-reports__range:hover { background: #98FB98; }
+#mint-lms-root .mint-reports__range:hover { background: #98FBCB; }
 #mint-lms-root .mint-reports__range.is-active {
   background: #FFFFFF;
   font-weight: 700;
@@ -12355,7 +12375,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   min-height: 8px;
 }
 #mint-lms-root .mint-reports__bar:hover .mint-reports__bar-fill,
-#mint-lms-root .mint-reports__bar-fill.is-latest { background: #98FB98; }
+#mint-lms-root .mint-reports__bar-fill.is-latest { background: #98FBCB; }
 #mint-lms-root .mint-reports__bar-label {
   font-size: 12px;
   color: #5C5C77;
@@ -12419,7 +12439,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 #mint-lms-root .mint-reports__course-fill {
   height: 100%;
   border-radius: 999px;
-  background: #98FB98;
+  background: #98FBCB;
 }
 #mint-lms-root .mint-reports__course-pct {
   font-size: 14px;
@@ -12613,7 +12633,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   outline: none;
 }
 #mint-lms-root .mint-assign__search:focus {
-  border-color: #98fb98;
+  border-color: #98fbcb;
   box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.45);
 }
 #mint-lms-root .mint-assign__list {
@@ -12693,7 +12713,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   padding: 0;
   border: 0;
   border-radius: 999px;
-  background: #98fb98;
+  background: #98fbcb;
   color: #111;
   cursor: pointer;
 }
@@ -12703,7 +12723,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   display: block;
 }
 #mint-lms-root .mint-assign__arrow:hover:not(:disabled) {
-  background: #7fe87f;
+  background: #7fe8b8;
 }
 #mint-lms-root .mint-assign__arrow:disabled {
   opacity: 0.55;
@@ -12908,7 +12928,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   width: 34px;
   height: 34px;
   border-radius: 9px;
-  background: #98FB98;
+  background: #98FBCB;
   color: #0F0E1A;
   font-size: 14px;
   font-weight: 800;
@@ -12949,7 +12969,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root .mint-section-lessons__status.mint-status-chip--published {
-  background: #98FB98;
+  background: #98FBCB;
   color: #0F0E1A;
   border: 0;
 }
@@ -12977,10 +12997,10 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root button.mint-section-lessons__row:hover .mint-section-lessons__open {
-  background: #98FB98;
-  border-color: #98FB98;
+  background: #98FBCB;
+  border-color: #98FBCB;
   color: #0F0E1A;
-  box-shadow: 0 2px 8px rgba(152, 251, 152, 0.4);
+  box-shadow: 0 2px 8px rgba(152, 251, 203, 0.4);
 }
 
 #mint-lms-root .mint-section-lessons__empty {
@@ -13088,7 +13108,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   padding: 0 18px;
   border-radius: 10px;
   border: none;
-  background: #98FB98 !important;
+  background: #98FBCB !important;
   color: #0F0E1A !important;
   font-size: 14px;
   font-weight: 700;
@@ -13098,7 +13118,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root button.mint-section-lessons__save:hover {
-  background: #7FE87F !important;
+  background: #7FE8B8 !important;
   box-shadow: 0 4px 12px rgba(11, 79, 63, 0.18);
   transform: translateY(-1px);
 }
