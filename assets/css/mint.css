@@ -732,6 +732,22 @@
     border-color: #98FB98;
   }
 
+  /* Instructor Step 2 — same card shell, classroom accent order (mint-blue finish). */
+  #mint-lms-root .mint-welcome-flow--teach .mint-welcome-flow__card {
+    border-color: #B8F5D9;
+    box-shadow: 0 4px 14px rgba(152, 251, 203, 0.18);
+  }
+
+  #mint-lms-root .mint-welcome-flow--teach .mint-welcome-flow__card.is-mid {
+    background: #F1FFF9;
+    border-color: #98FBCB;
+  }
+
+  #mint-lms-root .mint-welcome-flow--teach .mint-welcome-flow__card.is-root {
+    background: #98FBCB;
+    border-color: #98FBCB;
+  }
+
   #mint-lms-root .mint-welcome-flow__card:hover {
     transform: translateY(-2px);
     box-shadow: 0 12px 26px rgba(152, 251, 203, 0.55);
