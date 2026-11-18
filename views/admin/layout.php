@@ -3,13 +3,14 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-$showHeader    = $showHeader ?? true;
-$pageLabel     = $pageLabel ?? '';
-$headerActions = $headerActions ?? '';
-$newCourseUrl  = $newCourseUrl ?? \MintLMS\Infrastructure\Admin\CourseBuilderPage::newCourseUrl();
-$maxWidthClass = $maxWidthClass ?? 'mint-max-w-content';
-$content       = $content ?? '';
-$renderer      = new MintLMS\Infrastructure\Admin\ViewRenderer();
+$showHeader        = $showHeader ?? true;
+$showHeaderActions = $showHeaderActions ?? true;
+$pageLabel         = $pageLabel ?? '';
+$headerActions     = $headerActions ?? '';
+$newCourseUrl      = $newCourseUrl ?? \MintLMS\Infrastructure\Admin\CourseBuilderPage::newCourseUrl();
+$maxWidthClass     = $maxWidthClass ?? 'mint-max-w-content';
+$content           = $content ?? '';
+$renderer          = new MintLMS\Infrastructure\Admin\ViewRenderer();
 ?>
 <div class="wrap mint-lms-admin-wrap">
 	<?php echo MintLMS\Infrastructure\Ui\UiRoot::open( 'admin' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>

@@ -22,7 +22,7 @@
 #mint-lms-root button.mint-welcome-cta:focus,
 #mint-lms-root button.mint-welcome-cta:focus-visible {
   color: #0F0E1A !important;
-  background-color: #98FB98 !important;
+  background-color: #98FBCB !important;
   background-image: none !important;
   border: none !important;
   box-shadow: none !important;
@@ -35,15 +35,22 @@
 #mint-lms-root a.mint-welcome-cta:focus-visible,
 #mint-lms-root button.mint-welcome-cta:hover,
 #mint-lms-root button.mint-welcome-cta:focus-visible {
-  background-color: #7FE87F !important;
+  background-color: #7FE8B8 !important;
   box-shadow: 0 4px 12px rgba(11, 79, 63, 0.18) !important;
   transform: translateY(-1px);
+}
+
+#mint-lms-root a.mint-welcome-cta:active,
+#mint-lms-root button.mint-welcome-cta:active {
+  background-color: #6ED9AE !important;
+  box-shadow: none !important;
+  transform: translateY(0);
 }
 
 #mint-lms-root a.mint-welcome-skip,
 #mint-lms-root a.mint-welcome-skip:visited {
   color: #0F0E1A !important;
-  background-color: #7FE87F !important;
+  background-color: #7FE8B8 !important;
   box-shadow: 0 6px 16px rgba(152, 251, 203, 0.55) !important;
   transition: background 150ms ease-out, box-shadow 150ms ease-out, transform 150ms ease-out;
 }
@@ -51,7 +58,7 @@
 #mint-lms-root a.mint-welcome-skip:hover,
 #mint-lms-root a.mint-welcome-skip:focus-visible {
   color: #0F0E1A !important;
-  background-color: #98FB98 !important;
+  background-color: #98FBCB !important;
   border-color: transparent !important;
   box-shadow: 0 6px 16px rgba(152, 251, 203, 0.55) !important;
   transform: translateY(-1px);
@@ -90,7 +97,7 @@
 #mint-lms-root a.mint-dash-new-course:focus,
 #mint-lms-root a.mint-dash-new-course:focus-visible {
   color: #0F0E1A !important;
-  background-color: #98FB98 !important;
+  background-color: #98FBCB !important;
   background-image: none !important;
   box-shadow: none !important;
   transition: background 150ms ease-out, box-shadow 150ms ease-out, transform 150ms ease-out;
@@ -98,9 +105,15 @@
 
 #mint-lms-root a.mint-dash-new-course:hover,
 #mint-lms-root a.mint-dash-new-course:focus-visible {
-  background-color: #7FE87F !important;
+  background-color: #7FE8B8 !important;
   box-shadow: 0 4px 12px rgba(11, 79, 63, 0.18) !important;
   transform: translateY(-1px);
+}
+
+#mint-lms-root a.mint-dash-new-course:active {
+  background-color: #6ED9AE !important;
+  box-shadow: none !important;
+  transform: translateY(0);
 }
 
 #mint-lms-root a.mint-dash-new-course:focus-visible {
@@ -115,7 +128,7 @@
 #mint-lms-root a.mint-builder-btn-preview:focus,
 #mint-lms-root a.mint-builder-btn-preview:focus-visible {
   color: #0B4F3F !important;
-  background-color: #98FB98 !important;
+  background-color: #98FBCB !important;
   background-image: none !important;
   border: none !important;
   box-shadow: none !important;
@@ -126,13 +139,13 @@
 
 #mint-lms-root a.mint-builder-btn-preview:hover,
 #mint-lms-root a.mint-builder-btn-preview:focus-visible {
-  background-color: #7FE87F !important;
+  background-color: #7FE8B8 !important;
   box-shadow: 0 4px 12px rgba(11, 79, 63, 0.18) !important;
   transform: translateY(-1px);
 }
 
 #mint-lms-root a.mint-builder-btn-preview:active {
-  background-color: #7FE87F !important;
+  background-color: #6ED9AE !important;
   box-shadow: none !important;
   transform: translateY(0);
 }
@@ -360,13 +373,13 @@
   box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
 }
 
-/* Design file primary CTA — #98FB98 lime (all primary buttons) */
+/* Primary CTA — Mint blue #98FBCB (all primary buttons) */
 #mint-lms-root a.mint-cta-lime,
 #mint-lms-root a.mint-cta-lime:visited,
 #mint-lms-root button.mint-cta-lime,
 #mint-lms-root .mint-cta-lime {
   color: #0B4F3F !important;
-  background-color: #98FB98 !important;
+  background-color: #98FBCB !important;
   background-image: none !important;
   box-shadow: none !important;
   transition: background 150ms ease-out, box-shadow 150ms ease-out, transform 150ms ease-out;
@@ -379,9 +392,17 @@
 #mint-lms-root .mint-cta-lime:hover,
 #mint-lms-root .mint-cta-lime:focus-visible {
   color: #0B4F3F !important;
-  background-color: #7FE87F !important;
+  background-color: #7FE8B8 !important;
   box-shadow: 0 4px 12px rgba(11, 79, 63, 0.18) !important;
   transform: translateY(-1px);
+}
+
+#mint-lms-root a.mint-cta-lime:active,
+#mint-lms-root button.mint-cta-lime:active,
+#mint-lms-root .mint-cta-lime:active {
+  background-color: #6ED9AE !important;
+  box-shadow: none !important;
+  transform: translateY(0);
 }
 
 #mint-lms-root a.mint-cta-lime:focus-visible,
@@ -492,7 +513,7 @@
     width: 40px;
     height: 40px;
     border-radius: 12px;
-    background: #98FB98;
+    background: #98FBCB;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -560,7 +581,7 @@
   #mint-lms-root .mint-welcome__step-nav-btn.is-active,
   #mint-lms-root .mint-welcome__step-nav-btn.is-active:hover,
   #mint-lms-root .mint-welcome__step-nav-btn.is-active:focus-visible {
-    background: #98FB98 !important;
+    background: #98FBCB !important;
     color: #0F0E1A !important;
   }
 
@@ -679,20 +700,20 @@
   }
 
   #mint-lms-root .mint-welcome-tree__node.is-root {
-    background: #98FB98;
-    border-color: #98FB98;
+    background: #98FBCB;
+    border-color: #98FBCB;
   }
 
   #mint-lms-root .mint-welcome-tree__node:hover {
     transform: translateY(-2px);
     background: #E8FFF3;
-    border-color: #98FB98;
+    border-color: #98FBCB;
     box-shadow: 0 12px 26px rgba(152, 251, 203, 0.6);
   }
 
   #mint-lms-root .mint-welcome-tree__node.is-root:hover {
-    background: #7FE87F;
-    border-color: #7FE87F;
+    background: #7FE8B8;
+    border-color: #7FE8B8;
   }
 
   #mint-lms-root .mint-welcome__step-panel {
@@ -728,8 +749,8 @@
   }
 
   #mint-lms-root .mint-welcome-flow__card.is-root {
-    background: #98FB98;
-    border-color: #98FB98;
+    background: #98FBCB;
+    border-color: #98FBCB;
   }
 
   /* Instructor Step 2 — same card shell, classroom accent order (mint-blue finish). */
@@ -950,7 +971,7 @@
 #mint-lms-root button.mint-settings-action:active,
 #mint-lms-root button.mint-settings-action:focus {
   color: #0B4F3F !important;
-  background-color: #98FB98 !important;
+  background-color: #98FBCB !important;
   background-image: none !important;
   box-shadow: none !important;
   transition: background 150ms ease-out, box-shadow 150ms ease-out, transform 150ms ease-out;
@@ -962,7 +983,7 @@
 #mint-lms-root button.mint-settings-action:focus-visible,
 #mint-lms-root a.mint-settings-save:hover,
 #mint-lms-root a.mint-settings-save:focus-visible {
-  background-color: #7FE87F !important;
+  background-color: #7FE8B8 !important;
   box-shadow: 0 4px 12px rgba(11, 79, 63, 0.18) !important;
   transform: translateY(-1px);
 }
