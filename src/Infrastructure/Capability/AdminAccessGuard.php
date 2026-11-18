@@ -18,6 +18,40 @@ final class AdminAccessGuard {
 		add_filter( 'show_admin_bar', array( $this, 'hideAdminBarForStudents' ) );
 		add_filter( 'woocommerce_prevent_admin_access', array( $this, 'allowMintStaffWpAdmin' ), 20 );
 		add_filter( 'woocommerce_disable_admin_bar', array( $this, 'allowMintStaffAdminBar' ), 20 );
+		// After WP marks post.php / post-new.php nopriv for users without edit_posts.
+		add_action( 'admin_menu', array( $this, 'allowNativeMintEditorScreens' ), 9999 );
+	}
+
+	/**
+	 * Instructors/Managers have edit_mintlms_courses but not edit_posts.
+	 * Core then puts post.php / post-new.php / edit.php in $_wp_menu_nopriv and
+	 * user_can_access_admin_page() dies with "not allowed to access this page"
+	 * before CPT create/edit caps run. Clear those flags for Mint staff so the
+	 * native Course (and Lesson/Quiz/Question) Gutenberg screens work.
+	 */
+	public function allowNativeMintEditorScreens(): void {
+		if ( ! $this->isMintStaff() ) {
+			return;
+		}
+
+		global $_wp_menu_nopriv, $_wp_submenu_nopriv;
+
+		foreach ( array( 'post.php', 'post-new.php', 'edit.php' ) as $screen ) {
+			unset( $_wp_menu_nopriv[ $screen ] );
+		}
+
+		if ( ! is_array( $_wp_submenu_nopriv ) ) {
+			return;
+		}
+
+		foreach ( $_wp_submenu_nopriv as $parent => $items ) {
+			if ( ! is_array( $items ) ) {
+				continue;
+			}
+			foreach ( array( 'post.php', 'post-new.php', 'edit.php' ) as $screen ) {
+				unset( $_wp_submenu_nopriv[ $parent ][ $screen ] );
+			}
+		}
 	}
 
 	public function blockStudentWpAdmin(): void {
