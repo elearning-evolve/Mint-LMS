@@ -139,6 +139,60 @@ document.addEventListener('alpine:init', () => {
       },
     };
   });
+
+  Alpine.data('mintDashEmpty', () => ({
+    flash: false,
+    flashTimer: null,
+    /** Highest build-order step currently visible (1–4). */
+    boVisible: 1,
+    /** Steps whose arrow is in the open state. */
+    boOpen: {},
+    seeStructure() {
+      const el = this.$refs.structure;
+      if (!el) {
+        return;
+      }
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      this.flash = true;
+      if (this.flashTimer) {
+        clearTimeout(this.flashTimer);
+      }
+      this.flashTimer = setTimeout(() => {
+        this.flash = false;
+      }, 1400);
+    },
+    isBoVisible(n) {
+      return this.boVisible >= n;
+    },
+    isBoOpen(n) {
+      return !!this.boOpen[n];
+    },
+    toggleBo(n) {
+      const step = Number(n);
+      if (step < 1 || step > 3) {
+        return;
+      }
+      if (this.boVisible > step) {
+        this.boVisible = step;
+        const nextOpen = {};
+        Object.keys(this.boOpen).forEach((key) => {
+          if (Number(key) < step) {
+            nextOpen[key] = true;
+          }
+        });
+        this.boOpen = nextOpen;
+        return;
+      }
+      this.boVisible = step + 1;
+      this.boOpen = { ...this.boOpen, [step]: true };
+      this.$nextTick(() => {
+        const next = this.$root?.querySelector?.(`.mint-dash-zero__bo-step.is-lvl-${step + 1}`);
+        if (next && typeof next.scrollIntoView === 'function') {
+          next.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      });
+    },
+  }));
 });
 
 window.Alpine = Alpine;

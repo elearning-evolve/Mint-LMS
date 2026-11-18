@@ -18,8 +18,23 @@ final class CourseBuilderPage {
 		add_action( 'load-admin_page_mint-lms-course-new', array( $this, 'createAndRedirect' ) );
 	}
 
+	/**
+	 * Blank native WP Course editor (empty title).
+	 * Menu nopriv for users without edit_posts is cleared in AdminAccessGuard.
+	 */
 	public static function newCourseUrl(): string {
 		return admin_url( 'post-new.php?post_type=' . PostTypes::COURSE );
+	}
+
+	/**
+	 * Create a draft titled "Untitled Course", then open the native WP editor.
+	 * Used by empty-dashboard “Create your first course”.
+	 */
+	public static function titledCourseUrl(): string {
+		return wp_nonce_url(
+			admin_url( 'admin.php?page=mint-lms-course-new' ),
+			self::CREATE_NONCE_ACTION
+		);
 	}
 
 	public function registerPages(): void {

@@ -33,15 +33,15 @@ $dashboardService = new CreatorDashboardService(
 $dashboard    = $dashboardService->getDashboard( $userId );
 $newCourseUrl = \MintLMS\Infrastructure\Admin\CourseBuilderPage::newCourseUrl();
 
-// Empty dashboard: hero CTA + header New course (no search yet — nothing to find).
+// Empty dashboard: zero-course workspace + header New course (no search yet).
 if ( $dashboard->isEmpty ) {
 	ob_start();
 	?>
 	<a
 		href="<?php echo esc_url( $newCourseUrl ); ?>"
-		class="mint-dash-new-course mint-inline-flex mint-h-[34px] mint-items-center mint-justify-center mint-gap-[7px] mint-rounded-md mint-border-0 mint-px-[13px] mint-text-sm mint-font-semibold mint-no-underline focus-visible:mint-outline-none"
+		class="mint-dash-new-course mint-inline-flex mint-h-9 mint-items-center mint-justify-center mint-gap-2 mint-rounded-md mint-border-0 mint-px-[14px] mint-text-sm mint-font-semibold mint-no-underline focus-visible:mint-outline-none"
 	>
-		<svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 4.5v11M4.5 10h11"/></svg>
+		<svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg>
 		<?php esc_html_e( 'New course', 'mint-lms' ); ?>
 	</a>
 	<?php
@@ -50,7 +50,8 @@ if ( $dashboard->isEmpty ) {
 	$content = $renderer->render(
 		'admin/dashboard/_empty-content',
 		array(
-			'createUrl' => $newCourseUrl,
+			'createUrl' => \MintLMS\Infrastructure\Admin\CourseBuilderPage::titledCourseUrl(),
+			'blankUrl'  => $newCourseUrl,
 		)
 	);
 
@@ -59,6 +60,7 @@ if ( $dashboard->isEmpty ) {
 		array(
 			'content'       => $content,
 			'headerActions' => $headerActions,
+			'maxWidthClass' => 'mint-dash-zero__shell',
 		)
 	);
 	return;
