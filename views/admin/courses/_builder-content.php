@@ -1505,6 +1505,17 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 			</div>
 
 			<div class="mint-builder-tree__footer mint-px-3 mint-pb-3" x-show="showLessonScopedContentsTree()" x-cloak>
+				<div
+					class="mint-assoc-card mint-mb-3"
+					x-show="selected?.type === 'lesson' && selectedLesson?.id && Number(selectedLesson?.courseId || courseId || linkedCourseId) > 0"
+					x-cloak
+				>
+					<div class="mint-assoc-card__badge"><?php esc_html_e( 'Linked course', 'mint-lms' ); ?></div>
+					<div class="mint-assoc-card__current mint-truncate" x-text="breadcrumbCourseTitle() || t('course')"></div>
+					<div class="mint-assoc-card__actions">
+						<button type="button" class="mint-assoc-card__remove" :disabled="attaching" @click="detachLessonFromCourse()"><?php esc_html_e( 'Remove', 'mint-lms' ); ?></button>
+					</div>
+				</div>
 				<button
 					type="button"
 					class="mint-tree-add-section mint-w-full"
@@ -3658,26 +3669,26 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 										<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#17222B" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5h12M4 10h8M4 14.5h5M15 12v5M12.5 14.5h5"/></svg>
 									</span>
 									<div>
-										<div class="mint-settings-featured__title"><?php esc_html_e( 'Add to a course', 'mint-lms' ); ?></div>
-										<div class="mint-settings-featured__copy"><?php esc_html_e( 'Attach this lesson (and its quiz, if any) to a course. Lesson group is optional.', 'mint-lms' ); ?></div>
+										<div class="mint-settings-featured__title"><?php esc_html_e( 'Linked course', 'mint-lms' ); ?></div>
+										<div class="mint-settings-featured__copy"><?php esc_html_e( 'This lesson is attached to a course. Change the lesson group or remove it from the course anytime.', 'mint-lms' ); ?></div>
 									</div>
 								</div>
 								<div class="mint-settings-featured__body">
-									<div class="mint-settings-featured__field">
-										<label class="mint-settings-featured__label"><?php esc_html_e( 'Course', 'mint-lms' ); ?></label>
-										<div class="mint-settings-select">
-											<div
-												class="mint-settings-select__trigger mint-settings-select__trigger--tall"
-												role="status"
-												:title="breadcrumbCourseTitle() || t('course')"
-											>
-												<span
-													class="mint-truncate"
-													:class="!breadcrumbCourseTitle() ? 'is-placeholder' : ''"
-													x-text="breadcrumbCourseTitle() || t('selectACourse')"
-												></span>
-											</div>
-										</div>
+									<div
+										class="mint-quiz-attach__selected mint-mb-3"
+										x-show="breadcrumbCourseTitle() || Number(selectedLesson?.courseId || courseId || linkedCourseId) > 0"
+										x-cloak
+									>
+										<span class="mint-quiz-attach__check" aria-hidden="true">
+											<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 10.5 8.5 14 15 6.5"/></svg>
+										</span>
+										<span class="mint-quiz-attach__selected-title mint-truncate" x-text="breadcrumbCourseTitle() || t('course')"></span>
+										<button
+											type="button"
+											class="mint-quiz-attach__remove"
+											:disabled="attaching"
+											@click="detachLessonFromCourse()"
+										><?php esc_html_e( 'Remove', 'mint-lms' ); ?></button>
 									</div>
 									<div class="mint-settings-featured__field">
 										<label class="mint-settings-featured__label"><?php esc_html_e( 'Lesson group (optional)', 'mint-lms' ); ?></label>
