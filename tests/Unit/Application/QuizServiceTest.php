@@ -97,10 +97,11 @@ final class QuizServiceTest extends TestCase
             $this->trueFalseQuestion(2, 'false'),
         ];
 
+        // Quiz(id, lessonId, courseId, ...) — lesson 10, course 1.
         $this->quizRepository->method('findById')->with(5)->willReturn($quiz);
         $this->quizRepository->method('findQuestionsByQuizId')->with(5)->willReturn($questions);
-        $this->lessonRepository->method('findById')->with(1)->willReturn($this->sampleLesson(1, false));
-        $this->progressRepository->method('isUserEnrolled')->with(7, 10)->willReturn(true);
+        $this->lessonRepository->method('findById')->with(10)->willReturn($this->sampleLesson(10, false));
+        $this->progressRepository->method('isUserEnrolled')->with(7, 1)->willReturn(true);
         $this->quizRepository
             ->expects($this->once())
             ->method('saveAttempt')
@@ -143,8 +144,8 @@ final class QuizServiceTest extends TestCase
 
         $this->quizRepository->method('findById')->with(5)->willReturn($quiz);
         $this->quizRepository->method('findQuestionsByQuizId')->with(5)->willReturn($questions);
-        $this->lessonRepository->method('findById')->with(1)->willReturn($this->sampleLesson(1, false));
-        $this->progressRepository->method('isUserEnrolled')->with(7, 10)->willReturn(true);
+        $this->lessonRepository->method('findById')->with(10)->willReturn($this->sampleLesson(10, false));
+        $this->progressRepository->method('isUserEnrolled')->with(7, 1)->willReturn(true);
         $this->quizRepository
             ->method('saveAttempt')
             ->willReturnCallback(static fn (QuizAttempt $attempt): QuizAttempt => new QuizAttempt(
@@ -191,8 +192,8 @@ final class QuizServiceTest extends TestCase
 
         $this->quizRepository->method('findById')->with(5)->willReturn($quiz);
         $this->quizRepository->method('findQuestionsByQuizId')->with(5)->willReturn($questions);
-        $this->lessonRepository->method('findById')->with(1)->willReturn($this->sampleLesson(1, false));
-        $this->progressRepository->method('isUserEnrolled')->with(7, 10)->willReturn(false);
+        $this->lessonRepository->method('findById')->with(10)->willReturn($this->sampleLesson(10, false));
+        $this->progressRepository->method('isUserEnrolled')->with(7, 1)->willReturn(false);
 
         $this->expectException(ForbiddenException::class);
 
@@ -286,11 +287,11 @@ final class QuizServiceTest extends TestCase
 
         $this->quizRepository->method('findById')->with(5)->willReturn($quiz);
         $this->quizRepository->method('findQuestionsByQuizId')->with(5)->willReturn($questions);
-        $this->lessonRepository->method('findById')->with(1)->willReturn($this->sampleLesson(1, false));
-        $this->progressRepository->method('isUserEnrolled')->with(7, 10)->willReturn(false);
-        $this->courseRepository->method('findById')->willReturn(
+        $this->lessonRepository->method('findById')->with(10)->willReturn($this->sampleLesson(10, false));
+        $this->progressRepository->method('isUserEnrolled')->with(7, 1)->willReturn(false);
+        $this->courseRepository->method('findById')->with(1)->willReturn(
             new \MintLMS\Domain\Course\Course(
-                10,
+                1,
                 'Course',
                 'course',
                 '',

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace MintLMS\Application\Quiz;
 
 use MintLMS\Application\Contract\AuthorizationInterface;
+use MintLMS\Application\Contract\QuizLifecycleInterface;
 use MintLMS\Application\Contract\UserLookupInterface;
 use MintLMS\Application\Exception\ForbiddenException;
 use MintLMS\Application\Exception\NotFoundException;
@@ -28,7 +29,7 @@ use MintLMS\Domain\Quiz\QuizQuestion;
 use MintLMS\Domain\Quiz\QuizRepositoryInterface;
 use MintLMS\Domain\Shared\Clock;
 
-final class QuizService {
+final class QuizService implements QuizLifecycleInterface {
 
 	public function __construct(
 		private QuizRepositoryInterface $quizRepository,
@@ -490,7 +491,16 @@ final class QuizService {
 		$lesson = $this->findLessonOrFail( $quiz->lessonId );
 		$this->assertCanManageLessonContent( $userId, $lesson );
 
+		$hostLessonId = $quiz->lessonId;
 		$this->quizRepository->deleteQuiz( $quizId );
+
+		// Unlinked quizzes sit on disposable host lessons — remove the empty host.
+		if ( $this->isDisposableHostLesson( $lesson ) ) {
+			$remaining = $this->quizRepository->findAllByLessonId( $hostLessonId );
+			if ( array() === $remaining ) {
+				$this->lessonRepository->delete( $hostLessonId );
+			}
+		}
 	}
 
 	public function addQuestion( int $quizId, CreateQuestionDto $dto, int $userId ): QuizDto {

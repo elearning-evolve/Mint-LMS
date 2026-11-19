@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace MintLMS\Application\Section;
 
 use MintLMS\Application\Contract\AuthorizationInterface;
+use MintLMS\Application\Contract\ProgressLifecycleInterface;
+use MintLMS\Application\Contract\QuizLifecycleInterface;
 use MintLMS\Application\Exception\ForbiddenException;
 use MintLMS\Application\Exception\NotFoundException;
 use MintLMS\Application\Exception\ValidationException;
@@ -25,6 +27,8 @@ final class SectionService {
 		private CourseRepositoryInterface $courseRepository,
 		private AuthorizationInterface $authorization,
 		private Clock $clock,
+		private ?ProgressLifecycleInterface $progressLifecycle = null,
+		private ?QuizLifecycleInterface $quizLifecycle = null,
 	) {
 	}
 
@@ -84,7 +88,19 @@ final class SectionService {
 			throw new ForbiddenException();
 		}
 
-		$this->lessonRepository->deleteBySectionId( $section->id );
+		// Same cascade as LessonService::delete — quizzes/questions/progress, then lesson.
+		// Raw deleteBySectionId() only removes lesson posts and leaves orphans.
+		$lessons = $this->lessonRepository->findBySectionId( $section->id );
+		foreach ( $lessons as $lesson ) {
+			if ( null !== $this->progressLifecycle ) {
+				$this->progressLifecycle->onLessonDeleted( $lesson->id );
+			}
+			if ( null !== $this->quizLifecycle ) {
+				$this->quizLifecycle->onLessonDeleted( $lesson->id );
+			}
+			$this->lessonRepository->delete( $lesson->id );
+		}
+
 		$this->sectionRepository->delete( $section->id );
 	}
 

@@ -1,7 +1,16 @@
 <?php
-declare(strict_types=1);
+/**
+ * Composer autoload.files helpers for Mint LMS registries and DB access.
+ *
+ * Must stay WP-agnostic: do not use `defined( 'ABSPATH' ) || exit;` here.
+ * PHPUnit/CLI load vendor/autoload.php before WordPress defines ABSPATH;
+ * a bare exit (or early return + require_once) would break the process or
+ * skip helper registration.
+ *
+ * @package MintLMS
+ */
 
-defined( 'ABSPATH' ) || exit;
+declare(strict_types=1);
 
 use MintLMS\Api\V1\Registry\CertificateTemplateInterface;
 use MintLMS\Api\V1\Registry\CertificateTemplateRegistry;

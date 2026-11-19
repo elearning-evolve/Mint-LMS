@@ -4,9 +4,11 @@ declare(strict_types=1);
 namespace MintLMS\Tests\Unit\Application;
 
 use MintLMS\Application\Contract\AuthorizationInterface;
+use MintLMS\Application\Contract\ProgressLifecycleInterface;
 use MintLMS\Application\Exception\ForbiddenException;
 use MintLMS\Application\Exception\NotFoundException;
 use MintLMS\Application\Exception\ValidationException;
+use MintLMS\Application\Contract\QuizLifecycleInterface;
 use MintLMS\Application\Section\Dto\CreateSectionDto;
 use MintLMS\Application\Section\Dto\ReorderSectionsDto;
 use MintLMS\Application\Section\Dto\UpdateSectionDto;
@@ -15,6 +17,7 @@ use MintLMS\Domain\Course\Course;
 use MintLMS\Domain\Course\CourseRepositoryInterface;
 use MintLMS\Domain\Course\CourseStatus;
 use MintLMS\Domain\Course\EnrollmentType;
+use MintLMS\Domain\Lesson\Lesson;
 use MintLMS\Domain\Lesson\LessonRepositoryInterface;
 use MintLMS\Domain\Section\Section;
 use MintLMS\Domain\Section\SectionRepositoryInterface;
@@ -33,6 +36,10 @@ final class SectionServiceTest extends TestCase
 
     private Clock $clock;
 
+    private ProgressLifecycleInterface $progressLifecycle;
+
+    private QuizLifecycleInterface $quizLifecycle;
+
     private SectionService $service;
 
     protected function setUp(): void
@@ -42,12 +49,16 @@ final class SectionServiceTest extends TestCase
         $this->courseRepository = $this->createMock(CourseRepositoryInterface::class);
         $this->authorization = $this->createMock(AuthorizationInterface::class);
         $this->clock = $this->createMock(Clock::class);
+        $this->progressLifecycle = $this->createMock(ProgressLifecycleInterface::class);
+        $this->quizLifecycle = $this->createMock(QuizLifecycleInterface::class);
         $this->service = new SectionService(
             $this->sectionRepository,
             $this->lessonRepository,
             $this->courseRepository,
             $this->authorization,
             $this->clock,
+            $this->progressLifecycle,
+            $this->quizLifecycle,
         );
 
         $this->clock->method('now')->willReturn(new \DateTimeImmutable('2026-01-15 10:00:00'));
@@ -120,19 +131,51 @@ final class SectionServiceTest extends TestCase
         $this->assertSame('Updated Section', $result->title);
     }
 
-    public function test_delete_removes_section_and_lessons(): void
+    public function test_delete_cascades_lessons_quizzes_and_progress(): void
     {
         $section = $this->sampleSection();
         $course = $this->sampleCourse();
+        $lessons = [
+            $this->sampleLesson(20),
+            $this->sampleLesson(21),
+        ];
 
         $this->sectionRepository->method('findById')->with(10)->willReturn($section);
         $this->courseRepository->method('findById')->with(1)->willReturn($course);
         $this->authorization->method('canEditCourse')->with(2, 2)->willReturn(true);
+        $this->lessonRepository->method('findBySectionId')->with(10)->willReturn($lessons);
 
-        $this->lessonRepository->expects($this->once())->method('deleteBySectionId')->with(10);
+        $this->lessonRepository->expects($this->never())->method('deleteBySectionId');
+
+        $progressIds = [];
+        $this->progressLifecycle->expects($this->exactly(2))
+            ->method('onLessonDeleted')
+            ->willReturnCallback(static function (int $lessonId) use (&$progressIds): void {
+                $progressIds[] = $lessonId;
+            });
+
+        $quizIds = [];
+        $this->quizLifecycle->expects($this->exactly(2))
+            ->method('onLessonDeleted')
+            ->willReturnCallback(static function (int $lessonId) use (&$quizIds): void {
+                $quizIds[] = $lessonId;
+            });
+
+        $deletedLessonIds = [];
+        $this->lessonRepository->expects($this->exactly(2))
+            ->method('delete')
+            ->willReturnCallback(static function (int $lessonId) use (&$deletedLessonIds): bool {
+                $deletedLessonIds[] = $lessonId;
+                return true;
+            });
+
         $this->sectionRepository->expects($this->once())->method('delete')->with(10);
 
         $this->service->delete(10, 2);
+
+        $this->assertSame([20, 21], $progressIds);
+        $this->assertSame([20, 21], $quizIds);
+        $this->assertSame([20, 21], $deletedLessonIds);
     }
 
     public function test_reorder_updates_section_order(): void
@@ -203,6 +246,28 @@ final class SectionServiceTest extends TestCase
             'Section One',
             $sortOrder,
             new \DateTimeImmutable('2026-01-15 10:00:00'),
+        );
+    }
+
+    private function sampleLesson(int $id): Lesson
+    {
+        $now = new \DateTimeImmutable('2026-01-15 10:00:00');
+
+        return new Lesson(
+            $id,
+            10,
+            1,
+            'Lesson ' . $id,
+            'lesson-' . $id,
+            '',
+            null,
+            null,
+            false,
+            null,
+            0,
+            $now,
+            $now,
+            null,
         );
     }
 }

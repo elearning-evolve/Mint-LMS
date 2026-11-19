@@ -276,7 +276,6 @@ final class Bootstrap {
 		$dashboardRepo       = new WpdbAdminDashboardRepository( $wpdb );
 		$userLookup          = new WpUserLookup();
 		$courseService       = new CourseService( $courseRepo, $authorization, $clock, $dashboardRepo, $userLookup, Plugin::eventPublisher() );
-		$sectionService      = new SectionService( $sectionRepo, $lessonRepo, $courseRepo, $authorization, $clock );
 		$lessonAccessService = new LessonAccessService(
 			$lessonRepo,
 			$enrollmentRepo,
@@ -294,6 +293,16 @@ final class Bootstrap {
 			$clock,
 			Plugin::eventPublisher(),
 			$progressRepo
+		);
+		// Progress + Quiz wired so Lesson Group delete cascades quizzes/questions.
+		$sectionService      = new SectionService(
+			$sectionRepo,
+			$lessonRepo,
+			$courseRepo,
+			$authorization,
+			$clock,
+			$progressService,
+			$quizService
 		);
 		$lessonService       = new LessonService(
 			$lessonRepo,

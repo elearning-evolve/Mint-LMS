@@ -156,6 +156,8 @@ final class LessonServiceTest extends TestCase
 
         $this->lessonRepository->method('findById')->with(20)->willReturn($lesson);
         $this->courseRepository->method('findById')->with(1)->willReturn($course);
+        // Library lesson (courseId 0) requires canCreateCourse before attach.
+        $this->authorization->method('canCreateCourse')->with(2)->willReturn(true);
         $this->authorization->method('canEditCourse')->willReturn(true);
         $this->lessonRepository->method('findBySlugAndCourseId')->willReturn(null);
         $this->lessonRepository->method('nextSortOrder')->with(0, 1)->willReturn(0);
