@@ -203,7 +203,10 @@ final class EnrollmentServiceTest extends TestCase
         $this->courseRepository->method('findById')->with(1)->willReturn($course);
         $this->enrollmentRepository->method('findByUserAndCourse')->with(5, 1)->willReturn($cancelled);
 
-        $this->events->expects($this->once())->method('publish');
+        $this->dispatcher
+            ->expects($this->once())
+            ->method('dispatch')
+            ->with($this->isInstanceOf(EnrollmentCreated::class));
 
         $this->enrollmentRepository
             ->expects($this->once())

@@ -169,11 +169,16 @@ final class CourseServiceTest extends TestCase
         $this->authorization->method('canListCourses')->with(6)->willReturn(true);
         $this->authorization->method('canViewAllCourses')->with(6)->willReturn(false);
 
+        // list() also loads status tab totals via list(1, 1, ...).
         $this->repository
-            ->expects($this->once())
             ->method('list')
-            ->with(1, 20, 6, null, null)
-            ->willReturn(['courses' => [$course], 'total' => 1]);
+            ->willReturnCallback(static function (int $page, int $perPage, ?int $authorId) use ($course): array {
+                if (1 === $page && 20 === $perPage && 6 === $authorId) {
+                    return ['courses' => [$course], 'total' => 1];
+                }
+
+                return ['courses' => [], 'total' => 1];
+            });
 
         $result = $this->service->list(1, 20, 6);
 
