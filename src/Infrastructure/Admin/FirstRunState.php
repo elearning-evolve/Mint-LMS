@@ -126,10 +126,12 @@ final class FirstRunState {
 		return true;
 	}
 
+	/**
+	 * Legacy helper — guided wizard removed; kept for option/meta compatibility.
+	 */
 	public static function shouldOfferGuidedFlow( int $userId ): bool {
-		return self::isFirstRunComplete()
-			&& ! self::isGuidedCourseComplete()
-			&& 0 === self::userCourseCount( $userId )
-			&& self::hasDismissedWelcome( $userId );
+		unset( $userId );
+
+		return false;
 	}
 }

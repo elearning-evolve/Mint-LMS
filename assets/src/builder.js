@@ -8272,7 +8272,7 @@ function courseBuilder(courseId, opts = {}) {
         this.pullEditorContent();
       }
       try {
-        await mintApi(`lessons/${lesson.id}`, {
+        const saved = await mintApi(`lessons/${lesson.id}`, {
           method: 'PATCH',
           body: JSON.stringify({
             title: lesson.title,
@@ -8289,6 +8289,17 @@ function courseBuilder(courseId, opts = {}) {
             settings: lesson.settings || this.emptyLessonSettings(),
           }),
         });
+        // Keep local slug in sync when the API auto-refreshes placeholder slugs (ADM-02).
+        if (saved?.slug) {
+          lesson.slug = saved.slug;
+          if (this.selectedLesson?.id === lesson.id) {
+            this.selectedLesson.slug = saved.slug;
+          }
+          const sid = Number(lesson.sectionId);
+          const section = this.sections.find((s) => Number(s.id) === sid);
+          const row = section?.lessons?.find((l) => Number(l.id) === Number(lesson.id));
+          if (row) row.slug = saved.slug;
+        }
         this.setSaved();
         if (options.toast) {
           window.MintLMS.toast.success('Lesson saved');
@@ -8500,7 +8511,45 @@ function courseBuilder(courseId, opts = {}) {
       this.saveLesson(this.selectedLesson);
     },
 
+    countDraftLessonsInCourse() {
+      let draft = 0;
+      for (const section of this.sections || []) {
+        for (const lesson of section.lessons || []) {
+          if (lesson?.disposableHost) continue;
+          const status = String(lesson?.status || 'draft').toLowerCase();
+          if (status !== 'published' && status !== 'publish') {
+            draft += 1;
+          }
+        }
+      }
+      return draft;
+    },
+
+    countIncompleteQuizQuestions(quiz = this.lessonQuiz) {
+      const questions = Array.isArray(quiz?.questions) ? quiz.questions : [];
+      if (!questions.length) return { total: 0, incomplete: 0, empty: true };
+      let incomplete = 0;
+      for (const q of questions) {
+        const pending = !!q?.settings?.answerTypePending;
+        const blank = this.isBlankQuestionPrompt(q?.prompt) && this.isBlankQuestionPrompt(q?.title || q?.displayTitle);
+        if (pending || blank || !this.isQuestionAnswerReady(q)) {
+          incomplete += 1;
+        }
+      }
+      return { total: questions.length, incomplete, empty: false };
+    },
+
     async publishCourse() {
+      if (!this.courseId) return;
+      const draftLessons = this.countDraftLessonsInCourse();
+      if (draftLessons > 0 && this.course?.status !== 'published') {
+        const ok = window.confirm(
+          draftLessons === 1
+            ? '1 lesson is still a draft. Students will not see it until it is published. Publish the course anyway?'
+            : `${draftLessons} lessons are still drafts. Students will not see them until they are published. Publish the course anyway?`
+        );
+        if (!ok) return;
+      }
       this.publishing = true;
       try {
         const course = await mintApi(`courses/${this.courseId}/publish`, { method: 'POST' });
@@ -8773,9 +8822,32 @@ function courseBuilder(courseId, opts = {}) {
 
       if (this.selected?.type === 'quiz' && this.lessonQuiz) {
         await this.saveQuiz();
+        const gate = this.countIncompleteQuizQuestions(this.lessonQuiz);
+        if (gate.empty || gate.incomplete > 0) {
+          window.MintLMS.toast.error(
+            gate.empty
+              ? 'Add and finish at least one question before publishing this quiz.'
+              : gate.incomplete === 1
+                ? 'This quiz has 1 incomplete question. Finish it before publishing.'
+                : `This quiz has ${gate.incomplete} incomplete questions. Finish them before publishing.`
+          );
+          return;
+        }
         if (this.lessonQuiz?.id) {
-          const published = await this.publishContentItem('quizzes', this.lessonQuiz.id);
-          if (published?.status) this.lessonQuiz.status = published.status;
+          try {
+            const published = await this.publishContentItem('quizzes', this.lessonQuiz.id);
+            if (published?.status) this.lessonQuiz.status = published.status;
+            // Mirror API: configured draft questions go live with the quiz.
+            if (Array.isArray(this.lessonQuiz.questions)) {
+              this.lessonQuiz.questions = this.lessonQuiz.questions.map((q) => ({
+                ...q,
+                status: 'published',
+              }));
+            }
+          } catch (err) {
+            window.MintLMS.toast.error(err.message || 'Could not publish quiz');
+            return;
+          }
         }
         if (this.course?.status !== 'published') {
           await this.publishCourse();

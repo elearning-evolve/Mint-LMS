@@ -63,38 +63,13 @@ final class AssetLoader {
 					'newLesson'    => admin_url( 'post-new.php?post_type=' . PostTypes::LESSON ),
 					'newQuiz'      => admin_url( 'post-new.php?post_type=' . PostTypes::QUIZ ),
 					'newQuestion'  => admin_url( 'post-new.php?post_type=' . PostTypes::QUESTION ),
-					'dashboard'    => admin_url( 'admin.php?page=mint-lms' ),
-					'playerPage'   => $pageSettings->getPlayerUrl(),
-					'catalogPage'  => $pageSettings->getCatalogUrl(),
-					'guidedCourse' => admin_url( 'admin.php?page=mint-lms-guided-course' ),
+					'dashboard'   => admin_url( 'admin.php?page=mint-lms' ),
+					'playerPage'  => $pageSettings->getPlayerUrl(),
+					'catalogPage' => $pageSettings->getCatalogUrl(),
 				),
 				'i18n'               => AdminI18n::strings(),
 			)
 		);
-
-		if ( str_contains( $hookSuffix, 'mint-lms-guided-course' ) ) {
-			wp_localize_script(
-				'mint-lms-admin',
-				'mintLmsGuided',
-				array(
-					'restBase'    => $restBase,
-					'nonce'       => wp_create_nonce( 'wp_rest' ),
-					'coursesUrl'  => PostTypes::listUrl( PostTypes::COURSE ),
-					'builderBase' => admin_url( 'admin.php?page=mint-lms-builder&course_id=' ),
-					'i18n'        => array(
-						'step'            => __( 'Step', 'mint-lms' ),
-						'stepTitles'      => array(
-							1 => __( 'Name your course', 'mint-lms' ),
-							2 => __( 'Add your first lesson', 'mint-lms' ),
-							3 => __( 'Publish your course', 'mint-lms' ),
-						),
-						'titleRequired'   => __( 'Course title is required.', 'mint-lms' ),
-						'sectionRequired' => __( 'Lesson group and lesson titles are required.', 'mint-lms' ),
-						'genericError'    => __( 'Something went wrong. Please try again.', 'mint-lms' ),
-					),
-				)
-			);
-		}
 	}
 
 	/**
