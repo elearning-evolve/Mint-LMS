@@ -39,10 +39,10 @@ require MINTLMS_PATH . 'views/student/partials/preview-header.php';
 				<?php
 				foreach ( $options as $option ) :
 					$correct   = ! empty( $option['correct'] );
-					$border    = $correct ? '#0B4F3F' : '#E4E1F0';
+					$border    = $correct ? '#0F0E1A' : '#E4E1F0';
 					$bg        = $correct ? '#E8FFF3' : '#FFFFFF';
-					$dotBorder = $correct ? '#0B4F3F' : '#C7C4D8';
-					$dotBg     = $correct ? '#0B4F3F' : 'transparent';
+					$dotBorder = $correct ? '#0F0E1A' : '#C7C4D8';
+					$dotBg     = $correct ? '#0F0E1A' : 'transparent';
 					?>
 					<div
 						class="mint-flex mint-items-center mint-gap-3 mint-rounded-[10px] mint-border-[1.5px] mint-px-4 mint-py-3.5"
@@ -62,7 +62,7 @@ require MINTLMS_PATH . 'views/student/partials/preview-header.php';
 		<div class="mint-mt-[26px] mint-flex mint-justify-end">
 			<button
 				type="button"
-				class="mint-inline-flex mint-h-11 mint-items-center mint-justify-center mint-rounded-lg mint-border-0 mint-bg-cta mint-px-5 mint-text-[15px] mint-font-bold mint-text-ink hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(11,79,63,0.35)]"
+				class="mint-inline-flex mint-h-11 mint-items-center mint-justify-center mint-rounded-lg mint-border-0 mint-bg-cta mint-px-5 mint-text-[15px] mint-font-bold mint-text-ink hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(15,14,26,0.35)]"
 				disabled
 			><?php esc_html_e( 'Submit answer', 'mint-lms' ); ?></button>
 		</div>

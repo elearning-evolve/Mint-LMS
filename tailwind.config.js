@@ -40,7 +40,7 @@ module.exports = {
         },
         accent: { DEFAULT: '#3F00FF', hover: '#3200CC', wash: '#EFEBFF' },
         'mint-blue': '#98FBCB',
-        cta: { DEFAULT: '#98FBCB', hover: '#7FE8B8', active: '#6ED9AE', ink: '#0B4F3F' },
+        cta: { DEFAULT: '#98FBCB', hover: '#7FE8B8', active: '#6ED9AE', ink: '#0F0E1A' },
         bg: { DEFAULT: '#FFFFFF', hover: '#FAFAFC', subtle: '#F4F3F8', track: '#E7E4F3', ink: '#0F0E1A' },
         ink: { DEFAULT: '#0F0E1A', 2: '#33334A', 3: '#5C5C77' },
         hue: {

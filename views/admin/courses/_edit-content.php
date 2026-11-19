@@ -272,7 +272,7 @@ $inputClass = 'mint-cs-input';
 								<div x-show="display.materialsEnabled" x-cloak class="mint-cs-materials">
 									<div class="mint-cs-materials__actions">
 										<button type="button" class="mint-cs-materials__add-media" @click="addMediaToMaterials()">
-											<svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="#0B4F3F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="3.5" width="15" height="13" rx="3"/><circle cx="7" cy="8" r="1.4"/><path d="m4 14 4-3.5 3 2 4.5-4"/></svg>
+											<svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="3.5" width="15" height="13" rx="3"/><circle cx="7" cy="8" r="1.4"/><path d="m4 14 4-3.5 3 2 4.5-4"/></svg>
 											<?php esc_html_e( 'Add media', 'mint-lms' ); ?>
 										</button>
 										<div class="mint-cs-materials__view-toggle">
@@ -310,7 +310,7 @@ $inputClass = 'mint-cs-input';
 													:aria-expanded="materialsFormatMenuOpen ? 'true' : 'false'"
 												>
 													<span x-text="materialsFormatLabel"></span>
-													<svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#0B4F3F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 8 10 12.5 14.5 8"/></svg>
+													<svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 8 10 12.5 14.5 8"/></svg>
 												</button>
 												<div class="mint-cs-materials__format-menu" x-show="materialsFormatMenuOpen" x-cloak>
 													<template x-for="option in materialsFormatOptions" :key="'mat-fmt-' + option.value">
@@ -504,7 +504,7 @@ $inputClass = 'mint-cs-input';
 													@click="togglePrerequisite(course.id)"
 												>
 													<span class="mint-cs-prereq__check" aria-hidden="true">
-														<svg x-show="isPrerequisiteSelected(course.id)" width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="#0B4F3F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5 8 14 15.5 5.5"/></svg>
+														<svg x-show="isPrerequisiteSelected(course.id)" width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5 8 14 15.5 5.5"/></svg>
 													</span>
 													<span x-text="course.title"></span>
 												</button>
@@ -606,7 +606,7 @@ $inputClass = 'mint-cs-input';
 								<div class="mint-cs-select" @click.outside="certMenuOpen = false">
 									<button type="button" class="mint-cs-select__btn" @click="certMenuOpen = !certMenuOpen" :class="certMenuOpen ? 'is-open' : ''">
 										<span x-text="certificateLabel()"></span>
-										<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="#0B4F3F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" :style="{ transform: 'rotate(' + (certMenuOpen ? 180 : 0) + 'deg)' }"><path d="m5 8 5 5 5-5"/></svg>
+										<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" :style="{ transform: 'rotate(' + (certMenuOpen ? 180 : 0) + 'deg)' }"><path d="m5 8 5 5 5-5"/></svg>
 									</button>
 									<div class="mint-cs-select__menu" x-show="certMenuOpen" x-cloak>
 										<button type="button" class="mint-cs-select__option" :class="!optionOn('certificate') ? 'is-selected' : ''" @click="setCertificate(false); certMenuOpen = false"><?php esc_html_e( 'No certificate', 'mint-lms' ); ?></button>
