@@ -1240,12 +1240,12 @@
 }
 #mint-lms-root .mint-tree-item.is-active {
   background: #98FBCB;
-  border-color: #6FE8B0;
+  border-color: #7FE8B8;
   box-shadow: none;
 }
 #mint-lms-root .mint-tree-item.is-active:hover {
   background: #7FE8B8;
-  border-color: #5FD9A8;
+  border-color: #6ED9AE;
 }
 #mint-lms-root .mint-tree-item__icon {
   width: 20px;
@@ -1371,12 +1371,12 @@
 }
 #mint-lms-root .mint-tree--mint-blue .mint-tree-item.is-active {
   background: #98FBCB;
-  border-color: #6FE8B0;
+  border-color: #7FE8B8;
   box-shadow: none;
 }
 #mint-lms-root .mint-tree--mint-blue .mint-tree-item.is-active:hover {
   background: #7FE8B8;
-  border-color: #5FD9A8;
+  border-color: #6ED9AE;
 }
 #mint-lms-root .mint-course-tree .mint-builder-tree__toggle {
   width: 20px;
@@ -2551,7 +2551,7 @@
   min-width: 0;
   min-height: 40px;
   padding: 8px 14px;
-  border: 1.5px solid rgb(120, 220, 140);
+  border: 1.5px solid #98FBCB;
   border-radius: 8px;
   background: #fff;
   color: #121A22;
@@ -2580,7 +2580,7 @@
   justify-content: center;
   min-height: 40px;
   padding: 8px 16px;
-  border: 1.5px solid rgb(120, 220, 140);
+  border: 1.5px solid #98FBCB;
   border-radius: 8px;
   background: #98FBCB;
   color: #0F0E1A;
@@ -2595,7 +2595,7 @@
 
 #mint-lms-root .mint-builder-tree-page__inline-confirm:hover:not(:disabled) {
   background: #7FE8B8;
-  border-color: rgb(100, 200, 120);
+  border-color: #6ED9AE;
 }
 
 #mint-lms-root .mint-builder-tree-page__inline-cancel {
@@ -3378,9 +3378,9 @@
   padding: 9px 16px;
   border-style: solid;
   border-width: 1.5px;
-  border-color: rgb(120, 220, 140);
-  background: rgb(152, 251, 203);
-  color: #0B2E22;
+  border-color: #98FBCB;
+  background: #98FBCB;
+  color: #0F0E1A;
   white-space: nowrap;
   gap: 7px;
   font-size: 15px;
@@ -3393,9 +3393,9 @@
 }
 
 #mint-lms-root .mint-builder-overview__add--header:hover:not(:disabled) {
-  background: rgb(130, 240, 140);
-  border-color: rgb(100, 200, 120);
-  color: #0B2E22;
+  background: #7FE8B8;
+  border-color: #7FE8B8;
+  color: #0F0E1A;
 }
 
 @media (max-width: 720px) {
