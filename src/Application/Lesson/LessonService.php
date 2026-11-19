@@ -307,6 +307,19 @@ final class LessonService {
 			throw new ValidationException( 'Validation failed.', array( 'title' => 'Title is required.' ) );
 		}
 
+		// ADM-02: when title changes and the author did not send a slug, refresh placeholder /
+		// auto-derived slugs (e.g. new-lesson) from the new title. Keep custom slugs intact.
+		$titleChanged = $title !== $lesson->title;
+		$slugExplicit = null !== $dto->slug;
+		if (
+			! $slugExplicit
+			&& $titleChanged
+			&& 'New Lesson' !== $title
+			&& $this->shouldAutoSyncSlug( $lesson->slug, $lesson->title )
+		) {
+			$slug = $this->generateUniqueSlug( $title, $lesson->courseId, $lesson->id );
+		}
+
 		$this->assertValidSlug( $slug );
 
 		if ( $slug !== $lesson->slug ) {
@@ -477,7 +490,7 @@ final class LessonService {
 		}
 	}
 
-	private function generateUniqueSlug( string $title, int $courseId ): string {
+	private function generateUniqueSlug( string $title, int $courseId, int $excludeLessonId = 0 ): string {
 		$base = $this->normalizeSlug( $title );
 
 		if ( '' === $base ) {
@@ -487,12 +500,32 @@ final class LessonService {
 		$slug    = $base;
 		$counter = 1;
 
-		while ( null !== $this->lessonRepository->findBySlugAndCourseId( $slug, $courseId ) ) {
+		while ( true ) {
+			$existing = $this->lessonRepository->findBySlugAndCourseId( $slug, $courseId );
+			if ( null === $existing || ( $excludeLessonId > 0 && $existing->id === $excludeLessonId ) ) {
+				return $slug;
+			}
 			$slug = $base . '-' . $counter;
 			++$counter;
 		}
+	}
 
-		return $slug;
+	/**
+	 * True when the current slug is still a placeholder or the auto slug of the old title.
+	 */
+	private function shouldAutoSyncSlug( string $currentSlug, string $previousTitle ): bool {
+		$currentSlug = $this->normalizeSlug( $currentSlug );
+		if ( '' === $currentSlug ) {
+			return true;
+		}
+
+		if ( 1 === preg_match( '/^new-lesson(?:-\d+)?$/', $currentSlug ) ) {
+			return true;
+		}
+
+		$previousAuto = $this->normalizeSlug( $previousTitle );
+
+		return '' !== $previousAuto && $currentSlug === $previousAuto;
 	}
 
 	private function normalizeSlug( string $slug ): string {

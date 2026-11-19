@@ -98,14 +98,6 @@ final class MenuRegistrar {
 			array( $this, 'renderReports' )
 		);
 
-		add_submenu_page(
-			'',
-			__( 'Guided first course', 'mint-lms' ),
-			__( 'Guided first course', 'mint-lms' ),
-			'edit_mintlms_courses',
-			'mint-lms-guided-course',
-			array( $this, 'renderGuidedCourse' )
-		);
 	}
 
 	/**
@@ -176,14 +168,6 @@ final class MenuRegistrar {
 		}
 
 		include MINTLMS_PATH . 'views/admin/courses/students.php';
-	}
-
-	public function renderGuidedCourse(): void {
-		if ( ! current_user_can( 'edit_mintlms_courses' ) ) {
-			wp_die( esc_html__( 'You do not have permission to access Mint LMS.', 'mint-lms' ) );
-		}
-
-		include MINTLMS_PATH . 'views/admin/guided-course.php';
 	}
 
 	public function renderReports(): void {

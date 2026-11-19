@@ -40,6 +40,11 @@ final class FirstRunRedirect {
 		exit;
 	}
 
+	/**
+	 * Welcome "Create your first course" entry point.
+	 * Admin → sample course + builder. Everyone else → Untitled Course editor.
+	 * (Guided wizard removed — Welcome + empty dashboard cover first-run UX.)
+	 */
 	public function handleStartGuidedAction(): void {
 		if ( ! isset( $_GET['mintlms_action'] ) || self::START_GUIDED_ACTION !== $_GET['mintlms_action'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return;
@@ -75,9 +80,9 @@ final class FirstRunRedirect {
 			exit;
 		}
 
-		FirstRunState::markFirstRunStarted();
+		FirstRunState::markOnboardingComplete();
 
-		wp_safe_redirect( admin_url( 'admin.php?page=mint-lms-guided-course' ) );
+		wp_safe_redirect( CourseBuilderPage::titledCourseUrl() );
 		exit;
 	}
 
@@ -106,13 +111,10 @@ final class FirstRunRedirect {
 		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( (string) $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$onCoursesList = $this->isCoursesListScreen();
 
+		// Legacy guided wizard URL — always send users back to the dashboard.
 		if ( 'mint-lms-guided-course' === $page ) {
-			if ( FirstRunState::isGuidedCourseComplete() ) {
-				wp_safe_redirect( PostTypes::listUrl( PostTypes::COURSE ) );
-				exit;
-			}
-
-			return;
+			wp_safe_redirect( admin_url( 'admin.php?page=mint-lms' ) );
+			exit;
 		}
 
 		$userId = get_current_user_id();
@@ -132,13 +134,6 @@ final class FirstRunRedirect {
 				wp_safe_redirect( admin_url( 'admin.php?page=mint-lms' ) );
 				exit;
 			}
-
-			return;
-		}
-
-		if ( FirstRunState::shouldOfferGuidedFlow( $userId ) && 'mint-lms' === $page ) {
-			wp_safe_redirect( admin_url( 'admin.php?page=mint-lms-guided-course' ) );
-			exit;
 		}
 	}
 

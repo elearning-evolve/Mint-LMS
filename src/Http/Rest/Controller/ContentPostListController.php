@@ -7,6 +7,7 @@ defined( 'ABSPATH' ) || exit;
 
 use MintLMS\Http\Rest\Response\ApiResponse;
 use MintLMS\Infrastructure\Capability\ContentOwnership;
+use MintLMS\Infrastructure\Database\Schema;
 use MintLMS\Infrastructure\PostType\PostTypes;
 use MintLMS\Infrastructure\PostType\QuestionLinkResolver;
 use MintLMS\Infrastructure\PostType\QuizLinkResolver;
@@ -194,6 +195,14 @@ final class ContentPostListController {
 			return $post;
 		}
 
+		$type = (string) $request['type'];
+		if ( 'quizzes' === $type ) {
+			$quizGate = $this->assertQuizReadyToPublish( (int) $post->ID );
+			if ( $quizGate instanceof \WP_REST_Response ) {
+				return $quizGate;
+			}
+		}
+
 		if ( 'publish' !== $post->post_status ) {
 			$result = wp_update_post(
 				array(
@@ -212,7 +221,93 @@ final class ContentPostListController {
 			return ApiResponse::error( 'not_found', __( 'Not found.', 'mint-lms' ), 404 );
 		}
 
-		return ApiResponse::success( $this->serialize( $fresh, (string) $request['type'] ) );
+		return ApiResponse::success( $this->serialize( $fresh, $type ) );
+	}
+
+	/**
+	 * Block publishing a quiz that has no usable questions (ADM-04).
+	 */
+	private function assertQuizReadyToPublish( int $quizId ): ?\WP_REST_Response {
+		global $wpdb;
+
+		$junction = Schema::validateTable( Schema::quizQuestionsTable( $wpdb->prefix ), $wpdb->prefix );
+		$posts    = $wpdb->posts;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Junction read for publish gate.
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT p.ID AS id, p.post_status, p.post_title, p.post_content
+				FROM %i j
+				INNER JOIN %i p ON p.ID = j.question_id AND p.post_type = %s AND p.post_status NOT IN ('trash','auto-draft')
+				WHERE j.quiz_id = %d
+				ORDER BY j.sort_order ASC, j.question_id ASC",
+				$junction,
+				$posts,
+				PostTypes::QUESTION,
+				$quizId
+			)
+		);
+
+		if ( ! is_array( $rows ) || array() === $rows ) {
+			return ApiResponse::error(
+				'quiz_incomplete',
+				__( 'Add and finish at least one question before publishing this quiz.', 'mint-lms' ),
+				400
+			);
+		}
+
+		$incomplete = 0;
+		$readyDrafts = array();
+
+		foreach ( $rows as $row ) {
+			$questionId  = (int) ( $row->id ?? 0 );
+			$status      = (string) ( $row->post_status ?? 'draft' );
+			$title       = trim( wp_strip_all_tags( (string) ( $row->post_title ?? '' ) ) );
+			$prompt      = trim( wp_strip_all_tags( (string) ( $row->post_content ?? '' ) ) );
+			$settings    = get_post_meta( $questionId, PostTypes::META_QUESTION_SETTINGS, true );
+			$pending     = is_array( $settings ) && ! empty( $settings['answerTypePending'] );
+			$placeholder = ( '' === $prompt || 'New Question' === $prompt )
+				&& ( '' === $title || 'New Question' === $title );
+
+			if ( $pending || $placeholder ) {
+				++$incomplete;
+				continue;
+			}
+
+			if ( 'publish' !== $status && $questionId > 0 ) {
+				$readyDrafts[] = $questionId;
+			}
+		}
+
+		if ( $incomplete > 0 ) {
+			return ApiResponse::error(
+				'quiz_incomplete',
+				sprintf(
+					/* translators: %d: number of incomplete questions */
+					_n(
+						'This quiz has %d incomplete question. Finish every question before publishing the quiz.',
+						'This quiz has %d incomplete questions. Finish every question before publishing the quiz.',
+						$incomplete,
+						'mint-lms'
+					),
+					$incomplete
+				),
+				400,
+				array( 'incomplete' => $incomplete )
+			);
+		}
+
+		// Configured draft questions go live with the quiz (no silent unfinished drafts).
+		foreach ( $readyDrafts as $questionId ) {
+			wp_update_post(
+				array(
+					'ID'          => $questionId,
+					'post_status' => 'publish',
+				)
+			);
+		}
+
+		return null;
 	}
 
 	/**

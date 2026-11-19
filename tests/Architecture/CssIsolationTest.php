@@ -18,7 +18,6 @@ final class CssIsolationTest extends TestCase
         'views/admin/layout.php',
         'views/admin/layout-builder.php',
         'views/admin/first-run.php',
-        'views/admin/guided-course.php',
     );
 
     public function test_ui_entrypoints_render_isolated_root(): void

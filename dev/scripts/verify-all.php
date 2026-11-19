@@ -87,7 +87,6 @@ mintlms_render_admin( 'dashboard', fn() => $registrar->renderDashboard() );
 mintlms_render_admin( 'settings', fn() => ( new MintLMS\Infrastructure\Admin\SettingsPage() )->render() );
 mintlms_render_admin( 'courses', fn() => $registrar->renderCourses() );
 mintlms_render_admin( 'reports', fn() => $registrar->renderReports() );
-mintlms_render_admin( 'guided-course', fn() => $registrar->renderGuidedCourse() );
 
 if ( $courseId > 0 ) {
 	$_GET['course_id'] = $courseId;
