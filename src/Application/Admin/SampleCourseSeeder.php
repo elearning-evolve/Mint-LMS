@@ -65,13 +65,6 @@ final class SampleCourseSeeder {
 			$userLookup,
 			Plugin::eventPublisher()
 		);
-		$sectionService = new SectionService(
-			$sectionRepo,
-			$lessonRepo,
-			$courseRepo,
-			$authorization,
-			$clock
-		);
 		$lessonAccess = new LessonAccessService(
 			$lessonRepo,
 			$enrollmentRepo,
@@ -96,6 +89,15 @@ final class SampleCourseSeeder {
 			}
 		};
 
+		$sectionService = new SectionService(
+			$sectionRepo,
+			$lessonRepo,
+			$courseRepo,
+			$authorization,
+			$clock,
+			$progressLifecycle,
+			$quizService
+		);
 		$lessonService = new LessonService(
 			$lessonRepo,
 			$sectionRepo,

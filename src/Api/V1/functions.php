@@ -1,7 +1,12 @@
 <?php
 declare(strict_types=1);
 
-defined( 'ABSPATH' ) || exit;
+/**
+ * Composer autoload.files helper — must stay WP-agnostic.
+ * Do not use `defined( 'ABSPATH' ) || exit;` here: PHPUnit/CLI load
+ * vendor/autoload.php before WordPress defines ABSPATH, and a bare exit
+ * (or early return + require_once) would break the process / skip helpers.
+ */
 
 use MintLMS\Api\V1\Registry\CertificateTemplateInterface;
 use MintLMS\Api\V1\Registry\CertificateTemplateRegistry;

@@ -8335,8 +8335,21 @@ function courseBuilder(courseId, opts = {}) {
     async deleteSection(sectionId) {
       if (!window.confirm('Delete this lesson group and all its lessons?')) return;
       try {
-        await mintApi(`sections/${sectionId}`, { method: 'DELETE' });
-        this.sections = this.sections.filter((s) => s.id !== sectionId);
+        const sid = Number(sectionId) || 0;
+        const removed = this.sections.find((s) => Number(s.id) === sid);
+        const lessonIds = new Set(
+          (removed?.lessons || []).map((lesson) => Number(lesson.id)).filter((id) => id > 0)
+        );
+        await mintApi(`sections/${sid}`, { method: 'DELETE' });
+        this.sections = this.sections.filter((s) => Number(s.id) !== sid);
+        if (lessonIds.size) {
+          this.courseQuizzes = (this.courseQuizzes || []).filter(
+            (quiz) => !lessonIds.has(Number(quiz.lessonId))
+          );
+          this.courseQuestions = (this.courseQuestions || []).filter(
+            (question) => !lessonIds.has(Number(question.lessonId))
+          );
+        }
         window.MintLMS.toast.success('Lesson group deleted');
         this.redirectToTypeOverview('sections');
       } catch (err) {
@@ -10045,18 +10058,44 @@ function courseBuilder(courseId, opts = {}) {
     },
 
     async deleteQuizQuestion(question) {
-      if (!question.id || !this.lessonQuiz?.id) {
-        this.lessonQuiz.questions = this.lessonQuiz.questions.filter((q) => q !== question);
+      const questionId = Number(question?.id) || 0;
+      // Prefer loaded quiz, then selection / row meta — never fake-succeed without API.
+      const quizId =
+        Number(this.lessonQuiz?.id) ||
+        Number(this.selected?.quizId) ||
+        Number(question?.quizId) ||
+        Number(
+          (this.courseQuestions || []).find((row) => Number(row.id) === questionId)?.quizId
+        ) ||
+        0;
+
+      if (!questionId) {
+        // Unsaved draft — local remove only.
+        if (Array.isArray(this.lessonQuiz?.questions)) {
+          this.lessonQuiz.questions = this.lessonQuiz.questions.filter((q) => q !== question);
+        }
         return true;
       }
+
+      if (!quizId) {
+        window.MintLMS.toast.error('Could not delete question: quiz not loaded.');
+        return false;
+      }
+
       if (!window.confirm('Delete this question?')) return false;
       try {
-        const quiz = await mintApi(`quizzes/${this.lessonQuiz.id}/questions/${question.id}`, {
+        const quiz = await mintApi(`quizzes/${quizId}/questions/${questionId}`, {
           method: 'DELETE',
         });
-        this.lessonQuiz = this.normalizeQuiz(quiz);
+        if (Number(this.lessonQuiz?.id) === quizId) {
+          this.lessonQuiz = this.normalizeQuiz(quiz);
+        } else if (Array.isArray(this.lessonQuiz?.questions)) {
+          this.lessonQuiz.questions = this.lessonQuiz.questions.filter(
+            (q) => Number(q.id) !== questionId
+          );
+        }
         this.courseQuestions = (this.courseQuestions || []).filter(
-          (row) => Number(row.id) !== Number(question.id)
+          (row) => Number(row.id) !== questionId
         );
         return true;
       } catch (err) {
