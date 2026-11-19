@@ -6148,10 +6148,61 @@ function courseBuilder(courseId, opts = {}) {
       await this.selectQuestion(questionId, lessonId, sectionId, quizId || null);
     },
 
+    /**
+     * Quiz → Questions list Remove — detach (parallel to Lesson → Quizzes Remove).
+     * Permanent delete stays on Overview / header Delete question.
+     */
     async removeQuizQuestionFromList(question) {
-      const deleted = await this.deleteQuizQuestion(question);
-      if (deleted) {
-        window.MintLMS?.toast?.success?.('Question removed.');
+      const questionId = Number(question?.id || 0);
+      if (!questionId) {
+        // Unsaved draft — local remove only.
+        if (Array.isArray(this.lessonQuiz?.questions)) {
+          this.lessonQuiz.questions = this.lessonQuiz.questions.filter((q) => q !== question);
+        }
+        return;
+      }
+      if (
+        !window.confirm(
+          'Remove this question from the quiz? You can attach it to another quiz later.'
+        )
+      ) {
+        return;
+      }
+      this.clearPersistedQuestionAttachQuiz(questionId);
+      this.suggestedAttachQuizId = 0;
+      this.fromQuizOrigin = false;
+      this.attaching = true;
+      try {
+        await mintApi(`questions/${questionId}/detach`, {
+          method: 'POST',
+          body: '{}',
+        });
+        if (Array.isArray(this.lessonQuiz?.questions)) {
+          this.lessonQuiz.questions = this.lessonQuiz.questions.filter(
+            (q) => Number(q.id) !== questionId
+          );
+        }
+        this.courseQuestions = (this.courseQuestions || []).filter(
+          (row) => Number(row.id) !== questionId
+        );
+        if (
+          this.selected?.type === 'question' &&
+          Number(this.selected.id) === questionId
+        ) {
+          this.selected = {
+            type: 'quiz',
+            id: Number(this.lessonQuiz?.id) || 0,
+            lessonId: Number(this.lessonQuiz?.lessonId || this.selected?.lessonId || 0),
+            sectionId: Number(this.selected?.sectionId) || 0,
+          };
+          this.activeQuestion = null;
+          this.questionAnswerReady = false;
+        }
+        window.MintLMS.toast.success('Question removed from quiz.');
+      } catch (err) {
+        window.MintLMS.toast.error(err.message || 'Could not remove question.');
+      } finally {
+        this.attaching = false;
       }
     },
 

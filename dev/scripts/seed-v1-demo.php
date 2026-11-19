@@ -68,15 +68,7 @@ $progressService = new MintLMS\Application\Progress\ProgressService(
 	$clock,
 	$quizService
 );
-$sectionService = new SectionService(
-	$sectionRepo,
-	$lessonRepo,
-	$courseRepo,
-	$auth,
-	$clock,
-	$progressService,
-	$quizService
-);
+$sectionService = new SectionService( $sectionRepo, $lessonRepo, $courseRepo, $auth, $clock );
 $lessonService  = new LessonService(
 	$lessonRepo,
 	$sectionRepo,
