@@ -49,18 +49,18 @@
 
 #mint-lms-root a.mint-welcome-skip,
 #mint-lms-root a.mint-welcome-skip:visited {
-  color: #0F0E1A !important;
-  background-color: #7FE8B8 !important;
-  box-shadow: 0 6px 16px rgba(152, 251, 203, 0.55) !important;
-  transition: background 150ms ease-out, box-shadow 150ms ease-out, transform 150ms ease-out;
+  color: #5C5C77 !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  transition: color 150ms ease-out, background 150ms ease-out, transform 150ms ease-out;
 }
 
 #mint-lms-root a.mint-welcome-skip:hover,
 #mint-lms-root a.mint-welcome-skip:focus-visible {
   color: #0F0E1A !important;
-  background-color: #98FBCB !important;
+  background-color: #F1FFF9 !important;
   border-color: transparent !important;
-  box-shadow: 0 6px 16px rgba(152, 251, 203, 0.55) !important;
+  box-shadow: none !important;
   transform: translateY(-1px);
 }
 
