@@ -5,12 +5,15 @@ defined( 'ABSPATH' ) || exit;
 
 use MintLMS\Infrastructure\Admin\FirstRunRedirect;
 use MintLMS\Infrastructure\Capability\ContentOwnership;
+use MintLMS\Infrastructure\Capability\Roles;
 
 /**
- * Shared first-run welcome for Admin + Instructor.
+ * Shared first-run welcome for Admin, Manager, and Instructor.
  *
- * Admin / Manager: 1 Structure → 2 Create/Attach → 3 Publish + students learn
- * Instructor:      1 Structure → 2 Teach flow (no step 3)
+ * Step 1 (Structure) is shared for every role.
+ * Admin:      1 Structure → 2 Create/Attach → 3 Publish + students learn
+ * Manager:    1 Structure → 2 Manage flow (no step 3)
+ * Instructor: 1 Structure → 2 Teach flow (no step 3)
  */
 
 $createUrl = $createUrl ?? FirstRunRedirect::startGuidedUrl();
@@ -18,9 +21,23 @@ $skipUrl   = $skipUrl ?? FirstRunRedirect::skipFirstRunUrl();
 $showSkip  = $showSkip ?? true;
 $wpVersion = get_bloginfo( 'version' );
 
-// Instructors (own content only) get a 2-step classroom welcome; Admin/Manager keep 3 steps.
+$current_roles = is_user_logged_in() ? (array) wp_get_current_user()->roles : array();
+
+// Instructors (own content only) get a 2-step classroom welcome.
 $is_instructor_welcome = ContentOwnership::currentUserMustOwnContent();
-$max_steps             = $is_instructor_welcome ? 2 : 3;
+// Mint LMS Manager (not WP Administrator) gets a 2-step manage welcome — same pattern as Instructor.
+$is_manager_welcome    = ! $is_instructor_welcome
+	&& in_array( Roles::MANAGER, $current_roles, true )
+	&& ! in_array( Roles::ADMINISTRATOR, $current_roles, true );
+$is_two_step_welcome   = $is_instructor_welcome || $is_manager_welcome;
+$max_steps             = $is_two_step_welcome ? 2 : 3;
+
+$welcome_mod_class = '';
+if ( $is_instructor_welcome ) {
+	$welcome_mod_class = ' mint-welcome--instructor';
+} elseif ( $is_manager_welcome ) {
+	$welcome_mod_class = ' mint-welcome--manager';
+}
 
 $features_step1 = array(
 	array(
@@ -52,6 +69,21 @@ $features_step2_admin = array(
 	),
 );
 
+$features_step2_manager = array(
+	array(
+		'label' => __( 'Create and attach content across every course on the site', 'mint-lms' ),
+		'icon'  => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg>',
+	),
+	array(
+		'label' => __( 'Enroll students and open courses when they are ready', 'mint-lms' ),
+		'icon'  => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 10a3 3 0 100-6 3 3 0 000 6z"/><path d="M4 16a6 6 0 0112 0"/></svg>',
+	),
+	array(
+		'label' => __( 'Follow reports and progress across the whole LMS', 'mint-lms' ),
+		'icon'  => '<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 14l4-4 3 3 7-7"/></svg>',
+	),
+);
+
 $features_step2_instructor = array(
 	array(
 		'label' => __( 'Create freely — lesson, quiz, or question first; finish later', 'mint-lms' ),
@@ -67,7 +99,13 @@ $features_step2_instructor = array(
 	),
 );
 
-$features_step2 = $is_instructor_welcome ? $features_step2_instructor : $features_step2_admin;
+if ( $is_instructor_welcome ) {
+	$features_step2 = $features_step2_instructor;
+} elseif ( $is_manager_welcome ) {
+	$features_step2 = $features_step2_manager;
+} else {
+	$features_step2 = $features_step2_admin;
+}
 
 $features_step3 = array(
 	array(
@@ -110,6 +148,24 @@ $attach_steps = array(
 	),
 );
 
+$manage_steps = array(
+	array(
+		'label' => __( '1. Create a Lesson / Quiz', 'mint-lms' ),
+		'hint'  => __( 'Starts on its own — not linked yet', 'mint-lms' ),
+		'mod'   => '',
+	),
+	array(
+		'label' => __( '2. Attach into any Course', 'mint-lms' ),
+		'hint'  => __( 'Lesson Group → Lesson → Quiz → Question', 'mint-lms' ),
+		'mod'   => ' is-mid',
+	),
+	array(
+		'label' => __( '3. Enroll & oversee', 'mint-lms' ),
+		'hint'  => __( 'Open access site-wide; follow reports', 'mint-lms' ),
+		'mod'   => ' is-root',
+	),
+);
+
 $teach_steps = array(
 	array(
 		'label' => __( '1. Create a Lesson / Quiz', 'mint-lms' ),
@@ -128,8 +184,19 @@ $teach_steps = array(
 	),
 );
 
-$step2_flow       = $is_instructor_welcome ? $teach_steps : $attach_steps;
-$step2_flow_class = $is_instructor_welcome ? ' mint-welcome-flow--teach' : '';
+if ( $is_instructor_welcome ) {
+	$step2_flow       = $teach_steps;
+	$step2_flow_class = ' mint-welcome-flow--teach';
+	$step2_flow_label = __( 'Teach flow', 'mint-lms' );
+} elseif ( $is_manager_welcome ) {
+	$step2_flow       = $manage_steps;
+	$step2_flow_class = ' mint-welcome-flow--manage';
+	$step2_flow_label = __( 'Manage flow', 'mint-lms' );
+} else {
+	$step2_flow       = $attach_steps;
+	$step2_flow_class = '';
+	$step2_flow_label = __( 'Create then attach', 'mint-lms' );
+}
 
 $outcome_steps = array(
 	array(
@@ -166,7 +233,7 @@ $render_features = static function ( array $features ): void {
 };
 ?>
 <div
-	class="mint-welcome<?php echo $is_instructor_welcome ? ' mint-welcome--instructor' : ''; ?>"
+	class="mint-welcome<?php echo esc_attr( $welcome_mod_class ); ?>"
 	x-data="mintWelcomeOnboarding({ maxStep: <?php echo (int) $max_steps; ?> })"
 	x-cloak
 >
@@ -197,7 +264,7 @@ $render_features = static function ( array $features ): void {
 				>
 					<?php esc_html_e( 'Step 2', 'mint-lms' ); ?>
 				</button>
-				<?php if ( ! $is_instructor_welcome ) : ?>
+				<?php if ( ! $is_two_step_welcome ) : ?>
 					<button
 						type="button"
 						class="mint-welcome__step-nav-btn"
@@ -227,6 +294,9 @@ $render_features = static function ( array $features ): void {
 					<?php if ( $is_instructor_welcome ) : ?>
 						<h1 class="mint-welcome__title"><?php esc_html_e( 'Your course, your classroom.', 'mint-lms' ); ?></h1>
 						<p class="mint-welcome__lead"><?php esc_html_e( 'Build lessons and quizzes at your pace, attach them into your course, then open it for your students.', 'mint-lms' ); ?></p>
+					<?php elseif ( $is_manager_welcome ) : ?>
+						<h1 class="mint-welcome__title"><?php esc_html_e( 'Manage learning across your site.', 'mint-lms' ); ?></h1>
+						<p class="mint-welcome__lead"><?php esc_html_e( 'Build and attach course content anywhere, enroll students when ready, and follow progress across the whole LMS.', 'mint-lms' ); ?></p>
 					<?php else : ?>
 						<h1 class="mint-welcome__title"><?php esc_html_e( 'Build one piece at a time.', 'mint-lms' ); ?></h1>
 						<p class="mint-welcome__lead"><?php esc_html_e( 'Create a lesson, quiz, or question first — then attach it where it belongs. Nothing has to be finished in one sitting.', 'mint-lms' ); ?></p>
@@ -236,7 +306,7 @@ $render_features = static function ( array $features ): void {
 			</div>
 		</template>
 
-		<?php if ( ! $is_instructor_welcome ) : ?>
+		<?php if ( ! $is_two_step_welcome ) : ?>
 			<template x-if="step === 3">
 				<div class="mint-welcome__step-panel">
 					<div class="mint-welcome__hero">
@@ -286,6 +356,10 @@ $render_features = static function ( array $features ): void {
 					<div class="mint-welcome__eyebrow"><?php esc_html_e( 'Step 2 · Teach', 'mint-lms' ); ?></div>
 					<h2 class="mint-welcome__heading"><?php esc_html_e( 'Create → Attach → Open for students', 'mint-lms' ); ?></h2>
 					<p class="mint-welcome__sub"><?php esc_html_e( 'Create content first, attach it into your course, then enroll students and follow their progress.', 'mint-lms' ); ?></p>
+				<?php elseif ( $is_manager_welcome ) : ?>
+					<div class="mint-welcome__eyebrow"><?php esc_html_e( 'Step 2 · Manage', 'mint-lms' ); ?></div>
+					<h2 class="mint-welcome__heading"><?php esc_html_e( 'Create → Attach → Enroll & oversee', 'mint-lms' ); ?></h2>
+					<p class="mint-welcome__sub"><?php esc_html_e( 'Create content first, attach it into any course, then enroll students and follow reports across the site.', 'mint-lms' ); ?></p>
 				<?php else : ?>
 					<div class="mint-welcome__eyebrow"><?php esc_html_e( 'Step 2 · Build', 'mint-lms' ); ?></div>
 					<h2 class="mint-welcome__heading"><?php esc_html_e( 'Create → Attach', 'mint-lms' ); ?></h2>
@@ -294,7 +368,7 @@ $render_features = static function ( array $features ): void {
 
 				<div
 					class="mint-welcome-flow<?php echo esc_attr( $step2_flow_class ); ?>"
-					aria-label="<?php echo esc_attr( $is_instructor_welcome ? __( 'Teach flow', 'mint-lms' ) : __( 'Create then attach', 'mint-lms' ) ); ?>"
+					aria-label="<?php echo esc_attr( $step2_flow_label ); ?>"
 				>
 					<?php foreach ( $step2_flow as $index => $item ) : ?>
 						<div class="mint-welcome-flow__card<?php echo esc_attr( $item['mod'] ); ?>">
@@ -309,7 +383,7 @@ $render_features = static function ( array $features ): void {
 			</div>
 		</template>
 
-		<?php if ( ! $is_instructor_welcome ) : ?>
+		<?php if ( ! $is_two_step_welcome ) : ?>
 			<template x-if="step === 3">
 				<div class="mint-welcome__step-panel mint-welcome__step-panel--right">
 					<div class="mint-welcome__eyebrow"><?php esc_html_e( 'Step 3 · Go live', 'mint-lms' ); ?></div>
