@@ -104,7 +104,7 @@ final class FirstRunState {
 
 	/**
 	 * Admin / Instructor first-time dashboard: welcome until skip, create, or own a course.
-	 * Instructor gets a 2-step classroom variant; Admin/Manager keep 3 steps.
+	 * Instructor and Manager get 2-step variants; Admin keeps 3 steps.
 	 */
 	public static function shouldShowWelcome( int $userId ): bool {
 		if ( self::isWelcomePreviewRequested() ) {

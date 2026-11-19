@@ -161,7 +161,7 @@ final class MenuRegistrar {
 
 		$userId = get_current_user_id();
 
-		// First-time welcome: Admin/Manager = 3 steps; Instructor = 2-step classroom variant.
+		// First-time welcome: Admin = 3 steps; Manager/Instructor = 2-step role variants.
 		if ( FirstRunState::shouldShowWelcome( $userId ) ) {
 			include MINTLMS_PATH . 'views/admin/first-run.php';
 			return;
