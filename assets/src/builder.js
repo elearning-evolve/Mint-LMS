@@ -1246,14 +1246,16 @@ function courseBuilder(courseId, opts = {}) {
           } else if (
             !this.isStandalone &&
             Number(this.courseId) > 0 &&
-            this.hasRealSections() &&
             !this.isLessonsLibraryFlow() &&
             !this.isQuizzesLibraryFlow() &&
             !this.isQuestionsLibraryFlow()
           ) {
-            // Edit Course with existing lesson groups → Lesson Groups overview
-            // (not the blank "Add a lesson" canvas).
-            this.enterTypeOverview('sections');
+            // Edit Course: open the highest content overview that exists.
+            // Lesson Groups → Lessons (incl. ungrouped) → Quizzes.
+            const defaultOverview = this.resolveDefaultCourseOverview();
+            if (defaultOverview) {
+              this.enterTypeOverview(defaultOverview);
+            }
           }
         }
         if (this.isStandalone && !this.selected && this.standaloneLessonId) {
@@ -3474,6 +3476,24 @@ function courseBuilder(courseId, opts = {}) {
 
     hasRealSections() {
       return this.navSectionList().length > 0;
+    },
+
+    /**
+     * Best default overview when opening a course with no selected item / view.
+     * Priority: Lesson Groups → Lessons (incl. ungrouped) → Quizzes.
+     * @return {'sections'|'lessons'|'quizzes'|null}
+     */
+    resolveDefaultCourseOverview() {
+      if (this.hasRealSections()) {
+        return 'sections';
+      }
+      if (this.navLessonList().length > 0) {
+        return 'lessons';
+      }
+      if (this.navQuizMenuList().length > 0) {
+        return 'quizzes';
+      }
+      return null;
     },
 
     async addLessonToFirstSection() {
