@@ -125,7 +125,7 @@ $showCta = $overview->isEnrolled || $overview->canEnroll || ( 'paid' === $overvi
 		<?php if ( $showCta ) : ?>
 			<div class="mint-mt-4 mint-flex mint-flex-wrap mint-gap-3">
 				<?php if ( $overview->isEnrolled ) : ?>
-					<a href="<?php echo esc_url( $continueUrl ); ?>" class="mint-inline-flex mint-h-[42px] mint-items-center mint-justify-center mint-rounded-lg mint-border-0 mint-bg-cta mint-px-[18px] mint-text-sm mint-font-bold mint-text-ink mint-no-underline hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(11,79,63,0.35)]">
+					<a href="<?php echo esc_url( $continueUrl ); ?>" class="mint-inline-flex mint-h-[42px] mint-items-center mint-justify-center mint-rounded-lg mint-border-0 mint-bg-cta mint-px-[18px] mint-text-sm mint-font-bold mint-text-ink mint-no-underline hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(15,14,26,0.35)]">
 					<?php
 						echo null !== $overview->progressPct && $overview->progressPct > 0
 							? esc_html__( 'Continue lesson', 'mint-lms' )
@@ -133,9 +133,9 @@ $showCta = $overview->isEnrolled || $overview->canEnroll || ( 'paid' === $overvi
 					?>
 					</a>
 				<?php elseif ( $overview->canEnroll ) : ?>
-					<a href="<?php echo esc_url( $enrollUrl ); ?>" class="mint-inline-flex mint-h-[42px] mint-items-center mint-justify-center mint-rounded-lg mint-border-0 mint-bg-cta mint-px-[18px] mint-text-sm mint-font-bold mint-text-ink mint-no-underline hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(11,79,63,0.35)]"><?php esc_html_e( 'Enroll for free', 'mint-lms' ); ?></a>
+					<a href="<?php echo esc_url( $enrollUrl ); ?>" class="mint-inline-flex mint-h-[42px] mint-items-center mint-justify-center mint-rounded-lg mint-border-0 mint-bg-cta mint-px-[18px] mint-text-sm mint-font-bold mint-text-ink mint-no-underline hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(15,14,26,0.35)]"><?php esc_html_e( 'Enroll for free', 'mint-lms' ); ?></a>
 				<?php elseif ( 'paid' === $overview->enrollmentType && '' !== $purchaseUrl ) : ?>
-					<a href="<?php echo esc_url( $purchaseUrl ); ?>" class="mint-inline-flex mint-h-[42px] mint-items-center mint-justify-center mint-rounded-lg mint-border-0 mint-bg-cta mint-px-[18px] mint-text-sm mint-font-bold mint-text-ink mint-no-underline hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(11,79,63,0.35)]">
+					<a href="<?php echo esc_url( $purchaseUrl ); ?>" class="mint-inline-flex mint-h-[42px] mint-items-center mint-justify-center mint-rounded-lg mint-border-0 mint-bg-cta mint-px-[18px] mint-text-sm mint-font-bold mint-text-ink mint-no-underline hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(15,14,26,0.35)]">
 					<?php
 						echo '' !== $productPrice
 							? esc_html( sprintf( __( 'Buy course — %s', 'mint-lms' ), function_exists( 'wc_price' ) ? wp_strip_all_tags( wc_price( (float) $productPrice ) ) : $productPrice ) )
@@ -143,7 +143,7 @@ $showCta = $overview->isEnrolled || $overview->canEnroll || ( 'paid' === $overvi
 					?>
 					</a>
 				<?php elseif ( ! $overview->isLoggedIn ) : ?>
-					<a href="<?php echo esc_url( wp_login_url( get_permalink() ? get_permalink() : home_url( '/' ) ) ); ?>" class="mint-inline-flex mint-h-[42px] mint-items-center mint-justify-center mint-rounded-lg mint-border-0 mint-bg-cta mint-px-[18px] mint-text-sm mint-font-bold mint-text-ink mint-no-underline hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(11,79,63,0.35)]"><?php esc_html_e( 'Log in to enroll', 'mint-lms' ); ?></a>
+					<a href="<?php echo esc_url( wp_login_url( get_permalink() ? get_permalink() : home_url( '/' ) ) ); ?>" class="mint-inline-flex mint-h-[42px] mint-items-center mint-justify-center mint-rounded-lg mint-border-0 mint-bg-cta mint-px-[18px] mint-text-sm mint-font-bold mint-text-ink mint-no-underline hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(15,14,26,0.35)]"><?php esc_html_e( 'Log in to enroll', 'mint-lms' ); ?></a>
 				<?php endif; ?>
 			</div>
 		<?php endif; ?>

@@ -1570,7 +1570,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 																	<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" :style="{ transform: 'rotate(' + (isQuizExpanded(quiz.id) ? 90 : 0) + 'deg)' }"><path d="m7 5 6 5-6 5"/></svg>
 																</button>
 																<span class="mint-builder-nav__icon mint-builder-nav__icon--quiz" aria-hidden="true">
-																	<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#0B4F3F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5 8 14 15.5 5.5"/></svg>
+																	<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5 8 14 15.5 5.5"/></svg>
 																</span>
 																<div class="mint-builder-tree-page__identity">
 																	<span class="mint-builder-tree-page__name mint-truncate" x-text="quiz.title || t('untitledQuiz')"></span>
@@ -1730,7 +1730,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 																		<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" :style="{ transform: 'rotate(' + (isQuizExpanded(quiz.id) ? 90 : 0) + 'deg)' }"><path d="m7 5 6 5-6 5"/></svg>
 																	</button>
 																	<span class="mint-builder-nav__icon mint-builder-nav__icon--quiz" aria-hidden="true">
-																		<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#0B4F3F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5 8 14 15.5 5.5"/></svg>
+																		<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5 8 14 15.5 5.5"/></svg>
 																	</span>
 																	<div class="mint-builder-tree-page__identity">
 																		<span class="mint-builder-tree-page__name mint-truncate" x-text="quiz.title || t('untitledQuiz')"></span>
@@ -1892,9 +1892,9 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 								<div class="mint-builder-overview__main-top">
 									<div class="mint-builder-overview__tip" role="note">
 										<svg width="17" height="17" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-											<circle cx="10" cy="10" r="8" stroke="#0B4F3F" stroke-width="2"/>
-											<path d="M10 9v5" stroke="#0B4F3F" stroke-width="2.1" stroke-linecap="round"/>
-											<circle cx="10" cy="6.2" r="1.15" fill="#0B4F3F"/>
+											<circle cx="10" cy="10" r="8" stroke="#0F0E1A" stroke-width="2"/>
+											<path d="M10 9v5" stroke="#0F0E1A" stroke-width="2.1" stroke-linecap="round"/>
+											<circle cx="10" cy="6.2" r="1.15" fill="#0F0E1A"/>
 										</svg>
 										<span><strong class="mint-builder-overview__tip-label"><?php esc_html_e( 'Tip:', 'mint-lms' ); ?></strong> <?php esc_html_e( 'Lesson groups organize related lessons together, like chapters. Drag them to reorder in Course Hierarchy.', 'mint-lms' ); ?></span>
 									</div>
@@ -2051,9 +2051,9 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 								<div class="mint-builder-overview__main-top">
 									<div class="mint-builder-overview__tip" role="note">
 										<svg width="17" height="17" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-											<circle cx="10" cy="10" r="8" stroke="#0B4F3F" stroke-width="2"/>
-											<path d="M10 9v5" stroke="#0B4F3F" stroke-width="2.1" stroke-linecap="round"/>
-											<circle cx="10" cy="6.2" r="1.15" fill="#0B4F3F"/>
+											<circle cx="10" cy="10" r="8" stroke="#0F0E1A" stroke-width="2"/>
+											<path d="M10 9v5" stroke="#0F0E1A" stroke-width="2.1" stroke-linecap="round"/>
+											<circle cx="10" cy="6.2" r="1.15" fill="#0F0E1A"/>
 										</svg>
 										<span><strong class="mint-builder-overview__tip-label"><?php esc_html_e( 'Tip:', 'mint-lms' ); ?></strong> <?php esc_html_e( 'Lessons hold the teaching content — text, video, or a quiz. Each lesson lives inside one lesson group.', 'mint-lms' ); ?></span>
 									</div>
@@ -2187,7 +2187,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 							<div class="mint-builder-overview__head">
 								<div class="mint-builder-overview__title-block">
 									<span class="mint-builder-overview__hero-icon mint-builder-nav__icon mint-builder-nav__icon--quiz" aria-hidden="true">
-										<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#0B4F3F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5 8 14 15.5 5.5"/></svg>
+										<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5 8 14 15.5 5.5"/></svg>
 									</span>
 									<div>
 										<div class="mint-builder-overview__title"><?php esc_html_e( 'Quizzes', 'mint-lms' ); ?></div>
@@ -2209,9 +2209,9 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 								<div class="mint-builder-overview__main-top">
 									<div class="mint-builder-overview__tip" role="note">
 										<svg width="17" height="17" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-											<circle cx="10" cy="10" r="8" stroke="#0B4F3F" stroke-width="2"/>
-											<path d="M10 9v5" stroke="#0B4F3F" stroke-width="2.1" stroke-linecap="round"/>
-											<circle cx="10" cy="6.2" r="1.15" fill="#0B4F3F"/>
+											<circle cx="10" cy="10" r="8" stroke="#0F0E1A" stroke-width="2"/>
+											<path d="M10 9v5" stroke="#0F0E1A" stroke-width="2.1" stroke-linecap="round"/>
+											<circle cx="10" cy="6.2" r="1.15" fill="#0F0E1A"/>
 										</svg>
 										<span><strong class="mint-builder-overview__tip-label"><?php esc_html_e( 'Tip:', 'mint-lms' ); ?></strong> <?php esc_html_e( 'Quizzes check understanding at the end of a lesson. Set a pass % and add questions once created.', 'mint-lms' ); ?></span>
 									</div>
@@ -2257,7 +2257,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 											>
 												<div class="mint-builder-overview__td mint-builder-overview__td--title" role="cell">
 													<span class="mint-builder-nav__icon mint-builder-nav__icon--quiz" aria-hidden="true">
-														<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#0B4F3F" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5 8 14 15.5 5.5"/></svg>
+														<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5 8 14 15.5 5.5"/></svg>
 													</span>
 													<div class="mint-builder-overview__card-body">
 														<div class="mint-builder-overview__card-title mint-truncate" x-text="item.title || t('untitledQuiz')"></div>
@@ -2319,7 +2319,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 										<div class="mint-builder-overview__stat-top">
 											<div class="mint-builder-overview__stat-value" x-text="navQuizMenuList().length"></div>
 											<span class="mint-builder-overview__stat-icon mint-builder-nav__icon mint-builder-nav__icon--quiz" aria-hidden="true">
-												<svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="#0B4F3F" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5 8 14 15.5 5.5"/></svg>
+												<svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5 8 14 15.5 5.5"/></svg>
 											</span>
 										</div>
 										<div class="mint-builder-overview__stat-label"><?php esc_html_e( 'Quizzes', 'mint-lms' ); ?></div>
@@ -2363,9 +2363,9 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 								<div class="mint-builder-overview__main-top">
 									<div class="mint-builder-overview__tip" role="note">
 										<svg width="17" height="17" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-											<circle cx="10" cy="10" r="8" stroke="#0B4F3F" stroke-width="2"/>
-											<path d="M10 9v5" stroke="#0B4F3F" stroke-width="2.1" stroke-linecap="round"/>
-											<circle cx="10" cy="6.2" r="1.15" fill="#0B4F3F"/>
+											<circle cx="10" cy="10" r="8" stroke="#0F0E1A" stroke-width="2"/>
+											<path d="M10 9v5" stroke="#0F0E1A" stroke-width="2.1" stroke-linecap="round"/>
+											<circle cx="10" cy="6.2" r="1.15" fill="#0F0E1A"/>
 										</svg>
 										<span><strong class="mint-builder-overview__tip-label"><?php esc_html_e( 'Tip:', 'mint-lms' ); ?></strong> <?php esc_html_e( 'Questions are the individual prompts inside a quiz — multiple choice, true/false, or essay answers.', 'mint-lms' ); ?></span>
 									</div>
@@ -2479,7 +2479,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 										<div class="mint-builder-overview__stat-top">
 											<div class="mint-builder-overview__stat-value" x-text="navQuizMenuList().length"></div>
 											<span class="mint-builder-overview__stat-icon mint-builder-nav__icon mint-builder-nav__icon--quiz" aria-hidden="true">
-												<svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="#0B4F3F" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5 8 14 15.5 5.5"/></svg>
+												<svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5 8 14 15.5 5.5"/></svg>
 											</span>
 										</div>
 										<div class="mint-builder-overview__stat-label"><?php esc_html_e( 'Quizzes', 'mint-lms' ); ?></div>
@@ -3054,7 +3054,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 											<div class="mint-lesson-format">
 												<button type="button" class="mint-lesson-format__trigger" @click="questionFormatMenuOpen = !questionFormatMenuOpen" :aria-expanded="questionFormatMenuOpen ? 'true' : 'false'">
 													<span x-text="questionFormatLabel"></span>
-													<svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#0B4F3F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 8 10 12.5 14.5 8"/></svg>
+													<svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 8 10 12.5 14.5 8"/></svg>
 												</button>
 												<div class="mint-lesson-format__menu" x-show="questionFormatMenuOpen" x-cloak>
 													<template x-for="option in formatOptions" :key="'qfmt-' + option.value">
@@ -3222,7 +3222,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 											<div class="mint-qeditor__dropdown" @click.outside="essaySubmitOpen = false">
 												<button type="button" class="mint-qeditor__dropdown-trigger" @click="essaySubmitOpen = !essaySubmitOpen">
 													<span x-text="activeQuestion.settings.submitMethod || 'Text Box'"></span>
-													<svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#0B4F3F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 8 10 12.5 14.5 8"/></svg>
+													<svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 8 10 12.5 14.5 8"/></svg>
 												</button>
 												<div class="mint-qeditor__dropdown-menu" x-show="essaySubmitOpen" x-cloak>
 													<button type="button" class="mint-qeditor__dropdown-item" :class="activeQuestion.settings.submitMethod !== 'Upload' ? 'is-active' : ''" @click="setEssaySubmitMethod('Text Box')"><?php esc_html_e( 'Text Box', 'mint-lms' ); ?></button>
@@ -3237,7 +3237,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 											<div class="mint-qeditor__dropdown mint-qeditor__dropdown--wide" @click.outside="essayGradingOpen = false">
 												<button type="button" class="mint-qeditor__dropdown-trigger" @click="essayGradingOpen = !essayGradingOpen">
 													<span x-text="activeQuestion.settings.gradingMode || 'Not Graded, No Points Awarded'"></span>
-													<svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#0B4F3F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 8 10 12.5 14.5 8"/></svg>
+													<svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 8 10 12.5 14.5 8"/></svg>
 												</button>
 												<div class="mint-qeditor__dropdown-menu" x-show="essayGradingOpen" x-cloak>
 													<template x-for="mode in essayGradingModes" :key="mode">
@@ -3479,7 +3479,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 											<svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><circle cx="5" cy="3" r="1.5"/><circle cx="11" cy="3" r="1.5"/><circle cx="5" cy="8" r="1.5"/><circle cx="11" cy="8" r="1.5"/><circle cx="5" cy="13" r="1.5"/><circle cx="11" cy="13" r="1.5"/></svg>
 										</span>
 										<span class="mint-lesson-quizzes__icon" aria-hidden="true">
-											<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#0B4F3F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5 8 14 15.5 5.5"/></svg>
+											<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5 8 14 15.5 5.5"/></svg>
 										</span>
 										<div class="mint-lesson-quizzes__meta">
 											<div class="mint-lesson-quizzes__title mint-truncate" x-text="lq.title || t('newQuiz')"></div>

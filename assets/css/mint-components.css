@@ -472,12 +472,12 @@
   transition: color 120ms ease-out;
 }
 #mint-lms-root .mint-builder-nav__item:hover {
-  color: #0B4F3F !important;
+  color: #0F0E1A !important;
 }
 #mint-lms-root .mint-builder-nav__item.is-active {
-  color: #0B4F3F !important;
+  color: #0F0E1A !important;
   font-weight: 700;
-  border-bottom-color: #0B4F3F;
+  border-bottom-color: #0F0E1A;
 }
 #mint-lms-root .mint-builder-nav__item > svg {
   transition: transform 120ms ease-out;
@@ -526,7 +526,7 @@
   font-family: inherit;
   font-size: 14px;
   font-weight: 700;
-  color: #0B4F3F;
+  color: #0F0E1A;
   cursor: pointer;
   transition: background-color 120ms ease-out;
 }
@@ -580,7 +580,7 @@
   background: #F3F4F6;
 }
 #mint-lms-root .mint-builder-nav__option--overview {
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-weight: 700;
 }
 #mint-lms-root .mint-builder-nav__option--overview:hover {
@@ -617,7 +617,7 @@
   padding: 1px 7px;
   border-radius: 999px;
   background: #E8F7F0;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-size: 12px;
   font-weight: 700;
   line-height: 1.4;
@@ -741,7 +741,7 @@
   border-left-color: rgba(15, 14, 26, 0.12);
 }
 #mint-lms-root .mint-builder-nav__group--lesson .mint-builder-nav__group-lessons {
-  border-left-color: rgba(11, 79, 63, 0.28);
+  border-left-color: rgba(15, 14, 26, 0.28);
 }
 #mint-lms-root .mint-builder-nav__group--quiz .mint-builder-nav__group-lessons,
 #mint-lms-root .mint-builder-nav__group-questions {
@@ -757,7 +757,7 @@
 #mint-lms-root .mint-builder-nav__nested-quizzes {
   margin: 0 0 4px 18px;
   padding-left: 8px;
-  border-left: 2px solid rgba(11, 79, 63, 0.28);
+  border-left: 2px solid rgba(15, 14, 26, 0.28);
 }
 #mint-lms-root .mint-builder-nav__nested-questions {
   margin: 0 0 4px 18px;
@@ -806,14 +806,14 @@
   font-family: inherit;
   font-size: 14px;
   font-weight: 700;
-  color: #0B4F3F;
+  color: #0F0E1A;
   cursor: pointer;
   outline: none;
   transition: background-color 120ms ease-out, border-color 120ms ease-out;
 }
 #mint-lms-root .mint-builder-nav__add:hover:not(:disabled) {
   background: #F3F4F6;
-  border-color: rgba(11, 79, 63, 0.45);
+  border-color: rgba(15, 14, 26, 0.45);
 }
 #mint-lms-root .mint-builder-nav__add:disabled {
   opacity: 0.45;
@@ -833,7 +833,7 @@
   height: 20px;
   border-radius: 0;
   background: transparent;
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 #mint-lms-root .mint-builder-nav__icon--section {
   background: #F0EDFB;
@@ -929,7 +929,7 @@
   opacity: 1;
 }
 #mint-lms-root .mint-builder-nav__grip:hover {
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 #mint-lms-root .mint-builder-nav__badge {
   font-size: 12px;
@@ -1280,7 +1280,7 @@
 }
 #mint-lms-root .mint-tree-item__icon--quiz {
   background: #E5F9EC;
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 #mint-lms-root .mint-tree-item__icon--question {
   background: #EDE9FA;
@@ -1288,7 +1288,7 @@
 }
 #mint-lms-root .mint-tree-item.is-active .mint-tree-item__icon--quiz {
   background: rgba(255, 255, 255, 0.72);
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 #mint-lms-root .mint-tree-item__body {
   display: flex;
@@ -1327,19 +1327,19 @@
   color: #2C2940;
 }
 #mint-lms-root .mint-tree-item.is-active .mint-tree-item__title {
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-weight: 600;
 }
 #mint-lms-root .mint-tree-item--course.is-active .mint-tree-item__title {
   font-weight: 700;
 }
 #mint-lms-root .mint-tree-item.is-active .mint-tree-item__meta {
-  color: #0B4F3F;
+  color: #0F0E1A;
   opacity: 0.75;
 }
 #mint-lms-root .mint-tree-item.is-active .mint-tree-item__icon {
   background: rgba(255, 255, 255, 0.72);
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 #mint-lms-root .mint-tree-item__meta {
   display: block;
@@ -1392,11 +1392,11 @@
 }
 #mint-lms-root .mint-course-tree .mint-tree-item.is-active .mint-builder-tree__toggle {
   background: rgba(255, 255, 255, 0.7);
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 #mint-lms-root .mint-course-tree .mint-tree-item:hover .mint-builder-tree__toggle {
   background: #E5F9EC;
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 #mint-lms-root .mint-course-tree .mint-tree-add-lesson {
   margin: 4px 0 2px;
@@ -1414,7 +1414,7 @@
 #mint-lms-root .mint-course-tree .mint-handle-section:hover,
 #mint-lms-root .mint-course-tree .mint-handle-lesson:hover {
   opacity: 1;
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 #mint-lms-root .mint-course-tree .mint-handle-section svg,
 #mint-lms-root .mint-course-tree .mint-handle-lesson svg {
@@ -1481,7 +1481,7 @@
   box-shadow: inset 3px 0 0 #98FBCB;
 }
 #mint-lms-root .mint-tree-lesson.is-active .mint-tree-lesson__title {
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-weight: 600;
 }
 #mint-lms-root .mint-tree-lesson__parent {
@@ -1494,12 +1494,12 @@
   cursor: pointer;
 }
 #mint-lms-root .mint-tree-lesson__parent:hover {
-  color: #0B4F3F;
+  color: #0F0E1A;
   text-decoration: underline;
   text-underline-offset: 2px;
 }
 #mint-lms-root .mint-tree-lesson.is-active .mint-tree-lesson__parent {
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 #mint-lms-root .mint-tree-lesson__title--child {
   display: block;
@@ -1515,11 +1515,11 @@
 }
 #mint-lms-root .mint-tree-lesson.is-active .mint-tree-lesson__title--child {
   border-left-color: #98FBCB;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-weight: 600;
 }
 #mint-lms-root a.mint-tree-lesson__title--child:hover {
-  color: #0B4F3F;
+  color: #0F0E1A;
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -1536,7 +1536,7 @@
 }
 #mint-lms-root .mint-tree-lesson.is-active .mint-tree-lesson__title--grandchild {
   border-left-color: #98FBCB;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-weight: 600;
 }
 #mint-lms-root .mint-hierarchy {
@@ -1652,7 +1652,7 @@
 #mint-lms-root .mint-hierarchy.is-active .mint-hierarchy__label,
 #mint-lms-root .mint-hierarchy__row.is-active .mint-hierarchy__label,
 #mint-lms-root .mint-hierarchy__row.is-current .mint-hierarchy__label {
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 #mint-lms-root .mint-hierarchy__icon {
   width: 26px;
@@ -1673,7 +1673,7 @@
 }
 #mint-lms-root .mint-hierarchy__icon--quiz {
   background: #E8FFF3;
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 #mint-lms-root .mint-hierarchy__icon--question {
   background: #FFF4E5;
@@ -1706,7 +1706,7 @@
   text-transform: none;
 }
 #mint-lms-root .mint-hierarchy.is-active .mint-hierarchy__lesson {
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 #mint-lms-root a.mint-hierarchy__lesson:hover {
   text-decoration: underline;
@@ -1802,11 +1802,11 @@
 }
 #mint-lms-root .mint-tree-lesson__icon--quiz {
   background: #E8FFF3;
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 #mint-lms-root .mint-tree-lesson.is-active .mint-tree-lesson__icon--quiz {
   background: #FFFFFF;
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 #mint-lms-root .mint-tree-lesson.is-active .mint-tree-lesson__icon {
   background: #FFFFFF;
@@ -1891,7 +1891,7 @@
   pointer-events: none;
 }
 #mint-lms-root .mint-editor-frame .mint-lesson-content-area--visual a {
-  color: #0B4F3F;
+  color: #0F0E1A;
   text-decoration: underline;
 }
 #mint-lms-root .mint-editor-frame .mint-lesson-content-area--visual ul,
@@ -2074,7 +2074,7 @@
 }
 
 #mint-lms-root .mint-builder-identity__title:hover {
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 
 #mint-lms-root .mint-status-chip {
@@ -2092,7 +2092,7 @@
 
 #mint-lms-root .mint-status-chip--published {
   background: #E8FFF3;
-  color: #0B4F3F;
+  color: #0F0E1A;
   border-color: #98FBCB;
 }
 
@@ -2124,7 +2124,7 @@
 #mint-lms-root .mint-handle-section:hover,
 #mint-lms-root .mint-handle-lesson:hover {
   opacity: 1;
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 #mint-lms-root .mint-handle-section:active,
 #mint-lms-root .mint-handle-lesson:active { cursor: grabbing; }
@@ -2205,7 +2205,7 @@
   font-family: inherit;
   font-size: 14px;
   font-weight: 600;
-  color: #0B4F3F;
+  color: #0F0E1A;
   cursor: pointer;
 }
 
@@ -2353,7 +2353,7 @@
 }
 
 #mint-lms-root .mint-builder-tree-page__grip:hover {
-  color: #0B4F3F;
+  color: #0F0E1A;
   background: #E8FFF3;
 }
 
@@ -2430,7 +2430,7 @@
   border: none;
   border-radius: 7px;
   background: #98FBCB;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-family: inherit;
   font-size: 13px;
   font-weight: 700;
@@ -2483,7 +2483,7 @@
 }
 
 #mint-lms-root .mint-builder-tree-page__edit {
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 
 #mint-lms-root .mint-builder-tree-page__edit:hover {
@@ -2583,7 +2583,7 @@
   border: 1.5px solid rgb(120, 220, 140);
   border-radius: 8px;
   background: #98FBCB;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-family: inherit;
   font-size: 14px;
   font-weight: 700;
@@ -2807,7 +2807,7 @@
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.01em;
-  color: #0B4F3F;
+  color: #0F0E1A;
   background: #E8F7F0;
   border-radius: 999px;
   padding: 4px 10px;
@@ -2923,7 +2923,7 @@
   margin: 0 0 0 8px;
   cursor: pointer;
   background-color: transparent;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%230B4F3F' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M5 5l10 10M15 5 5 15'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%230F0E1A' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M5 5l10 10M15 5 5 15'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: center;
   background-size: 14px 14px;
@@ -2953,7 +2953,7 @@
   padding: 13px 15px;
   border-radius: 12px;
   background: #E8F7F0;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-size: 14px;
   line-height: 1.45;
   font-weight: 500;
@@ -2968,7 +2968,7 @@
 
 #mint-lms-root .mint-builder-overview__tip-label {
   font-weight: 800;
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 
 #mint-lms-root .mint-sr-only {
@@ -3191,10 +3191,10 @@
   width: 32px;
   height: 32px;
   padding: 0;
-  border: 1px solid rgba(11, 79, 63, 0.45);
+  border: 1px solid rgba(15, 14, 26, 0.45);
   border-radius: 4px;
   background: #fff;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-family: inherit;
   font-size: 16px;
   font-weight: 600;
@@ -3205,8 +3205,8 @@
 
 #mint-lms-root .mint-builder-overview__pager-btn:hover:not(:disabled) {
   background: #E8F7F0;
-  border-color: #0B4F3F;
-  color: #0B4F3F;
+  border-color: #0F0E1A;
+  color: #0F0E1A;
 }
 
 #mint-lms-root .mint-builder-overview__pager-btn:disabled {
@@ -3297,7 +3297,7 @@
 }
 
 #mint-lms-root .mint-builder-overview__chip--ok {
-  color: #0B4F3F;
+  color: #0F0E1A;
   background: #E8F7F0;
 }
 
@@ -3334,7 +3334,7 @@
 }
 
 #mint-lms-root .mint-builder-overview__card-edit {
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 
 #mint-lms-root .mint-builder-overview__card-remove {
@@ -3356,13 +3356,13 @@
   font-family: inherit;
   font-size: 15px;
   font-weight: 700;
-  color: #0B4F3F;
+  color: #0F0E1A;
   cursor: pointer;
 }
 
 #mint-lms-root .mint-builder-overview__add:hover:not(:disabled) {
   background: #F3F4F6;
-  border-color: rgba(11, 79, 63, 0.45);
+  border-color: rgba(15, 14, 26, 0.45);
 }
 
 #mint-lms-root .mint-builder-overview__add:disabled {
@@ -3459,7 +3459,7 @@
   flex: none;
   background: #fff;
   border: 1px solid #E4E1F0;
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 
 #mint-lms-root .mint-builder-overview__row-body {
@@ -3512,7 +3512,7 @@
   border-radius: 9px;
   border: none !important;
   background: #98FBCB !important;
-  color: #0B4F3F !important;
+  color: #0F0E1A !important;
   font-size: 15px;
   font-weight: 600;
   font-family: var(--mint-font);
@@ -3528,8 +3528,8 @@
 #mint-lms-root a.mint-builder-btn-preview:hover,
 #mint-lms-root a.mint-builder-btn-preview:focus-visible {
   background: #7FE8B8 !important;
-  color: #0B4F3F !important;
-  box-shadow: 0 4px 12px rgba(11, 79, 63, 0.18) !important;
+  color: #0F0E1A !important;
+  box-shadow: 0 4px 12px rgba(15, 14, 26, 0.18) !important;
   transform: translateY(-1px);
   cursor: pointer !important;
 }
@@ -3547,7 +3547,7 @@
   border-radius: 8px;
   border: none;
   background: #98FBCB !important;
-  color: #0B4F3F !important;
+  color: #0F0E1A !important;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -3556,11 +3556,11 @@
 #mint-lms-root button.mint-builder-btn-publish:hover:not(:disabled),
 #mint-lms-root button.mint-builder-btn-publish:focus-visible:not(:disabled) {
   background: #7FE8B8 !important;
-  box-shadow: 0 4px 12px rgba(11, 79, 63, 0.18) !important;
+  box-shadow: 0 4px 12px rgba(15, 14, 26, 0.18) !important;
   transform: translateY(-1px);
 }
 #mint-lms-root button.mint-builder-btn-publish:focus-visible:not(:disabled) {
-  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55), 0 4px 12px rgba(11, 79, 63, 0.18) !important;
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55), 0 4px 12px rgba(15, 14, 26, 0.18) !important;
 }
 #mint-lms-root button.mint-builder-btn-publish:disabled {
   opacity: 0.45;
@@ -3796,7 +3796,7 @@
   border-radius: 7px;
   border: 0;
   background: transparent;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-size: 16px;
   display: inline-flex;
   align-items: center;
@@ -3812,8 +3812,8 @@
 }
 #mint-lms-root .mint-lesson-editor-tool.is-active {
   background: #98FBCB;
-  color: #0B4F3F;
-  box-shadow: inset 0 0 0 1.5px rgba(11, 79, 63, 0.28);
+  color: #0F0E1A;
+  box-shadow: inset 0 0 0 1.5px rgba(15, 14, 26, 0.28);
 }
 #mint-lms-root .mint-lesson-editor-tool.is-active[data-tool="ul"],
 #mint-lms-root .mint-lesson-editor-tool.is-active[data-tool="ol"] {
@@ -3827,7 +3827,7 @@
   box-shadow: 0 0 0 2px rgba(152, 251, 203, 0.7);
 }
 #mint-lms-root .mint-lesson-editor-tool.is-active:focus-visible {
-  box-shadow: inset 0 0 0 1.5px rgba(11, 79, 63, 0.28), 0 0 0 2px rgba(152, 251, 203, 0.7);
+  box-shadow: inset 0 0 0 1.5px rgba(15, 14, 26, 0.28), 0 0 0 2px rgba(152, 251, 203, 0.7);
 }
 #mint-lms-root .mint-lesson-code-chip {
   height: 30px;
@@ -3835,7 +3835,7 @@
   border-radius: 6px;
   background: #FFFFFF;
   border: 1.5px solid #98FBCB;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-size: 13px;
   font-weight: 600;
   display: inline-flex;
@@ -3847,7 +3847,7 @@
 }
 #mint-lms-root .mint-lesson-code-chip:hover {
   background: #98FBCB;
-  color: #0B4F3F;
+  color: #0F0E1A;
   border-color: #98FBCB;
 }
 #mint-lms-root .mint-lesson-code-chip:focus-visible {
@@ -3985,7 +3985,7 @@
   border-radius: 10px;
   border: none;
   background: #98FBCB !important;
-  color: #0B4F3F !important;
+  color: #0F0E1A !important;
   font-size: 15px;
   font-weight: 600;
   margin-top: 24px;
@@ -3995,7 +3995,7 @@
 #mint-lms-root button.mint-builder-empty__cta:hover,
 #mint-lms-root button.mint-builder-empty__cta:focus-visible {
   background: #7FE8B8 !important;
-  box-shadow: 0 4px 12px rgba(11, 79, 63, 0.18) !important;
+  box-shadow: 0 4px 12px rgba(15, 14, 26, 0.18) !important;
   transform: translateY(-1px);
 }
 
@@ -4030,7 +4030,7 @@
 #mint-lms-root .mint-segmented__item:focus-visible { box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55); }
 #mint-lms-root .mint-segmented__item.is-active {
   background: #E8FFF3;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-weight: 600;
 }
 
@@ -4041,7 +4041,7 @@
   border-radius: 8px;
   border: 1.5px solid #98FBCB !important;
   background: #E8FFF3 !important;
-  color: #0B4F3F !important;
+  color: #0F0E1A !important;
   font-size: 15px;
   font-weight: 600;
   display: inline-flex;
@@ -4067,7 +4067,7 @@
   border-radius: 6px;
   border: 0;
   background: transparent;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -4075,7 +4075,7 @@
 }
 #mint-lms-root .mint-lesson-view-toggle__item.is-active {
   background: #98FBCB;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-weight: 600;
 }
 
@@ -4086,7 +4086,7 @@
   border-radius: 9px;
   border: none;
   background: #98FBCB !important;
-  color: #0B4F3F !important;
+  color: #0F0E1A !important;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -4096,11 +4096,11 @@
 #mint-lms-root button.mint-lesson-choose-file:hover,
 #mint-lms-root button.mint-lesson-choose-file:focus-visible {
   background: #7FE8B8 !important;
-  box-shadow: 0 4px 12px rgba(11, 79, 63, 0.18) !important;
+  box-shadow: 0 4px 12px rgba(15, 14, 26, 0.18) !important;
   transform: translateY(-1px);
 }
 #mint-lms-root button.mint-lesson-choose-file:focus-visible {
-  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55), 0 4px 12px rgba(11, 79, 63, 0.18);
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55), 0 4px 12px rgba(15, 14, 26, 0.18);
 }
 
 #mint-lms-root .mint-lesson-preview-toggle {
@@ -4177,7 +4177,7 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 #mint-lms-root .mint-lesson-field-input {
   display: block;
@@ -4246,7 +4246,7 @@
   padding: 0 14px;
   border-radius: 7px;
   background: #E8FFF3;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-size: 15px;
   font-weight: 600;
   width: fit-content;
@@ -4335,7 +4335,7 @@
 }
 
 #mint-lms-root .mint-quiz-time__sep {
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-weight: 700;
   padding-top: 10px;
 }
@@ -4344,7 +4344,7 @@
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.06em;
-  color: #0B4F3F;
+  color: #0F0E1A;
   text-transform: uppercase;
 }
 
@@ -4356,7 +4356,7 @@
   padding: 0;
   border: 0;
   background: transparent;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-family: var(--mint-font);
   font-size: 15px;
   font-weight: 600;
@@ -4393,7 +4393,7 @@
   border-radius: 9px;
   border: none !important;
   background: #98FBCB !important;
-  color: #0B4F3F !important;
+  color: #0F0E1A !important;
   font-size: 15px;
   font-weight: 600;
   font-family: var(--mint-font);
@@ -4551,7 +4551,7 @@
 }
 
 #mint-lms-root .mint-quiz-release__sep {
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-weight: 700;
   font-size: 14px;
 }
@@ -4599,7 +4599,7 @@
   align-items: center;
   padding: 0 14px;
   background: #E8FFF3;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-size: 14px;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -4619,7 +4619,7 @@
   height: 18px;
   border-radius: 999px;
   border: 1.5px solid #98FBCB;
-  color: #0B4F3F;
+  color: #0F0E1A;
   background: #E8FFF3;
   display: inline-flex;
   align-items: center;
@@ -4688,7 +4688,7 @@
   border-radius: 10px;
   border: none;
   background: #98FBCB;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-size: 15px;
   font-weight: 700;
   font-family: var(--mint-font);
@@ -4698,7 +4698,7 @@
 
 #mint-lms-root button.mint-quiz-add-question:hover:not(:disabled) {
   background: #7FE8B8;
-  box-shadow: 0 4px 12px rgba(11, 79, 63, 0.18);
+  box-shadow: 0 4px 12px rgba(15, 14, 26, 0.18);
   transform: translateY(-1px);
 }
 
@@ -4718,7 +4718,7 @@
   border-radius: 9px;
   border: 1.5px solid #98FBCB !important;
   background: #E8FFF3 !important;
-  color: #0B4F3F !important;
+  color: #0F0E1A !important;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -4745,7 +4745,7 @@
   border-radius: 9px;
   border: none;
   background: #98FBCB !important;
-  color: #0B4F3F !important;
+  color: #0F0E1A !important;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -4756,12 +4756,12 @@
 #mint-lms-root button.mint-quiz-save:hover:not(:disabled),
 #mint-lms-root button.mint-quiz-save:focus-visible:not(:disabled) {
   background: #7FE8B8 !important;
-  box-shadow: 0 4px 12px rgba(11, 79, 63, 0.18) !important;
+  box-shadow: 0 4px 12px rgba(15, 14, 26, 0.18) !important;
   transform: translateY(-1px);
 }
 #mint-lms-root button.mint-quiz-save:focus-visible,
 #mint-lms-root button.mint-quiz-save-question:focus-visible {
-  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55), 0 4px 12px rgba(11, 79, 63, 0.18);
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55), 0 4px 12px rgba(15, 14, 26, 0.18);
 }
 #mint-lms-root .mint-quiz-empty {
   margin-top: 18px;
@@ -4784,7 +4784,7 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 #mint-lms-root .mint-quiz-options {
   display: grid;
@@ -4800,7 +4800,7 @@
   width: 16px;
   height: 16px;
   border-radius: 999px;
-  border: 2px solid #0B4F3F;
+  border: 2px solid #0F0E1A;
   background: transparent;
   padding: 0;
   flex: none;
@@ -4809,7 +4809,7 @@
 }
 #mint-lms-root .mint-quiz-option-mark.is-selected {
   background: #98FBCB;
-  border-color: #0B4F3F;
+  border-color: #0F0E1A;
   box-shadow: inset 0 0 0 3px #FFFFFF;
 }
 #mint-lms-root .mint-quiz-option-mark--multi {
@@ -4819,7 +4819,7 @@
   box-shadow: none;
   background:
     #98FBCB
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%230B4F3F' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' d='M3.5 8.2 6.4 11l6-6'/%3E%3C/svg%3E")
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%230F0E1A' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round' d='M3.5 8.2 6.4 11l6-6'/%3E%3C/svg%3E")
     center / 12px 12px no-repeat;
 }
 #mint-lms-root .mint-quiz-option-remove {
@@ -4842,7 +4842,7 @@
   border-radius: 8px;
   border: 1.5px dashed #98FBCB !important;
   background: transparent !important;
-  color: #0B4F3F !important;
+  color: #0F0E1A !important;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -4866,7 +4866,7 @@
   border-radius: 999px;
   border: 1.5px solid #98FBCB;
   background: #E8FFF3;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-size: 15px;
   font-weight: 500;
   cursor: pointer;
@@ -4876,7 +4876,7 @@
 #mint-lms-root .mint-quiz-tf__pill.is-selected {
   border-color: #98FBCB;
   background: #98FBCB;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-weight: 700;
 }
 #mint-lms-root .mint-quiz-tf__dot {
@@ -4899,7 +4899,7 @@
   border-radius: 8px;
   border: none;
   background: #98FBCB !important;
-  color: #0B4F3F !important;
+  color: #0F0E1A !important;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -4909,7 +4909,7 @@
 #mint-lms-root button.mint-quiz-save-question:hover:not(:disabled),
 #mint-lms-root button.mint-quiz-save-question:focus-visible:not(:disabled) {
   background: #7FE8B8 !important;
-  box-shadow: 0 4px 12px rgba(11, 79, 63, 0.18) !important;
+  box-shadow: 0 4px 12px rgba(15, 14, 26, 0.18) !important;
   transform: translateY(-1px);
 }
 
@@ -4920,7 +4920,7 @@
   border-radius: 9px;
   border: 1.5px solid #A79FE0;
   background: #E8FFF3;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -4952,7 +4952,7 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 #mint-lms-root .mint-qeditor__remove,
 #mint-lms-root button.mint-qeditor__remove {
@@ -5073,7 +5073,7 @@
   border-radius: 8px;
   border: none;
   background: #98FBCB !important;
-  color: #0B4F3F !important;
+  color: #0F0E1A !important;
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
@@ -5140,7 +5140,7 @@
 #mint-lms-root .mint-qeditor__answers-title {
   font-size: 16px;
   font-weight: 700;
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 #mint-lms-root .mint-qeditor__answers-hint,
 #mint-lms-root .mint-qeditor__answers-foot {
@@ -5179,7 +5179,7 @@
   flex: none;
   border-radius: 999px;
   background: #E8FFF3;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-size: 13px;
   font-weight: 700;
   display: inline-flex;
@@ -5350,7 +5350,7 @@
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #0B4F3F;
+  color: #0F0E1A;
   background: #E8FFF3;
 }
 #mint-lms-root .mint-qeditor__option-cell--side {
@@ -5466,9 +5466,9 @@
   cursor: pointer;
 }
 #mint-lms-root button.mint-qeditor__tf-flag.is-on {
-  border-color: #0B4F3F;
+  border-color: #0F0E1A;
   background: #E8FFF3 !important;
-  color: #0B4F3F !important;
+  color: #0F0E1A !important;
 }
 #mint-lms-root .mint-qeditor__tf-row {
   display: flex;
@@ -5515,7 +5515,7 @@
   font-weight: 600;
 }
 #mint-lms-root button.mint-qeditor__option-grip:hover {
-  color: #0B4F3F !important;
+  color: #0F0E1A !important;
   background: #F3FFF9 !important;
 }
 #mint-lms-root button.mint-qeditor__option-grip:active {
@@ -5535,7 +5535,7 @@
   border-radius: 8px;
   border: 1.5px solid #98FBCB;
   background: #FFFFFF !important;
-  color: #0B4F3F !important;
+  color: #0F0E1A !important;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -5555,7 +5555,7 @@
   border-radius: 8px;
   border: none;
   background: #98FBCB !important;
-  color: #0B4F3F !important;
+  color: #0F0E1A !important;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
@@ -5581,7 +5581,7 @@
   border-radius: 8px;
   border: 1.5px solid #98FBCB;
   background: #FFFFFF !important;
-  color: #0B4F3F !important;
+  color: #0F0E1A !important;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -5619,9 +5619,9 @@
   margin-top: 4px;
   padding: 0 16px;
   border-radius: 10px;
-  border: 1.5px dashed rgba(11, 79, 63, 0.28);
+  border: 1.5px dashed rgba(15, 14, 26, 0.28);
   background: #F1FFF9 !important;
-  color: #0B4F3F !important;
+  color: #0F0E1A !important;
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
@@ -5629,7 +5629,7 @@
 }
 #mint-lms-root button.mint-qeditor__add-answer:hover {
   background: #E8FFF3 !important;
-  border-color: #0B4F3F;
+  border-color: #0F0E1A;
 }
 #mint-lms-root .mint-qeditor__add-answer--solid,
 #mint-lms-root button.mint-qeditor__add-answer--solid {
@@ -5639,7 +5639,7 @@
   border: none;
   border-radius: 10px;
   background: #98FBCB !important;
-  color: #0B4F3F !important;
+  color: #0F0E1A !important;
 }
 #mint-lms-root button.mint-qeditor__add-answer--solid:hover {
   background: #7FE8B8 !important;
@@ -5674,7 +5674,7 @@
 #mint-lms-root .mint-qeditor__essay-chevrons {
   display: flex;
   gap: 2px;
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 #mint-lms-root .mint-qeditor__essay-hint {
   font-size: 15px;
@@ -5747,7 +5747,7 @@
   background: #E8FFF3 !important;
 }
 #mint-lms-root button.mint-qeditor__dropdown-item.is-active {
-  background: #0B4F3F !important;
+  background: #0F0E1A !important;
   color: #FFFFFF !important;
 }
 #mint-lms-root .mint-qeditor__points {
@@ -5783,7 +5783,7 @@
   border: 0;
   padding: 0;
   background: transparent !important;
-  color: #0B4F3F;
+  color: #0F0E1A;
   cursor: pointer;
 }
 
@@ -7179,7 +7179,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 #mint-lms-root .mint-metric-cell > .mint-t-stat {
   margin-top: 12px;
@@ -8172,12 +8172,12 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 #mint-lms-root .mint-assoc-select__option.is-active {
   background: #98FBCB;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-weight: 600;
 }
 #mint-lms-root .mint-assoc-select__option.is-active:hover {
   background: #7FE8B8;
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 #mint-lms-root .mint-assoc-select__option.is-disabled,
 #mint-lms-root .mint-assoc-select__option:disabled {
@@ -8241,7 +8241,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   height: 40px;
   border-radius: 12px;
   background: #fff;
-  color: #0B4F3F;
+  color: #0F0E1A;
   text-decoration: none;
   border: 1px solid #CFF5E2;
   transition: background 150ms ease-out, transform 150ms ease-out, box-shadow 150ms ease-out;
@@ -8280,7 +8280,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 
 #mint-lms-root a.mint-cs-switcher__link:hover,
 #mint-lms-root a.mint-cs-switcher__link:focus-visible {
-  color: #0B4F3F;
+  color: #0F0E1A;
   background: rgba(255, 255, 255, 0.72);
   outline: none;
   transform: translateY(-1px);
@@ -8288,10 +8288,10 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 
 #mint-lms-root .mint-cs-switcher__link.is-active {
   font-weight: 700;
-  color: #0B4F3F;
+  color: #0F0E1A;
   background: #fff;
   border-color: #CFF5E2;
-  box-shadow: 0 1px 3px rgba(11, 79, 63, 0.08);
+  box-shadow: 0 1px 3px rgba(15, 14, 26, 0.08);
 }
 
 #mint-lms-root .mint-cs-switcher__course {
@@ -8343,7 +8343,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root .mint-cs-crumb a:hover {
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 
 #mint-lms-root .mint-cs-crumb span {
@@ -8384,7 +8384,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 #mint-lms-root .mint-cs-card__title {
   font-size: 17px;
   font-weight: 700;
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 
 #mint-lms-root .mint-cs-card__sub {
@@ -8583,7 +8583,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root .mint-cs-toggle.is-on {
-  background: #0B4F3F;
+  background: #0F0E1A;
 }
 
 #mint-lms-root .mint-cs-toggle:focus-visible {
@@ -8671,7 +8671,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   border-radius: 8px;
   border: 1.5px solid #98FBCB;
   background: #F1FFF9;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
@@ -8705,7 +8705,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   border: 0;
   border-radius: 6px;
   background: transparent;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font: inherit;
   font-size: 14px;
   font-weight: 500;
@@ -8713,7 +8713,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root .mint-cs-materials__view-btn.is-active {
-  background: #0B4F3F;
+  background: #0F0E1A;
   color: #fff;
   font-weight: 600;
 }
@@ -8759,7 +8759,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   font: inherit;
   font-size: 14px;
   font-weight: 600;
-  color: #0B4F3F;
+  color: #0F0E1A;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -8788,7 +8788,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   background: transparent;
   font: inherit;
   font-size: 14px;
-  color: #0B4F3F;
+  color: #0F0E1A;
   text-align: left;
   cursor: pointer;
 }
@@ -8805,7 +8805,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   border: 0;
   border-radius: 7px;
   background: transparent;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font: inherit;
   font-size: 16px;
   display: inline-flex;
@@ -8824,7 +8824,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   border-radius: 6px;
   background: #fff;
   border: 1.5px solid #98FBCB;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font: inherit;
   font-size: 13px;
   font-weight: 600;
@@ -8930,7 +8930,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   border-radius: 8px;
   border: 1.5px solid #98FBCB;
   background: #F1FFF9;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
@@ -8948,7 +8948,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 #mint-lms-root .mint-cs-link {
   font-size: 14px;
   font-weight: 600;
-  color: #0B4F3F;
+  color: #0F0E1A;
   text-decoration: none;
 }
 
@@ -8982,7 +8982,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   font: inherit;
   font-size: 15px;
   font-weight: 500;
-  color: #0B4F3F;
+  color: #0F0E1A;
   text-align: left;
   cursor: pointer;
 }
@@ -9066,7 +9066,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   font: inherit;
   font-size: 15px;
   font-weight: 500;
-  color: #0B4F3F;
+  color: #0F0E1A;
   text-align: left;
   cursor: pointer;
 }
@@ -9131,7 +9131,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   border-radius: 18px;
   background:
     linear-gradient(180deg, rgba(152, 251, 203, 0.22) 0%, rgba(152, 251, 203, 0.08) 88px, #fff 88px);
-  border: 1.5px solid rgba(11, 79, 63, 0.12);
+  border: 1.5px solid rgba(15, 14, 26, 0.12);
 }
 
 #mint-lms-root .mint-course-sidebar__intro {
@@ -9163,7 +9163,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   gap: 12px;
   padding: 14px 14px;
   border-radius: 14px;
-  border: 1.5px solid rgba(11, 79, 63, 0.14);
+  border: 1.5px solid rgba(15, 14, 26, 0.14);
   background: #fff;
   text-align: left;
   cursor: pointer;
@@ -9172,7 +9172,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 
 #mint-lms-root .mint-course-sidebar__visibility:hover,
 #mint-lms-root .mint-course-sidebar__visibility:focus-visible {
-  border-color: rgba(11, 79, 63, 0.35);
+  border-color: rgba(15, 14, 26, 0.35);
   outline: none;
   box-shadow: var(--mint-cta-focus);
 }
@@ -9357,7 +9357,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 
 #mint-lms-root .mint-settings-card__header {
   padding: 18px 22px;
-  border-bottom: 1.5px solid rgba(11, 79, 63, 0.14);
+  border-bottom: 1.5px solid rgba(15, 14, 26, 0.14);
   background: #f1fff9;
 }
 
@@ -9810,7 +9810,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   border: 0;
   border-radius: 10px;
   background: #98FBCB;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-family: var(--mint-font);
   font-size: 15px;
   font-weight: 700;
@@ -9846,7 +9846,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   padding: 0;
   border: 0;
   background: transparent;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-family: var(--mint-font);
   font-size: 15px;
   font-weight: 600;
@@ -9921,7 +9921,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 #mint-lms-root .mint-settings-card__head-title {
   font-size: 17px;
   font-weight: 700;
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 
 #mint-lms-root .mint-settings-card__head-copy {
@@ -9933,7 +9933,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 #mint-lms-root .mint-settings-card__chevron {
   flex: none;
   transition: transform 150ms ease-out;
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 
 #mint-lms-root .mint-settings-card__head.is-open .mint-settings-card__chevron {
@@ -10120,7 +10120,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 
 #mint-lms-root .mint-settings-time__sep {
   font-weight: 700;
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 
 #mint-lms-root .mint-settings-choice,
@@ -10354,7 +10354,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 #mint-lms-root .mint-settings-select__chevron {
   flex: none;
   transition: transform 150ms ease-out;
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 
 #mint-lms-root .mint-settings-select.is-open .mint-settings-select__chevron {
@@ -10470,7 +10470,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   border-radius: 8px;
   border: 1.5px solid #98FBCB;
   background: #F1FFF9;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-size: 15px;
   font-weight: 600;
   font-family: var(--mint-font);
@@ -10503,7 +10503,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   border-radius: 6px;
   border: 0;
   background: transparent;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-size: 14px;
   font-weight: 600;
   font-family: var(--mint-font);
@@ -10514,7 +10514,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root .mint-settings-rte__view.is-active {
-  background: #0B4F3F;
+  background: #0F0E1A;
   color: #FFFFFF;
   font-weight: 700;
 }
@@ -10561,7 +10561,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   border: 1.5px solid #98FBCB;
   font-size: 13px;
   font-weight: 600;
-  color: #0B4F3F;
+  color: #0F0E1A;
   display: inline-flex;
   align-items: center;
   font-family: var(--mint-font);
@@ -10571,8 +10571,8 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 
 #mint-lms-root button.mint-settings-editor__chip:hover {
   background: #98FBCB;
-  color: #0B4F3F;
-  border-color: #0B4F3F;
+  color: #0F0E1A;
+  border-color: #0F0E1A;
 }
 
 #mint-lms-root button.mint-settings-editor__chip:focus-visible {
@@ -10587,7 +10587,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   align-items: center;
   justify-content: center;
   font-size: 14px;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-family: var(--mint-font);
   user-select: none;
 }
@@ -10598,7 +10598,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   border-radius: 7px;
   border: 0;
   background: #98FBCB;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-size: 13px;
   font-weight: 700;
   font-family: var(--mint-font);
@@ -10639,7 +10639,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   border-radius: 9px;
   border: none;
   background: #98FBCB;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-size: 15px;
   font-weight: 700;
   font-family: var(--mint-font);
@@ -10649,7 +10649,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 
 #mint-lms-root button.mint-settings-save:hover:not(:disabled) {
   background: #7FE8B8;
-  box-shadow: 0 4px 12px rgba(11, 79, 63, 0.18);
+  box-shadow: 0 4px 12px rgba(15, 14, 26, 0.18);
   transform: translateY(-1px);
 }
 #mint-lms-root button.mint-settings-save:active:not(:disabled) {
@@ -11032,7 +11032,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   border-radius: 9px;
   border: none;
   background: #98FBCB;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-size: 15px;
   font-weight: 700;
   font-family: var(--mint-font);
@@ -11094,7 +11094,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #0B4F3F;
+  color: #0F0E1A;
 }
 
 #mint-lms-root .mint-lesson-quizzes__draft {
@@ -11139,7 +11139,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   border: none;
   border-radius: 10px;
   background: #98FBCB;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-size: 15px;
   font-weight: 700;
   font-family: var(--mint-font);
@@ -11208,7 +11208,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   transition: color 120ms ease-out, background 120ms ease-out;
 }
 #mint-lms-root .mint-lesson-quizzes__grip:hover {
-  color: #0B4F3F;
+  color: #0F0E1A;
   background: #E8FFF3;
 }
 #mint-lms-root .mint-lesson-quizzes__grip:active {
@@ -11359,7 +11359,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   align-items: center;
   border-radius: 999px;
   background: #98FBCB;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-size: 12px;
   font-weight: 700;
 }
@@ -11416,7 +11416,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   border-radius: 10px;
   border: none;
   background: #98FBCB;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-size: 15px;
   font-weight: 700;
   font-family: var(--mint-font);
@@ -11425,7 +11425,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 
 #mint-lms-root button.mint-lesson-add-quiz:hover:not(:disabled) {
   background: #7FE8B8;
-  box-shadow: 0 4px 12px rgba(11, 79, 63, 0.18);
+  box-shadow: 0 4px 12px rgba(15, 14, 26, 0.18);
   transform: translateY(-1px);
 }
 
@@ -11446,7 +11446,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   border-radius: 999px;
   border: none;
   background: #98FBCB;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-size: 15px;
   font-weight: 700;
   font-family: var(--mint-font);
@@ -11979,7 +11979,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   align-items: center;
   justify-content: center;
   background: #E8FFF3;
-  color: #0B4F3F;
+  color: #0F0E1A;
   font-size: 12px;
   font-weight: 700;
 }
@@ -12608,7 +12608,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #0b4f3f;
+  color: #0f0e1a;
 }
 #mint-lms-root .mint-assign__count {
   min-width: 24px;
@@ -12616,7 +12616,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   padding: 0 7px;
   border-radius: 999px;
   background: #98fbcb;
-  color: #0b4f3f;
+  color: #0f0e1a;
   font-size: 12px;
   line-height: 24px;
   text-align: center;
@@ -12659,7 +12659,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 #mint-lms-root .mint-assign__item.is-selected {
   background: #98fbcb;
-  color: #0b4f3f;
+  color: #0f0e1a;
   font-weight: 600;
 }
 #mint-lms-root .mint-assign__empty {
@@ -13119,7 +13119,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 
 #mint-lms-root button.mint-section-lessons__save:hover {
   background: #7FE8B8 !important;
-  box-shadow: 0 4px 12px rgba(11, 79, 63, 0.18);
+  box-shadow: 0 4px 12px rgba(15, 14, 26, 0.18);
   transform: translateY(-1px);
 }
 

@@ -84,7 +84,7 @@ defined( 'ABSPATH' ) || exit;
 					<span class="mint-settings-hint" title="<?php echo esc_attr__( 'Hide the quiz from visitors who aren’t logged in', 'mint-lms' ); ?>">?</span>
 					<button type="button" class="mint-settings-check" @click="lessonQuiz.settings.allowedRegisteredOnly = !lessonQuiz.settings.allowedRegisteredOnly">
 						<span class="mint-settings-check__box" :class="lessonQuiz.settings.allowedRegisteredOnly ? 'is-checked' : ''" aria-hidden="true">
-							<svg x-show="lessonQuiz.settings.allowedRegisteredOnly" width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="#0B4F3F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 10.5 8.5 14 15 6.5"/></svg>
+							<svg x-show="lessonQuiz.settings.allowedRegisteredOnly" width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 10.5 8.5 14 15 6.5"/></svg>
 						</span>
 						<span class="mint-settings-check__label"><?php esc_html_e( 'Only registered users can take this quiz', 'mint-lms' ); ?></span>
 					</button>
@@ -193,7 +193,7 @@ defined( 'ABSPATH' ) || exit;
 					<span class="mint-settings-hint mint-settings-hint--spacer" aria-hidden="true">?</span>
 					<button type="button" class="mint-settings-check" @click="lessonQuiz.settings.questionCompletion = !lessonQuiz.settings.questionCompletion">
 						<span class="mint-settings-check__box" :class="lessonQuiz.settings.questionCompletion ? 'is-checked' : ''" aria-hidden="true">
-							<svg x-show="lessonQuiz.settings.questionCompletion" width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="#0B4F3F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 10.5 8.5 14 15 6.5"/></svg>
+							<svg x-show="lessonQuiz.settings.questionCompletion" width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 10.5 8.5 14 15 6.5"/></svg>
 						</span>
 						<span class="mint-settings-check__label"><?php esc_html_e( 'All questions required to complete', 'mint-lms' ); ?></span>
 					</button>
@@ -253,7 +253,7 @@ defined( 'ABSPATH' ) || exit;
 				<div class="mint-cs-materials mint-cs-materials--settings">
 					<div class="mint-cs-materials__actions">
 						<button type="button" class="mint-cs-materials__add-media" @click="addMediaToQuizMaterials()">
-							<svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="#0B4F3F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="3.5" width="15" height="13" rx="3"/><circle cx="7" cy="8" r="1.4"/><path d="m4 14 4-3.5 3 2 4.5-4"/></svg>
+							<svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="3.5" width="15" height="13" rx="3"/><circle cx="7" cy="8" r="1.4"/><path d="m4 14 4-3.5 3 2 4.5-4"/></svg>
 							<?php esc_html_e( 'Add media', 'mint-lms' ); ?>
 						</button>
 						<div class="mint-cs-materials__view-toggle" role="group" aria-label="<?php echo esc_attr__( 'Editor mode', 'mint-lms' ); ?>">
@@ -289,7 +289,7 @@ defined( 'ABSPATH' ) || exit;
 									:aria-expanded="quizMaterialsFormatMenuOpen ? 'true' : 'false'"
 								>
 									<span x-text="quizMaterialsFormatLabel"></span>
-									<svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#0B4F3F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 8 10 12.5 14.5 8"/></svg>
+									<svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5.5 8 10 12.5 14.5 8"/></svg>
 								</button>
 								<div class="mint-cs-materials__format-menu" x-show="quizMaterialsFormatMenuOpen">
 									<template x-for="option in quizMaterialsFormatOptions" :key="'qm-fmt-' + option.value">
@@ -348,7 +348,7 @@ defined( 'ABSPATH' ) || exit;
 					<span class="mint-settings-hint mint-settings-hint--spacer" aria-hidden="true">?</span>
 					<button type="button" class="mint-settings-check" @click="lessonQuiz.settings.autostart = !lessonQuiz.settings.autostart">
 						<span class="mint-settings-check__box" :class="lessonQuiz.settings.autostart ? 'is-checked' : ''" aria-hidden="true">
-							<svg x-show="lessonQuiz.settings.autostart" width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="#0B4F3F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 10.5 8.5 14 15 6.5"/></svg>
+							<svg x-show="lessonQuiz.settings.autostart" width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 10.5 8.5 14 15 6.5"/></svg>
 						</span>
 						<span class="mint-settings-check__label"><?php esc_html_e( 'Start automatically, without the “Start Quiz” button', 'mint-lms' ); ?></span>
 					</button>
@@ -375,7 +375,7 @@ defined( 'ABSPATH' ) || exit;
 					<div class="mint-settings-nested--indent" x-show="lessonQuiz.settings.resultsMode === 'end'" x-cloak>
 						<button type="button" class="mint-settings-check" @click="lessonQuiz.settings.displayBackButton = !lessonQuiz.settings.displayBackButton">
 							<span class="mint-settings-check__box" :class="lessonQuiz.settings.displayBackButton ? 'is-checked' : ''" aria-hidden="true">
-								<svg x-show="lessonQuiz.settings.displayBackButton" width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="#0B4F3F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 10.5 8.5 14 15 6.5"/></svg>
+								<svg x-show="lessonQuiz.settings.displayBackButton" width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 10.5 8.5 14 15 6.5"/></svg>
 							</span>
 							<span class="mint-settings-check__label"><?php esc_html_e( 'Display Back button', 'mint-lms' ); ?></span>
 						</button>
@@ -426,7 +426,7 @@ defined( 'ABSPATH' ) || exit;
 					<div class="mint-settings-row__control">
 						<button type="button" class="mint-settings-check" @click="lessonQuiz.settings.sortByCategory = !lessonQuiz.settings.sortByCategory">
 							<span class="mint-settings-check__box" :class="lessonQuiz.settings.sortByCategory ? 'is-checked' : ''" aria-hidden="true">
-								<svg x-show="lessonQuiz.settings.sortByCategory" width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="#0B4F3F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 10.5 8.5 14 15 6.5"/></svg>
+								<svg x-show="lessonQuiz.settings.sortByCategory" width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 10.5 8.5 14 15 6.5"/></svg>
 							</span>
 						</button>
 					</div>
@@ -543,7 +543,7 @@ defined( 'ABSPATH' ) || exit;
 									height="16"
 									viewBox="0 0 20 20"
 									fill="none"
-									stroke="#0B4F3F"
+									stroke="#0F0E1A"
 									stroke-width="2.4"
 									stroke-linecap="round"
 									stroke-linejoin="round"

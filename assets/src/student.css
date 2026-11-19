@@ -44,7 +44,7 @@
   border-radius: 18px;
   overflow: hidden;
   background: #e8fff3;
-  box-shadow: 0 12px 36px rgba(11, 79, 63, 0.08);
+  box-shadow: 0 12px 36px rgba(15, 14, 26, 0.08);
   box-sizing: border-box;
 }
 
@@ -94,7 +94,7 @@
   border-radius: 18px;
   overflow: hidden;
   background: #e8fff3;
-  box-shadow: 0 12px 36px rgba(11, 79, 63, 0.08);
+  box-shadow: 0 12px 36px rgba(15, 14, 26, 0.08);
   box-sizing: border-box;
 }
 
@@ -416,7 +416,7 @@
   margin: 0;
   border: 1.5px solid #c9f3dd;
   border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(11, 79, 63, 0.06);
+  box-shadow: 0 4px 16px rgba(15, 14, 26, 0.06);
 }
 
 #mint-lms-root.mint-lms-student .mint-s3b-stack__icon {
@@ -671,7 +671,7 @@
   align-items: center;
   justify-content: center;
   text-decoration: none;
-  box-shadow: 0 2px 8px rgba(11, 79, 63, 0.06);
+  box-shadow: 0 2px 8px rgba(15, 14, 26, 0.06);
   box-sizing: border-box;
 }
 
@@ -711,7 +711,7 @@
 
 #mint-lms-root.mint-lms-student .mint-s3b-nav__next--disabled {
   background: #e8fff3;
-  color: rgba(11, 79, 63, 0.45);
+  color: rgba(15, 14, 26, 0.45);
   cursor: default;
 }
 
@@ -729,7 +729,7 @@
   border-radius: 12px;
   overflow: hidden;
   background: #ffffff;
-  box-shadow: 0 8px 24px rgba(11, 79, 63, 0.07);
+  box-shadow: 0 8px 24px rgba(15, 14, 26, 0.07);
 }
 
 #mint-lms-root.mint-lms-student .mint-s3-section__body {
@@ -750,7 +750,7 @@
   border-radius: 10px;
   overflow: hidden;
   background: #ffffff;
-  box-shadow: 0 4px 16px rgba(11, 79, 63, 0.06);
+  box-shadow: 0 4px 16px rgba(15, 14, 26, 0.06);
 }
 
 #mint-lms-root.mint-lms-student .mint-s3-lesson__body {
@@ -777,7 +777,7 @@
   border-radius: 12px;
   overflow: hidden;
   background: #ffffff;
-  box-shadow: 0 4px 16px rgba(11, 79, 63, 0.06);
+  box-shadow: 0 4px 16px rgba(15, 14, 26, 0.06);
 }
 
 #mint-lms-root.mint-lms-student .mint-s3-quiz__body {
@@ -796,7 +796,7 @@
   border-radius: 8px;
   background: #f1fff9;
   border: 1px solid #d8f5e6;
-  box-shadow: 0 2px 8px rgba(11, 79, 63, 0.04);
+  box-shadow: 0 2px 8px rgba(15, 14, 26, 0.04);
   transition: background 120ms ease-out, border-color 120ms ease-out;
 }
 
@@ -997,7 +997,7 @@
 #mint-lms-root.mint-lms-student .mint-s3-row--nested.mint-s3-choice.is-selected {
   background: #98fbcb;
   border-color: #98fbcb;
-  box-shadow: 0 4px 16px rgba(11, 79, 63, 0.08);
+  box-shadow: 0 4px 16px rgba(15, 14, 26, 0.08);
 }
 
 #mint-lms-root.mint-lms-student .mint-s3-choice__input {
@@ -1216,7 +1216,7 @@
 #mint-lms-root.mint-lms-student .mint-s3-quiz-take__timer {
   font-size: 12px;
   font-weight: 700;
-  color: #0b4f3f;
+  color: #0f0e1a;
   font-variant-numeric: tabular-nums;
 }
 
@@ -1234,7 +1234,7 @@
 }
 
 #mint-lms-root.mint-lms-student .mint-s3-quiz-review__item.is-correct {
-  border-color: #0b4f3f;
+  border-color: #0f0e1a;
   background: #e8fff3;
 }
 
@@ -1285,7 +1285,7 @@
 }
 
 #mint-lms-root.mint-lms-student .mint-s3-quiz-review__choice.is-right {
-  border-color: #0b4f3f;
+  border-color: #0f0e1a;
   background: #e8fff3;
 }
 
@@ -1295,7 +1295,7 @@
 }
 
 #mint-lms-root.mint-lms-student .mint-s3-quiz-review__choice.is-missed {
-  border-color: #0b4f3f;
+  border-color: #0f0e1a;
   background: #f7fffb;
 }
 
@@ -1308,7 +1308,7 @@
 #mint-lms-root.mint-lms-student .mint-s3-quiz-review__choice-mark {
   font-size: 12px;
   font-weight: 700;
-  color: #0b4f3f;
+  color: #0f0e1a;
 }
 
 #mint-lms-root.mint-lms-student .mint-s3-quiz-review__choice-mark--wrong {
@@ -1334,7 +1334,7 @@
 }
 
 #mint-lms-root.mint-lms-student .mint-s3-quiz-review__essay-status.is-ok {
-  border-color: #0b4f3f;
+  border-color: #0f0e1a;
   background: #e8fff3;
 }
 

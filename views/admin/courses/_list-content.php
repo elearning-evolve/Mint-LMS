@@ -102,7 +102,7 @@ defined( 'ABSPATH' ) || exit;
 										height="15"
 										viewBox="0 0 20 20"
 										fill="none"
-										stroke="#0B4F3F"
+										stroke="#0F0E1A"
 										stroke-width="1.8"
 										stroke-linecap="round"
 										stroke-linejoin="round"

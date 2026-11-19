@@ -3442,7 +3442,7 @@ function courseBuilder(courseId, opts = {}) {
     },
 
     navTabInk(key) {
-      return this.navTabActive(key) ? '#0B4F3F' : '#5C5C77';
+      return this.navTabActive(key) ? '#0F0E1A' : '#5C5C77';
     },
 
     navSectionList() {
@@ -4936,7 +4936,7 @@ function courseBuilder(courseId, opts = {}) {
         return '<svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="#1A5AA8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="12" rx="2.5" /></svg>';
       }
       if (kind === 'quiz') {
-        return '<svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="#0B4F3F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5 8 14 15.5 5.5" /></svg>';
+        return '<svg width="11" height="11" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10.5 8 14 15.5 5.5" /></svg>';
       }
       return '<span style="font-weight:700;font-size:12px;line-height:1">?</span>';
     },
