@@ -729,6 +729,46 @@ final class QuizService implements QuizLifecycleInterface {
 		$this->quizRepository->deleteByLessonId( $lessonId );
 	}
 
+	public function onLessonTrashed( int $lessonId ): void {
+		foreach ( $this->quizRepository->findAllByLessonId( $lessonId ) as $quiz ) {
+			$this->trashQuizCascade( $quiz->id );
+		}
+	}
+
+	/**
+	 * Move a quiz and its questions to WordPress trash (restorable).
+	 */
+	public function trash( int $quizId, int $userId ): void {
+		$quiz   = $this->findQuizOrFail( $quizId );
+		$lesson = $this->findLessonOrFail( $quiz->lessonId );
+		$this->assertCanManageLessonContent( $userId, $lesson );
+
+		$this->trashQuizCascade( $quizId );
+	}
+
+	/**
+	 * Move a single question to WordPress trash (restorable).
+	 */
+	public function trashQuestion( int $quizId, int $questionId, int $userId ): void {
+		$quiz     = $this->findQuizOrFail( $quizId );
+		$lesson   = $this->findLessonOrFail( $quiz->lessonId );
+		$question = $this->findQuestionOrFail( $questionId );
+
+		if ( $question->quizId !== $quizId ) {
+			throw new NotFoundException( 'Question not found.' );
+		}
+
+		$this->assertCanManageLessonContent( $userId, $lesson );
+		$this->quizRepository->trashQuestion( $questionId );
+	}
+
+	private function trashQuizCascade( int $quizId ): void {
+		foreach ( $this->quizRepository->findQuestionsByQuizId( $quizId ) as $question ) {
+			$this->quizRepository->trashQuestion( $question->id );
+		}
+		$this->quizRepository->trashQuiz( $quizId );
+	}
+
 	/**
 	 * @param list<QuizQuestion> $questions
 	 * @param array<int, string> $answers

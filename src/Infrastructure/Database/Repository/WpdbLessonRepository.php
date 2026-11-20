@@ -208,6 +208,11 @@ final class WpdbLessonRepository implements LessonRepositoryInterface {
 		return false !== $deleted && $deleted > 0;
 	}
 
+	public function trash( int $id ): bool {
+		// Legacy custom-table storage has no trash status — hard delete.
+		return $this->delete( $id );
+	}
+
 	public function deleteBySectionId( int $sectionId ): void {
 		$wpdb = $this->wpdb;
 		if ( $sectionId <= 0 ) {

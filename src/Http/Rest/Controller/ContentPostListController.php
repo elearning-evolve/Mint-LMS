@@ -319,12 +319,24 @@ final class ContentPostListController {
 			return $post;
 		}
 
-		$result = wp_trash_post( $post->ID );
-		if ( ! $result ) {
+		$type = (string) $request['type'];
+		if ( 'lessons' === $type ) {
+			$this->trashLessonCascade( (int) $post->ID );
+		} elseif ( 'quizzes' === $type ) {
+			$this->trashQuizCascade( (int) $post->ID );
+		} else {
+			$result = wp_trash_post( $post->ID );
+			if ( ! $result ) {
+				return ApiResponse::error( 'trash_failed', __( 'Could not move to trash.', 'mint-lms' ), 500 );
+			}
+		}
+
+		$fresh = get_post( $post->ID );
+		if ( ! $fresh instanceof \WP_Post ) {
 			return ApiResponse::error( 'trash_failed', __( 'Could not move to trash.', 'mint-lms' ), 500 );
 		}
 
-		return ApiResponse::success( $this->serialize( get_post( $post->ID ), (string) $request['type'] ) );
+		return ApiResponse::success( $this->serialize( $fresh, $type ) );
 	}
 
 	/**
@@ -502,5 +514,66 @@ final class ContentPostListController {
 		}
 
 		return wp_date( 'M j, Y', $ts );
+	}
+
+	/**
+	 * Trash a lesson and nested quizzes/questions (junction rows kept for restore).
+	 */
+	private function trashLessonCascade( int $lessonId ): void {
+		$query = new \WP_Query(
+			array(
+				'post_type'              => PostTypes::QUIZ,
+				'post_status'            => array( 'publish', 'draft', 'private', PostTypes::STATUS_ARCHIVED ),
+				'posts_per_page'         => -1,
+				'fields'                 => 'ids',
+				'no_found_rows'          => true,
+				'update_post_meta_cache' => false,
+				'update_post_term_cache' => false,
+				'meta_query'             => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					array(
+						'key'     => PostTypes::META_LESSON_ID,
+						'value'   => $lessonId,
+						'compare' => '=',
+						'type'    => 'NUMERIC',
+					),
+				),
+			)
+		);
+
+		foreach ( $query->posts as $quizId ) {
+			$this->trashQuizCascade( (int) $quizId );
+		}
+
+		wp_trash_post( $lessonId );
+	}
+
+	/**
+	 * Trash a quiz and its questions without removing junction links.
+	 */
+	private function trashQuizCascade( int $quizId ): void {
+		global $wpdb;
+
+		$junction = Schema::validateTable( Schema::quizQuestionsTable( $wpdb->prefix ), $wpdb->prefix );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$questionIds = $wpdb->get_col(
+			$wpdb->prepare(
+				'SELECT question_id FROM %i WHERE quiz_id = %d',
+				$junction,
+				$quizId
+			)
+		);
+
+		if ( is_array( $questionIds ) ) {
+			foreach ( $questionIds as $questionId ) {
+				$qid  = (int) $questionId;
+				$post = get_post( $qid );
+				if ( $post instanceof \WP_Post && PostTypes::QUESTION === $post->post_type && 'trash' !== $post->post_status ) {
+					wp_trash_post( $qid );
+				}
+			}
+		}
+
+		wp_trash_post( $quizId );
 	}
 }

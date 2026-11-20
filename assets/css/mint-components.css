@@ -5930,6 +5930,293 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 
+/* ── Confirm modal (Move to trash) — matches Mint LMS Trash Dialog design ── */
+
+#mint-lms-root .mint-confirm {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+#mint-lms-root .mint-confirm__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 14, 26, 0.35);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+#mint-lms-root .mint-confirm__panel {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 460px;
+  padding: 28px;
+  border-radius: 22px;
+  background: #FFFFFF;
+  border: 1px solid #E4E1F0;
+  box-shadow:
+    0 30px 70px rgba(15, 14, 26, 0.18),
+    0 0 0 6px rgba(152, 251, 203, 0.18);
+  font-family: var(--mint-font);
+  color: var(--mint-ink);
+  box-sizing: border-box;
+}
+
+#mint-lms-root .mint-confirm__panel.is-toss {
+  animation: mint-confirm-toss 0.42s cubic-bezier(0.5, 0, 0.8, 0.4) forwards;
+}
+
+#mint-lms-root .mint-confirm__close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--mint-ink);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+#mint-lms-root .mint-confirm__close:hover {
+  background: rgba(152, 251, 203, 0.22);
+}
+
+#mint-lms-root .mint-confirm__close:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
+}
+
+#mint-lms-root .mint-confirm__top {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+#mint-lms-root .mint-confirm__icon {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: #98FBCB;
+  color: #0F0E1A;
+}
+
+#mint-lms-root .mint-confirm__title {
+  margin: 2px 36px 0 0;
+  padding: 0;
+  font-family: var(--mint-font);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 28px;
+  letter-spacing: -0.02em;
+  color: var(--mint-ink);
+}
+
+#mint-lms-root .mint-confirm__body {
+  margin: 16px 0 0 62px;
+  padding: 0;
+  font-family: var(--mint-font);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 24px;
+  color: var(--mint-ink-3);
+}
+
+#mint-lms-root .mint-confirm__body b {
+  color: var(--mint-ink);
+  font-weight: 700;
+}
+
+#mint-lms-root .mint-confirm__note {
+  margin: 16px 0 0 62px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(152, 251, 203, 0.12);
+  border: 1px dashed #98FBCB;
+  font-family: var(--mint-font);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 21px;
+  color: var(--mint-ink-2);
+}
+
+#mint-lms-root .mint-confirm__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 26px;
+}
+
+#mint-lms-root .mint-confirm__cancel,
+#mint-lms-root button.mint-confirm__cancel {
+  height: 46px;
+  margin: 0;
+  padding: 0 16px;
+  border: none;
+  border-radius: 12px;
+  background: none !important;
+  color: var(--mint-ink-3) !important;
+  font-family: var(--mint-font);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: none !important;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+#mint-lms-root .mint-confirm__cancel:hover,
+#mint-lms-root button.mint-confirm__cancel:hover {
+  color: var(--mint-ink) !important;
+  background: rgba(152, 251, 203, 0.12) !important;
+}
+
+#mint-lms-root .mint-confirm__cancel:focus-visible,
+#mint-lms-root button.mint-confirm__cancel:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55) !important;
+}
+
+#mint-lms-root .mint-confirm__submit,
+#mint-lms-root button.mint-confirm__submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 46px;
+  margin: 0;
+  padding: 0 20px;
+  border-radius: 12px;
+  border: 1.5px solid #E5484D !important;
+  background: #FFFFFF !important;
+  color: #C4262B !important;
+  font-family: var(--mint-font);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: none !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+#mint-lms-root .mint-confirm__submit:hover,
+#mint-lms-root button.mint-confirm__submit:hover {
+  transform: translateY(-2px);
+  background: #FFF1F1 !important;
+  box-shadow: 0 8px 18px rgba(229, 72, 77, 0.18) !important;
+}
+
+#mint-lms-root .mint-confirm__submit:active,
+#mint-lms-root button.mint-confirm__submit:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(229, 72, 77, 0.15) !important;
+}
+
+#mint-lms-root .mint-confirm__submit:focus-visible,
+#mint-lms-root button.mint-confirm__submit:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(229, 72, 77, 0.25) !important;
+}
+
+#mint-lms-root .mint-confirm__submit svg {
+  flex: none;
+}
+
+#mint-lms-root .mint-confirm__submit .mint-confirm__lid {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+#mint-lms-root .mint-confirm__submit .mint-confirm__bin {
+  transition: transform 0.3s ease;
+}
+
+#mint-lms-root .mint-confirm__submit:hover .mint-confirm__lid {
+  transform: translate(0, -2px) rotate(-18deg);
+}
+
+#mint-lms-root .mint-confirm__submit:hover .mint-confirm__bin {
+  transform: translateY(1px);
+}
+
+#mint-lms-root .mint-confirm__submit.is-busy {
+  pointer-events: none;
+}
+
+#mint-lms-root .mint-confirm__submit.is-busy .mint-confirm__lid {
+  transform: translate(0, -3px) rotate(-28deg);
+}
+
+@keyframes mint-confirm-toss {
+  0% { transform: none; opacity: 1; }
+  40% { transform: translate(0, -6px) scale(0.98); opacity: 1; }
+  100% { transform: translate(0, 40px) scale(0.9) rotate(3deg); opacity: 0; }
+}
+
+@media (max-width: 480px) {
+  #mint-lms-root .mint-confirm__panel {
+    padding: 22px;
+  }
+
+  #mint-lms-root .mint-confirm__top {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  #mint-lms-root .mint-confirm__title {
+    font-size: 20px;
+    line-height: 26px;
+  }
+
+  #mint-lms-root .mint-confirm__body,
+  #mint-lms-root .mint-confirm__note {
+    margin-left: 0;
+  }
+
+  #mint-lms-root .mint-confirm__actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  #mint-lms-root .mint-confirm__cancel,
+  #mint-lms-root .mint-confirm__submit,
+  #mint-lms-root button.mint-confirm__cancel,
+  #mint-lms-root button.mint-confirm__submit {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #mint-lms-root .mint-confirm__panel.is-toss,
+  #mint-lms-root .mint-confirm__submit,
+  #mint-lms-root .mint-confirm__submit .mint-confirm__lid,
+  #mint-lms-root .mint-confirm__submit .mint-confirm__bin {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+
 /* ── Focus rings — never removed ─────────────────────────── */
 
 #mint-lms-root *:focus-visible {

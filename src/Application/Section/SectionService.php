@@ -88,17 +88,14 @@ final class SectionService {
 			throw new ForbiddenException();
 		}
 
-		// Same cascade as LessonService::delete — quizzes/questions/progress, then lesson.
-		// Raw deleteBySectionId() only removes lesson posts and leaves orphans.
+		// Move nested lessons (and quizzes/questions) to trash, then remove the group row.
+		// Lesson groups are not WP posts — the group itself cannot sit in Trash.
 		$lessons = $this->lessonRepository->findBySectionId( $section->id );
 		foreach ( $lessons as $lesson ) {
-			if ( null !== $this->progressLifecycle ) {
-				$this->progressLifecycle->onLessonDeleted( $lesson->id );
-			}
 			if ( null !== $this->quizLifecycle ) {
-				$this->quizLifecycle->onLessonDeleted( $lesson->id );
+				$this->quizLifecycle->onLessonTrashed( $lesson->id );
 			}
-			$this->lessonRepository->delete( $lesson->id );
+			$this->lessonRepository->trash( $lesson->id );
 		}
 
 		$this->sectionRepository->delete( $section->id );

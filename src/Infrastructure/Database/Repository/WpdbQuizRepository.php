@@ -264,6 +264,10 @@ final class WpdbQuizRepository implements QuizRepositoryInterface {
 		return false !== $deleted && $deleted > 0;
 	}
 
+	public function trashQuiz( int $id ): bool {
+		return $this->deleteQuiz( $id );
+	}
+
 	public function deleteAttemptsByQuizId( int $quizId ): void {
 		$wpdb = $this->wpdb;
 		if ( $quizId <= 0 ) {
@@ -282,6 +286,10 @@ final class WpdbQuizRepository implements QuizRepositoryInterface {
 		$deleted = $wpdb->delete( $table, array( 'id' => $id ), array( '%d' ) );
 
 		return false !== $deleted && $deleted > 0;
+	}
+
+	public function trashQuestion( int $id ): bool {
+		return $this->deleteQuestion( $id );
 	}
 
 	public function deleteQuestionsByQuizId( int $quizId ): void {

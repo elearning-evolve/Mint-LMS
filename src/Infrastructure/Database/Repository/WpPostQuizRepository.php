@@ -401,6 +401,22 @@ final class WpPostQuizRepository implements QuizRepositoryInterface {
 		return $deleted instanceof \WP_Post;
 	}
 
+	public function trashQuiz( int $id ): bool {
+		$post = get_post( $id );
+
+		if ( ! $post instanceof \WP_Post || PostTypes::QUIZ !== $post->post_type ) {
+			return false;
+		}
+
+		if ( 'trash' === $post->post_status ) {
+			return true;
+		}
+
+		$result = wp_trash_post( $id );
+
+		return $result instanceof \WP_Post;
+	}
+
 	public function deleteAttemptsByQuizId( int $quizId ): void {
 		$wpdb = $this->wpdb;
 		if ( $quizId <= 0 ) {
@@ -430,6 +446,23 @@ final class WpPostQuizRepository implements QuizRepositoryInterface {
 		$deleted = wp_delete_post( $id, true );
 
 		return $deleted instanceof \WP_Post;
+	}
+
+	public function trashQuestion( int $id ): bool {
+		$post = get_post( $id );
+
+		if ( ! $post instanceof \WP_Post || PostTypes::QUESTION !== $post->post_type ) {
+			return false;
+		}
+
+		if ( 'trash' === $post->post_status ) {
+			return true;
+		}
+
+		// Keep junction rows so restore can reattach the question to its quiz.
+		$result = wp_trash_post( $id );
+
+		return $result instanceof \WP_Post;
 	}
 
 	public function deleteQuestionsByQuizId( int $quizId ): void {
