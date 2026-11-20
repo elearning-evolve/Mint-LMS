@@ -13489,6 +13489,26 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   gap: 16px;
 }
 
+#mint-lms-root .mint-existing-picker__lead {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+#mint-lms-root .mint-existing-picker__icon {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #98FBCB;
+  color: #0F0E1A;
+}
+
 #mint-lms-root .mint-existing-picker__heading {
   flex: 1;
   min-width: 0;
@@ -13584,11 +13604,12 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 
 #mint-lms-root .mint-existing-picker__list {
   margin-top: 14px;
-  min-height: 120px;
   max-height: min(420px, calc(100vh - 320px));
   overflow-x: hidden;
   overflow-y: auto;
   display: grid;
+  grid-auto-rows: max-content;
+  align-content: start;
   gap: 10px;
   padding-right: 4px;
   box-sizing: border-box;
@@ -13609,8 +13630,11 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   gap: 12px;
   width: 100%;
   max-width: 100%;
+  height: auto;
+  min-height: 0;
+  align-self: start;
   box-sizing: border-box;
-  padding: 14px 16px;
+  padding: 12px 14px;
   border: 1.5px solid #E4E1F0;
   border-radius: 12px;
   background: #FFFFFF;
@@ -13628,6 +13652,18 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   border-style: solid;
   border-color: #98FBCB;
   background: rgba(152, 251, 203, 0.12);
+}
+
+#mint-lms-root .mint-existing-picker__row-icon {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: #98FBCB;
+  color: #0F0E1A;
 }
 
 #mint-lms-root .mint-existing-picker__row-copy {
