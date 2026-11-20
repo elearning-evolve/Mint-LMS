@@ -194,7 +194,7 @@ function courseBuilder(courseId, opts = {}) {
     ],
     quizMaterialsCodeTags: ['b', 'i', 'link', 'ul', 'ol', 'li', 'code', 'img'],
     addingCourseQuiz: false,
-    /** Mint “Move to trash” confirm (builder permanent-remove paths). */
+    /** Mint “Move to trash” confirm — Course Hierarchy Remove only. */
     trashConfirm: {
       open: false,
       title: '',
@@ -203,6 +203,16 @@ function courseBuilder(courseId, opts = {}) {
       note: '',
       busy: false,
       tossing: false,
+      _resolver: null,
+    },
+    /** Detach confirm — Lesson Group / Lesson / Quiz list Remove (not trash). */
+    detachConfirm: {
+      open: false,
+      title: '',
+      name: '',
+      body: '',
+      note: '',
+      busy: false,
       _resolver: null,
     },
     /** Mint “Move linked item” confirm (Add Existing when already associated). */
@@ -1422,13 +1432,12 @@ function courseBuilder(courseId, opts = {}) {
     async removeQuizFromLessonList(quiz) {
       const quizId = Number(quiz?.id || 0);
       if (!quizId) return;
-      if (
-        !window.confirm(
-          'Remove this quiz from the lesson? You can attach it to another lesson later.'
-        )
-      ) {
-        return;
-      }
+      const title =
+        quiz?.title ||
+        (this.courseQuizzes || []).find((row) => Number(row.id) === quizId)?.title ||
+        '';
+      if (!(await this.confirmDetach(this.detachCopy('quiz', title)))) return;
+      this.clearPersistedQuizAttachLesson(quizId);
       this.attaching = true;
       try {
         await mintApi(`quizzes/${quizId}/detach`, {
@@ -1439,9 +1448,44 @@ function courseBuilder(courseId, opts = {}) {
         if (Number(this.lessonQuiz?.id) === quizId) {
           this.lessonQuiz = this.emptyQuizState();
         }
-        window.MintLMS.toast.success('Quiz removed from lesson.');
+        if (this.selected?.type === 'quiz' && Number(this.selected.id) === quizId) {
+          const lessonId = Number(this.selectedLesson?.id || this.selected?.lessonId || 0);
+          const sectionId = Number(this.selected?.sectionId) || 0;
+          if (lessonId > 0) {
+            this.selectItem('lesson', lessonId, sectionId);
+          }
+        }
+        window.MintLMS.toast.success('Quiz detached from lesson.');
       } catch (err) {
-        window.MintLMS.toast.error(err.message || 'Could not remove quiz.');
+        window.MintLMS.toast.error(err.message || 'Could not detach quiz.');
+      } finally {
+        this.attaching = false;
+      }
+    },
+
+    /**
+     * Lesson Group list Remove — detach from group (section_id 0), not trash.
+     */
+    async removeLessonFromGroupList(lesson) {
+      const lessonId = Number(lesson?.id || 0);
+      const courseId = Number(this.courseId) || 0;
+      if (!lessonId || !courseId) return;
+      const title = lesson?.title || '';
+      if (!(await this.confirmDetach(this.detachCopy('lesson', title)))) return;
+      this.attaching = true;
+      try {
+        await mintApi(`lessons/${lessonId}/attach`, {
+          method: 'POST',
+          body: JSON.stringify({
+            course_id: courseId,
+            section_id: 0,
+          }),
+        });
+        this.relocateLessonInTree(lessonId, 0);
+        window.MintLMS.toast.success('Lesson detached from lesson group.');
+        this.$nextTick(() => this.initSortables());
+      } catch (err) {
+        window.MintLMS.toast.error(err.message || 'Could not detach lesson.');
       } finally {
         this.attaching = false;
       }
@@ -2767,13 +2811,8 @@ function courseBuilder(courseId, opts = {}) {
       const lessonId = Number(this.selectedLesson?.id || this.selected?.id || 0);
       const courseId = Number(this.courseId) || 0;
       if (!lessonId || !courseId) return;
-      if (
-        !window.confirm(
-          'Remove this lesson from the lesson group? It stays in the course — you can attach it to another group later.'
-        )
-      ) {
-        return;
-      }
+      const title = this.selectedLesson?.title || '';
+      if (!(await this.confirmDetach(this.detachCopy('lesson', title)))) return;
       this.attaching = true;
       try {
         await mintApi(`lessons/${lessonId}/attach`, {
@@ -2788,10 +2827,10 @@ function courseBuilder(courseId, opts = {}) {
           this.selected = { ...this.selected, sectionId: 0 };
         }
         this.attach.sectionId = 0;
-        window.MintLMS.toast.success('Lesson removed from lesson group.');
+        window.MintLMS.toast.success('Lesson detached from lesson group.');
         this.$nextTick(() => this.initSortables());
       } catch (err) {
-        window.MintLMS.toast.error(err.message || 'Could not remove from lesson group.');
+        window.MintLMS.toast.error(err.message || 'Could not detach from lesson group.');
       } finally {
         this.attaching = false;
       }
@@ -6655,8 +6694,7 @@ function courseBuilder(courseId, opts = {}) {
     },
 
     /**
-     * Quiz → Questions list Remove — detach (parallel to Lesson → Quizzes Remove).
-     * Trash stays on Overview / header Move to trash.
+     * Quiz → Questions list Remove — detach from quiz (not trash).
      */
     async removeQuizQuestionFromList(question) {
       const questionId = Number(question?.id || 0);
@@ -6667,13 +6705,13 @@ function courseBuilder(courseId, opts = {}) {
         }
         return;
       }
-      if (
-        !window.confirm(
-          'Remove this question from the quiz? You can attach it to another quiz later.'
-        )
-      ) {
-        return;
-      }
+      const title =
+        question?.title ||
+        question?.displayTitle ||
+        this.quizQuestionListTitle?.(question) ||
+        (this.courseQuestions || []).find((row) => Number(row.id) === questionId)?.title ||
+        '';
+      if (!(await this.confirmDetach(this.detachCopy('question', title)))) return;
       this.clearPersistedQuestionAttachQuiz(questionId);
       this.suggestedAttachQuizId = 0;
       this.fromQuizOrigin = false;
@@ -6704,9 +6742,9 @@ function courseBuilder(courseId, opts = {}) {
           this.activeQuestion = null;
           this.questionAnswerReady = false;
         }
-        window.MintLMS.toast.success('Question removed from quiz.');
+        window.MintLMS.toast.success('Question detached from quiz.');
       } catch (err) {
-        window.MintLMS.toast.error(err.message || 'Could not remove question.');
+        window.MintLMS.toast.error(err.message || 'Could not detach question.');
       } finally {
         this.attaching = false;
       }
@@ -8931,6 +8969,75 @@ function courseBuilder(courseId, opts = {}) {
       };
     },
 
+    detachCopy(kind, itemTitle) {
+      const name = String(itemTitle || '').trim();
+      const label =
+        name ||
+        ({
+          lesson: 'This lesson',
+          quiz: 'This quiz',
+          question: 'This question',
+        }[kind] || 'This item');
+      if (kind === 'lesson') {
+        return {
+          title: 'Detach this lesson?',
+          name: label,
+          body: 'will be removed from this lesson group. It stays in the course — you can attach it to another group later.',
+          note: 'This does not move the lesson to trash.',
+        };
+      }
+      if (kind === 'quiz') {
+        return {
+          title: 'Detach this quiz?',
+          name: label,
+          body: 'will be removed from this lesson. You can attach it to another lesson later.',
+          note: 'This does not move the quiz to trash.',
+        };
+      }
+      return {
+        title: 'Detach this question?',
+        name: label,
+        body: 'will be removed from this quiz. You can attach it to another quiz later.',
+        note: 'This does not move the question to trash.',
+      };
+    },
+
+    confirmDetach({ title, name, body, note }) {
+      return new Promise((resolve) => {
+        if (this.detachConfirm?._resolver) {
+          this.detachConfirm._resolver(false);
+        }
+        this.detachConfirm = {
+          open: true,
+          title: title || 'Detach?',
+          name: name || '',
+          body: body || '',
+          note: note || '',
+          busy: false,
+          _resolver: resolve,
+        };
+      });
+    },
+
+    cancelDetachConfirm() {
+      if (this.detachConfirm.busy) return;
+      const resolve = this.detachConfirm._resolver;
+      this.detachConfirm.open = false;
+      this.detachConfirm.busy = false;
+      this.detachConfirm._resolver = null;
+      if (typeof resolve === 'function') resolve(false);
+    },
+
+    acceptDetachConfirm() {
+      if (this.detachConfirm.busy) return;
+      const resolve = this.detachConfirm._resolver;
+      this.detachConfirm.busy = true;
+      this.detachConfirm._resolver = null;
+      this.detachConfirm.open = false;
+      this.detachConfirm.busy = false;
+      if (typeof resolve === 'function') resolve(true);
+    },
+
     confirmMoveToTrash({ title, name, body, note }) {
       return new Promise((resolve) => {
         if (this.trashConfirm?._resolver) {
@@ -9024,7 +9131,12 @@ function courseBuilder(courseId, opts = {}) {
           (question) => Number(question.lessonId) !== lid
         );
         window.MintLMS.toast.success('Moved to trash');
-        this.redirectToTypeOverview('lessons');
+        // Stay on Lesson Group editor when removing from that screen.
+        if (this.selected?.type === 'section' && Number(this.selected?.id) === sid && sid > 0) {
+          this.afterLessonDeleted(sid);
+        } else {
+          this.redirectToTypeOverview('lessons');
+        }
       } catch (err) {
         window.MintLMS.toast.error(err.message);
       }

@@ -2596,28 +2596,35 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 						>
 							<template x-for="(lesson, lessonIndex) in (selectedSection.lessons || [])" :key="'sec-les-' + lesson.id">
 								<li>
-									<button
-										type="button"
-										class="mint-section-lessons__row"
-										@click="selectItem('lesson', lesson.id, selectedSection.id)"
-									>
-										<span class="mint-section-lessons__index" x-text="lessonIndex + 1" aria-hidden="true"></span>
-										<span class="mint-section-lessons__row-copy">
-											<span
-												class="mint-section-lessons__row-title"
-												x-text="lesson.title || t('untitledLesson')"
-											></span>
-											<span
-												class="mint-status-chip mint-section-lessons__status"
-												:class="sectionLessonStatusChipClass(lesson)"
-												x-text="statusLabel(sectionLessonStatus(lesson))"
-											></span>
-										</span>
-										<span class="mint-section-lessons__open">
-											<?php esc_html_e( 'Open lesson', 'mint-lms' ); ?>
-											<svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 4.5 5.5 5.5L8 15.5"/></svg>
-										</span>
-									</button>
+									<div class="mint-section-lessons__row">
+										<button
+											type="button"
+											class="mint-section-lessons__main"
+											@click="selectItem('lesson', lesson.id, selectedSection.id)"
+										>
+											<span class="mint-section-lessons__index" x-text="lessonIndex + 1" aria-hidden="true"></span>
+											<span class="mint-section-lessons__row-copy">
+												<span
+													class="mint-section-lessons__row-title"
+													x-text="lesson.title || t('untitledLesson')"
+												></span>
+												<span
+													class="mint-status-chip mint-section-lessons__status"
+													:class="sectionLessonStatusChipClass(lesson)"
+													x-text="statusLabel(sectionLessonStatus(lesson))"
+												></span>
+											</span>
+											<span class="mint-section-lessons__open">
+												<?php esc_html_e( 'Open lesson', 'mint-lms' ); ?>
+												<svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 4.5 5.5 5.5L8 15.5"/></svg>
+											</span>
+										</button>
+										<button
+											type="button"
+											class="mint-section-lessons__remove"
+											@click.stop="removeLessonFromGroupList(lesson)"
+										><?php esc_html_e( 'Remove', 'mint-lms' ); ?></button>
+									</div>
 								</li>
 							</template>
 						</ul>
@@ -2636,19 +2643,25 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 							<span><?php esc_html_e( 'Click any lesson to open it and edit its content, quizzes and settings.', 'mint-lms' ); ?></span>
 						</div>
 
-						<div class="mint-section-lessons__actions">
+						<div class="mint-existing-add-row mint-section-lessons__actions">
 							<button
 								type="button"
-								class="mint-section-lessons__add"
+								class="mint-lesson-add-quiz"
 								:disabled="addingLesson || existingPicker.busy"
 								@click="addLesson(selectedSection?.id || selected?.id)"
-							>+ <?php esc_html_e( 'Add a new lesson to this group', 'mint-lms' ); ?></button>
+							>
+								<svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M10 5v10M5 10h10"/></svg>
+								<?php esc_html_e( 'Add Lesson', 'mint-lms' ); ?>
+							</button>
 							<button
 								type="button"
-								class="mint-section-lessons__add-existing"
+								class="mint-existing-add-btn"
 								:disabled="addingLesson || existingPicker.busy"
 								@click="openExistingLessonPicker(selectedSection?.id || selected?.id)"
-							>+ <?php esc_html_e( 'Add existing lesson', 'mint-lms' ); ?></button>
+							>
+								<svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M10 5v10M5 10h10"/></svg>
+								<?php esc_html_e( 'Add existing lesson', 'mint-lms' ); ?>
+							</button>
 						</div>
 					</div>
 
@@ -4076,6 +4089,70 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 					<span class="mint-move-confirm__arw" aria-hidden="true">
 						<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h11M11 6l4 4-4 4" /></svg>
 					</span>
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<div
+		class="mint-detach-confirm"
+		x-show="detachConfirm.open"
+		x-cloak
+		role="presentation"
+		@keydown.escape.window="cancelDetachConfirm()"
+	>
+		<div class="mint-detach-confirm__backdrop" @click="cancelDetachConfirm()"></div>
+		<div
+			class="mint-detach-confirm__dialog"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="mint-detach-confirm-title"
+			aria-describedby="mint-detach-confirm-body"
+			@click.stop
+		>
+			<button
+				type="button"
+				class="mint-detach-confirm__close"
+				@click="cancelDetachConfirm()"
+				aria-label="<?php echo esc_attr__( 'Close', 'mint-lms' ); ?>"
+			>
+				<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15" /></svg>
+			</button>
+
+			<div class="mint-detach-confirm__top">
+				<div class="mint-detach-confirm__icon" aria-hidden="true">
+					<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M8.2 11.8a3.2 3.2 0 0 1 0-4.5l1.2-1.2a3.2 3.2 0 0 1 4.5 4.5l-.6.6"/>
+						<path d="M11.8 8.2a3.2 3.2 0 0 1 0 4.5l-1.2 1.2a3.2 3.2 0 1 1-4.5-4.5l.6-.6"/>
+						<path d="M4.5 4.5l11 11"/>
+					</svg>
+				</div>
+				<h2 id="mint-detach-confirm-title" class="mint-detach-confirm__title" x-text="detachConfirm.title"></h2>
+			</div>
+
+			<p id="mint-detach-confirm-body" class="mint-detach-confirm__body">
+				<b x-text="detachConfirm.name"></b>
+				<span x-text="' ' + (detachConfirm.body || '')"></span>
+			</p>
+			<div class="mint-detach-confirm__note" x-text="detachConfirm.note"></div>
+
+			<div class="mint-detach-confirm__foot">
+				<button type="button" class="mint-detach-confirm__cancel" @click="cancelDetachConfirm()">
+					<?php esc_html_e( 'Cancel', 'mint-lms' ); ?>
+				</button>
+				<button
+					type="button"
+					class="mint-detach-confirm__submit"
+					:class="{ 'is-busy': detachConfirm.busy }"
+					:disabled="detachConfirm.busy"
+					@click="acceptDetachConfirm()"
+				>
+					<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						<path d="M8.2 11.8a3.2 3.2 0 0 1 0-4.5l1.2-1.2a3.2 3.2 0 0 1 4.5 4.5l-.6.6"/>
+						<path d="M11.8 8.2a3.2 3.2 0 0 1 0 4.5l-1.2 1.2a3.2 3.2 0 1 1-4.5-4.5l.6-.6"/>
+						<path d="M4.5 4.5l11 11"/>
+					</svg>
+					<?php esc_html_e( 'Detach', 'mint-lms' ); ?>
 				</button>
 			</div>
 		</div>
