@@ -493,8 +493,7 @@ final class LessonService {
 			return;
 		}
 
-		$post = get_post( $lesson->id );
-		if ( ! $post instanceof \WP_Post || (int) $post->post_author !== $userId ) {
+		if ( ! $this->authorization->ownsPost( $userId, $lesson->id ) ) {
 			throw new ForbiddenException();
 		}
 	}

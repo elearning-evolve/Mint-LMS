@@ -26,5 +26,10 @@ interface AuthorizationInterface {
 	 */
 	public function canViewAllContent( int $userId ): bool;
 
+	/**
+	 * True when $userId is the post_author of the given content post (lesson/quiz/question CPT).
+	 */
+	public function ownsPost( int $userId, int $postId ): bool;
+
 	public function canEnrollStudents( int $userId ): bool;
 }

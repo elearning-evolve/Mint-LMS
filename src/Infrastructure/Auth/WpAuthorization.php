@@ -55,6 +55,19 @@ final class WpAuthorization implements AuthorizationInterface {
 		return $this->canViewAllCourses( $userId );
 	}
 
+	public function ownsPost( int $userId, int $postId ): bool {
+		if ( $userId <= 0 || $postId <= 0 ) {
+			return false;
+		}
+
+		$post = get_post( $postId );
+		if ( ! $post instanceof \WP_Post ) {
+			return false;
+		}
+
+		return (int) $post->post_author === $userId;
+	}
+
 	public function canEnrollStudents( int $userId ): bool {
 		return $this->hasCapability( $userId, 'enroll_mintlms_students' )
 			|| $this->hasCapability( $userId, 'manage_mintlms' );
