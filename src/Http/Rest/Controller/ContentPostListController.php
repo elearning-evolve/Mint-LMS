@@ -479,31 +479,58 @@ final class ContentPostListController {
 			$title = wp_trim_words( wp_strip_all_tags( $post->post_content ), 12, '…' );
 		}
 
-		$sectionId      = 0;
-		$disposableHost = false;
+		$sectionId         = 0;
+		$disposableHost    = false;
+		$questionType      = '';
+		$answerTypePending = false;
 		if ( 'lessons' === $type ) {
 			$sectionId      = (int) get_post_meta( $post->ID, PostTypes::META_SECTION_ID, true );
 			$disposableHost = PostTypes::isDisposableHostLesson( (int) $post->ID );
 		} elseif ( 'quizzes' === $type ) {
 			$disposableHost = $lessonId > 0 && PostTypes::isDisposableHostLesson( $lessonId );
 		} elseif ( 'questions' === $type ) {
-			$shell          = (int) get_post_meta( $quizId, PostTypes::META_QUESTION_SHELL, true );
-			$disposableHost = $shell > 0 || ( $lessonId > 0 && PostTypes::isDisposableHostLesson( $lessonId ) );
+			$shell             = (int) get_post_meta( $quizId, PostTypes::META_QUESTION_SHELL, true );
+			$disposableHost    = $shell > 0 || ( $lessonId > 0 && PostTypes::isDisposableHostLesson( $lessonId ) );
+			$questionType      = $this->questionTypeForPost( (int) $post->ID );
+			$settings          = get_post_meta( $post->ID, PostTypes::META_QUESTION_SETTINGS, true );
+			$answerTypePending = is_array( $settings ) && ! empty( $settings['answerTypePending'] );
 		}
 
 		return array(
-			'id'             => (int) $post->ID,
-			'title'          => '' !== $title ? $title : __( '(no title)', 'mint-lms' ),
-			'authorName'     => $author instanceof \WP_User ? $author->display_name : '—',
-			'status'         => $status,
-			'date'           => $this->formatListDate( $modified ),
-			'updatedAt'      => $modified,
-			'courseId'       => $courseId,
-			'sectionId'      => $sectionId,
-			'lessonId'       => $lessonId,
-			'quizId'         => $quizId,
-			'disposableHost' => $disposableHost,
+			'id'                => (int) $post->ID,
+			'title'             => '' !== $title ? $title : __( '(no title)', 'mint-lms' ),
+			'authorName'        => $author instanceof \WP_User ? $author->display_name : '—',
+			'status'            => $status,
+			'date'              => $this->formatListDate( $modified ),
+			'updatedAt'         => $modified,
+			'courseId'          => $courseId,
+			'sectionId'         => $sectionId,
+			'lessonId'          => $lessonId,
+			'quizId'            => $quizId,
+			'disposableHost'    => $disposableHost,
+			'questionType'      => $questionType,
+			'answerTypePending' => $answerTypePending,
 		);
+	}
+
+	private function questionTypeForPost( int $postId ): string {
+		if ( $postId <= 0 ) {
+			return '';
+		}
+
+		global $wpdb;
+		$table = Schema::validateTable( Schema::questionDataTable( $wpdb->prefix ), $wpdb->prefix );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped list serialize.
+		$type = $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT question_type FROM %i WHERE post_id = %d',
+				$table,
+				$postId
+			)
+		);
+
+		return is_string( $type ) ? $type : '';
 	}
 
 	private function mintStatus( string $wpStatus ): string {

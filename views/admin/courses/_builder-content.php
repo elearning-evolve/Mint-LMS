@@ -3803,45 +3803,43 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 	</div>
 
 	<div
-		class="mint-confirm mint-existing-picker"
+		class="mint-existing-picker"
 		x-show="existingPicker.open"
 		x-cloak
-		x-transition.opacity.duration.200ms
 		role="presentation"
 		@keydown.escape.window="closeExistingPicker()"
 	>
-		<div class="mint-confirm__backdrop" @click="closeExistingPicker()"></div>
+		<div class="mint-existing-picker__backdrop" @click="closeExistingPicker()"></div>
 		<div
-			class="mint-confirm__panel mint-existing-picker__panel"
+			class="mint-existing-picker__box"
 			role="dialog"
 			aria-modal="true"
 			aria-labelledby="mint-existing-picker-title"
+			aria-describedby="mint-existing-picker-subtitle"
 			@click.stop
 		>
-			<button
-				type="button"
-				class="mint-confirm__close"
-				@click="closeExistingPicker()"
-				aria-label="<?php echo esc_attr__( 'Close', 'mint-lms' ); ?>"
-			>
-				<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15" /></svg>
-			</button>
-
-			<div class="mint-confirm__top">
-				<div class="mint-confirm__icon" aria-hidden="true">
-					<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<path d="M4.5 6.5h11M4.5 10h11M4.5 13.5h7"/>
-					</svg>
+			<div class="mint-existing-picker__top">
+				<div class="mint-existing-picker__heading">
+					<div id="mint-existing-picker-title" class="mint-existing-picker__title" x-text="existingPicker.title"></div>
+					<div id="mint-existing-picker-subtitle" class="mint-existing-picker__subtitle" x-text="existingPickerSubtitle()"></div>
 				</div>
-				<h2 id="mint-existing-picker-title" class="mint-confirm__title" x-text="existingPicker.title"></h2>
+				<button
+					type="button"
+					class="mint-existing-picker__close"
+					@click="closeExistingPicker()"
+					aria-label="<?php echo esc_attr__( 'Close', 'mint-lms' ); ?>"
+				>
+					<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15" /></svg>
+				</button>
 			</div>
 
 			<div class="mint-existing-picker__search">
-				<svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="#5C5C77" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="9" r="5.5"/><path d="m13.2 13.2 3 3"/></svg>
+				<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="#5C5C77" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="9" r="5.5"/><path d="m13.5 13.5 3.5 3.5"/></svg>
 				<input
 					type="search"
 					class="mint-existing-picker__search-input"
-					placeholder="<?php echo esc_attr__( 'Search…', 'mint-lms' ); ?>"
+					:placeholder="existingPickerSearchPlaceholder()"
+					:aria-label="existingPickerSearchPlaceholder()"
 					autocomplete="off"
 					x-model="existingPicker.search"
 					:disabled="existingPicker.loading || existingPicker.busy"
@@ -3856,27 +3854,42 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 					<div class="mint-existing-picker__empty" x-text="existingPicker.error"></div>
 				</template>
 				<template x-if="!existingPicker.loading && !existingPicker.error && filteredExistingPickerItems().length === 0">
-					<div class="mint-existing-picker__empty"><?php esc_html_e( 'No items available to add.', 'mint-lms' ); ?></div>
+					<div class="mint-existing-picker__empty" x-text="existingPickerEmptyLabel()"></div>
 				</template>
 				<template x-for="item in filteredExistingPickerItems()" :key="'existing-' + existingPicker.kind + '-' + item.id">
-					<div class="mint-existing-picker__row" role="listitem">
+					<div
+						class="mint-existing-picker__row"
+						:class="{ 'is-added': isExistingPickerAdded(item) }"
+						role="listitem"
+					>
 						<div class="mint-existing-picker__row-copy">
-							<div class="mint-existing-picker__row-title mint-truncate" x-text="item.title"></div>
-							<div class="mint-existing-picker__row-meta" x-text="existingPickerMeta(item)"></div>
+							<div class="mint-existing-picker__row-title" x-text="item.title"></div>
+							<span
+								class="mint-existing-picker__type"
+								x-show="existingPickerBadge(item)"
+								x-text="existingPickerBadge(item)"
+							></span>
 						</div>
 						<button
 							type="button"
 							class="mint-existing-picker__add"
-							:disabled="existingPicker.busy"
+							:class="{ 'is-ghost': isExistingPickerAdded(item) }"
+							:disabled="existingPicker.busy || isExistingPickerAdded(item)"
 							@click="addExistingPickerItem(item)"
-						><?php esc_html_e( 'Add', 'mint-lms' ); ?></button>
+							x-text="isExistingPickerAdded(item) ? 'Added' : existingPickerAddLabel()"
+						></button>
 					</div>
 				</template>
 			</div>
 
-			<div class="mint-confirm__actions">
-				<button type="button" class="mint-confirm__cancel" @click="closeExistingPicker()">
-					<?php esc_html_e( 'Cancel', 'mint-lms' ); ?>
+			<div class="mint-existing-picker__footer">
+				<span
+					class="mint-existing-picker__count"
+					x-show="!existingPicker.loading && !existingPicker.error"
+					x-text="existingPickerCountLabel()"
+				></span>
+				<button type="button" class="mint-existing-picker__done" @click="closeExistingPicker()">
+					<?php esc_html_e( 'Done', 'mint-lms' ); ?>
 				</button>
 			</div>
 		</div>
