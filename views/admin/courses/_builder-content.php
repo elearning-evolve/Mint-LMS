@@ -195,9 +195,9 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 			<template x-if="showQuizIdentityHeader()">
 				<div class="mint-builder-identity">
 					<a
-						:href="listDashboardUrl('quizzes')"
+						:href="quizIdentityBackUrl()"
 						class="mint-builder-back"
-						aria-label="<?php echo esc_attr__( 'Back to quizzes', 'mint-lms' ); ?>"
+						:aria-label="isCourseBuilderSurface() ? '<?php echo esc_js( __( 'Back to courses', 'mint-lms' ) ); ?>' : (fromLessonOrigin || (fromLessons && !isQuizzesLibraryFlow()) ? '<?php echo esc_js( __( 'Back to lessons', 'mint-lms' ) ); ?>' : '<?php echo esc_js( __( 'Back to quizzes', 'mint-lms' ) ); ?>')"
 						@click="rememberOriginTab()"
 					>
 						<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.5 4.5 7 10l5.5 5.5"/></svg>
@@ -221,23 +221,12 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 					</div>
 				</div>
 			</template>
-			<template x-if="!showCourseSettingsButton() && fromBuilderOrigin && fromQuizzes">
-				<a
-					:href="parentCourseEditorUrl()"
-					class="mint-builder-back-lessons mint-inline-flex mint-min-w-0 mint-items-center mint-gap-2 mint-rounded-lg mint-px-2 mint-py-1.5 mint-no-underline mint-text-ink hover:mint-bg-[#F4F3F8]"
-					aria-label="<?php echo esc_attr__( 'Back to course', 'mint-lms' ); ?>"
-					@click="goToParentCourse($event)"
-				>
-					<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="mint-shrink-0"><path d="M12.5 4.5 7 10l5.5 5.5"/></svg>
-					<span class="mint-truncate mint-text-base mint-font-semibold mint-tracking-[-0.015em]" x-text="breadcrumbCourseTitle() || t('backToCourse')"></span>
-				</a>
-			</template>
 			<template x-if="showLessonIdentityHeader()">
 				<div class="mint-builder-identity">
 					<a
-						:href="listDashboardUrl('lessons')"
+						:href="lessonIdentityBackUrl()"
 						class="mint-builder-back"
-						aria-label="<?php echo esc_attr__( 'Back to lessons', 'mint-lms' ); ?>"
+						:aria-label="isCourseBuilderSurface() ? '<?php echo esc_js( __( 'Back to courses', 'mint-lms' ) ); ?>' : '<?php echo esc_js( __( 'Back to lessons', 'mint-lms' ) ); ?>'"
 						@click="rememberOriginTab()"
 					>
 						<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12.5 4.5 7 10l5.5 5.5"/></svg>
@@ -261,7 +250,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 					</div>
 				</div>
 			</template>
-			<template x-if="showCourseSettingsButton()">
+			<template x-if="showCourseIdentityHeader()">
 				<div class="mint-builder-identity">
 					<a
 						:href="listDashboardUrl('courses')"

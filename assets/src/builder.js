@@ -3639,8 +3639,38 @@ function courseBuilder(courseId, opts = {}) {
       return `${name} · ${status}`;
     },
 
+    /**
+     * Lesson identity (title → native WP editor).
+     * Shows when the current editor surface is a lesson — Course builder or Lesson → Quiz flow.
+     */
     showLessonIdentityHeader() {
-      return !this.showCourseSettingsButton() && !!this.fromLessons && !this.fromQuizzes;
+      if (this.questionEditorActive || this.quizEditorActive) return false;
+      if (this.selected?.type === 'lesson' && Number(this.selectedLesson?.id || this.selected?.id || 0) > 0) {
+        return true;
+      }
+      // Lessons library shell before a row is selected.
+      return (
+        !this.showCourseSettingsButton() &&
+        !!this.fromLessons &&
+        !this.fromQuizzes &&
+        !this.fromQuestions
+      );
+    },
+
+    /** Course identity only when not on Lesson/Quiz editor surfaces. */
+    showCourseIdentityHeader() {
+      return (
+        this.showCourseSettingsButton() &&
+        !this.showLessonIdentityHeader() &&
+        !this.showQuizIdentityHeader()
+      );
+    },
+
+    lessonIdentityBackUrl() {
+      if (this.isCourseBuilderSurface()) {
+        return this.listDashboardUrl('courses');
+      }
+      return this.listDashboardUrl('lessons');
     },
 
     lessonIdentityName() {
@@ -3680,20 +3710,44 @@ function courseBuilder(courseId, opts = {}) {
     },
 
     standaloneLessonEditId() {
-      return Number(this.standaloneLessonId || this.selectedLesson?.id || 0);
+      return Number(
+        this.standaloneLessonId ||
+          this.selectedLesson?.id ||
+          (this.selected?.type === 'lesson' ? this.selected.id : 0) ||
+          0
+      );
     },
 
     goToStandaloneLessonHome(event) {
       this.goToNativePostEdit(this.standaloneLessonEditId(), event);
     },
 
+    /**
+     * Quiz identity (title → native WP editor).
+     * Shows whenever the Quiz screen is open — Course builder, Lesson → Quiz, or Quizzes library.
+     */
     showQuizIdentityHeader() {
+      if (this.questionEditorActive || this.selected?.type === 'question') return false;
+      const quizId = Number(this.lessonQuiz?.id || this.selected?.quizId || 0);
+      if (this.quizEditorActive && quizId > 0) {
+        return true;
+      }
+      // Quizzes library shell before a row is selected.
       return (
         !this.showCourseSettingsButton() &&
         !!this.fromQuizzes &&
-        !this.fromQuestions &&
-        !this.fromBuilderOrigin
+        !this.fromQuestions
       );
+    },
+
+    quizIdentityBackUrl() {
+      if (this.isCourseBuilderSurface()) {
+        return this.listDashboardUrl('courses');
+      }
+      if (this.fromLessonOrigin || (this.fromLessons && !this.isQuizzesLibraryFlow())) {
+        return this.listDashboardUrl('lessons');
+      }
+      return this.listDashboardUrl('quizzes');
     },
 
     quizIdentityName() {
@@ -3745,6 +3799,11 @@ function courseBuilder(courseId, opts = {}) {
 
     /** Lessons library: Lesson → Quiz → Question (no Course / Lesson Group chrome). */
     isLessonsLibraryFlow() {
+      // Course builder URLs may still carry from=lessons (WP lesson-edit → Open in Mint).
+      // That remains Course → Lesson Group → Lesson, not the lessons library shell.
+      if (this.isCourseBuilderSurface()) {
+        return false;
+      }
       return !!this.fromLessons && !this.fromQuizzes && !this.fromQuestions;
     },
 
