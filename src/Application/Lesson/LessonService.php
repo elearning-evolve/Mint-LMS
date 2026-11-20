@@ -487,6 +487,16 @@ final class LessonService {
 		if ( ! $this->authorization->canCreateCourse( $userId ) ) {
 			throw new ForbiddenException();
 		}
+
+		// Library / orphan lessons: instructors may only manage their own posts.
+		if ( $this->authorization->canViewAllContent( $userId ) ) {
+			return;
+		}
+
+		$post = get_post( $lesson->id );
+		if ( ! $post instanceof \WP_Post || (int) $post->post_author !== $userId ) {
+			throw new ForbiddenException();
+		}
 	}
 
 	private function assertCanViewLesson( int $userId, Lesson $lesson ): void {

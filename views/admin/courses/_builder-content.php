@@ -2636,12 +2636,20 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 							<span><?php esc_html_e( 'Click any lesson to open it and edit its content, quizzes and settings.', 'mint-lms' ); ?></span>
 						</div>
 
-						<button
-							type="button"
-							class="mint-section-lessons__add"
-							:disabled="addingLesson"
-							@click="addLesson(selectedSection?.id || selected?.id)"
-						>+ <?php esc_html_e( 'Add a new lesson to this group', 'mint-lms' ); ?></button>
+						<div class="mint-section-lessons__actions">
+							<button
+								type="button"
+								class="mint-section-lessons__add"
+								:disabled="addingLesson || existingPicker.busy"
+								@click="addLesson(selectedSection?.id || selected?.id)"
+							>+ <?php esc_html_e( 'Add a new lesson to this group', 'mint-lms' ); ?></button>
+							<button
+								type="button"
+								class="mint-section-lessons__add-existing"
+								:disabled="addingLesson || existingPicker.busy"
+								@click="openExistingLessonPicker(selectedSection?.id || selected?.id)"
+							>+ <?php esc_html_e( 'Add existing lesson', 'mint-lms' ); ?></button>
+						</div>
 					</div>
 
 					<div class="mint-section-lessons__footer">
@@ -2829,15 +2837,26 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 									</div>
 								</div>
 
-								<button
-									type="button"
-									class="mint-quiz-add-question"
-									@click="addNewQuestionToQuiz()"
-									:disabled="quizSaving || !lessonQuiz?.id || quizQuestionDraftOpen"
-								>
-									<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M10 5v10M5 10h10" /></svg>
-									<?php esc_html_e( 'Add Question', 'mint-lms' ); ?>
-								</button>
+								<div class="mint-existing-add-row">
+									<button
+										type="button"
+										class="mint-quiz-add-question"
+										@click="addNewQuestionToQuiz()"
+										:disabled="quizSaving || !lessonQuiz?.id || quizQuestionDraftOpen || existingPicker.busy"
+									>
+										<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M10 5v10M5 10h10" /></svg>
+										<?php esc_html_e( 'Add Question', 'mint-lms' ); ?>
+									</button>
+									<button
+										type="button"
+										class="mint-existing-add-btn"
+										@click="openExistingQuestionPicker()"
+										:disabled="quizSaving || !lessonQuiz?.id || quizQuestionDraftOpen || existingPicker.busy"
+									>
+										<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M10 5v10M5 10h10" /></svg>
+										<?php esc_html_e( 'Add existing question', 'mint-lms' ); ?>
+									</button>
+								</div>
 								</div><!-- /quiz builder -->
 
 								</div><!-- /.mint-quiz-editor-layout__main -->
@@ -3529,15 +3548,26 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 							</div>
 						</div>
 
-						<button
-							type="button"
-							class="mint-lesson-add-quiz"
-							@click="addNewQuizToLesson()"
-							:disabled="!selectedLesson?.id || quizSaving || lessonQuizDraftOpen"
-						>
-							<svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M10 5v10M5 10h10"/></svg>
-							<?php esc_html_e( 'Add Quiz', 'mint-lms' ); ?>
-						</button>
+						<div class="mint-existing-add-row">
+							<button
+								type="button"
+								class="mint-lesson-add-quiz"
+								@click="addNewQuizToLesson()"
+								:disabled="!selectedLesson?.id || quizSaving || lessonQuizDraftOpen || existingPicker.busy"
+							>
+								<svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M10 5v10M5 10h10"/></svg>
+								<?php esc_html_e( 'Add Quiz', 'mint-lms' ); ?>
+							</button>
+							<button
+								type="button"
+								class="mint-existing-add-btn"
+								@click="openExistingQuizPicker()"
+								:disabled="!selectedLesson?.id || quizSaving || lessonQuizDraftOpen || existingPicker.busy"
+							>
+								<svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M10 5v10M5 10h10"/></svg>
+								<?php esc_html_e( 'Add existing quiz', 'mint-lms' ); ?>
+							</button>
+						</div>
 							</div><!-- /!lessonSettingsView -->
 							</div><!-- /.mint-quiz-editor-layout__main -->
 
@@ -3770,6 +3800,86 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 				</div>
 			</div>
 		</section>
+	</div>
+
+	<div
+		class="mint-confirm mint-existing-picker"
+		x-show="existingPicker.open"
+		x-cloak
+		x-transition.opacity.duration.200ms
+		role="presentation"
+		@keydown.escape.window="closeExistingPicker()"
+	>
+		<div class="mint-confirm__backdrop" @click="closeExistingPicker()"></div>
+		<div
+			class="mint-confirm__panel mint-existing-picker__panel"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="mint-existing-picker-title"
+			@click.stop
+		>
+			<button
+				type="button"
+				class="mint-confirm__close"
+				@click="closeExistingPicker()"
+				aria-label="<?php echo esc_attr__( 'Close', 'mint-lms' ); ?>"
+			>
+				<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15" /></svg>
+			</button>
+
+			<div class="mint-confirm__top">
+				<div class="mint-confirm__icon" aria-hidden="true">
+					<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M4.5 6.5h11M4.5 10h11M4.5 13.5h7"/>
+					</svg>
+				</div>
+				<h2 id="mint-existing-picker-title" class="mint-confirm__title" x-text="existingPicker.title"></h2>
+			</div>
+
+			<div class="mint-existing-picker__search">
+				<svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="#5C5C77" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="9" cy="9" r="5.5"/><path d="m13.2 13.2 3 3"/></svg>
+				<input
+					type="search"
+					class="mint-existing-picker__search-input"
+					placeholder="<?php echo esc_attr__( 'Search…', 'mint-lms' ); ?>"
+					autocomplete="off"
+					x-model="existingPicker.search"
+					:disabled="existingPicker.loading || existingPicker.busy"
+				/>
+			</div>
+
+			<div class="mint-existing-picker__list" role="list">
+				<template x-if="existingPicker.loading">
+					<div class="mint-existing-picker__empty"><?php esc_html_e( 'Loading…', 'mint-lms' ); ?></div>
+				</template>
+				<template x-if="!existingPicker.loading && existingPicker.error">
+					<div class="mint-existing-picker__empty" x-text="existingPicker.error"></div>
+				</template>
+				<template x-if="!existingPicker.loading && !existingPicker.error && filteredExistingPickerItems().length === 0">
+					<div class="mint-existing-picker__empty"><?php esc_html_e( 'No items available to add.', 'mint-lms' ); ?></div>
+				</template>
+				<template x-for="item in filteredExistingPickerItems()" :key="'existing-' + existingPicker.kind + '-' + item.id">
+					<div class="mint-existing-picker__row" role="listitem">
+						<div class="mint-existing-picker__row-copy">
+							<div class="mint-existing-picker__row-title mint-truncate" x-text="item.title"></div>
+							<div class="mint-existing-picker__row-meta" x-text="existingPickerMeta(item)"></div>
+						</div>
+						<button
+							type="button"
+							class="mint-existing-picker__add"
+							:disabled="existingPicker.busy"
+							@click="addExistingPickerItem(item)"
+						><?php esc_html_e( 'Add', 'mint-lms' ); ?></button>
+					</div>
+				</template>
+			</div>
+
+			<div class="mint-confirm__actions">
+				<button type="button" class="mint-confirm__cancel" @click="closeExistingPicker()">
+					<?php esc_html_e( 'Cancel', 'mint-lms' ); ?>
+				</button>
+			</div>
+		</div>
 	</div>
 
 	<div

@@ -1082,6 +1082,16 @@ final class QuizService implements QuizLifecycleInterface {
 		if ( ! $this->authorization->canCreateCourse( $userId ) ) {
 			throw new ForbiddenException();
 		}
+
+		// Standalone host lessons: instructors may only manage their own posts.
+		if ( $this->authorization->canViewAllContent( $userId ) ) {
+			return;
+		}
+
+		$post = get_post( $lesson->id );
+		if ( ! $post instanceof \WP_Post || (int) $post->post_author !== $userId ) {
+			throw new ForbiddenException();
+		}
 	}
 
 	private function findCourseOrFail( int $id ): \MintLMS\Domain\Course\Course {
