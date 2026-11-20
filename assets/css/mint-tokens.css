@@ -28,16 +28,17 @@
   --mint-check-ink: #17222B;
   --mint-check-border: #98FBCB;
 
-  /* Radio / joining-method choice cards — one hover language everywhere */
+  /* Radio / joining-method choice cards — mint blue #98FBCB only (no green washes) */
   --mint-choice-border: #E4E1F0;
   --mint-choice-hover-border: #98FBCB;
-  --mint-choice-hover-bg: #F1FFF9;
+  --mint-choice-hover-bg: rgba(152, 251, 203, 0.14);
   --mint-choice-hover-ring: 0 0 0 3px rgba(152, 251, 203, 0.35);
   --mint-choice-selected-border: #98FBCB;
-  --mint-choice-selected-bg: #F1FFF9;
+  --mint-choice-selected-bg: rgba(152, 251, 203, 0.18);
   --mint-choice-selected-hover-border: #98FBCB;
-  --mint-choice-selected-hover-bg: #F1FFF9;
+  --mint-choice-selected-hover-bg: rgba(152, 251, 203, 0.22);
   --mint-choice-selected-hover-ring: 0 0 0 3px rgba(152, 251, 203, 0.35);
+  --mint-mint-wash: rgba(152, 251, 203, 0.18);
 
   /* Surfaces — white page, not grey */
   --mint-bg: #FFFFFF;
@@ -101,7 +102,7 @@
 
   /* Content row / card — idle grey-purple, hover mint blue */
   --mint-content-border: #E4E1F0;
-  --mint-content-hover-bg: #F1FFF9;
+  --mint-content-hover-bg: rgba(152, 251, 203, 0.14);
   --mint-content-hover-border: #98FBCB;
   --mint-content-hover-shadow: 0 6px 18px rgba(152, 251, 203, 0.28);
   --mint-content-hover-ring:
