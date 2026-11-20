@@ -1,6 +1,8 @@
 @import '../src/scoped-reset.css';
+@import './mint-fonts.css';
 @import './mint-tokens.css';
 @import './mint-components.css';
+@import './mint-buttons.css';
 
 @tailwind base;
 @tailwind components;
@@ -36,8 +38,8 @@
 #mint-lms-root button.mint-welcome-cta:hover,
 #mint-lms-root button.mint-welcome-cta:focus-visible {
   background-color: #7FE8B8 !important;
-  box-shadow: 0 4px 12px rgba(15, 14, 26, 0.18) !important;
-  transform: translateY(-1px);
+  box-shadow: var(--mint-btn-glow) !important;
+  transform: translateY(-2px);
 }
 
 #mint-lms-root a.mint-welcome-cta:active,
@@ -61,11 +63,10 @@
   background-color: rgba(152, 251, 203, 0.14) !important;
   border-color: transparent !important;
   box-shadow: none !important;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 
 #mint-lms-root button.mint-welcome-back,
-#mint-lms-root button.mint-welcome-back:hover,
 #mint-lms-root button.mint-welcome-back:focus,
 #mint-lms-root button.mint-welcome-back:focus-visible {
   color: #0F0E1A !important;
@@ -73,20 +74,22 @@
   border: 1.5px solid #98FBCB !important;
   box-shadow: none !important;
   cursor: pointer;
-  transition: background 150ms ease-out, border-color 150ms ease-out, transform 150ms ease-out;
+  transition: var(--mint-btn-transition);
 }
 
 #mint-lms-root button.mint-welcome-back:hover,
 #mint-lms-root button.mint-welcome-back:focus-visible {
   background: rgba(152, 251, 203, 0.18) !important;
-  transform: translateY(-1px);
+  border-color: #98FBCB !important;
+  box-shadow: var(--mint-btn-glow) !important;
+  transform: translateY(-2px);
 }
 
 #mint-lms-root a.mint-welcome-cta:focus-visible,
 #mint-lms-root button.mint-welcome-cta:focus-visible,
 #mint-lms-root a.mint-welcome-skip:focus-visible,
 #mint-lms-root button.mint-welcome-back:focus-visible {
-  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55), 0 4px 12px rgba(15, 14, 26, 0.18) !important;
+  box-shadow: var(--mint-cta-focus), var(--mint-btn-glow) !important;
 }
 
 /* Dashboard / Courses header — New course */
@@ -106,18 +109,18 @@
 #mint-lms-root a.mint-dash-new-course:hover,
 #mint-lms-root a.mint-dash-new-course:focus-visible {
   background-color: #7FE8B8 !important;
-  box-shadow: 0 4px 12px rgba(15, 14, 26, 0.18) !important;
-  transform: translateY(-1px);
+  box-shadow: var(--mint-btn-glow) !important;
+  transform: translateY(-2px);
 }
 
 #mint-lms-root a.mint-dash-new-course:active {
   background-color: #6ED9AE !important;
-  box-shadow: none !important;
+  box-shadow: var(--mint-btn-glow-active) !important;
   transform: translateY(0);
 }
 
 #mint-lms-root a.mint-dash-new-course:focus-visible {
-  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55), 0 4px 12px rgba(15, 14, 26, 0.18) !important;
+  box-shadow: var(--mint-cta-focus), var(--mint-btn-glow) !important;
 }
 
 /* Builder header Preview — filled control; reset would otherwise make it look like text. */
@@ -140,18 +143,18 @@
 #mint-lms-root a.mint-builder-btn-preview:hover,
 #mint-lms-root a.mint-builder-btn-preview:focus-visible {
   background-color: #7FE8B8 !important;
-  box-shadow: 0 4px 12px rgba(15, 14, 26, 0.18) !important;
-  transform: translateY(-1px);
+  box-shadow: var(--mint-btn-glow) !important;
+  transform: translateY(-2px);
 }
 
 #mint-lms-root a.mint-builder-btn-preview:active {
   background-color: #6ED9AE !important;
-  box-shadow: none !important;
+  box-shadow: var(--mint-btn-glow-active) !important;
   transform: translateY(0);
 }
 
 #mint-lms-root a.mint-builder-btn-preview:focus-visible {
-  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55), 0 4px 12px rgba(15, 14, 26, 0.18) !important;
+  box-shadow: var(--mint-cta-focus), var(--mint-btn-glow) !important;
 }
 
 /* Dashboard v2 — Needs you + Continue editing (design: h36 / 15px / r8) */
@@ -393,22 +396,22 @@
 #mint-lms-root .mint-cta-lime:focus-visible {
   color: #0F0E1A !important;
   background-color: #7FE8B8 !important;
-  box-shadow: 0 4px 12px rgba(15, 14, 26, 0.18) !important;
-  transform: translateY(-1px);
+  box-shadow: var(--mint-btn-glow) !important;
+  transform: translateY(-2px);
 }
 
 #mint-lms-root a.mint-cta-lime:active,
 #mint-lms-root button.mint-cta-lime:active,
 #mint-lms-root .mint-cta-lime:active {
   background-color: #6ED9AE !important;
-  box-shadow: none !important;
+  box-shadow: var(--mint-btn-glow-active) !important;
   transform: translateY(0);
 }
 
 #mint-lms-root a.mint-cta-lime:focus-visible,
 #mint-lms-root button.mint-cta-lime:focus-visible,
 #mint-lms-root .mint-cta-lime:focus-visible {
-  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55), 0 4px 12px rgba(15, 14, 26, 0.18) !important;
+  box-shadow: var(--mint-cta-focus), var(--mint-btn-glow) !important;
 }
 
 #mint-lms-root button.mint-cta-lime:disabled,
@@ -984,14 +987,14 @@
 #mint-lms-root a.mint-settings-save:hover,
 #mint-lms-root a.mint-settings-save:focus-visible {
   background-color: #7FE8B8 !important;
-  box-shadow: 0 4px 12px rgba(15, 14, 26, 0.18) !important;
-  transform: translateY(-1px);
+  box-shadow: var(--mint-btn-glow) !important;
+  transform: translateY(-2px);
 }
 
 #mint-lms-root button.mint-settings-save:focus-visible,
 #mint-lms-root button.mint-settings-action:focus-visible,
 #mint-lms-root a.mint-settings-save:focus-visible {
-  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55), 0 4px 12px rgba(15, 14, 26, 0.18) !important;
+  box-shadow: var(--mint-cta-focus), var(--mint-btn-glow) !important;
 }
 
 #mint-lms-root button.mint-settings-delete {
@@ -1011,57 +1014,9 @@
 }
 
 /*
- * Global pressable motion — hover / focus lifts, click settles.
- * Skip menu-row options and switches so lists do not jump.
+ * Global button motion lives in mint-buttons.css (filled / outline / danger allowlists).
+ * Do not blanket-lift every <button> — toggles, choice cards, icon grips must stay still.
  */
-#mint-lms-root button:not(:disabled):not(.mint-settings-toggle):not(.mint-settings-select__option),
-#mint-lms-root a.mint-btn,
-#mint-lms-root a.mint-quiz-settings-btn,
-#mint-lms-root a.mint-builder-btn-preview,
-#mint-lms-root a.mint-builder-btn-save,
-#mint-lms-root a.mint-cta-lime,
-#mint-lms-root a.mint-settings-save,
-#mint-lms-root a.mint-settings-action,
-#mint-lms-root a.mint-welcome-cta {
-  cursor: pointer;
-  transition-property: background, background-color, border-color, box-shadow, color, opacity, transform;
-  transition-duration: 150ms;
-  transition-timing-function: ease-out;
-}
-
-#mint-lms-root button:not(:disabled):not(.mint-settings-toggle):not(.mint-settings-select__option):hover,
-#mint-lms-root button:not(:disabled):not(.mint-settings-toggle):not(.mint-settings-select__option):focus-visible,
-#mint-lms-root a.mint-btn:hover,
-#mint-lms-root a.mint-btn:focus-visible,
-#mint-lms-root a.mint-quiz-settings-btn:hover,
-#mint-lms-root a.mint-quiz-settings-btn:focus-visible,
-#mint-lms-root a.mint-builder-btn-preview:hover,
-#mint-lms-root a.mint-builder-btn-preview:focus-visible,
-#mint-lms-root a.mint-builder-btn-save:hover,
-#mint-lms-root a.mint-builder-btn-save:focus-visible,
-#mint-lms-root a.mint-cta-lime:hover,
-#mint-lms-root a.mint-cta-lime:focus-visible,
-#mint-lms-root a.mint-settings-save:hover,
-#mint-lms-root a.mint-settings-save:focus-visible,
-#mint-lms-root a.mint-settings-action:hover,
-#mint-lms-root a.mint-settings-action:focus-visible,
-#mint-lms-root a.mint-welcome-cta:hover,
-#mint-lms-root a.mint-welcome-cta:focus-visible {
-  transform: translateY(-1px);
-}
-
-#mint-lms-root button:not(:disabled):not(.mint-settings-toggle):not(.mint-settings-select__option):active,
-#mint-lms-root a.mint-btn:active,
-#mint-lms-root a.mint-quiz-settings-btn:active,
-#mint-lms-root a.mint-builder-btn-preview:active,
-#mint-lms-root a.mint-builder-btn-save:active,
-#mint-lms-root a.mint-cta-lime:active,
-#mint-lms-root a.mint-settings-save:active,
-#mint-lms-root a.mint-settings-action:active,
-#mint-lms-root a.mint-welcome-cta:active {
-  transform: translateY(0);
-}
-
 #mint-lms-root button:disabled {
   transform: none;
 }

@@ -1,25 +1,25 @@
 /* Mint LMS — Component classes
    Built on --mint-* tokens. Never add raw colours here. */
 
-/* ── Buttons ─────────────────────────────────────────────── */
+/* ── Buttons (canonical .mint-btn — global motion in mint-buttons.css) ── */
 
 #mint-lms-root .mint-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  height: 44px;
-  padding: 0 18px;
-  border-radius: var(--mint-r-lg);
+  height: var(--mint-btn-height);
+  padding: 0 var(--mint-btn-pad-x);
+  border-radius: var(--mint-btn-radius);
   border: none;
-  font-family: var(--mint-font);
-  font-size: 16px;
-  font-weight: 600;
+  font-family: var(--mint-btn-font);
+  font-size: var(--mint-btn-size);
+  font-weight: var(--mint-btn-weight);
   line-height: 1;
   cursor: pointer;
   white-space: nowrap;
   text-decoration: none;
-  transition: background var(--mint-t-hover) ease-out, border-color var(--mint-t-hover) ease-out, color var(--mint-t-hover) ease-out, opacity var(--mint-t-hover) ease-out, transform var(--mint-t-hover) ease-out, box-shadow var(--mint-t-hover) ease-out;
+  transition: var(--mint-btn-transition);
   outline: none;
 }
 #mint-lms-root .mint-btn:focus-visible { box-shadow: var(--mint-focus); }
@@ -28,67 +28,97 @@
   opacity: 0.45;
   cursor: not-allowed;
   pointer-events: none;
+  transform: none !important;
+  box-shadow: none !important;
 }
 
-#mint-lms-root .mint-btn--sm { height: 36px; padding: 0 14px; font-size: 14px; border-radius: var(--mint-r-md); }
-#mint-lms-root .mint-btn--lg { height: 52px; padding: 0 24px; font-size: 18px; border-radius: var(--mint-r-xl); }
-#mint-lms-root .mint-btn--xs { height: 34px; padding: 0 13px; font-size: 14px; border-radius: var(--mint-r-md); }
+#mint-lms-root .mint-btn--sm { height: 34px; padding: 0 14px; font-size: 14px; border-radius: var(--mint-btn-radius); }
+#mint-lms-root .mint-btn--lg { height: var(--mint-btn-height-lg); padding: 0 20px; font-size: 15px; border-radius: var(--mint-btn-radius); }
+#mint-lms-root .mint-btn--xs { height: 34px; padding: 0 13px; font-size: 14px; border-radius: var(--mint-btn-radius); }
+#mint-lms-root .mint-btn--block { width: 100%; height: var(--mint-btn-height-lg); font-size: 15px; }
 
-/* Primary — design CTA lime */
+/* Primary — filled mint CTA */
 #mint-lms-root .mint-btn--primary {
   background: var(--mint-cta);
   color: var(--mint-cta-ink);
 }
-#mint-lms-root .mint-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
+#mint-lms-root .mint-btn--primary:hover:not(:disabled) {
+  background: var(--mint-cta-hover);
+  box-shadow: var(--mint-btn-glow);
+  transform: translateY(-2px);
 }
-#mint-lms-root .mint-btn:active:not(:disabled) {
+#mint-lms-root .mint-btn--primary:active:not(:disabled) {
+  background: var(--mint-cta-active);
+  box-shadow: var(--mint-btn-glow-active);
   transform: translateY(0);
 }
-
-#mint-lms-root .mint-btn--primary:hover {
-  background: var(--mint-cta-hover);
-  box-shadow: var(--mint-cta-shadow);
-  transform: translateY(-1px);
-}
 #mint-lms-root .mint-btn--primary:focus-visible {
-  box-shadow: var(--mint-cta-focus), var(--mint-cta-shadow);
+  box-shadow: var(--mint-cta-focus), var(--mint-btn-glow);
 }
 
-/* Secondary */
+/* Secondary — non-filled */
 #mint-lms-root .mint-btn--secondary {
   background: #FFFFFF;
   color: var(--mint-ink);
   border: 1px solid var(--mint-border);
 }
-#mint-lms-root .mint-btn--secondary:hover {
-  background: var(--mint-bg-subtle);
-  border-color: var(--mint-ink-3);
+#mint-lms-root .mint-btn--secondary:hover:not(:disabled) {
+  background: var(--mint-btn-outline-hover-bg);
+  border-color: var(--mint-btn-outline-hover-border);
+  box-shadow: var(--mint-btn-glow);
+  transform: translateY(-2px);
+}
+#mint-lms-root .mint-btn--secondary:active:not(:disabled) {
+  box-shadow: var(--mint-btn-glow-active);
+  transform: translateY(0);
 }
 
-/* Dark */
+/* Dark — filled */
 #mint-lms-root .mint-btn--dark {
   background: var(--mint-bg-ink);
   color: #FFFFFF;
 }
-#mint-lms-root .mint-btn--dark:hover { opacity: 0.86; }
+#mint-lms-root .mint-btn--dark:hover:not(:disabled) {
+  opacity: 0.92;
+  box-shadow: var(--mint-btn-glow);
+  transform: translateY(-2px);
+}
+#mint-lms-root .mint-btn--dark:active:not(:disabled) {
+  box-shadow: var(--mint-btn-glow-active);
+  transform: translateY(0);
+}
 
-/* Ghost */
+/* Ghost — non-filled */
 #mint-lms-root .mint-btn--ghost {
   background: transparent;
   color: var(--mint-ink-2);
 }
-#mint-lms-root .mint-btn--ghost:hover {
-  background: var(--mint-bg-subtle);
+#mint-lms-root .mint-btn--ghost:hover:not(:disabled) {
+  background: var(--mint-btn-outline-hover-bg);
   color: var(--mint-ink);
+  border-color: var(--mint-btn-outline-hover-border);
+  box-shadow: var(--mint-btn-glow);
+  transform: translateY(-2px);
+}
+#mint-lms-root .mint-btn--ghost:active:not(:disabled) {
+  box-shadow: var(--mint-btn-glow-active);
+  transform: translateY(0);
 }
 
-/* Danger */
+/* Danger — filled red */
 #mint-lms-root .mint-btn--danger {
   background: var(--mint-danger);
   color: #FFFFFF;
 }
-#mint-lms-root .mint-btn--danger:hover { background: var(--mint-danger-hover); }
+#mint-lms-root .mint-btn--danger:hover:not(:disabled) {
+  background: var(--mint-danger-hover);
+  box-shadow: var(--mint-btn-glow-danger);
+  transform: translateY(-2px);
+}
+#mint-lms-root .mint-btn--danger:active:not(:disabled) {
+  box-shadow: var(--mint-btn-glow-danger-active);
+  transform: translateY(0);
+}
 #mint-lms-root .mint-btn--danger:focus-visible { box-shadow: var(--mint-focus-danger); }
 
 /* Danger outline */
@@ -97,12 +127,21 @@
   color: var(--mint-danger);
   border: 1.5px solid #D98B84;
 }
-#mint-lms-root .mint-btn--danger-outline:hover { background: var(--mint-danger-wash); }
+#mint-lms-root .mint-btn--danger-outline:hover:not(:disabled) {
+  background: var(--mint-danger-wash);
+  box-shadow: var(--mint-btn-glow-danger);
+  transform: translateY(-2px);
+}
+#mint-lms-root .mint-btn--danger-outline:active:not(:disabled) {
+  box-shadow: var(--mint-btn-glow-danger-active);
+  transform: translateY(0);
+}
 #mint-lms-root .mint-btn--danger-outline:focus-visible { box-shadow: var(--mint-focus-danger); }
 
-/* Icon-only square */
-#mint-lms-root .mint-btn--icon { padding: 0; width: 34px; height: 34px; }
+/* Icon-only square — excluded from global height/motion normalize */
+#mint-lms-root .mint-btn--icon { padding: 0; width: 34px; height: 34px; transform: none !important; box-shadow: none !important; }
 #mint-lms-root .mint-btn--icon.mint-btn--sm { width: 36px; height: 36px; }
+#mint-lms-root .mint-btn--icon:hover:not(:disabled) { transform: none !important; box-shadow: none !important; }
 
 
 /* ── Form controls ───────────────────────────────────────── */
