@@ -13255,22 +13255,79 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 #mint-lms-root .mint-section-lessons__row {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   width: 100%;
-  padding: 14px 14px 14px 12px;
+  padding: 10px 12px 10px 8px;
   border: 1.5px solid var(--mint-content-border);
   border-radius: 12px;
   background: #FFFFFF;
-  text-align: left;
-  cursor: pointer;
-  font-family: inherit;
   transition: border-color 140ms ease-out, background 140ms ease-out, box-shadow 140ms ease-out;
 }
 
-#mint-lms-root button.mint-section-lessons__row:hover {
+#mint-lms-root .mint-section-lessons__row:hover {
   border-color: var(--mint-content-hover-border);
   background: var(--mint-content-hover-bg);
   box-shadow: var(--mint-content-hover-shadow);
+}
+
+#mint-lms-root .mint-section-lessons__main,
+#mint-lms-root button.mint-section-lessons__main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 4px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: none !important;
+}
+
+#mint-lms-root button.mint-section-lessons__main:hover,
+#mint-lms-root button.mint-section-lessons__main:focus {
+  background: transparent;
+  box-shadow: none !important;
+}
+
+#mint-lms-root button.mint-section-lessons__main:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55) !important;
+}
+
+#mint-lms-root .mint-section-lessons__remove,
+#mint-lms-root button.mint-section-lessons__remove {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 0;
+  background: transparent !important;
+  color: #C22B2B !important;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: none !important;
+}
+
+#mint-lms-root button.mint-section-lessons__remove:hover {
+  color: #A93226 !important;
+  text-decoration: underline;
+  background: transparent !important;
+}
+
+#mint-lms-root button.mint-section-lessons__remove:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(194, 43, 43, 0.22) !important;
 }
 
 #mint-lms-root .mint-section-lessons__index {
@@ -13349,7 +13406,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   white-space: nowrap;
 }
 
-#mint-lms-root button.mint-section-lessons__row:hover .mint-section-lessons__open {
+#mint-lms-root .mint-section-lessons__row:hover .mint-section-lessons__open {
   background: #98FBCB;
   border-color: #98FBCB;
   color: #0F0E1A;
@@ -13389,52 +13446,13 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   color: #0F0E1A;
 }
 
-#mint-lms-root .mint-section-lessons__actions {
+#mint-lms-root .mint-section-lessons__actions.mint-existing-add-row {
   margin-top: 12px;
-  display: grid;
-  gap: 10px;
 }
 
-#mint-lms-root .mint-section-lessons__add,
-#mint-lms-root button.mint-section-lessons__add,
-#mint-lms-root .mint-section-lessons__add-existing,
-#mint-lms-root button.mint-section-lessons__add-existing {
+#mint-lms-root .mint-section-lessons__actions .mint-lesson-add-quiz,
+#mint-lms-root .mint-section-lessons__actions button.mint-lesson-add-quiz {
   margin-top: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 44px;
-  padding: 0 16px;
-  border-radius: 12px;
-  border: 1.5px dashed var(--mint-content-border);
-  background: #FFFFFF !important;
-  color: #0F0E1A !important;
-  font-size: 14px;
-  font-weight: 700;
-  font-family: inherit;
-  cursor: pointer;
-  transition: background 140ms ease-out, border-color 140ms ease-out, box-shadow 140ms ease-out;
-}
-
-#mint-lms-root .mint-section-lessons__add-existing,
-#mint-lms-root button.mint-section-lessons__add-existing {
-  border-style: solid;
-  border-color: #98FBCB;
-  background: #F1FFF9 !important;
-}
-
-#mint-lms-root button.mint-section-lessons__add:hover:not(:disabled),
-#mint-lms-root button.mint-section-lessons__add-existing:hover:not(:disabled) {
-  background: var(--mint-content-hover-bg) !important;
-  border-color: var(--mint-content-hover-border);
-  box-shadow: var(--mint-content-hover-shadow);
-}
-
-#mint-lms-root button.mint-section-lessons__add:disabled,
-#mint-lms-root button.mint-section-lessons__add-existing:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 #mint-lms-root .mint-existing-add-row {
@@ -14215,6 +14233,254 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   }
 }
 
+/* Detach confirm — Lesson Group / Lesson / Quiz list Remove */
+#mint-lms-root .mint-detach-confirm {
+  position: fixed;
+  inset: 0;
+  z-index: 100070;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  animation: mint-existing-picker-fade 0.2s ease both;
+}
+
+#mint-lms-root .mint-detach-confirm__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 14, 26, 0.35);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+#mint-lms-root .mint-detach-confirm__dialog {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 460px;
+  padding: 28px;
+  border-radius: 22px;
+  background: #FFFFFF;
+  border: 1px solid #E4E1F0;
+  box-shadow:
+    0 30px 70px rgba(15, 14, 26, 0.18),
+    0 0 0 6px rgba(152, 251, 203, 0.18);
+  font-family: var(--mint-font);
+  color: #0F0E1A;
+  box-sizing: border-box;
+  animation: mint-existing-picker-pop 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+#mint-lms-root .mint-detach-confirm__close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: #0F0E1A;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+#mint-lms-root .mint-detach-confirm__close:hover {
+  background: rgba(152, 251, 203, 0.22);
+}
+
+#mint-lms-root .mint-detach-confirm__close:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
+}
+
+#mint-lms-root .mint-detach-confirm__top {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+#mint-lms-root .mint-detach-confirm__icon {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: #98FBCB;
+  color: #0F0E1A;
+}
+
+#mint-lms-root .mint-detach-confirm__title {
+  margin: 2px 36px 0 0;
+  padding: 0;
+  font-family: var(--mint-font);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 28px;
+  letter-spacing: -0.02em;
+  color: #0F0E1A;
+}
+
+#mint-lms-root .mint-detach-confirm__body {
+  margin: 16px 0 0 62px;
+  padding: 0;
+  font-family: var(--mint-font);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 24px;
+  color: #5C5C77;
+}
+
+#mint-lms-root .mint-detach-confirm__body b {
+  color: #0F0E1A;
+  font-weight: 700;
+}
+
+#mint-lms-root .mint-detach-confirm__note {
+  margin: 16px 0 0 62px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(152, 251, 203, 0.12);
+  border: 1px dashed #98FBCB;
+  font-family: var(--mint-font);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 21px;
+  color: #33334A;
+}
+
+#mint-lms-root .mint-detach-confirm__foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 26px;
+}
+
+#mint-lms-root .mint-detach-confirm__cancel,
+#mint-lms-root button.mint-detach-confirm__cancel {
+  height: 46px;
+  margin: 0;
+  padding: 0 16px;
+  border: none;
+  border-radius: 12px;
+  background: none !important;
+  color: #5C5C77 !important;
+  font-family: var(--mint-font);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: none !important;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+#mint-lms-root button.mint-detach-confirm__cancel:hover {
+  color: #0F0E1A !important;
+  background: rgba(152, 251, 203, 0.12) !important;
+}
+
+#mint-lms-root button.mint-detach-confirm__cancel:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55) !important;
+}
+
+#mint-lms-root .mint-detach-confirm__submit,
+#mint-lms-root button.mint-detach-confirm__submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 46px;
+  margin: 0;
+  padding: 0 20px;
+  border-radius: 12px;
+  border: 1.5px solid #98FBCB !important;
+  background: #98FBCB !important;
+  color: #0F0E1A !important;
+  font-family: var(--mint-font);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: none !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#mint-lms-root button.mint-detach-confirm__submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(152, 251, 203, 0.6) !important;
+}
+
+#mint-lms-root button.mint-detach-confirm__submit:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(152, 251, 203, 0.45) !important;
+}
+
+#mint-lms-root button.mint-detach-confirm__submit:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55) !important;
+}
+
+#mint-lms-root button.mint-detach-confirm__submit.is-busy,
+#mint-lms-root button.mint-detach-confirm__submit:disabled {
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+#mint-lms-root .mint-detach-confirm__submit svg {
+  flex: none;
+}
+
+@media (max-width: 480px) {
+  #mint-lms-root .mint-detach-confirm__dialog {
+    padding: 22px;
+  }
+
+  #mint-lms-root .mint-detach-confirm__top {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  #mint-lms-root .mint-detach-confirm__title {
+    font-size: 20px;
+    line-height: 26px;
+  }
+
+  #mint-lms-root .mint-detach-confirm__body,
+  #mint-lms-root .mint-detach-confirm__note {
+    margin-left: 0;
+  }
+
+  #mint-lms-root .mint-detach-confirm__foot {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  #mint-lms-root button.mint-detach-confirm__cancel,
+  #mint-lms-root button.mint-detach-confirm__submit {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #mint-lms-root .mint-detach-confirm,
+  #mint-lms-root .mint-detach-confirm__dialog,
+  #mint-lms-root button.mint-detach-confirm__submit {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
 #mint-lms-root .mint-section-lessons__footer {
   margin-top: 22px;
   display: flex;
@@ -14276,7 +14542,17 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
     flex-wrap: wrap;
   }
 
+  #mint-lms-root .mint-section-lessons__main,
+  #mint-lms-root button.mint-section-lessons__main {
+    flex-wrap: wrap;
+  }
+
   #mint-lms-root .mint-section-lessons__open {
+    margin-left: auto;
+  }
+
+  #mint-lms-root .mint-section-lessons__remove,
+  #mint-lms-root button.mint-section-lessons__remove {
     margin-left: auto;
   }
 }
