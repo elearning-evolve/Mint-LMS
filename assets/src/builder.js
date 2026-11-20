@@ -205,6 +205,20 @@ function courseBuilder(courseId, opts = {}) {
       tossing: false,
       _resolver: null,
     },
+    /** Parent → “Add existing …” picker (lesson group / lesson / quiz). */
+    existingPicker: {
+      open: false,
+      kind: '', // lesson | quiz | question
+      title: '',
+      search: '',
+      loading: false,
+      busy: false,
+      items: [],
+      error: '',
+      targetSectionId: 0,
+      targetLessonId: 0,
+      targetQuizId: 0,
+    },
     /** Inline “Quiz title + Save” row inside lesson Quizzes card. */
     lessonQuizDraftOpen: false,
     lessonQuizDraftTitle: '',
@@ -899,6 +913,271 @@ function courseBuilder(courseId, opts = {}) {
         const el = document.getElementById('mint-lesson-quiz-draft-title');
         if (el) el.focus();
       });
+    },
+
+    openExistingLessonPicker(sectionId = null) {
+      const sid = Number(sectionId ?? this.selectedSection?.id ?? this.selected?.id) || 0;
+      if (sid <= 0 || !Number(this.courseId)) {
+        window.MintLMS?.toast?.error?.('Open a lesson group in a course to add an existing lesson.');
+        return;
+      }
+      this.openExistingPicker({
+        kind: 'lesson',
+        title: 'Add existing lesson',
+        targetSectionId: sid,
+      });
+    },
+
+    openExistingQuizPicker(lessonId = null) {
+      const lid = Number(lessonId ?? this.selectedLesson?.id) || 0;
+      if (lid <= 0) {
+        window.MintLMS?.toast?.error?.('Save the lesson first, then add an existing quiz.');
+        return;
+      }
+      this.openExistingPicker({
+        kind: 'quiz',
+        title: 'Add existing quiz',
+        targetLessonId: lid,
+      });
+    },
+
+    openExistingQuestionPicker(quizId = null) {
+      const qid = Number(quizId ?? this.lessonQuiz?.id) || 0;
+      if (qid <= 0) {
+        window.MintLMS?.toast?.error?.('Save the quiz first, then add an existing question.');
+        return;
+      }
+      this.openExistingPicker({
+        kind: 'question',
+        title: 'Add existing question',
+        targetQuizId: qid,
+      });
+    },
+
+    openExistingPicker({ kind, title, targetSectionId = 0, targetLessonId = 0, targetQuizId = 0 }) {
+      this.existingPicker = {
+        open: true,
+        kind,
+        title: title || 'Add existing',
+        search: '',
+        loading: true,
+        busy: false,
+        items: [],
+        error: '',
+        targetSectionId: Number(targetSectionId) || 0,
+        targetLessonId: Number(targetLessonId) || 0,
+        targetQuizId: Number(targetQuizId) || 0,
+      };
+      this.loadExistingPickerItems();
+    },
+
+    closeExistingPicker() {
+      if (this.existingPicker.busy) return;
+      this.existingPicker.open = false;
+      this.existingPicker.loading = false;
+      this.existingPicker.busy = false;
+      this.existingPicker.items = [];
+      this.existingPicker.error = '';
+      this.existingPicker.search = '';
+    },
+
+    filteredExistingPickerItems() {
+      const q = String(this.existingPicker.search || '')
+        .trim()
+        .toLowerCase();
+      const rows = Array.isArray(this.existingPicker.items) ? this.existingPicker.items : [];
+      if (!q) return rows;
+      return rows.filter((row) => String(row.title || '').toLowerCase().includes(q));
+    },
+
+    existingPickerMeta(item) {
+      const kind = this.existingPicker.kind;
+      if (kind === 'lesson') {
+        const courseId = Number(item.courseId) || 0;
+        const sectionId = Number(item.sectionId) || 0;
+        if (courseId <= 0) return 'Library · not in a course';
+        if (courseId === Number(this.courseId)) {
+          return sectionId > 0 ? 'In this course · another group' : 'In this course · ungrouped';
+        }
+        return 'In another course';
+      }
+      if (kind === 'quiz') {
+        if (item.disposableHost || !(Number(item.lessonId) > 0)) return 'Library · not attached to a lesson';
+        if (Number(item.lessonId) === Number(this.existingPicker.targetLessonId)) {
+          return 'Already in this lesson';
+        }
+        return Number(item.courseId) === Number(this.courseId)
+          ? 'Attached to another lesson in this course'
+          : 'Attached to another lesson';
+      }
+      if (item.disposableHost || !(Number(item.quizId) > 0)) return 'Library · not attached to a quiz';
+      if (Number(item.quizId) === Number(this.existingPicker.targetQuizId)) {
+        return 'Already in this quiz';
+      }
+      return Number(item.courseId) === Number(this.courseId)
+        ? 'Attached to another quiz in this course'
+        : 'Attached to another quiz';
+    },
+
+    async loadExistingPickerItems() {
+      const kind = this.existingPicker.kind;
+      if (!kind) return;
+      this.existingPicker.loading = true;
+      this.existingPicker.error = '';
+      try {
+        const type =
+          kind === 'lesson' ? 'lessons' : kind === 'quiz' ? 'quizzes' : 'questions';
+        const data = await mintApi(`content/${type}?per_page=100&status=all`);
+        const rows = Array.isArray(data?.items) ? data.items : [];
+        this.existingPicker.items = rows
+          .map((row) => ({
+            id: Number(row.id) || 0,
+            title: row.title || `(no title)`,
+            courseId: Number(row.courseId) || 0,
+            sectionId: Number(row.sectionId) || 0,
+            lessonId: Number(row.lessonId) || 0,
+            quizId: Number(row.quizId) || 0,
+            disposableHost: !!row.disposableHost,
+            status: row.status || '',
+          }))
+          .filter((row) => this.isExistingPickerCandidate(row));
+      } catch (err) {
+        this.existingPicker.items = [];
+        this.existingPicker.error = err.message || 'Could not load items.';
+      } finally {
+        this.existingPicker.loading = false;
+      }
+    },
+
+    isExistingPickerCandidate(row) {
+      if (!row?.id || row.status === 'trashed') return false;
+      const kind = this.existingPicker.kind;
+      if (kind === 'lesson') {
+        if (row.disposableHost) return false;
+        const sid = Number(this.existingPicker.targetSectionId) || 0;
+        // Already in this group — hide.
+        if (
+          Number(row.courseId) === Number(this.courseId) &&
+          Number(row.sectionId) === sid &&
+          sid > 0
+        ) {
+          return false;
+        }
+        return true;
+      }
+      if (kind === 'quiz') {
+        const lid = Number(this.existingPicker.targetLessonId) || 0;
+        if (Number(row.lessonId) === lid && lid > 0 && !row.disposableHost) return false;
+        return true;
+      }
+      const qid = Number(this.existingPicker.targetQuizId) || 0;
+      if (Number(row.quizId) === qid && qid > 0 && !row.disposableHost) return false;
+      return true;
+    },
+
+    needsExistingMoveConfirm(item) {
+      const kind = this.existingPicker.kind;
+      if (kind === 'lesson') {
+        const courseId = Number(item.courseId) || 0;
+        const sectionId = Number(item.sectionId) || 0;
+        const targetSection = Number(this.existingPicker.targetSectionId) || 0;
+        if (courseId <= 0) return false;
+        return (
+          courseId !== Number(this.courseId) ||
+          sectionId !== targetSection
+        );
+      }
+      if (kind === 'quiz') {
+        if (item.disposableHost) return false;
+        const lessonId = Number(item.lessonId) || 0;
+        return lessonId > 0 && lessonId !== Number(this.existingPicker.targetLessonId);
+      }
+      if (item.disposableHost) return false;
+      const quizId = Number(item.quizId) || 0;
+      return quizId > 0 && quizId !== Number(this.existingPicker.targetQuizId);
+    },
+
+    async addExistingPickerItem(item) {
+      if (!item?.id || this.existingPicker.busy) return;
+      if (this.needsExistingMoveConfirm(item)) {
+        const label = String(item.title || 'This item').trim() || 'This item';
+        const ok = window.confirm(
+          `${label} is already linked elsewhere. Adding it here will move it (remove from the previous place). Continue?`
+        );
+        if (!ok) return;
+      }
+
+      this.existingPicker.busy = true;
+      try {
+        const kind = this.existingPicker.kind;
+        if (kind === 'lesson') {
+          await this.attachExistingLessonToGroup(item);
+        } else if (kind === 'quiz') {
+          await this.attachExistingQuizToLesson(item);
+        } else {
+          await this.attachExistingQuestionToQuiz(item);
+        }
+        this.existingPicker.busy = false;
+        this.closeExistingPicker();
+        window.MintLMS.toast.success('Added');
+      } catch (err) {
+        this.existingPicker.busy = false;
+        window.MintLMS.toast.error(err.message || 'Could not add item.');
+      }
+    },
+
+    async attachExistingLessonToGroup(item) {
+      const lessonId = Number(item.id) || 0;
+      const sectionId = Number(this.existingPicker.targetSectionId) || 0;
+      const courseId = Number(this.courseId) || 0;
+      if (!lessonId || !sectionId || !courseId) {
+        throw new Error('Missing lesson group or course.');
+      }
+      await mintApi(`lessons/${lessonId}/attach`, {
+        method: 'POST',
+        body: JSON.stringify({
+          course_id: courseId,
+          section_id: sectionId,
+        }),
+      });
+      await this.loadStructure();
+    },
+
+    async attachExistingQuizToLesson(item) {
+      const quizId = Number(item.id) || 0;
+      const lessonId = Number(this.existingPicker.targetLessonId) || 0;
+      if (!quizId || !lessonId) {
+        throw new Error('Missing quiz or lesson.');
+      }
+      await mintApi(`quizzes/${quizId}/attach`, {
+        method: 'POST',
+        body: JSON.stringify({ lesson_id: lessonId }),
+      });
+      if (Number(this.courseId) > 0) {
+        await this.loadCourseQuizzes();
+      }
+      if (Number(this.lessonQuiz?.id) === quizId) {
+        const quiz = await mintApi(`quizzes/${quizId}`);
+        this.lessonQuiz = this.normalizeQuiz(quiz);
+      }
+    },
+
+    async attachExistingQuestionToQuiz(item) {
+      const questionId = Number(item.id) || 0;
+      const quizId = Number(this.existingPicker.targetQuizId) || 0;
+      if (!questionId || !quizId) {
+        throw new Error('Missing question or quiz.');
+      }
+      const quiz = await mintApi(`questions/${questionId}/attach`, {
+        method: 'POST',
+        body: JSON.stringify({ quiz_id: quizId }),
+      });
+      if (Number(this.lessonQuiz?.id) === quizId) {
+        this.lessonQuiz = this.normalizeQuiz(quiz);
+      }
+      if (this.fromQuestions || this.showCourseContentsTree()) {
+        await this.loadCourseQuestions();
+      }
     },
 
     cancelLessonQuizDraft() {

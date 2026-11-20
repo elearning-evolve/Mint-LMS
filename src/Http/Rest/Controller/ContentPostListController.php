@@ -479,17 +479,30 @@ final class ContentPostListController {
 			$title = wp_trim_words( wp_strip_all_tags( $post->post_content ), 12, '…' );
 		}
 
+		$sectionId      = 0;
+		$disposableHost = false;
+		if ( 'lessons' === $type ) {
+			$sectionId      = (int) get_post_meta( $post->ID, PostTypes::META_SECTION_ID, true );
+			$disposableHost = PostTypes::isDisposableHostLesson( (int) $post->ID );
+		} elseif ( 'quizzes' === $type ) {
+			$disposableHost = $lessonId > 0 && PostTypes::isDisposableHostLesson( $lessonId );
+		} elseif ( 'questions' === $type ) {
+			$shell          = (int) get_post_meta( $quizId, PostTypes::META_QUESTION_SHELL, true );
+			$disposableHost = $shell > 0 || ( $lessonId > 0 && PostTypes::isDisposableHostLesson( $lessonId ) );
+		}
+
 		return array(
-			'id'              => (int) $post->ID,
-			'title'           => '' !== $title ? $title : __( '(no title)', 'mint-lms' ),
-			'authorName'      => $author instanceof \WP_User ? $author->display_name : '—',
-			'status'          => $status,
-			'date'            => $this->formatListDate( $modified ),
-			'updatedAt'       => $modified,
-			'courseId'        => $courseId,
-			'lessonId'        => $lessonId,
-			'quizId'          => $quizId,
-			'disposableHost'  => 'lessons' === $type && PostTypes::isDisposableHostLesson( (int) $post->ID ),
+			'id'             => (int) $post->ID,
+			'title'          => '' !== $title ? $title : __( '(no title)', 'mint-lms' ),
+			'authorName'     => $author instanceof \WP_User ? $author->display_name : '—',
+			'status'         => $status,
+			'date'           => $this->formatListDate( $modified ),
+			'updatedAt'      => $modified,
+			'courseId'       => $courseId,
+			'sectionId'      => $sectionId,
+			'lessonId'       => $lessonId,
+			'quizId'         => $quizId,
+			'disposableHost' => $disposableHost,
 		);
 	}
 

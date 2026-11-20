@@ -487,6 +487,15 @@ final class LessonService {
 		if ( ! $this->authorization->canCreateCourse( $userId ) ) {
 			throw new ForbiddenException();
 		}
+
+		// Library / orphan lessons: instructors may only manage their own posts.
+		if ( $this->authorization->canViewAllContent( $userId ) ) {
+			return;
+		}
+
+		if ( ! $this->authorization->ownsPost( $userId, $lesson->id ) ) {
+			throw new ForbiddenException();
+		}
 	}
 
 	private function assertCanViewLesson( int $userId, Lesson $lesson ): void {
