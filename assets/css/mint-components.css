@@ -1381,17 +1381,15 @@
   color: #0F0E1A;
 }
 #mint-lms-root .mint-tree-item__meta {
-  display: block;
+  display: inline-flex;
   flex: none;
   margin-left: auto;
   padding-left: 6px;
-  max-width: 42%;
-  font-size: 12px;
-  line-height: 1.25;
-  font-weight: 500;
-  color: #8A879E;
-  text-transform: none;
-  white-space: nowrap;
+  max-width: 48%;
+}
+
+#mint-lms-root .mint-tree-item__meta.mint-count-chip {
+  padding-left: 10px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -2135,6 +2133,33 @@
   border-color: #98FBCB;
 }
 
+/* Child-count pill — same mint language as Published status chip */
+#mint-lms-root .mint-count-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 22px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid #98FBCB;
+  background: #E8FFF3;
+  color: #0F0E1A;
+  font-family: var(--mint-font);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  box-sizing: border-box;
+  flex: none;
+}
+
+#mint-lms-root .mint-count-chip--lg {
+  height: 28px;
+  padding: 0 11px;
+  font-size: 13px;
+}
+
 #mint-lms-root .mint-status-chip--draft {
   background: #F4F3F8;
   color: #5C5C77;
@@ -2542,14 +2567,15 @@
 }
 
 #mint-lms-root .mint-builder-tree-page__meta {
-  display: block;
+  display: inline-flex;
   min-width: 0;
-  font-size: 13px;
-  font-weight: 400;
-  line-height: 1.35;
-  color: #5C5C77;
-  margin-top: 2px;
-  white-space: nowrap;
+  margin-top: 4px;
+  max-width: 100%;
+}
+
+#mint-lms-root .mint-builder-tree-page__meta.mint-count-chip {
+  align-self: flex-start;
+  margin-top: 6px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -3310,6 +3336,10 @@
 #mint-lms-root .mint-builder-overview__card-body {
   min-width: 0;
   flex: 1;
+}
+
+#mint-lms-root .mint-builder-overview__card-body > .mint-count-chip {
+  margin-top: 6px;
 }
 
 #mint-lms-root .mint-builder-overview__card-title {
@@ -8333,6 +8363,29 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
+#mint-lms-root .mint-assoc-card__current-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+  margin-bottom: 12px;
+}
+
+#mint-lms-root .mint-assoc-card__current-row .mint-assoc-card__current {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+#mint-lms-root .mint-existing-picker__row-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
 #mint-lms-root .mint-assoc-card__current {
   margin-bottom: 12px;
   font-family: var(--mint-font);
@@ -13229,19 +13282,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root .mint-section-lessons__count {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  height: 28px;
-  padding: 0 11px;
-  border-radius: 999px;
-  border: 1.5px solid #98FBCB;
-  background: #E8FFF3;
-  color: #0F0E1A;
-  font-size: 13px;
-  font-weight: 700;
-  white-space: nowrap;
-  box-sizing: border-box;
+  /* Uses .mint-count-chip (+ --lg) for Published-matching mint pill. */
 }
 
 #mint-lms-root .mint-section-lessons__list {
