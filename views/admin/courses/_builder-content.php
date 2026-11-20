@@ -215,7 +215,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 							class="mint-builder-identity__title"
 							:href="nativePostEditUrl(standaloneQuizEditId())"
 							@click.prevent="goToStandaloneQuizHome($event)"
-							:title="quizIdentityTitle()"
+							:title="quizIdentityTitle() + ' — <?php echo esc_js( __( 'Edit content in WordPress', 'mint-lms' ) ); ?>'"
 							x-text="quizIdentityName()"
 						></a>
 					</div>
@@ -244,7 +244,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 							class="mint-builder-identity__title"
 							:href="nativePostEditUrl(standaloneLessonEditId())"
 							@click.prevent="goToStandaloneLessonHome($event)"
-							:title="lessonIdentityTitle()"
+							:title="lessonIdentityTitle() + ' — <?php echo esc_js( __( 'Edit content in WordPress', 'mint-lms' ) ); ?>'"
 							x-text="lessonIdentityName()"
 						></a>
 					</div>
@@ -2775,6 +2775,30 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 									<?php esc_html_e( 'Quiz', 'mint-lms' ); ?>
 								</div>
 
+								<a
+									class="mint-wp-content-link"
+									x-show="standaloneQuizEditId()"
+									x-cloak
+									:href="nativePostEditUrl(standaloneQuizEditId())"
+									@click.prevent="goToStandaloneQuizHome($event)"
+								>
+									<span class="mint-wp-content-link__icon" aria-hidden="true">
+										<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+											<path d="M5.2 3.8h6.2L14.8 7.2v9a1 1 0 0 1-1 1H5.2a1 1 0 0 1-1-1V4.8a1 1 0 0 1 1-1Z"/>
+											<path d="M11.3 3.8V7.2h3.4"/>
+											<path d="M7 11.2h4.8M7 13.8h3.2"/>
+											<path d="M12.6 15.2 16.1 11.7a1.1 1.1 0 0 1 1.6 1.6l-3.5 3.5H12.6v-1.6Z"/>
+										</svg>
+									</span>
+									<span class="mint-wp-content-link__copy">
+										<span class="mint-wp-content-link__title"><?php esc_html_e( 'Edit content in WordPress', 'mint-lms' ); ?></span>
+										<span class="mint-wp-content-link__hint"><?php esc_html_e( 'Add quiz description, images, and media.', 'mint-lms' ); ?></span>
+									</span>
+									<span class="mint-wp-content-link__arrow" aria-hidden="true">
+										<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10h11M11 5.5 15.5 10 11 14.5"/></svg>
+									</span>
+								</a>
+
 								<div class="mint-lesson-quizzes mint-mt-5">
 									<div class="mint-lesson-quizzes__label"><?php esc_html_e( 'Questions in this quiz', 'mint-lms' ); ?></div>
 
@@ -3486,6 +3510,30 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 							<svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="13" height="13" rx="2.5"/><path d="M6.5 8h7M6.5 11.5h4.5"/></svg>
 							<?php esc_html_e( 'Lesson', 'mint-lms' ); ?>
 						</div>
+
+						<a
+							class="mint-wp-content-link"
+							x-show="standaloneLessonEditId()"
+							x-cloak
+							:href="nativePostEditUrl(standaloneLessonEditId())"
+							@click.prevent="goToStandaloneLessonHome($event)"
+						>
+							<span class="mint-wp-content-link__icon" aria-hidden="true">
+								<svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+									<path d="M5.2 3.8h6.2L14.8 7.2v9a1 1 0 0 1-1 1H5.2a1 1 0 0 1-1-1V4.8a1 1 0 0 1 1-1Z"/>
+									<path d="M11.3 3.8V7.2h3.4"/>
+									<path d="M7 11.2h4.8M7 13.8h3.2"/>
+									<path d="M12.6 15.2 16.1 11.7a1.1 1.1 0 0 1 1.6 1.6l-3.5 3.5H12.6v-1.6Z"/>
+								</svg>
+							</span>
+							<span class="mint-wp-content-link__copy">
+								<span class="mint-wp-content-link__title"><?php esc_html_e( 'Edit content in WordPress', 'mint-lms' ); ?></span>
+								<span class="mint-wp-content-link__hint"><?php esc_html_e( 'Add lesson text, images, and media.', 'mint-lms' ); ?></span>
+							</span>
+							<span class="mint-wp-content-link__arrow" aria-hidden="true">
+								<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 10h11M11 5.5 15.5 10 11 14.5"/></svg>
+							</span>
+						</a>
 
 						<div class="mint-lesson-quizzes mint-mt-5">
 							<div class="mint-lesson-quizzes__label"><?php esc_html_e( 'Quizzes in this lesson', 'mint-lms' ); ?></div>
