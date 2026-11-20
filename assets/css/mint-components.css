@@ -11443,6 +11443,33 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   cursor: not-allowed;
 }
 
+#mint-lms-root .mint-lesson-quizzes__draft-cancel,
+#mint-lms-root button.mint-lesson-quizzes__draft-cancel {
+  height: 44px;
+  margin: 0;
+  padding: 0 10px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: #33334A;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--mint-font);
+  cursor: pointer;
+  flex: none;
+  white-space: nowrap;
+}
+
+#mint-lms-root button.mint-lesson-quizzes__draft-cancel:hover:not(:disabled) {
+  color: #0F0E1A;
+  background: rgba(152, 251, 203, 0.12);
+}
+
+#mint-lms-root button.mint-lesson-quizzes__draft-cancel:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 #mint-lms-root .mint-lesson-quizzes__empty {
   margin-top: 12px;
   font-size: 15px;
