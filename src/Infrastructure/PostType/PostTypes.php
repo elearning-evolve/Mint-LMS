@@ -104,16 +104,49 @@ final class PostTypes {
 			return true;
 		}
 
-		// Legacy hosts (pre-meta): empty + default scaffolding title or new-lesson-* slug.
+		// Legacy hosts (pre-meta): empty scaffolding title/slug ONLY when a quiz
+		// still points at this lesson. Author library drafts titled "New Lesson"
+		// (courseId 0, no quiz) must stay selectable in Add Existing.
 		$defaultTitle = __( 'New Lesson', 'mint-lms' );
 		$title        = trim( (string) $post->post_title );
 		$slug         = (string) $post->post_name;
+		$looksLikeHost = ( $title === $defaultTitle ) || ( 0 === strpos( $slug, 'new-lesson-' ) );
 
-		if ( $title === $defaultTitle ) {
-			return true;
+		if ( ! $looksLikeHost ) {
+			return false;
 		}
 
-		return 0 === strpos( $slug, 'new-lesson-' );
+		return self::lessonIsReferencedByQuiz( $lessonId );
+	}
+
+	/**
+	 * True when at least one quiz still uses this lesson as its host parent.
+	 */
+	private static function lessonIsReferencedByQuiz( int $lessonId ): bool {
+		if ( $lessonId <= 0 ) {
+			return false;
+		}
+
+		$query = new \WP_Query(
+			array(
+				'post_type'              => self::QUIZ,
+				'post_status'            => array( 'publish', 'draft', 'private', self::STATUS_ARCHIVED, 'trash' ),
+				'posts_per_page'         => 1,
+				'fields'                 => 'ids',
+				'no_found_rows'          => true,
+				'update_post_meta_cache' => false,
+				'update_post_term_cache' => false,
+				'meta_query'             => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					array(
+						'key'   => self::META_LESSON_ID,
+						'value' => $lessonId,
+						'type'  => 'NUMERIC',
+					),
+				),
+			)
+		);
+
+		return array() !== $query->posts;
 	}
 
 	/**

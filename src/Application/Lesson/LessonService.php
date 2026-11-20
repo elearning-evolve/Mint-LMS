@@ -236,6 +236,9 @@ final class LessonService {
 
 		$saved = $this->lessonRepository->save( $updated );
 
+		// Claimed into a course — no longer an internal quiz/question host shell.
+		\MintLMS\Infrastructure\PostType\PostTypes::clearDisposableHostLesson( (int) $saved->id );
+
 		if ( null !== $this->quizService ) {
 			$this->quizService->syncCourseIdForLesson( $saved->id, $courseId );
 		}

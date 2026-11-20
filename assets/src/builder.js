@@ -1007,12 +1007,12 @@ function courseBuilder(courseId, opts = {}) {
     existingPickerSubtitle() {
       const kind = this.existingPicker.kind;
       if (kind === 'lesson') {
-        return 'Pick from the lessons in your course. Each one is added to this lesson group.';
+        return 'Pick from your lessons (including ones linked elsewhere). Each one is added to this lesson group.';
       }
       if (kind === 'quiz') {
-        return 'Pick from the quizzes in your course. Each one is added to this lesson.';
+        return 'Pick from your quizzes (including ones linked elsewhere). Each one is added to this lesson.';
       }
-      return 'Pick from the questions in your course. Each one is added to this quiz.';
+      return 'Pick from your questions (including ones linked elsewhere). Each one is added to this quiz.';
     },
 
     existingPickerSearchPlaceholder() {
@@ -1102,20 +1102,16 @@ function courseBuilder(courseId, opts = {}) {
       if (!row?.id || row.status === 'trashed') return false;
       const courseId = Number(this.courseId) || 0;
       const rowCourse = Number(row.courseId) || 0;
-      // Prefer this course + library; hide other courses from the picker.
-      if (courseId > 0 && rowCourse > 0 && rowCourse !== courseId && !row.disposableHost) {
-        return false;
-      }
       const kind = this.existingPicker.kind;
+      // Lifter-style move: show library + other parents/courses.
+      // Only hide trash, disposable lesson hosts, and items already on *this* parent.
       if (kind === 'lesson') {
-        if (row.disposableHost) return false;
+        // Do NOT hide unassociated (courseId 0) lessons — including quiz host
+        // shells that appear as "New Lesson" drafts in the Lessons list. Adding
+        // them here claims them into this group. Only skip rows already in
+        // *this* lesson group.
         const sid = Number(this.existingPicker.targetSectionId) || 0;
-        // Already in this group — hide.
-        if (
-          rowCourse === courseId &&
-          Number(row.sectionId) === sid &&
-          sid > 0
-        ) {
+        if (sid > 0 && Number(row.sectionId) === sid && rowCourse === courseId && courseId > 0) {
           return false;
         }
         return true;
