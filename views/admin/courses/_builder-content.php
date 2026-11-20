@@ -3819,9 +3819,57 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 			@click.stop
 		>
 			<div class="mint-existing-picker__top">
-				<div class="mint-existing-picker__heading">
-					<div id="mint-existing-picker-title" class="mint-existing-picker__title" x-text="existingPicker.title"></div>
-					<div id="mint-existing-picker-subtitle" class="mint-existing-picker__subtitle" x-text="existingPickerSubtitle()"></div>
+				<div class="mint-existing-picker__lead">
+					<div class="mint-existing-picker__icon" aria-hidden="true">
+						<svg
+							x-show="existingPicker.kind === 'lesson'"
+							width="20"
+							height="20"
+							viewBox="0 0 20 20"
+							fill="none"
+							stroke="#0F0E1A"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						>
+							<path d="M5 3.5h7.2L15 6.3V16.5H5V3.5z" />
+							<path d="M12.2 3.5V6.3H15" />
+							<path d="M7.5 10h5M7.5 13h3.5" />
+						</svg>
+						<svg
+							x-show="existingPicker.kind === 'quiz'"
+							width="20"
+							height="20"
+							viewBox="0 0 20 20"
+							fill="none"
+							stroke="#0F0E1A"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						>
+							<circle cx="10" cy="10" r="7" />
+							<path d="M7.2 10.2 9.1 12.1 13.2 7.8" />
+						</svg>
+						<svg
+							x-show="existingPicker.kind === 'question'"
+							width="20"
+							height="20"
+							viewBox="0 0 20 20"
+							fill="none"
+							stroke="#0F0E1A"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						>
+							<circle cx="10" cy="10" r="7" />
+							<path d="M8.2 7.8c.4-1.1 1.4-1.7 2.5-1.7 1.3 0 2.3.8 2.3 2.1 0 1.2-1 1.7-1.8 2.2-.7.4-1.1.8-1.1 1.6" />
+							<path d="M10 14.6h.01" />
+						</svg>
+					</div>
+					<div class="mint-existing-picker__heading">
+						<div id="mint-existing-picker-title" class="mint-existing-picker__title" x-text="existingPicker.title"></div>
+						<div id="mint-existing-picker-subtitle" class="mint-existing-picker__subtitle" x-text="existingPickerSubtitle()"></div>
+					</div>
 				</div>
 				<button
 					type="button"
@@ -3862,6 +3910,51 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 						:class="{ 'is-added': isExistingPickerAdded(item) }"
 						role="listitem"
 					>
+						<span class="mint-existing-picker__row-icon" aria-hidden="true">
+							<svg
+								x-show="existingPicker.kind === 'lesson'"
+								width="16"
+								height="16"
+								viewBox="0 0 20 20"
+								fill="none"
+								stroke="#0F0E1A"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							>
+								<path d="M5 3.5h7.2L15 6.3V16.5H5V3.5z" />
+								<path d="M12.2 3.5V6.3H15" />
+								<path d="M7.5 10h5M7.5 13h3.5" />
+							</svg>
+							<svg
+								x-show="existingPicker.kind === 'quiz'"
+								width="16"
+								height="16"
+								viewBox="0 0 20 20"
+								fill="none"
+								stroke="#0F0E1A"
+								stroke-width="2.4"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							>
+								<path d="M4.5 10.5 8 14 15.5 5.5" />
+							</svg>
+							<svg
+								x-show="existingPicker.kind === 'question'"
+								width="16"
+								height="16"
+								viewBox="0 0 20 20"
+								fill="none"
+								stroke="#0F0E1A"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							>
+								<circle cx="10" cy="10" r="7" />
+								<path d="M8.2 7.8c.4-1.1 1.4-1.7 2.5-1.7 1.3 0 2.3.8 2.3 2.1 0 1.2-1 1.7-1.8 2.2-.7.4-1.1.8-1.1 1.6" />
+								<path d="M10 14.6h.01" />
+							</svg>
+						</span>
 						<div class="mint-existing-picker__row-copy">
 							<div class="mint-existing-picker__row-title" x-text="item.title"></div>
 							<span
