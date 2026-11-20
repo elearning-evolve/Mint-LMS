@@ -2780,6 +2780,12 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 										>
 											<span x-text="quizSaving ? t('saving') : t('save')"></span>
 										</button>
+										<button
+											type="button"
+											class="mint-lesson-quizzes__draft-cancel"
+											@click="cancelQuizQuestionDraft()"
+											:disabled="quizSaving"
+										><?php esc_html_e( 'Cancel', 'mint-lms' ); ?></button>
 									</div>
 
 									<div
@@ -3475,6 +3481,12 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 								>
 									<span x-text="quizSaving ? t('saving') : t('save')"></span>
 								</button>
+								<button
+									type="button"
+									class="mint-lesson-quizzes__draft-cancel"
+									@click="cancelLessonQuizDraft()"
+									:disabled="quizSaving"
+								><?php esc_html_e( 'Cancel', 'mint-lms' ); ?></button>
 							</div>
 
 							<div
