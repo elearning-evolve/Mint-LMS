@@ -1,0 +1,522 @@
+/*
+ * Mint LMS — Global button design system
+ * Allowlist only (no blanket button{}). Maps existing action classes.
+ *
+ * Filled   → typography + −2px lift + mint glow + active settle
+ * Outline  → same font; hover tint + mint border + lift + glow (resting fill unchanged)
+ * Danger   → red wash + red shadow (never mint glow)
+ * Full-width → 44px / 15px; same motion
+ *
+ * Excluded: toggles, choice cards, icon-only, grips, pagers, tree rows, chips.
+ */
+
+/* ── Shared action-button type ───────────────────────────── */
+
+#mint-lms-root .mint-btn:not(.mint-btn--icon),
+#mint-lms-root a.mint-btn:not(.mint-btn--icon),
+#mint-lms-root .mint-builder-btn-publish,
+#mint-lms-root button.mint-builder-btn-publish,
+#mint-lms-root .mint-builder-btn-save,
+#mint-lms-root button.mint-builder-btn-save,
+#mint-lms-root a.mint-builder-btn-save,
+#mint-lms-root .mint-builder-btn-preview,
+#mint-lms-root a.mint-builder-btn-preview,
+#mint-lms-root .mint-builder-btn-dark,
+#mint-lms-root button.mint-builder-btn-dark,
+#mint-lms-root .mint-builder-btn-secondary,
+#mint-lms-root button.mint-builder-btn-secondary,
+#mint-lms-root .mint-builder-empty__cta,
+#mint-lms-root button.mint-builder-empty__cta,
+#mint-lms-root .mint-lesson-choose-file,
+#mint-lms-root button.mint-lesson-choose-file,
+#mint-lms-root .mint-lesson-add-quiz,
+#mint-lms-root button.mint-lesson-add-quiz,
+#mint-lms-root .mint-quiz-add-question,
+#mint-lms-root button.mint-quiz-add-question,
+#mint-lms-root .mint-quiz-save,
+#mint-lms-root button.mint-quiz-save,
+#mint-lms-root .mint-quiz-save-question,
+#mint-lms-root button.mint-quiz-save-question,
+#mint-lms-root .mint-quiz-add-option,
+#mint-lms-root button.mint-quiz-add-option,
+#mint-lms-root .mint-quiz-action,
+#mint-lms-root button.mint-quiz-action,
+#mint-lms-root .mint-quiz-settings-btn,
+#mint-lms-root button.mint-quiz-settings-btn,
+#mint-lms-root a.mint-quiz-settings-btn,
+#mint-lms-root .mint-qeditor__btn-solid,
+#mint-lms-root button.mint-qeditor__btn-solid,
+#mint-lms-root .mint-qeditor__btn-outline,
+#mint-lms-root button.mint-qeditor__btn-outline,
+#mint-lms-root .mint-qeditor__add-answer,
+#mint-lms-root button.mint-qeditor__add-answer,
+#mint-lms-root .mint-qeditor__add-answer--solid,
+#mint-lms-root button.mint-qeditor__add-answer--solid,
+#mint-lms-root .mint-cta-lime,
+#mint-lms-root a.mint-cta-lime,
+#mint-lms-root button.mint-cta-lime,
+#mint-lms-root a.mint-dash-new-course,
+#mint-lms-root .mint-welcome-cta,
+#mint-lms-root a.mint-welcome-cta,
+#mint-lms-root button.mint-welcome-cta,
+#mint-lms-root .mint-welcome-back,
+#mint-lms-root button.mint-welcome-back,
+#mint-lms-root .mint-settings-save,
+#mint-lms-root button.mint-settings-save,
+#mint-lms-root a.mint-settings-save,
+#mint-lms-root .mint-settings-action,
+#mint-lms-root button.mint-settings-action,
+#mint-lms-root a.mint-settings-action,
+#mint-lms-root .mint-settings-delete,
+#mint-lms-root button.mint-settings-delete,
+#mint-lms-root .mint-existing-add-btn,
+#mint-lms-root button.mint-existing-add-btn,
+#mint-lms-root .mint-existing-picker__add,
+#mint-lms-root button.mint-existing-picker__add,
+#mint-lms-root .mint-existing-picker__done,
+#mint-lms-root button.mint-existing-picker__done,
+#mint-lms-root .mint-confirm__cancel,
+#mint-lms-root button.mint-confirm__cancel,
+#mint-lms-root .mint-confirm__submit,
+#mint-lms-root button.mint-confirm__submit,
+#mint-lms-root .mint-move-confirm__cancel,
+#mint-lms-root button.mint-move-confirm__cancel,
+#mint-lms-root .mint-move-confirm__submit,
+#mint-lms-root button.mint-move-confirm__submit,
+#mint-lms-root .mint-detach-confirm__cancel,
+#mint-lms-root button.mint-detach-confirm__cancel,
+#mint-lms-root .mint-detach-confirm__submit,
+#mint-lms-root button.mint-detach-confirm__submit,
+#mint-lms-root .mint-section-lessons__save,
+#mint-lms-root button.mint-section-lessons__save,
+#mint-lms-root .mint-lesson-quizzes__draft-save,
+#mint-lms-root button.mint-lesson-quizzes__draft-save,
+#mint-lms-root .mint-lesson-quizzes__draft-cancel,
+#mint-lms-root button.mint-lesson-quizzes__draft-cancel,
+#mint-lms-root .mint-lesson-settings-pill,
+#mint-lms-root button.mint-lesson-settings-pill,
+#mint-lms-root .mint-quiz-attach__submit,
+#mint-lms-root button.mint-quiz-attach__submit,
+#mint-lms-root .mint-builder-delete--header,
+#mint-lms-root button.mint-builder-delete--header,
+#mint-lms-root .mint-qeditor__btn-danger,
+#mint-lms-root button.mint-qeditor__btn-danger,
+#mint-lms-root .mint-btn--on-accent {
+  font-family: var(--mint-btn-font) !important;
+  font-weight: var(--mint-btn-weight);
+  transition: var(--mint-btn-transition);
+}
+
+/* Standard size — skip modals (taller) and full-width / compact row actions */
+#mint-lms-root .mint-btn:not(.mint-btn--icon):not(.mint-btn--sm):not(.mint-btn--xs):not(.mint-btn--lg):not(.mint-btn--block),
+#mint-lms-root a.mint-btn:not(.mint-btn--icon):not(.mint-btn--sm):not(.mint-btn--xs):not(.mint-btn--lg):not(.mint-btn--block),
+#mint-lms-root .mint-builder-btn-publish,
+#mint-lms-root button.mint-builder-btn-publish,
+#mint-lms-root .mint-builder-btn-save,
+#mint-lms-root button.mint-builder-btn-save,
+#mint-lms-root a.mint-builder-btn-save,
+#mint-lms-root .mint-builder-btn-dark,
+#mint-lms-root button.mint-builder-btn-dark,
+#mint-lms-root .mint-builder-btn-secondary,
+#mint-lms-root button.mint-builder-btn-secondary,
+#mint-lms-root .mint-quiz-save,
+#mint-lms-root button.mint-quiz-save,
+#mint-lms-root .mint-quiz-save-question,
+#mint-lms-root button.mint-quiz-save-question,
+#mint-lms-root .mint-quiz-action,
+#mint-lms-root button.mint-quiz-action,
+#mint-lms-root .mint-quiz-settings-btn,
+#mint-lms-root button.mint-quiz-settings-btn,
+#mint-lms-root a.mint-quiz-settings-btn,
+#mint-lms-root .mint-qeditor__btn-solid,
+#mint-lms-root button.mint-qeditor__btn-solid,
+#mint-lms-root .mint-qeditor__btn-outline,
+#mint-lms-root button.mint-qeditor__btn-outline,
+#mint-lms-root .mint-settings-save,
+#mint-lms-root button.mint-settings-save,
+#mint-lms-root a.mint-settings-save,
+#mint-lms-root .mint-settings-action,
+#mint-lms-root button.mint-settings-action,
+#mint-lms-root a.mint-settings-action,
+#mint-lms-root .mint-section-lessons__save,
+#mint-lms-root button.mint-section-lessons__save,
+#mint-lms-root .mint-lesson-quizzes__draft-save,
+#mint-lms-root button.mint-lesson-quizzes__draft-save,
+#mint-lms-root .mint-lesson-quizzes__draft-cancel,
+#mint-lms-root button.mint-lesson-quizzes__draft-cancel,
+#mint-lms-root .mint-builder-delete--header,
+#mint-lms-root button.mint-builder-delete--header {
+  height: var(--mint-btn-height);
+  padding-left: var(--mint-btn-pad-x);
+  padding-right: var(--mint-btn-pad-x);
+  border-radius: var(--mint-btn-radius);
+  font-size: var(--mint-btn-size);
+}
+
+/* Preview / empty CTA / choose-file / add-quiz — filled standard */
+#mint-lms-root .mint-builder-btn-preview,
+#mint-lms-root a.mint-builder-btn-preview,
+#mint-lms-root .mint-builder-empty__cta,
+#mint-lms-root button.mint-builder-empty__cta,
+#mint-lms-root .mint-lesson-choose-file,
+#mint-lms-root button.mint-lesson-choose-file,
+#mint-lms-root .mint-cta-lime,
+#mint-lms-root a.mint-cta-lime,
+#mint-lms-root button.mint-cta-lime,
+#mint-lms-root .mint-welcome-cta,
+#mint-lms-root a.mint-welcome-cta,
+#mint-lms-root button.mint-welcome-cta {
+  border-radius: var(--mint-btn-radius);
+  font-size: var(--mint-btn-size);
+  font-weight: var(--mint-btn-weight);
+}
+
+/* Full-width action buttons */
+#mint-lms-root .mint-btn--block,
+#mint-lms-root .mint-lesson-add-quiz,
+#mint-lms-root button.mint-lesson-add-quiz,
+#mint-lms-root .mint-quiz-add-question,
+#mint-lms-root button.mint-quiz-add-question,
+#mint-lms-root .mint-quiz-attach__submit,
+#mint-lms-root button.mint-quiz-attach__submit,
+#mint-lms-root .mint-qeditor__add-answer--solid,
+#mint-lms-root button.mint-qeditor__add-answer--solid {
+  width: 100%;
+  height: var(--mint-btn-height-lg);
+  font-size: 15px;
+  font-weight: var(--mint-btn-weight);
+  border-radius: var(--mint-btn-radius);
+}
+
+/* Outline “Add existing” — keep readable; normalize to standard height */
+#mint-lms-root .mint-existing-add-btn,
+#mint-lms-root button.mint-existing-add-btn {
+  height: var(--mint-btn-height);
+  font-size: var(--mint-btn-size);
+  border-radius: var(--mint-btn-radius);
+}
+
+/* ── Filled: −2px + mint glow ────────────────────────────── */
+
+#mint-lms-root .mint-btn--primary:hover:not(:disabled),
+#mint-lms-root .mint-btn--primary:focus-visible:not(:disabled),
+#mint-lms-root .mint-btn--dark:hover:not(:disabled),
+#mint-lms-root .mint-btn--dark:focus-visible:not(:disabled),
+#mint-lms-root .mint-builder-btn-publish:hover:not(:disabled),
+#mint-lms-root button.mint-builder-btn-publish:hover:not(:disabled),
+#mint-lms-root .mint-builder-btn-publish:focus-visible:not(:disabled),
+#mint-lms-root button.mint-builder-btn-publish:focus-visible:not(:disabled),
+#mint-lms-root .mint-builder-btn-save:hover:not(:disabled),
+#mint-lms-root button.mint-builder-btn-save:hover:not(:disabled),
+#mint-lms-root a.mint-builder-btn-save:hover,
+#mint-lms-root .mint-builder-btn-save:focus-visible:not(:disabled),
+#mint-lms-root button.mint-builder-btn-save:focus-visible:not(:disabled),
+#mint-lms-root a.mint-builder-btn-save:focus-visible,
+#mint-lms-root .mint-builder-btn-preview:hover,
+#mint-lms-root a.mint-builder-btn-preview:hover,
+#mint-lms-root .mint-builder-btn-preview:focus-visible,
+#mint-lms-root a.mint-builder-btn-preview:focus-visible,
+#mint-lms-root .mint-builder-btn-dark:hover:not(:disabled),
+#mint-lms-root button.mint-builder-btn-dark:hover:not(:disabled),
+#mint-lms-root .mint-builder-empty__cta:hover,
+#mint-lms-root button.mint-builder-empty__cta:hover,
+#mint-lms-root .mint-builder-empty__cta:focus-visible,
+#mint-lms-root button.mint-builder-empty__cta:focus-visible,
+#mint-lms-root .mint-lesson-choose-file:hover:not(:disabled),
+#mint-lms-root button.mint-lesson-choose-file:hover:not(:disabled),
+#mint-lms-root .mint-lesson-add-quiz:hover:not(:disabled),
+#mint-lms-root button.mint-lesson-add-quiz:hover:not(:disabled),
+#mint-lms-root .mint-quiz-add-question:hover:not(:disabled),
+#mint-lms-root button.mint-quiz-add-question:hover:not(:disabled),
+#mint-lms-root .mint-quiz-save:hover:not(:disabled),
+#mint-lms-root button.mint-quiz-save:hover:not(:disabled),
+#mint-lms-root .mint-quiz-save:focus-visible:not(:disabled),
+#mint-lms-root button.mint-quiz-save:focus-visible:not(:disabled),
+#mint-lms-root .mint-quiz-save-question:hover:not(:disabled),
+#mint-lms-root button.mint-quiz-save-question:hover:not(:disabled),
+#mint-lms-root .mint-quiz-save-question:focus-visible:not(:disabled),
+#mint-lms-root button.mint-quiz-save-question:focus-visible:not(:disabled),
+#mint-lms-root .mint-qeditor__btn-solid:hover:not(:disabled),
+#mint-lms-root button.mint-qeditor__btn-solid:hover:not(:disabled),
+#mint-lms-root .mint-qeditor__add-answer--solid:hover:not(:disabled),
+#mint-lms-root button.mint-qeditor__add-answer--solid:hover:not(:disabled),
+#mint-lms-root .mint-cta-lime:hover,
+#mint-lms-root a.mint-cta-lime:hover,
+#mint-lms-root button.mint-cta-lime:hover,
+#mint-lms-root .mint-cta-lime:focus-visible,
+#mint-lms-root a.mint-cta-lime:focus-visible,
+#mint-lms-root button.mint-cta-lime:focus-visible,
+#mint-lms-root a.mint-dash-new-course:hover,
+#mint-lms-root a.mint-dash-new-course:focus-visible,
+#mint-lms-root .mint-welcome-cta:hover,
+#mint-lms-root a.mint-welcome-cta:hover,
+#mint-lms-root button.mint-welcome-cta:hover,
+#mint-lms-root .mint-welcome-cta:focus-visible,
+#mint-lms-root a.mint-welcome-cta:focus-visible,
+#mint-lms-root button.mint-welcome-cta:focus-visible,
+#mint-lms-root .mint-settings-save:hover:not(:disabled),
+#mint-lms-root button.mint-settings-save:hover:not(:disabled),
+#mint-lms-root a.mint-settings-save:hover,
+#mint-lms-root .mint-settings-save:focus-visible:not(:disabled),
+#mint-lms-root button.mint-settings-save:focus-visible:not(:disabled),
+#mint-lms-root a.mint-settings-save:focus-visible,
+#mint-lms-root .mint-existing-picker__add:not(.is-ghost):hover:not(:disabled),
+#mint-lms-root button.mint-existing-picker__add:not(.is-ghost):hover:not(:disabled),
+#mint-lms-root .mint-existing-picker__done:hover,
+#mint-lms-root button.mint-existing-picker__done:hover,
+#mint-lms-root .mint-existing-picker__done:focus-visible,
+#mint-lms-root button.mint-existing-picker__done:focus-visible,
+#mint-lms-root .mint-move-confirm__submit:hover:not(:disabled),
+#mint-lms-root button.mint-move-confirm__submit:hover:not(:disabled),
+#mint-lms-root .mint-detach-confirm__submit:hover:not(:disabled),
+#mint-lms-root button.mint-detach-confirm__submit:hover:not(:disabled),
+#mint-lms-root .mint-section-lessons__save:hover:not(:disabled),
+#mint-lms-root button.mint-section-lessons__save:hover:not(:disabled),
+#mint-lms-root .mint-lesson-quizzes__draft-save:hover:not(:disabled),
+#mint-lms-root button.mint-lesson-quizzes__draft-save:hover:not(:disabled),
+#mint-lms-root .mint-quiz-attach__submit:hover:not(:disabled),
+#mint-lms-root button.mint-quiz-attach__submit:hover:not(:disabled),
+#mint-lms-root .mint-quiz-add-option:hover:not(:disabled),
+#mint-lms-root button.mint-quiz-add-option:hover:not(:disabled),
+#mint-lms-root .mint-settings-action:hover:not(:disabled),
+#mint-lms-root button.mint-settings-action:hover:not(:disabled),
+#mint-lms-root a.mint-settings-action:hover,
+#mint-lms-root .mint-settings-action:focus-visible:not(:disabled),
+#mint-lms-root button.mint-settings-action:focus-visible:not(:disabled),
+#mint-lms-root a.mint-settings-action:focus-visible {
+  transform: translateY(-2px) !important;
+  box-shadow: var(--mint-btn-glow) !important;
+}
+
+#mint-lms-root .mint-btn--primary:active:not(:disabled),
+#mint-lms-root .mint-btn--dark:active:not(:disabled),
+#mint-lms-root .mint-builder-btn-publish:active:not(:disabled),
+#mint-lms-root button.mint-builder-btn-publish:active:not(:disabled),
+#mint-lms-root .mint-builder-btn-save:active:not(:disabled),
+#mint-lms-root button.mint-builder-btn-save:active:not(:disabled),
+#mint-lms-root a.mint-builder-btn-save:active,
+#mint-lms-root .mint-builder-btn-preview:active,
+#mint-lms-root a.mint-builder-btn-preview:active,
+#mint-lms-root .mint-builder-btn-dark:active:not(:disabled),
+#mint-lms-root button.mint-builder-btn-dark:active:not(:disabled),
+#mint-lms-root .mint-builder-empty__cta:active,
+#mint-lms-root button.mint-builder-empty__cta:active,
+#mint-lms-root .mint-lesson-choose-file:active:not(:disabled),
+#mint-lms-root button.mint-lesson-choose-file:active:not(:disabled),
+#mint-lms-root .mint-lesson-add-quiz:active:not(:disabled),
+#mint-lms-root button.mint-lesson-add-quiz:active:not(:disabled),
+#mint-lms-root .mint-quiz-add-question:active:not(:disabled),
+#mint-lms-root button.mint-quiz-add-question:active:not(:disabled),
+#mint-lms-root .mint-quiz-save:active:not(:disabled),
+#mint-lms-root button.mint-quiz-save:active:not(:disabled),
+#mint-lms-root .mint-quiz-save-question:active:not(:disabled),
+#mint-lms-root button.mint-quiz-save-question:active:not(:disabled),
+#mint-lms-root .mint-qeditor__btn-solid:active:not(:disabled),
+#mint-lms-root button.mint-qeditor__btn-solid:active:not(:disabled),
+#mint-lms-root .mint-qeditor__add-answer--solid:active:not(:disabled),
+#mint-lms-root button.mint-qeditor__add-answer--solid:active:not(:disabled),
+#mint-lms-root .mint-cta-lime:active,
+#mint-lms-root a.mint-cta-lime:active,
+#mint-lms-root button.mint-cta-lime:active,
+#mint-lms-root a.mint-dash-new-course:active,
+#mint-lms-root .mint-welcome-cta:active,
+#mint-lms-root a.mint-welcome-cta:active,
+#mint-lms-root button.mint-welcome-cta:active,
+#mint-lms-root .mint-settings-save:active:not(:disabled),
+#mint-lms-root button.mint-settings-save:active:not(:disabled),
+#mint-lms-root a.mint-settings-save:active,
+#mint-lms-root .mint-existing-picker__add:not(.is-ghost):active:not(:disabled),
+#mint-lms-root button.mint-existing-picker__add:not(.is-ghost):active:not(:disabled),
+#mint-lms-root .mint-existing-picker__done:active,
+#mint-lms-root button.mint-existing-picker__done:active,
+#mint-lms-root .mint-move-confirm__submit:active:not(:disabled),
+#mint-lms-root button.mint-move-confirm__submit:active:not(:disabled),
+#mint-lms-root .mint-detach-confirm__submit:active:not(:disabled),
+#mint-lms-root button.mint-detach-confirm__submit:active:not(:disabled),
+#mint-lms-root .mint-section-lessons__save:active:not(:disabled),
+#mint-lms-root button.mint-section-lessons__save:active:not(:disabled),
+#mint-lms-root .mint-lesson-quizzes__draft-save:active:not(:disabled),
+#mint-lms-root button.mint-lesson-quizzes__draft-save:active:not(:disabled),
+#mint-lms-root .mint-quiz-attach__submit:active:not(:disabled),
+#mint-lms-root button.mint-quiz-attach__submit:active:not(:disabled),
+#mint-lms-root .mint-quiz-add-option:active:not(:disabled),
+#mint-lms-root button.mint-quiz-add-option:active:not(:disabled),
+#mint-lms-root .mint-settings-action:active:not(:disabled),
+#mint-lms-root button.mint-settings-action:active:not(:disabled),
+#mint-lms-root a.mint-settings-action:active {
+  transform: translateY(0) !important;
+  box-shadow: var(--mint-btn-glow-active) !important;
+}
+
+/* ── Non-filled / outline / ghost: hover tint + mint border + lift ── */
+
+#mint-lms-root .mint-btn--secondary:hover:not(:disabled),
+#mint-lms-root .mint-btn--secondary:focus-visible:not(:disabled),
+#mint-lms-root .mint-btn--ghost:hover:not(:disabled),
+#mint-lms-root .mint-btn--ghost:focus-visible:not(:disabled),
+#mint-lms-root .mint-builder-btn-secondary:hover:not(:disabled),
+#mint-lms-root button.mint-builder-btn-secondary:hover:not(:disabled),
+#mint-lms-root .mint-builder-btn-secondary:focus-visible:not(:disabled),
+#mint-lms-root button.mint-builder-btn-secondary:focus-visible:not(:disabled),
+#mint-lms-root .mint-existing-add-btn:hover:not(:disabled),
+#mint-lms-root button.mint-existing-add-btn:hover:not(:disabled),
+#mint-lms-root .mint-existing-picker__add.is-ghost:hover:not(:disabled),
+#mint-lms-root button.mint-existing-picker__add.is-ghost:hover:not(:disabled),
+#mint-lms-root .mint-quiz-action:hover:not(:disabled),
+#mint-lms-root button.mint-quiz-action:hover:not(:disabled),
+#mint-lms-root .mint-quiz-settings-btn:hover:not(:disabled),
+#mint-lms-root button.mint-quiz-settings-btn:hover:not(:disabled),
+#mint-lms-root a.mint-quiz-settings-btn:hover,
+#mint-lms-root .mint-qeditor__btn-outline:hover:not(:disabled),
+#mint-lms-root button.mint-qeditor__btn-outline:hover:not(:disabled),
+#mint-lms-root .mint-qeditor__add-answer:not(.mint-qeditor__add-answer--solid):hover:not(:disabled),
+#mint-lms-root button.mint-qeditor__add-answer:not(.mint-qeditor__add-answer--solid):hover:not(:disabled),
+#mint-lms-root .mint-welcome-back:hover,
+#mint-lms-root button.mint-welcome-back:hover,
+#mint-lms-root .mint-welcome-back:focus-visible,
+#mint-lms-root button.mint-welcome-back:focus-visible,
+#mint-lms-root .mint-lesson-quizzes__draft-cancel:hover:not(:disabled),
+#mint-lms-root button.mint-lesson-quizzes__draft-cancel:hover:not(:disabled),
+#mint-lms-root .mint-lesson-settings-pill:hover:not(:disabled),
+#mint-lms-root button.mint-lesson-settings-pill:hover:not(:disabled) {
+  background-color: var(--mint-btn-outline-hover-bg) !important;
+  border-color: var(--mint-btn-outline-hover-border) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: var(--mint-btn-glow) !important;
+}
+
+#mint-lms-root .mint-btn--secondary:active:not(:disabled),
+#mint-lms-root .mint-btn--ghost:active:not(:disabled),
+#mint-lms-root .mint-builder-btn-secondary:active:not(:disabled),
+#mint-lms-root button.mint-builder-btn-secondary:active:not(:disabled),
+#mint-lms-root .mint-existing-add-btn:active:not(:disabled),
+#mint-lms-root button.mint-existing-add-btn:active:not(:disabled),
+#mint-lms-root .mint-existing-picker__add.is-ghost:active:not(:disabled),
+#mint-lms-root button.mint-existing-picker__add.is-ghost:active:not(:disabled),
+#mint-lms-root .mint-quiz-action:active:not(:disabled),
+#mint-lms-root button.mint-quiz-action:active:not(:disabled),
+#mint-lms-root .mint-quiz-settings-btn:active:not(:disabled),
+#mint-lms-root button.mint-quiz-settings-btn:active:not(:disabled),
+#mint-lms-root a.mint-quiz-settings-btn:active,
+#mint-lms-root .mint-qeditor__btn-outline:active:not(:disabled),
+#mint-lms-root button.mint-qeditor__btn-outline:active:not(:disabled),
+#mint-lms-root .mint-welcome-back:active,
+#mint-lms-root button.mint-welcome-back:active,
+#mint-lms-root .mint-lesson-quizzes__draft-cancel:active:not(:disabled),
+#mint-lms-root button.mint-lesson-quizzes__draft-cancel:active:not(:disabled),
+#mint-lms-root .mint-lesson-settings-pill:active:not(:disabled),
+#mint-lms-root button.mint-lesson-settings-pill:active:not(:disabled) {
+  transform: translateY(0) !important;
+  box-shadow: var(--mint-btn-glow-active) !important;
+}
+
+/* Cancel ghosts often have no border — don't force a border box if border:0/none */
+#mint-lms-root .mint-confirm__cancel:hover,
+#mint-lms-root button.mint-confirm__cancel:hover,
+#mint-lms-root .mint-move-confirm__cancel:hover,
+#mint-lms-root button.mint-move-confirm__cancel:hover,
+#mint-lms-root .mint-detach-confirm__cancel:hover,
+#mint-lms-root button.mint-detach-confirm__cancel:hover {
+  border-color: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+/* ── Danger: red wash + red shadow (never mint) ──────────── */
+
+#mint-lms-root .mint-btn--danger:hover:not(:disabled),
+#mint-lms-root .mint-btn--danger:focus-visible:not(:disabled),
+#mint-lms-root .mint-btn--danger-outline:hover:not(:disabled),
+#mint-lms-root .mint-btn--danger-outline:focus-visible:not(:disabled),
+#mint-lms-root .mint-confirm__submit:hover,
+#mint-lms-root button.mint-confirm__submit:hover,
+#mint-lms-root .mint-builder-delete--header:hover,
+#mint-lms-root button.mint-builder-delete--header:hover,
+#mint-lms-root .mint-settings-delete:hover,
+#mint-lms-root button.mint-settings-delete:hover,
+#mint-lms-root .mint-qeditor__btn-danger:hover:not(:disabled),
+#mint-lms-root button.mint-qeditor__btn-danger:hover:not(:disabled) {
+  transform: translateY(-2px) !important;
+  box-shadow: var(--mint-btn-glow-danger) !important;
+}
+
+#mint-lms-root .mint-confirm__submit:hover,
+#mint-lms-root button.mint-confirm__submit:hover,
+#mint-lms-root .mint-builder-delete--header:hover,
+#mint-lms-root button.mint-builder-delete--header:hover,
+#mint-lms-root .mint-settings-delete:hover,
+#mint-lms-root button.mint-settings-delete:hover,
+#mint-lms-root .mint-btn--danger-outline:hover:not(:disabled) {
+  background-color: var(--mint-danger-wash) !important;
+}
+
+#mint-lms-root .mint-btn--danger:active:not(:disabled),
+#mint-lms-root .mint-btn--danger-outline:active:not(:disabled),
+#mint-lms-root .mint-confirm__submit:active,
+#mint-lms-root button.mint-confirm__submit:active,
+#mint-lms-root .mint-builder-delete--header:active,
+#mint-lms-root button.mint-builder-delete--header:active,
+#mint-lms-root .mint-settings-delete:active,
+#mint-lms-root button.mint-settings-delete:active,
+#mint-lms-root .mint-qeditor__btn-danger:active:not(:disabled),
+#mint-lms-root button.mint-qeditor__btn-danger:active:not(:disabled) {
+  transform: translateY(0) !important;
+  box-shadow: var(--mint-btn-glow-danger-active) !important;
+}
+
+/* ── Disabled: no motion ─────────────────────────────────── */
+
+#mint-lms-root .mint-btn:disabled,
+#mint-lms-root .mint-btn[disabled],
+#mint-lms-root button.mint-builder-btn-publish:disabled,
+#mint-lms-root button.mint-builder-btn-save:disabled,
+#mint-lms-root button.mint-builder-btn-secondary:disabled,
+#mint-lms-root button.mint-quiz-save:disabled,
+#mint-lms-root button.mint-quiz-save-question:disabled,
+#mint-lms-root button.mint-lesson-add-quiz:disabled,
+#mint-lms-root button.mint-quiz-add-question:disabled,
+#mint-lms-root button.mint-existing-add-btn:disabled,
+#mint-lms-root button.mint-existing-picker__add:disabled,
+#mint-lms-root button.mint-settings-save:disabled,
+#mint-lms-root button.mint-move-confirm__submit:disabled,
+#mint-lms-root button.mint-detach-confirm__submit:disabled,
+#mint-lms-root button.mint-quiz-attach__submit:disabled {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* ── Reduced motion ──────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  #mint-lms-root .mint-btn,
+  #mint-lms-root button.mint-builder-btn-publish,
+  #mint-lms-root button.mint-builder-btn-save,
+  #mint-lms-root button.mint-builder-btn-secondary,
+  #mint-lms-root button.mint-quiz-save,
+  #mint-lms-root button.mint-existing-add-btn,
+  #mint-lms-root button.mint-existing-picker__add,
+  #mint-lms-root button.mint-confirm__submit,
+  #mint-lms-root button.mint-move-confirm__submit,
+  #mint-lms-root button.mint-detach-confirm__submit,
+  #mint-lms-root a.mint-welcome-cta,
+  #mint-lms-root button.mint-welcome-cta,
+  #mint-lms-root a.mint-cta-lime,
+  #mint-lms-root button.mint-cta-lime {
+    transition: background-color 0.01ms, border-color 0.01ms, color 0.01ms !important;
+  }
+
+  #mint-lms-root .mint-btn:hover:not(:disabled),
+  #mint-lms-root .mint-btn:active:not(:disabled),
+  #mint-lms-root button.mint-builder-btn-publish:hover:not(:disabled),
+  #mint-lms-root button.mint-builder-btn-save:hover:not(:disabled),
+  #mint-lms-root button.mint-builder-btn-secondary:hover:not(:disabled),
+  #mint-lms-root button.mint-existing-add-btn:hover:not(:disabled),
+  #mint-lms-root button.mint-existing-picker__add:hover:not(:disabled),
+  #mint-lms-root button.mint-confirm__submit:hover,
+  #mint-lms-root button.mint-move-confirm__submit:hover:not(:disabled),
+  #mint-lms-root button.mint-detach-confirm__submit:hover:not(:disabled),
+  #mint-lms-root a.mint-welcome-cta:hover,
+  #mint-lms-root button.mint-welcome-cta:hover {
+    transform: none !important;
+  }
+}

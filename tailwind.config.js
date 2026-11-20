@@ -15,14 +15,8 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: [
-          'Aeonik',
-          'Aeonik Pro',
           'General Sans',
-          '-apple-system',
-          'BlinkMacSystemFont',
-          'Segoe UI',
-          'Helvetica',
-          'Arial',
+          'Aeonik',
           'sans-serif',
         ],
       },
