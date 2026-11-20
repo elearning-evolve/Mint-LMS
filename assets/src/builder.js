@@ -219,6 +219,8 @@ function courseBuilder(courseId, opts = {}) {
       targetSectionId: 0,
       targetLessonId: 0,
       targetQuizId: 0,
+      page: 1,
+      perPage: 6,
     },
     /** Inline “Quiz title + Save” row inside lesson Quizzes card. */
     lessonQuizDraftOpen: false,
@@ -969,6 +971,8 @@ function courseBuilder(courseId, opts = {}) {
         targetSectionId: Number(targetSectionId) || 0,
         targetLessonId: Number(targetLessonId) || 0,
         targetQuizId: Number(targetQuizId) || 0,
+        page: 1,
+        perPage: 6,
       };
       this.loadExistingPickerItems();
       this.$nextTick(() => {
@@ -986,6 +990,7 @@ function courseBuilder(courseId, opts = {}) {
       this.existingPicker.addedIds = [];
       this.existingPicker.error = '';
       this.existingPicker.search = '';
+      this.existingPicker.page = 1;
     },
 
     filteredExistingPickerItems() {
@@ -995,6 +1000,49 @@ function courseBuilder(courseId, opts = {}) {
       const rows = Array.isArray(this.existingPicker.items) ? this.existingPicker.items : [];
       if (!q) return rows;
       return rows.filter((row) => String(row.title || '').toLowerCase().includes(q));
+    },
+
+    existingPickerPageTotal() {
+      const per = Math.max(1, Number(this.existingPicker.perPage) || 6);
+      const n = this.filteredExistingPickerItems().length;
+      return Math.max(1, Math.ceil(n / per) || 1);
+    },
+
+    existingPickerCurrentPage() {
+      const pages = this.existingPickerPageTotal();
+      let page = Number(this.existingPicker.page) || 1;
+      if (page > pages) page = pages;
+      if (page < 1) page = 1;
+      return page;
+    },
+
+    existingPickerPageLabel() {
+      return `Page ${this.existingPickerCurrentPage()} of ${this.existingPickerPageTotal()}`;
+    },
+
+    pagedExistingPickerItems() {
+      const per = Math.max(1, Number(this.existingPicker.perPage) || 6);
+      const page = this.existingPickerCurrentPage();
+      const rows = this.filteredExistingPickerItems();
+      const start = (page - 1) * per;
+      return rows.slice(start, start + per);
+    },
+
+    existingPickerPrevPage() {
+      const page = Number(this.existingPicker.page) || 1;
+      if (page <= 1) return;
+      this.existingPicker.page = page - 1;
+    },
+
+    existingPickerNextPage() {
+      const page = Number(this.existingPicker.page) || 1;
+      const pages = this.existingPickerPageTotal();
+      if (page >= pages) return;
+      this.existingPicker.page = page + 1;
+    },
+
+    onExistingPickerSearchInput() {
+      this.existingPicker.page = 1;
     },
 
     isExistingPickerAdded(item) {
