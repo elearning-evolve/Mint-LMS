@@ -171,12 +171,8 @@
   font-weight: var(--mint-btn-weight);
 }
 
-/* Full-width action buttons */
+/* Full-width action buttons (attach / solid add-answer only — NOT Add Lesson/Quiz/Question) */
 #mint-lms-root .mint-btn--block,
-#mint-lms-root .mint-lesson-add-quiz,
-#mint-lms-root button.mint-lesson-add-quiz,
-#mint-lms-root .mint-quiz-add-question,
-#mint-lms-root button.mint-quiz-add-question,
 #mint-lms-root .mint-quiz-attach__submit,
 #mint-lms-root button.mint-quiz-attach__submit,
 #mint-lms-root .mint-qeditor__add-answer--solid,
@@ -188,9 +184,28 @@
   border-radius: var(--mint-btn-radius);
 }
 
-/* Outline “Add existing” — keep readable; normalize to standard height */
+/*
+ * + Add Lesson / + Add Quiz / + Add Question — content-width beside “Add existing”.
+ * Never stretch to 100% in the action row.
+ */
+#mint-lms-root .mint-lesson-add-quiz,
+#mint-lms-root button.mint-lesson-add-quiz,
+#mint-lms-root .mint-quiz-add-question,
+#mint-lms-root button.mint-quiz-add-question {
+  width: fit-content !important;
+  max-width: 100%;
+  height: var(--mint-btn-height);
+  font-size: 15px;
+  font-weight: var(--mint-btn-weight);
+  border-radius: var(--mint-btn-radius);
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+/* Outline “Add existing” — match Add Lesson/Quiz height in the same row */
 #mint-lms-root .mint-existing-add-btn,
 #mint-lms-root button.mint-existing-add-btn {
+  width: fit-content;
   height: var(--mint-btn-height);
   font-size: var(--mint-btn-size);
   border-radius: var(--mint-btn-radius);
@@ -283,7 +298,17 @@
 #mint-lms-root a.mint-settings-action:hover,
 #mint-lms-root .mint-settings-action:focus-visible:not(:disabled),
 #mint-lms-root button.mint-settings-action:focus-visible:not(:disabled),
-#mint-lms-root a.mint-settings-action:focus-visible {
+#mint-lms-root a.mint-settings-action:focus-visible,
+#mint-lms-root .mint-quiz-settings-btn:hover:not(:disabled),
+#mint-lms-root button.mint-quiz-settings-btn:hover:not(:disabled),
+#mint-lms-root a.mint-quiz-settings-btn:hover,
+#mint-lms-root .mint-quiz-settings-btn:focus-visible:not(:disabled),
+#mint-lms-root button.mint-quiz-settings-btn:focus-visible:not(:disabled),
+#mint-lms-root a.mint-quiz-settings-btn:focus-visible,
+#mint-lms-root .mint-lesson-settings-pill:hover:not(:disabled),
+#mint-lms-root button.mint-lesson-settings-pill:hover:not(:disabled) {
+  background-color: var(--mint-cta-hover) !important;
+  color: var(--mint-cta-ink) !important;
   transform: translateY(-2px) !important;
   box-shadow: var(--mint-btn-glow) !important;
 }
@@ -343,7 +368,14 @@
 #mint-lms-root button.mint-quiz-add-option:active:not(:disabled),
 #mint-lms-root .mint-settings-action:active:not(:disabled),
 #mint-lms-root button.mint-settings-action:active:not(:disabled),
-#mint-lms-root a.mint-settings-action:active {
+#mint-lms-root a.mint-settings-action:active,
+#mint-lms-root .mint-quiz-settings-btn:active:not(:disabled),
+#mint-lms-root button.mint-quiz-settings-btn:active:not(:disabled),
+#mint-lms-root a.mint-quiz-settings-btn:active,
+#mint-lms-root .mint-lesson-settings-pill:active:not(:disabled),
+#mint-lms-root button.mint-lesson-settings-pill:active:not(:disabled) {
+  background-color: var(--mint-cta-active) !important;
+  color: var(--mint-cta-ink) !important;
   transform: translateY(0) !important;
   box-shadow: var(--mint-btn-glow-active) !important;
 }
@@ -364,9 +396,6 @@
 #mint-lms-root button.mint-existing-picker__add.is-ghost:hover:not(:disabled),
 #mint-lms-root .mint-quiz-action:hover:not(:disabled),
 #mint-lms-root button.mint-quiz-action:hover:not(:disabled),
-#mint-lms-root .mint-quiz-settings-btn:hover:not(:disabled),
-#mint-lms-root button.mint-quiz-settings-btn:hover:not(:disabled),
-#mint-lms-root a.mint-quiz-settings-btn:hover,
 #mint-lms-root .mint-qeditor__btn-outline:hover:not(:disabled),
 #mint-lms-root button.mint-qeditor__btn-outline:hover:not(:disabled),
 #mint-lms-root .mint-qeditor__add-answer:not(.mint-qeditor__add-answer--solid):hover:not(:disabled),
@@ -376,9 +405,7 @@
 #mint-lms-root .mint-welcome-back:focus-visible,
 #mint-lms-root button.mint-welcome-back:focus-visible,
 #mint-lms-root .mint-lesson-quizzes__draft-cancel:hover:not(:disabled),
-#mint-lms-root button.mint-lesson-quizzes__draft-cancel:hover:not(:disabled),
-#mint-lms-root .mint-lesson-settings-pill:hover:not(:disabled),
-#mint-lms-root button.mint-lesson-settings-pill:hover:not(:disabled) {
+#mint-lms-root button.mint-lesson-quizzes__draft-cancel:hover:not(:disabled) {
   background-color: var(--mint-btn-outline-hover-bg) !important;
   border-color: var(--mint-btn-outline-hover-border) !important;
   transform: translateY(-2px) !important;
@@ -395,17 +422,12 @@
 #mint-lms-root button.mint-existing-picker__add.is-ghost:active:not(:disabled),
 #mint-lms-root .mint-quiz-action:active:not(:disabled),
 #mint-lms-root button.mint-quiz-action:active:not(:disabled),
-#mint-lms-root .mint-quiz-settings-btn:active:not(:disabled),
-#mint-lms-root button.mint-quiz-settings-btn:active:not(:disabled),
-#mint-lms-root a.mint-quiz-settings-btn:active,
 #mint-lms-root .mint-qeditor__btn-outline:active:not(:disabled),
 #mint-lms-root button.mint-qeditor__btn-outline:active:not(:disabled),
 #mint-lms-root .mint-welcome-back:active,
 #mint-lms-root button.mint-welcome-back:active,
 #mint-lms-root .mint-lesson-quizzes__draft-cancel:active:not(:disabled),
-#mint-lms-root button.mint-lesson-quizzes__draft-cancel:active:not(:disabled),
-#mint-lms-root .mint-lesson-settings-pill:active:not(:disabled),
-#mint-lms-root button.mint-lesson-settings-pill:active:not(:disabled) {
+#mint-lms-root button.mint-lesson-quizzes__draft-cancel:active:not(:disabled) {
   transform: translateY(0) !important;
   box-shadow: var(--mint-btn-glow-active) !important;
 }

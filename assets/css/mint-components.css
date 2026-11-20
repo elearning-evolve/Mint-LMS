@@ -4604,14 +4604,14 @@
 #mint-lms-root button.mint-quiz-settings-btn:focus-visible:not(:disabled) {
   background: var(--mint-cta-hover) !important;
   color: var(--mint-cta-ink) !important;
-  box-shadow: var(--mint-cta-shadow) !important;
-  transform: translateY(-1px);
+  box-shadow: var(--mint-btn-glow) !important;
+  transform: translateY(-2px);
   cursor: pointer !important;
 }
 #mint-lms-root a.mint-quiz-settings-btn:active,
 #mint-lms-root button.mint-quiz-settings-btn:active:not(:disabled) {
-  background: var(--mint-cta-hover) !important;
-  box-shadow: none !important;
+  background: var(--mint-cta-active) !important;
+  box-shadow: var(--mint-btn-glow-active) !important;
   transform: translateY(0);
 }
 
@@ -4864,12 +4864,13 @@
 #mint-lms-root button.mint-quiz-add-question {
   margin-top: 24px;
   width: fit-content;
+  max-width: 100%;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  height: 42px;
-  padding: 0 18px;
-  border-radius: 10px;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 9px;
   border: none;
   background: #98FBCB;
   color: #0F0E1A;
@@ -4882,8 +4883,8 @@
 
 #mint-lms-root button.mint-quiz-add-question:hover:not(:disabled) {
   background: #7FE8B8;
-  box-shadow: 0 4px 12px rgba(15, 14, 26, 0.18);
-  transform: translateY(-1px);
+  box-shadow: var(--mint-btn-glow);
+  transform: translateY(-2px);
 }
 
 #mint-lms-root button.mint-quiz-add-question:focus-visible {
@@ -11929,12 +11930,13 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 #mint-lms-root button.mint-lesson-add-quiz {
   margin-top: 20px;
   width: fit-content;
+  max-width: 100%;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  height: 42px;
-  padding: 0 18px;
-  border-radius: 10px;
+  height: 38px;
+  padding: 0 16px;
+  border-radius: 9px;
   border: none;
   background: #98FBCB;
   color: #0F0E1A;
@@ -11946,8 +11948,8 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 
 #mint-lms-root button.mint-lesson-add-quiz:hover:not(:disabled) {
   background: #7FE8B8;
-  box-shadow: 0 4px 12px rgba(15, 14, 26, 0.18);
-  transform: translateY(-1px);
+  box-shadow: var(--mint-btn-glow);
+  transform: translateY(-2px);
 }
 
 #mint-lms-root button.mint-lesson-add-quiz:disabled {
@@ -11962,8 +11964,8 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  height: 42px;
-  padding: 0 18px;
+  height: 38px;
+  padding: 0 16px;
   border-radius: 999px;
   border: none;
   background: #98FBCB;
@@ -11976,6 +11978,8 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 
 #mint-lms-root button.mint-lesson-settings-pill:hover:not(:disabled) {
   background: #7FE8B8;
+  box-shadow: var(--mint-btn-glow);
+  transform: translateY(-2px);
 }
 
 #mint-lms-root button.mint-lesson-settings-pill:disabled {
