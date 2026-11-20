@@ -13246,7 +13246,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 
 #mint-lms-root .mint-section-lessons__list {
   list-style: none;
-  margin: 16px 0 0;
+  margin: 12px 0 0;
   padding: 0;
   display: grid;
   gap: 10px;
@@ -13426,11 +13426,11 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root .mint-section-lessons__tip {
-  margin-top: 14px;
+  margin-top: 10px;
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 12px 14px;
+  padding: 10px 12px;
   border: 1.5px dashed #98FBCB;
   border-radius: 12px;
   background: #F1FFF9;
@@ -13447,7 +13447,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root .mint-section-lessons__actions.mint-existing-add-row {
-  margin-top: 12px;
+  margin-top: 10px;
 }
 
 #mint-lms-root .mint-section-lessons__actions .mint-lesson-add-quiz,

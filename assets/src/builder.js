@@ -9450,6 +9450,9 @@ function courseBuilder(courseId, opts = {}) {
       if (this.lessonSettingsView || this.quizSettingsView) {
         return false;
       }
+      if (this.selected?.type === 'section') {
+        return !!this.selectedSection?.id;
+      }
       if (this.selected?.type === 'lesson') {
         return !!this.selectedLesson?.id;
       }
@@ -9465,6 +9468,9 @@ function courseBuilder(courseId, opts = {}) {
     showHeaderDeleteButton() {
       if (this.lessonSettingsView || this.quizSettingsView) {
         return false;
+      }
+      if (this.selected?.type === 'section') {
+        return !!this.selectedSection?.id;
       }
       if (this.selected?.type === 'lesson') {
         return !!this.selectedLesson?.id;
@@ -9483,6 +9489,10 @@ function courseBuilder(courseId, opts = {}) {
     },
 
     headerDeleteAction() {
+      if (this.selected?.type === 'section' && this.selectedSection?.id) {
+        this.deleteSection(this.selectedSection.id);
+        return;
+      }
       if (this.selected?.type === 'quiz') {
         this.deleteQuiz();
         return;

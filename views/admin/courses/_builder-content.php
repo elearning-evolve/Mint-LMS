@@ -2541,6 +2541,8 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 
 			<template x-if="selected && selected.type === 'section' && selectedSection">
 				<div class="mint-builder-editor__canvas mint-flex mint-h-full mint-w-full mint-flex-col">
+					<div class="mint-quiz-editor-layout">
+					<div class="mint-quiz-editor-layout__main">
 					<nav
 						class="mint-flex mint-items-center mint-gap-2.5 mint-text-[15px] mint-text-ink-2"
 						aria-label="<?php echo esc_attr__( 'Lesson group location', 'mint-lms' ); ?>"
@@ -2574,12 +2576,12 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 					/>
 					<div class="mint-mt-2 mint-text-[15px] mint-text-ink-2"><?php esc_html_e( 'Click the title to rename it.', 'mint-lms' ); ?></div>
 
-					<div class="mint-quiz-type-chip mint-mt-8">
+					<div class="mint-quiz-type-chip mint-mt-4">
 						<svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 6.5h15M4.5 12h15M4.5 17.5h9"/></svg>
 						<?php esc_html_e( 'Lesson Group', 'mint-lms' ); ?>
 					</div>
 
-					<div class="mint-section-lessons mint-mt-8">
+					<div class="mint-section-lessons mint-mt-4">
 						<div class="mint-section-lessons__head">
 							<div class="mint-section-lessons__head-copy">
 								<div class="mint-section-lessons__title"><?php esc_html_e( 'Lessons in this group', 'mint-lms' ); ?></div>
@@ -2664,27 +2666,12 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 							</button>
 						</div>
 					</div>
+					</div><!-- /.mint-quiz-editor-layout__main -->
 
-					<div class="mint-section-lessons__footer">
-						<button
-							type="button"
-							class="mint-section-lessons__delete"
-							@click="deleteSection(selected.id)"
-						>
-							<svg width="15" height="15" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-								<path d="M4.5 6.5h11"/>
-								<path d="M8 6.5V5a1.5 1.5 0 0 1 1.5-1.5h1A1.5 1.5 0 0 1 12 5v1.5"/>
-								<path d="M6.5 6.5v8A1.5 1.5 0 0 0 8 16h4a1.5 1.5 0 0 0 1.5-1.5v-8"/>
-								<path d="M9 9.5v4M11 9.5v4"/>
-							</svg>
-							<?php esc_html_e( 'Delete lesson group', 'mint-lms' ); ?>
-						</button>
-						<button
-							type="button"
-							class="mint-section-lessons__save"
-							@click="saveSection(selectedSection, { toast: false, reload: true })"
-						><?php esc_html_e( 'Save changes', 'mint-lms' ); ?></button>
+					<div class="mint-editor-rail">
+						<?php require MINTLMS_PATH . 'views/admin/courses/_builder-editor-rail-actions.php'; ?>
 					</div>
+					</div><!-- /.mint-quiz-editor-layout -->
 				</div>
 			</template>
 
