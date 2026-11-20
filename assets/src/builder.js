@@ -214,6 +214,7 @@ function courseBuilder(courseId, opts = {}) {
       loading: false,
       busy: false,
       items: [],
+      addedIds: [],
       error: '',
       targetSectionId: 0,
       targetLessonId: 0,
@@ -923,7 +924,7 @@ function courseBuilder(courseId, opts = {}) {
       }
       this.openExistingPicker({
         kind: 'lesson',
-        title: 'Add existing lesson',
+        title: 'Add existing lessons',
         targetSectionId: sid,
       });
     },
@@ -936,7 +937,7 @@ function courseBuilder(courseId, opts = {}) {
       }
       this.openExistingPicker({
         kind: 'quiz',
-        title: 'Add existing quiz',
+        title: 'Add existing quizzes',
         targetLessonId: lid,
       });
     },
@@ -949,7 +950,7 @@ function courseBuilder(courseId, opts = {}) {
       }
       this.openExistingPicker({
         kind: 'question',
-        title: 'Add existing question',
+        title: 'Add existing questions',
         targetQuizId: qid,
       });
     },
@@ -963,12 +964,17 @@ function courseBuilder(courseId, opts = {}) {
         loading: true,
         busy: false,
         items: [],
+        addedIds: [],
         error: '',
         targetSectionId: Number(targetSectionId) || 0,
         targetLessonId: Number(targetLessonId) || 0,
         targetQuizId: Number(targetQuizId) || 0,
       };
       this.loadExistingPickerItems();
+      this.$nextTick(() => {
+        const input = document.querySelector('#mint-lms-root .mint-existing-picker__search-input');
+        if (input) input.focus();
+      });
     },
 
     closeExistingPicker() {
@@ -977,6 +983,7 @@ function courseBuilder(courseId, opts = {}) {
       this.existingPicker.loading = false;
       this.existingPicker.busy = false;
       this.existingPicker.items = [];
+      this.existingPicker.addedIds = [];
       this.existingPicker.error = '';
       this.existingPicker.search = '';
     },
@@ -990,33 +997,72 @@ function courseBuilder(courseId, opts = {}) {
       return rows.filter((row) => String(row.title || '').toLowerCase().includes(q));
     },
 
-    existingPickerMeta(item) {
+    isExistingPickerAdded(item) {
+      const id = Number(item?.id) || 0;
+      if (!id) return false;
+      const added = Array.isArray(this.existingPicker.addedIds) ? this.existingPicker.addedIds : [];
+      return added.includes(id);
+    },
+
+    existingPickerSubtitle() {
       const kind = this.existingPicker.kind;
       if (kind === 'lesson') {
-        const courseId = Number(item.courseId) || 0;
-        const sectionId = Number(item.sectionId) || 0;
-        if (courseId <= 0) return 'Library · not in a course';
-        if (courseId === Number(this.courseId)) {
-          return sectionId > 0 ? 'In this course · another group' : 'In this course · ungrouped';
-        }
-        return 'In another course';
+        return 'Pick from the lessons in your course. Each one is added to this lesson group.';
       }
       if (kind === 'quiz') {
-        if (item.disposableHost || !(Number(item.lessonId) > 0)) return 'Library · not attached to a lesson';
-        if (Number(item.lessonId) === Number(this.existingPicker.targetLessonId)) {
-          return 'Already in this lesson';
-        }
-        return Number(item.courseId) === Number(this.courseId)
-          ? 'Attached to another lesson in this course'
-          : 'Attached to another lesson';
+        return 'Pick from the quizzes in your course. Each one is added to this lesson.';
       }
-      if (item.disposableHost || !(Number(item.quizId) > 0)) return 'Library · not attached to a quiz';
-      if (Number(item.quizId) === Number(this.existingPicker.targetQuizId)) {
-        return 'Already in this quiz';
+      return 'Pick from the questions in your course. Each one is added to this quiz.';
+    },
+
+    existingPickerSearchPlaceholder() {
+      const kind = this.existingPicker.kind;
+      if (kind === 'lesson') return 'Search lessons';
+      if (kind === 'quiz') return 'Search quizzes';
+      return 'Search questions';
+    },
+
+    existingPickerEmptyLabel() {
+      const kind = this.existingPicker.kind;
+      if (kind === 'lesson') return 'No lessons match your search.';
+      if (kind === 'quiz') return 'No quizzes match your search.';
+      return 'No questions match your search.';
+    },
+
+    existingPickerAddLabel() {
+      const kind = this.existingPicker.kind;
+      if (kind === 'lesson') return 'Add to lesson group';
+      if (kind === 'quiz') return 'Add to lesson';
+      return 'Add to quiz';
+    },
+
+    existingPickerCountLabel() {
+      const total = Array.isArray(this.existingPicker.items) ? this.existingPicker.items.length : 0;
+      const added = Array.isArray(this.existingPicker.addedIds) ? this.existingPicker.addedIds.length : 0;
+      const n = Math.max(0, total - added);
+      return `${n} available`;
+    },
+
+    existingPickerBadge(item) {
+      const kind = this.existingPicker.kind;
+      if (kind === 'question') {
+        if (item?.answerTypePending) return 'Answer type not set';
+        if (item?.questionType === 'true_false') return 'True / False';
+        if (item?.questionType === 'essay') return 'Essay answer';
+        if (item?.questionType === 'mcq_multi') return 'Multiple choice';
+        return 'Multiple choice';
       }
-      return Number(item.courseId) === Number(this.courseId)
-        ? 'Attached to another quiz in this course'
-        : 'Attached to another quiz';
+      if (kind === 'lesson') {
+        if (item?.status === 'published') return 'Published';
+        if (item?.status === 'draft') return 'Draft';
+        if (item?.status === 'archived') return 'Archived';
+        return item?.status ? String(item.status) : '';
+      }
+      if (kind === 'quiz') {
+        if (item?.disposableHost || !(Number(item?.lessonId) > 0)) return 'Library';
+        return 'Quiz';
+      }
+      return '';
     },
 
     async loadExistingPickerItems() {
@@ -1039,6 +1085,8 @@ function courseBuilder(courseId, opts = {}) {
             quizId: Number(row.quizId) || 0,
             disposableHost: !!row.disposableHost,
             status: row.status || '',
+            questionType: row.questionType || '',
+            answerTypePending: !!row.answerTypePending,
           }))
           .filter((row) => this.isExistingPickerCandidate(row));
       } catch (err) {
@@ -1051,13 +1099,19 @@ function courseBuilder(courseId, opts = {}) {
 
     isExistingPickerCandidate(row) {
       if (!row?.id || row.status === 'trashed') return false;
+      const courseId = Number(this.courseId) || 0;
+      const rowCourse = Number(row.courseId) || 0;
+      // Prefer this course + library; hide other courses from the picker.
+      if (courseId > 0 && rowCourse > 0 && rowCourse !== courseId && !row.disposableHost) {
+        return false;
+      }
       const kind = this.existingPicker.kind;
       if (kind === 'lesson') {
         if (row.disposableHost) return false;
         const sid = Number(this.existingPicker.targetSectionId) || 0;
         // Already in this group — hide.
         if (
-          Number(row.courseId) === Number(this.courseId) &&
+          rowCourse === courseId &&
           Number(row.sectionId) === sid &&
           sid > 0
         ) {
@@ -1098,7 +1152,8 @@ function courseBuilder(courseId, opts = {}) {
     },
 
     async addExistingPickerItem(item) {
-      if (!item?.id || this.existingPicker.busy) return;
+      const id = Number(item?.id) || 0;
+      if (!id || this.existingPicker.busy || this.isExistingPickerAdded(item)) return;
       if (this.needsExistingMoveConfirm(item)) {
         const label = String(item.title || 'This item').trim() || 'This item';
         const ok = window.confirm(
@@ -1117,9 +1172,13 @@ function courseBuilder(courseId, opts = {}) {
         } else {
           await this.attachExistingQuestionToQuiz(item);
         }
+        if (!Array.isArray(this.existingPicker.addedIds)) {
+          this.existingPicker.addedIds = [];
+        }
+        if (!this.existingPicker.addedIds.includes(id)) {
+          this.existingPicker.addedIds.push(id);
+        }
         this.existingPicker.busy = false;
-        this.closeExistingPicker();
-        window.MintLMS.toast.success('Added');
       } catch (err) {
         this.existingPicker.busy = false;
         window.MintLMS.toast.error(err.message || 'Could not add item.');
