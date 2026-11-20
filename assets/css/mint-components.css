@@ -463,21 +463,29 @@
   align-items: center;
   gap: 5px;
   height: 44px;
+  padding: 0 10px;
+  margin: 0 -4px;
   cursor: pointer;
   font-size: 14px;
   font-weight: 600;
   outline: none;
   border-bottom: 2.5px solid transparent;
+  border-radius: 10px 10px 0 0;
   user-select: none;
-  transition: color 120ms ease-out;
+  transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease;
 }
 #mint-lms-root .mint-builder-nav__item:hover {
   color: #0F0E1A !important;
+  background: rgba(152, 251, 203, 0.35);
 }
 #mint-lms-root .mint-builder-nav__item.is-active {
   color: #0F0E1A !important;
   font-weight: 700;
   border-bottom-color: #0F0E1A;
+  background: transparent;
+}
+#mint-lms-root .mint-builder-nav__item.is-active:hover {
+  background: rgba(152, 251, 203, 0.28);
 }
 #mint-lms-root .mint-builder-nav__item > svg {
   transition: transform 120ms ease-out;
@@ -489,9 +497,11 @@
   left: 0;
   min-width: 220px;
   background: #FFFFFF;
-  border: 1px solid #E4E1F0;
+  border: 1px solid #98FBCB;
   border-radius: 12px;
-  box-shadow: 0 12px 28px rgba(15, 14, 26, 0.16);
+  box-shadow:
+    0 12px 28px rgba(15, 14, 26, 0.14),
+    0 0 0 4px rgba(152, 251, 203, 0.18);
   padding: 8px;
   z-index: 50;
   cursor: default;
@@ -517,21 +527,39 @@
   width: 100%;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 10px 8px 6px;
-  border: 0;
-  border-radius: 8px;
-  background: transparent;
+  justify-content: flex-start;
+  gap: 8px;
+  margin-top: 2px;
+  padding: 10px 12px;
+  border: 1.5px solid #98FBCB;
+  border-radius: 10px;
+  background: rgba(152, 251, 203, 0.18);
   font-family: inherit;
   font-size: 14px;
   font-weight: 700;
   color: #0F0E1A;
   cursor: pointer;
-  transition: background-color 120ms ease-out;
+  outline: none;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
 }
 #mint-lms-root .mint-builder-nav__open-full:hover {
-  background: #EEF1F3;
+  background: #98FBCB;
+  border-color: #98FBCB;
+  box-shadow: 0 8px 18px rgba(152, 251, 203, 0.55);
+  transform: translateY(-1px);
+}
+#mint-lms-root .mint-builder-nav__open-full:focus-visible {
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
+}
+#mint-lms-root .mint-builder-nav__menu--tree:has(.mint-builder-nav__open-full:hover) {
+  border-color: #98FBCB;
+  box-shadow:
+    0 14px 32px rgba(15, 14, 26, 0.16),
+    0 0 0 5px rgba(152, 251, 203, 0.28);
 }
 #mint-lms-root .mint-builder-nav__heading {
   padding: 6px 10px 10px;
@@ -545,7 +573,7 @@
 #mint-lms-root .mint-builder-nav__divider {
   height: 1px;
   margin: 4px 6px 6px;
-  background: #E8E6F0;
+  background: rgba(152, 251, 203, 0.55);
 }
 #mint-lms-root .mint-builder-nav__level {
   padding: 8px 10px 4px;
@@ -565,7 +593,7 @@
   align-items: center;
   gap: 8px;
   padding: 8px 10px;
-  border: 0;
+  border: 1.5px solid transparent;
   border-radius: 8px;
   background: transparent;
   font-family: inherit;
@@ -574,17 +602,21 @@
   color: #17222B;
   text-align: left;
   cursor: pointer;
-  transition: background-color 120ms ease-out;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }
 #mint-lms-root .mint-builder-nav__option:hover {
-  background: #F3F4F6;
+  background: rgba(152, 251, 203, 0.28);
+  border-color: #98FBCB;
+  box-shadow: 0 6px 14px rgba(152, 251, 203, 0.35);
+  transform: translateY(-1px);
 }
 #mint-lms-root .mint-builder-nav__option--overview {
   color: #0F0E1A;
   font-weight: 700;
 }
 #mint-lms-root .mint-builder-nav__option--overview:hover {
-  background: #EEF1F3;
+  background: rgba(152, 251, 203, 0.35);
+  border-color: #98FBCB;
 }
 #mint-lms-root .mint-builder-nav__count {
   margin-left: auto;
@@ -596,43 +628,41 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #E6F1FF;
-  color: #1A5AA8;
+  background: rgba(152, 251, 203, 0.35);
+  border: 1px solid #98FBCB;
+  color: #0F0E1A;
   font-size: 12px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   line-height: 1;
+  transition: background-color 160ms ease, box-shadow 160ms ease;
+}
+#mint-lms-root .mint-builder-nav__option:hover .mint-builder-nav__count {
+  background: #98FBCB;
+  box-shadow: 0 0 0 2px rgba(152, 251, 203, 0.45);
 }
 #mint-lms-root .mint-builder-nav__option--recent {
   color: #17222B;
   font-weight: 500;
 }
 #mint-lms-root .mint-builder-nav__option--recent:hover {
-  background: #F3F4F6;
-}
-#mint-lms-root .mint-builder-nav__count {
-  margin-left: auto;
-  flex: none;
-  min-width: 1.5em;
-  padding: 1px 7px;
-  border-radius: 999px;
-  background: #E8F7F0;
-  color: #0F0E1A;
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1.4;
-  text-align: center;
+  background: rgba(152, 251, 203, 0.28);
+  border-color: #98FBCB;
 }
 #mint-lms-root .mint-builder-nav__option--parent {
   padding: 0;
   gap: 0;
+  border: 0;
 }
 #mint-lms-root .mint-builder-nav__option--parent:hover {
   background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  transform: none;
 }
 #mint-lms-root .mint-builder-nav__option--parent:hover .mint-builder-nav__option-main,
 #mint-lms-root .mint-builder-nav__option--parent:hover .mint-builder-nav__toggle {
-  background: #F0FFF8;
+  background: rgba(152, 251, 203, 0.32);
 }
 #mint-lms-root .mint-builder-nav__toggle {
   flex: none;
@@ -700,7 +730,7 @@
   outline: none;
 }
 #mint-lms-root .mint-builder-nav__group-label:hover {
-  background: #F7F6FB;
+  background: rgba(152, 251, 203, 0.28);
 }
 #mint-lms-root .mint-builder-nav__group-label--static {
   cursor: default;
@@ -783,10 +813,10 @@
   outline: none;
 }
 #mint-lms-root .mint-builder-nav__option--quiz-child:hover {
-  background: #F0FFF8;
+  background: rgba(152, 251, 203, 0.28);
 }
 #mint-lms-root .mint-builder-nav__option--question-child:hover {
-  background: #F5F2FF;
+  background: rgba(152, 251, 203, 0.28);
 }
 #mint-lms-root .mint-builder-nav__empty {
   padding: 6px 10px 8px 28px;
@@ -801,23 +831,32 @@
   gap: 6px;
   padding: 9px 10px;
   border-radius: 8px;
-  border: 1.5px dashed rgba(15, 14, 26, 0.2);
-  background: transparent;
+  border: 1.5px dashed #98FBCB;
+  background: rgba(152, 251, 203, 0.12);
   font-family: inherit;
   font-size: 14px;
   font-weight: 700;
   color: #0F0E1A;
   cursor: pointer;
   outline: none;
-  transition: background-color 120ms ease-out, border-color 120ms ease-out;
+  transition: background-color 160ms ease, border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }
 #mint-lms-root .mint-builder-nav__add:hover:not(:disabled) {
-  background: #F3F4F6;
-  border-color: rgba(15, 14, 26, 0.45);
+  background: #98FBCB;
+  border-style: solid;
+  border-color: #98FBCB;
+  box-shadow: 0 8px 18px rgba(152, 251, 203, 0.55);
+  transform: translateY(-1px);
+}
+#mint-lms-root .mint-builder-nav__add:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
 }
 #mint-lms-root .mint-builder-nav__add:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 #mint-lms-root .mint-builder-nav__icon {
   width: 20px;
@@ -13471,6 +13510,8 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   max-height: calc(100vh - 40px);
   display: flex;
   flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
   padding: 26px;
   border: 1px solid #E4E1F0;
   border-radius: 22px;
@@ -13613,6 +13654,9 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   gap: 10px;
   padding-right: 4px;
   box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 
 #mint-lms-root .mint-existing-picker__empty {
@@ -13627,12 +13671,14 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
   max-width: 100%;
   height: auto;
+  min-width: 0;
   min-height: 0;
-  align-self: start;
+  align-self: stretch;
+  overflow: hidden;
   box-sizing: border-box;
   padding: 12px 14px;
   border: 1.5px solid #E4E1F0;
@@ -13667,11 +13713,18 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root .mint-existing-picker__row-copy {
-  flex: 1 1 auto;
+  flex: 1 1 0;
   min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 #mint-lms-root .mint-existing-picker__row-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  white-space: normal;
   font-size: 15px;
   font-weight: 600;
   color: #0F0E1A;
@@ -13697,7 +13750,8 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 
 #mint-lms-root .mint-existing-picker__add,
 #mint-lms-root button.mint-existing-picker__add {
-  flex: none;
+  flex: 0 0 auto;
+  flex-shrink: 0;
   align-self: center;
   height: 34px;
   margin: 0;
@@ -13713,6 +13767,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   white-space: nowrap;
   cursor: pointer;
   box-shadow: none !important;
+  overflow: visible;
   transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
 }
 
