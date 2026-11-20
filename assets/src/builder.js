@@ -1861,7 +1861,8 @@ function courseBuilder(courseId, opts = {}) {
     },
 
     /**
-     * Keep course-builder selection in the URL so refresh / share restores lesson, quiz, or question.
+     * Keep course-builder selection in the URL so refresh / share restores
+     * lesson group, lesson, quiz, or question.
      */
     syncBuilderSelectionUrl(options = {}) {
       try {
@@ -1869,9 +1870,12 @@ function courseBuilder(courseId, opts = {}) {
         const type = options.type ?? this.selected?.type ?? null;
 
         if (options.clearContent) {
-          ['lesson_id', 'quiz_id', 'question_id', 'tab'].forEach((key) => {
-            url.searchParams.delete(key);
-          });
+          ['mint_section', 'section_id', 'lesson_id', 'quiz_id', 'question_id', 'tab'].forEach(
+            (key) => {
+              url.searchParams.delete(key);
+            }
+          );
+          this.clearPersistedLessonGroupSelection();
           if (options.view) {
             url.searchParams.set('view', String(options.view));
           }
@@ -1906,9 +1910,12 @@ function courseBuilder(courseId, opts = {}) {
           } else {
             url.searchParams.delete('lesson_id');
           }
+          url.searchParams.delete('mint_section');
+          url.searchParams.delete('section_id');
           url.searchParams.delete('quiz_id');
           url.searchParams.delete('question_id');
           url.searchParams.delete('tab');
+          this.clearPersistedLessonGroupSelection();
         } else if (type === 'quiz') {
           const lessonId = Number(options.lessonId ?? this.selected?.lessonId ?? 0);
           const quizId = Number(
@@ -1918,8 +1925,11 @@ function courseBuilder(courseId, opts = {}) {
           else url.searchParams.delete('lesson_id');
           if (quizId > 0) url.searchParams.set('quiz_id', String(quizId));
           else url.searchParams.delete('quiz_id');
+          url.searchParams.delete('mint_section');
+          url.searchParams.delete('section_id');
           url.searchParams.delete('question_id');
           url.searchParams.delete('tab');
+          this.clearPersistedLessonGroupSelection();
           // Persist lesson→quiz context so Attach to Lesson stays prefilled after refresh.
           if (this.fromLessonOrigin) {
             url.searchParams.set('origin', 'lesson');
@@ -1941,6 +1951,9 @@ function courseBuilder(courseId, opts = {}) {
           else url.searchParams.delete('quiz_id');
           if (questionId > 0) url.searchParams.set('question_id', String(questionId));
           else url.searchParams.delete('question_id');
+          url.searchParams.delete('mint_section');
+          url.searchParams.delete('section_id');
+          this.clearPersistedLessonGroupSelection();
           // Persist quiz→question context so Attach to Quiz stays prefilled after refresh.
           // Prefer quiz origin whenever a quiz_id is present (Attach parent).
           const hasQuizParent =
@@ -1960,6 +1973,19 @@ function courseBuilder(courseId, opts = {}) {
             }
           }
         } else if (type === 'section') {
+          const sectionId = Number(
+            options.sectionId ?? this.selected?.id ?? this.selectedSection?.id ?? 0
+          );
+          if (sectionId > 0) {
+            // Mint-specific key (avoid generic section_id collisions).
+            url.searchParams.set('mint_section', String(sectionId));
+            url.searchParams.delete('section_id');
+            this.persistLessonGroupSelection(sectionId);
+          } else {
+            url.searchParams.delete('mint_section');
+            url.searchParams.delete('section_id');
+            this.clearPersistedLessonGroupSelection();
+          }
           url.searchParams.delete('lesson_id');
           url.searchParams.delete('quiz_id');
           url.searchParams.delete('question_id');
@@ -1974,11 +2000,69 @@ function courseBuilder(courseId, opts = {}) {
       }
     },
 
+    lessonGroupStorageKey() {
+      const courseId = Number(this.courseId) || 0;
+      return courseId > 0 ? `mintlms_course_${courseId}_section` : '';
+    },
+
+    persistLessonGroupSelection(sectionId) {
+      const key = this.lessonGroupStorageKey();
+      const sid = Number(sectionId) || 0;
+      if (!key || sid <= 0) return;
+      try {
+        window.sessionStorage.setItem(key, String(sid));
+      } catch {
+        // Ignore storage failures.
+      }
+    },
+
+    clearPersistedLessonGroupSelection() {
+      const key = this.lessonGroupStorageKey();
+      if (!key) return;
+      try {
+        window.sessionStorage.removeItem(key);
+      } catch {
+        // Ignore storage failures.
+      }
+    },
+
+    readPersistedLessonGroupSelection() {
+      const key = this.lessonGroupStorageKey();
+      if (!key) return 0;
+      try {
+        return parseInt(window.sessionStorage.getItem(key) || '0', 10) || 0;
+      } catch {
+        return 0;
+      }
+    },
+
+    /**
+     * Restore Lesson Group editor without selectItem() early-returns
+     * (e.g. from=lessons library chrome can block type=section).
+     */
+    restoreLessonGroupSelection(sectionId) {
+      const sid = Number(sectionId) || 0;
+      if (sid <= 0 || !this.isCourseBuilderSurface()) return false;
+      const section = (this.sections || []).find((row) => Number(row.id) === sid);
+      if (!section) return false;
+      this.overviewKind = null;
+      this.quizSettingsView = false;
+      this.lessonSettingsView = false;
+      this.expanded = { ...this.expanded, [sid]: true };
+      this.selected = { type: 'section', id: sid, sectionId: null };
+      this.refreshPreviewUrl?.();
+      this.syncBuilderSelectionUrl({ type: 'section', sectionId: sid });
+      return true;
+    },
+
     async selectFromQuery() {
       const params = new URLSearchParams(window.location.search);
       const questionId = parseInt(params.get('question_id') || '0', 10);
       const quizId = parseInt(params.get('quiz_id') || '0', 10);
       const lessonId = parseInt(params.get('lesson_id') || '0', 10);
+      const sectionId =
+        parseInt(params.get('mint_section') || params.get('section_id') || '0', 10) ||
+        this.readPersistedLessonGroupSelection();
 
       if (questionId > 0) {
         let row = this.courseQuestions.find((item) => Number(item.id) === questionId);
@@ -2040,24 +2124,30 @@ function courseBuilder(courseId, opts = {}) {
         return;
       }
 
-      if (!lessonId) return;
-
-      for (const section of this.sections) {
-        const lesson = (section.lessons || []).find((item) => Number(item.id) === lessonId);
-        if (lesson) {
-          this.expanded[section.id] = true;
-          this.selectItem('lesson', lesson.id, section.id);
-          if (this.preferredLessonTab && this.preferredLessonTab !== 'quiz') {
-            this.lessonTab = this.preferredLessonTab;
+      if (lessonId > 0) {
+        for (const section of this.sections) {
+          const lesson = (section.lessons || []).find((item) => Number(item.id) === lessonId);
+          if (lesson) {
+            this.expanded[section.id] = true;
+            this.selectItem('lesson', lesson.id, section.id);
+            if (this.preferredLessonTab && this.preferredLessonTab !== 'quiz') {
+              this.lessonTab = this.preferredLessonTab;
+            }
+            return;
           }
-          return;
         }
+
+        // Lesson exists in URL but is not yet in the tree payload — still open the editor.
+        this.selectItem('lesson', lessonId, this.resolveSectionIdForLesson(lessonId) || 0);
+        if (this.preferredLessonTab && this.preferredLessonTab !== 'quiz') {
+          this.lessonTab = this.preferredLessonTab;
+        }
+        return;
       }
 
-      // Lesson exists in URL but is not yet in the tree payload — still open the editor.
-      this.selectItem('lesson', lessonId, this.resolveSectionIdForLesson(lessonId) || 0);
-      if (this.preferredLessonTab && this.preferredLessonTab !== 'quiz') {
-        this.lessonTab = this.preferredLessonTab;
+      // Lesson Group editor: restore via ?mint_section= (or legacy section_id / session).
+      if (sectionId > 0) {
+        this.restoreLessonGroupSelection(sectionId);
       }
     },
 
@@ -4711,9 +4801,12 @@ function courseBuilder(courseId, opts = {}) {
         }
         url.searchParams.set('view', view);
         // Clear content selection in the URL, but KEEP from/origin so parents restore.
-        ['quiz_id', 'question_id', 'tab', 'open_nav'].forEach((key) => {
-          url.searchParams.delete(key);
-        });
+        ['mint_section', 'section_id', 'quiz_id', 'question_id', 'tab', 'open_nav'].forEach(
+          (key) => {
+            url.searchParams.delete(key);
+          }
+        );
+        this.clearPersistedLessonGroupSelection();
         // Standalone lesson shell must keep lesson_id or Overview loses the parent context.
         if (this.isStandalone && Number(this.standaloneLessonId) > 0) {
           url.searchParams.set('lesson_id', String(this.standaloneLessonId));
@@ -4821,9 +4914,20 @@ function courseBuilder(courseId, opts = {}) {
       const url = new URL(base, window.location.href);
       url.searchParams.set('course_id', String(this.courseId));
       url.searchParams.set('view', view);
-      ['lesson_id', 'quiz_id', 'question_id', 'tab', 'from', 'origin', 'open_nav'].forEach((key) => {
+      [
+        'mint_section',
+        'section_id',
+        'lesson_id',
+        'quiz_id',
+        'question_id',
+        'tab',
+        'from',
+        'origin',
+        'open_nav',
+      ].forEach((key) => {
         url.searchParams.delete(key);
       });
+      this.clearPersistedLessonGroupSelection();
       window.location.assign(url.toString());
     },
 
@@ -5763,6 +5867,7 @@ function courseBuilder(courseId, opts = {}) {
       this.syncBuilderSelectionUrl({
         type,
         lessonId: type === 'lesson' ? id : undefined,
+        sectionId: type === 'section' ? id : undefined,
       });
     },
 
@@ -9592,7 +9697,10 @@ function courseBuilder(courseId, opts = {}) {
         });
       } else if (this.selected?.type === 'section' && this.selectedSection) {
         saved = (await this.saveSection(this.selectedSection, { toast: false })) === true;
-        this.syncBuilderSelectionUrl({ type: 'section' });
+        this.syncBuilderSelectionUrl({
+          type: 'section',
+          sectionId: Number(this.selectedSection.id) || Number(this.selected?.id) || 0,
+        });
       } else {
         window.MintLMS.toast.info('Nothing to save here');
         return;
