@@ -3890,6 +3890,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 					:aria-label="existingPickerSearchPlaceholder()"
 					autocomplete="off"
 					x-model="existingPicker.search"
+					@input="onExistingPickerSearchInput()"
 					:disabled="existingPicker.loading || existingPicker.busy"
 				/>
 			</div>
@@ -3904,7 +3905,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 				<template x-if="!existingPicker.loading && !existingPicker.error && filteredExistingPickerItems().length === 0">
 					<div class="mint-existing-picker__empty" x-text="existingPickerEmptyLabel()"></div>
 				</template>
-				<template x-for="item in filteredExistingPickerItems()" :key="'existing-' + existingPicker.kind + '-' + item.id">
+				<template x-for="item in pagedExistingPickerItems()" :key="'existing-' + existingPicker.kind + '-' + item.id">
 					<div
 						class="mint-existing-picker__row"
 						:class="{ 'is-added': isExistingPickerAdded(item) }"
@@ -3981,6 +3982,33 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 					x-show="!existingPicker.loading && !existingPicker.error"
 					x-text="existingPickerCountLabel()"
 				></span>
+				<div
+					class="mint-existing-picker__pager"
+					x-show="!existingPicker.loading && !existingPicker.error && filteredExistingPickerItems().length > 0"
+					x-cloak
+				>
+					<button
+						type="button"
+						class="mint-existing-picker__pg-arrow"
+						aria-label="<?php echo esc_attr__( 'Previous page', 'mint-lms' ); ?>"
+						data-tip="<?php echo esc_attr__( 'Previous page', 'mint-lms' ); ?>"
+						:disabled="existingPickerCurrentPage() <= 1"
+						@click="existingPickerPrevPage()"
+					>
+						<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 4.5-6 5.5 6 5.5" /></svg>
+					</button>
+					<span class="mint-existing-picker__pg-label" x-text="existingPickerPageLabel()"></span>
+					<button
+						type="button"
+						class="mint-existing-picker__pg-arrow"
+						aria-label="<?php echo esc_attr__( 'Next page', 'mint-lms' ); ?>"
+						data-tip="<?php echo esc_attr__( 'Next page', 'mint-lms' ); ?>"
+						:disabled="existingPickerCurrentPage() >= existingPickerPageTotal()"
+						@click="existingPickerNextPage()"
+					>
+						<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 4.5 6 5.5-6 5.5" /></svg>
+					</button>
+				</div>
 				<button type="button" class="mint-existing-picker__done" @click="closeExistingPicker()">
 					<?php esc_html_e( 'Done', 'mint-lms' ); ?>
 				</button>
