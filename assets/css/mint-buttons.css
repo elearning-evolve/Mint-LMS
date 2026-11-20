@@ -486,6 +486,110 @@
   box-shadow: var(--mint-btn-glow-danger-active) !important;
 }
 
+/*
+ * Overview / list / attach / preview row actions —
+ * Lesson, Lesson Group, Quiz interfaces: Edit, Remove, Collapse, Expand, Add to lesson.
+ */
+#mint-lms-root .mint-lesson-quizzes__edit,
+#mint-lms-root button.mint-lesson-quizzes__edit,
+#mint-lms-root .mint-lesson-quizzes__remove,
+#mint-lms-root button.mint-lesson-quizzes__remove,
+#mint-lms-root .mint-builder-tree-page__edit,
+#mint-lms-root button.mint-builder-tree-page__edit,
+#mint-lms-root .mint-builder-tree-page__remove,
+#mint-lms-root button.mint-builder-tree-page__remove,
+#mint-lms-root .mint-builder-tree-page__collapse,
+#mint-lms-root button.mint-builder-tree-page__collapse,
+#mint-lms-root .mint-builder-tree-page__toggle,
+#mint-lms-root button.mint-builder-tree-page__toggle,
+#mint-lms-root .mint-section-lessons__remove,
+#mint-lms-root button.mint-section-lessons__remove,
+#mint-lms-root .mint-assoc-card__remove,
+#mint-lms-root button.mint-assoc-card__remove,
+#mint-lms-root .mint-qeditor__remove,
+#mint-lms-root button.mint-qeditor__remove,
+#mint-lms-root .mint-quiz-attach__submit,
+#mint-lms-root button.mint-quiz-attach__submit {
+  transition: var(--mint-btn-transition);
+}
+
+/* Filled Edit / Add to lesson */
+#mint-lms-root .mint-lesson-quizzes__edit:hover:not(:disabled),
+#mint-lms-root button.mint-lesson-quizzes__edit:hover:not(:disabled),
+#mint-lms-root .mint-quiz-attach__submit:hover:not(:disabled),
+#mint-lms-root button.mint-quiz-attach__submit:hover:not(:disabled),
+#mint-lms-root .mint-quiz-attach__submit:focus-visible:not(:disabled),
+#mint-lms-root button.mint-quiz-attach__submit:focus-visible:not(:disabled) {
+  background-color: var(--mint-cta-hover) !important;
+  color: var(--mint-cta-ink) !important;
+  filter: none !important;
+  transform: translateY(-2px) !important;
+  box-shadow: var(--mint-btn-glow) !important;
+}
+
+#mint-lms-root .mint-lesson-quizzes__edit:active:not(:disabled),
+#mint-lms-root button.mint-lesson-quizzes__edit:active:not(:disabled),
+#mint-lms-root .mint-quiz-attach__submit:active:not(:disabled),
+#mint-lms-root button.mint-quiz-attach__submit:active:not(:disabled) {
+  background-color: var(--mint-cta-active) !important;
+  transform: translateY(0) !important;
+  box-shadow: var(--mint-btn-glow-active) !important;
+}
+
+/* Danger Remove (pill / outline) */
+#mint-lms-root .mint-lesson-quizzes__remove:hover:not(:disabled),
+#mint-lms-root button.mint-lesson-quizzes__remove:hover:not(:disabled) {
+  background-color: var(--mint-danger-wash) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: var(--mint-btn-glow-danger) !important;
+}
+
+#mint-lms-root .mint-lesson-quizzes__remove:active:not(:disabled),
+#mint-lms-root button.mint-lesson-quizzes__remove:active:not(:disabled) {
+  transform: translateY(0) !important;
+  box-shadow: var(--mint-btn-glow-danger-active) !important;
+}
+
+/* Text-link Edit / Remove / Collapse / chevron — lift only (keep look) */
+#mint-lms-root .mint-builder-tree-page__edit:hover,
+#mint-lms-root button.mint-builder-tree-page__edit:hover,
+#mint-lms-root .mint-builder-tree-page__remove:hover,
+#mint-lms-root button.mint-builder-tree-page__remove:hover,
+#mint-lms-root .mint-builder-tree-page__collapse:hover,
+#mint-lms-root button.mint-builder-tree-page__collapse:hover,
+#mint-lms-root .mint-builder-tree-page__toggle:hover,
+#mint-lms-root button.mint-builder-tree-page__toggle:hover,
+#mint-lms-root .mint-section-lessons__remove:hover,
+#mint-lms-root button.mint-section-lessons__remove:hover,
+#mint-lms-root .mint-assoc-card__remove:hover:not(:disabled),
+#mint-lms-root button.mint-assoc-card__remove:hover:not(:disabled),
+#mint-lms-root .mint-qeditor__remove:hover:not(:disabled),
+#mint-lms-root button.mint-qeditor__remove:hover:not(:disabled) {
+  transform: translateY(-2px) !important;
+}
+
+#mint-lms-root .mint-builder-tree-page__collapse:hover,
+#mint-lms-root button.mint-builder-tree-page__collapse:hover {
+  background: rgba(152, 251, 203, 0.18) !important;
+}
+
+#mint-lms-root .mint-builder-tree-page__edit:active,
+#mint-lms-root button.mint-builder-tree-page__edit:active,
+#mint-lms-root .mint-builder-tree-page__remove:active,
+#mint-lms-root button.mint-builder-tree-page__remove:active,
+#mint-lms-root .mint-builder-tree-page__collapse:active,
+#mint-lms-root button.mint-builder-tree-page__collapse:active,
+#mint-lms-root .mint-builder-tree-page__toggle:active,
+#mint-lms-root button.mint-builder-tree-page__toggle:active,
+#mint-lms-root .mint-section-lessons__remove:active,
+#mint-lms-root button.mint-section-lessons__remove:active,
+#mint-lms-root .mint-assoc-card__remove:active:not(:disabled),
+#mint-lms-root button.mint-assoc-card__remove:active:not(:disabled),
+#mint-lms-root .mint-qeditor__remove:active:not(:disabled),
+#mint-lms-root button.mint-qeditor__remove:active:not(:disabled) {
+  transform: translateY(0) !important;
+}
+
 /* ── Disabled: no motion ─────────────────────────────────── */
 
 #mint-lms-root .mint-btn:disabled,

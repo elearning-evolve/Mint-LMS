@@ -2310,11 +2310,13 @@
   font-weight: 600;
   color: #0F0E1A;
   cursor: pointer;
+  transition: var(--mint-btn-transition);
 }
 
 #mint-lms-root .mint-builder-tree-page__collapse:hover {
-  background: #F0FFF8;
+  background: rgba(152, 251, 203, 0.18);
   text-decoration: none;
+  transform: translateY(-2px);
 }
 
 /* Design file: mint border + mint glow box */
@@ -2487,6 +2489,7 @@
   color: #5C5C77;
   cursor: pointer;
   padding: 0;
+  transition: var(--mint-btn-transition);
 }
 
 #mint-lms-root .mint-builder-tree-page__toggle svg {
@@ -2583,6 +2586,7 @@
   white-space: nowrap;
   cursor: pointer;
   box-shadow: none;
+  transition: var(--mint-btn-transition);
 }
 
 #mint-lms-root .mint-builder-tree-page__edit {
@@ -2593,6 +2597,7 @@
   color: #083D31;
   text-decoration: underline;
   background: transparent;
+  transform: translateY(-2px);
 }
 
 #mint-lms-root .mint-builder-tree-page__remove {
@@ -2603,6 +2608,13 @@
   color: #A93226;
   text-decoration: underline;
   background: transparent;
+  transform: translateY(-2px);
+}
+
+#mint-lms-root .mint-builder-tree-page__toggle:hover {
+  background: rgba(152, 251, 203, 0.18);
+  color: #0F0E1A;
+  transform: translateY(-2px);
 }
 
 #mint-lms-root .mint-builder-tree-page__meta {
@@ -10313,7 +10325,15 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 #mint-lms-root button.mint-quiz-attach__submit:hover:not(:disabled),
 #mint-lms-root button.mint-quiz-attach__submit:focus-visible:not(:disabled) {
-  filter: brightness(0.97);
+  background: var(--mint-cta-hover);
+  filter: none;
+  box-shadow: var(--mint-btn-glow);
+  transform: translateY(-2px);
+}
+#mint-lms-root button.mint-quiz-attach__submit:active:not(:disabled) {
+  background: var(--mint-cta-active);
+  box-shadow: var(--mint-btn-glow-active);
+  transform: translateY(0);
 }
 #mint-lms-root button.mint-quiz-attach__submit:disabled {
   opacity: 0.45;
@@ -11900,10 +11920,13 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   cursor: pointer;
   flex: none;
   white-space: nowrap;
+  transition: var(--mint-btn-transition);
 }
 
 #mint-lms-root button.mint-lesson-quizzes__edit:hover {
   background: #7FE8B8;
+  box-shadow: var(--mint-btn-glow);
+  transform: translateY(-2px);
 }
 
 #mint-lms-root .mint-lesson-quizzes__remove,
@@ -11920,10 +11943,13 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   cursor: pointer;
   flex: none;
   white-space: nowrap;
+  transition: var(--mint-btn-transition);
 }
 
 #mint-lms-root button.mint-lesson-quizzes__remove:hover {
   background: #FBE9E9;
+  box-shadow: var(--mint-btn-glow-danger);
+  transform: translateY(-2px);
 }
 
 #mint-lms-root .mint-lesson-add-quiz,
