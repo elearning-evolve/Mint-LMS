@@ -13951,6 +13951,270 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   to { opacity: 1; transform: none; }
 }
 
+/* Mint Move confirm (Add Existing when already linked) — design: Move Lesson Popup */
+#mint-lms-root .mint-move-confirm {
+  position: fixed;
+  inset: 0;
+  z-index: 100070;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  animation: mint-existing-picker-fade 0.2s ease both;
+}
+
+#mint-lms-root .mint-move-confirm__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 14, 26, 0.35);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
+#mint-lms-root .mint-move-confirm__dialog {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 460px;
+  padding: 28px;
+  border-radius: 22px;
+  background: #FFFFFF;
+  border: 1px solid #E4E1F0;
+  box-shadow:
+    0 30px 70px rgba(15, 14, 26, 0.18),
+    0 0 0 6px rgba(152, 251, 203, 0.18);
+  font-family: var(--mint-font);
+  color: #0F0E1A;
+  box-sizing: border-box;
+  animation: mint-existing-picker-pop 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+#mint-lms-root .mint-move-confirm__close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: #0F0E1A;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+#mint-lms-root .mint-move-confirm__close:hover {
+  background: rgba(152, 251, 203, 0.22);
+}
+
+#mint-lms-root .mint-move-confirm__close:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
+}
+
+#mint-lms-root .mint-move-confirm__top {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+#mint-lms-root .mint-move-confirm__icon {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: #98FBCB;
+  color: #0F0E1A;
+}
+
+#mint-lms-root .mint-move-confirm__title {
+  margin: 2px 36px 0 0;
+  padding: 0;
+  font-family: var(--mint-font);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 28px;
+  letter-spacing: -0.02em;
+  color: #0F0E1A;
+}
+
+#mint-lms-root .mint-move-confirm__body {
+  margin: 16px 0 0 62px;
+  padding: 0;
+  font-family: var(--mint-font);
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 24px;
+  color: #5C5C77;
+}
+
+#mint-lms-root .mint-move-confirm__body b {
+  color: #0F0E1A;
+  font-weight: 700;
+}
+
+#mint-lms-root .mint-move-confirm__note {
+  margin: 16px 0 0 62px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(152, 251, 203, 0.12);
+  border: 1px dashed #98FBCB;
+  font-family: var(--mint-font);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 21px;
+  color: #33334A;
+}
+
+#mint-lms-root .mint-move-confirm__foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 26px;
+}
+
+#mint-lms-root .mint-move-confirm__cancel,
+#mint-lms-root button.mint-move-confirm__cancel {
+  height: 46px;
+  margin: 0;
+  padding: 0 16px;
+  border: none;
+  border-radius: 12px;
+  background: none !important;
+  color: #5C5C77 !important;
+  font-family: var(--mint-font);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: none !important;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+#mint-lms-root button.mint-move-confirm__cancel:hover {
+  color: #0F0E1A !important;
+  background: rgba(152, 251, 203, 0.12) !important;
+}
+
+#mint-lms-root button.mint-move-confirm__cancel:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55) !important;
+}
+
+#mint-lms-root .mint-move-confirm__submit,
+#mint-lms-root button.mint-move-confirm__submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 46px;
+  margin: 0;
+  padding: 0 20px;
+  border-radius: 12px;
+  border: 1.5px solid #98FBCB !important;
+  background: #98FBCB !important;
+  color: #0F0E1A !important;
+  font-family: var(--mint-font);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: none !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+#mint-lms-root button.mint-move-confirm__submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(152, 251, 203, 0.6) !important;
+}
+
+#mint-lms-root button.mint-move-confirm__submit:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(152, 251, 203, 0.45) !important;
+}
+
+#mint-lms-root button.mint-move-confirm__submit:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55) !important;
+}
+
+#mint-lms-root button.mint-move-confirm__submit.is-busy,
+#mint-lms-root button.mint-move-confirm__submit:disabled {
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+#mint-lms-root .mint-move-confirm__arw {
+  display: inline-flex;
+  width: 0;
+  opacity: 0;
+  overflow: hidden;
+  transform: translateX(-6px);
+  transition: width 0.25s ease, opacity 0.2s ease, transform 0.25s ease;
+}
+
+#mint-lms-root button.mint-move-confirm__submit:hover:not(:disabled) .mint-move-confirm__arw {
+  width: 14px;
+  opacity: 1;
+  transform: translateX(0);
+}
+
+#mint-lms-root .mint-move-confirm__arw svg {
+  flex: none;
+}
+
+@media (max-width: 480px) {
+  #mint-lms-root .mint-move-confirm__dialog {
+    padding: 22px;
+  }
+
+  #mint-lms-root .mint-move-confirm__top {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  #mint-lms-root .mint-move-confirm__title {
+    font-size: 20px;
+    line-height: 26px;
+  }
+
+  #mint-lms-root .mint-move-confirm__body,
+  #mint-lms-root .mint-move-confirm__note {
+    margin-left: 0;
+  }
+
+  #mint-lms-root .mint-move-confirm__foot {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  #mint-lms-root button.mint-move-confirm__cancel,
+  #mint-lms-root button.mint-move-confirm__submit {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #mint-lms-root .mint-move-confirm,
+  #mint-lms-root .mint-move-confirm__dialog,
+  #mint-lms-root .mint-move-confirm__arw,
+  #mint-lms-root button.mint-move-confirm__submit {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
 #mint-lms-root .mint-section-lessons__footer {
   margin-top: 22px;
   display: flex;

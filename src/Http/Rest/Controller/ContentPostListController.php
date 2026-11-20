@@ -496,6 +496,11 @@ final class ContentPostListController {
 			$answerTypePending = is_array( $settings ) && ! empty( $settings['answerTypePending'] );
 		}
 
+		$courseTitle  = $this->postTitleForId( $courseId );
+		$lessonTitle  = ( 'lessons' === $type ) ? ( '' !== $title ? $title : __( '(no title)', 'mint-lms' ) ) : $this->postTitleForId( $lessonId );
+		$quizTitle    = ( 'quizzes' === $type ) ? ( '' !== $title ? $title : __( '(no title)', 'mint-lms' ) ) : $this->postTitleForId( $quizId );
+		$sectionTitle = ( 'lessons' === $type ) ? $this->sectionTitleForId( $sectionId ) : '';
+
 		return array(
 			'id'                => (int) $post->ID,
 			'title'             => '' !== $title ? $title : __( '(no title)', 'mint-lms' ),
@@ -507,10 +512,46 @@ final class ContentPostListController {
 			'sectionId'         => $sectionId,
 			'lessonId'          => $lessonId,
 			'quizId'            => $quizId,
+			'courseTitle'       => $courseTitle,
+			'sectionTitle'      => $sectionTitle,
+			'lessonTitle'       => $lessonTitle,
+			'quizTitle'         => $quizTitle,
 			'disposableHost'    => $disposableHost,
 			'questionType'      => $questionType,
 			'answerTypePending' => $answerTypePending,
 		);
+	}
+
+	private function postTitleForId( int $postId ): string {
+		if ( $postId <= 0 ) {
+			return '';
+		}
+		$post = get_post( $postId );
+		if ( ! $post instanceof \WP_Post ) {
+			return '';
+		}
+		$title = trim( (string) $post->post_title );
+		return '' !== $title ? $title : __( '(no title)', 'mint-lms' );
+	}
+
+	private function sectionTitleForId( int $sectionId ): string {
+		if ( $sectionId <= 0 ) {
+			return '';
+		}
+		global $wpdb;
+		if ( ! $wpdb instanceof \wpdb ) {
+			return '';
+		}
+		$table = Schema::validateTable( Schema::sectionsTable( $wpdb->prefix ), $wpdb->prefix );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; list serialize.
+		$title = $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT title FROM %i WHERE id = %d',
+				$table,
+				$sectionId
+			)
+		);
+		return is_string( $title ) ? trim( $title ) : '';
 	}
 
 	private function questionTypeForPost( int $postId ): string {
