@@ -534,7 +534,10 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 							x-cloak
 						>
 							<div class="mint-assoc-card__badge"><?php esc_html_e( 'Linked quiz', 'mint-lms' ); ?></div>
-							<div class="mint-assoc-card__current mint-truncate" x-text="breadcrumbQuizLabel() || t('quiz')"></div>
+							<div class="mint-assoc-card__current-row">
+								<div class="mint-assoc-card__current mint-truncate" x-text="breadcrumbQuizLabel() || t('quiz')"></div>
+								<span class="mint-count-chip" x-show="attachRailCountLabel()" x-cloak x-text="attachRailCountLabel()"></span>
+							</div>
 							<template x-if="!attach.changing">
 								<div class="mint-assoc-card__actions">
 									<button type="button" class="mint-lesson-choose-file" :disabled="attaching" @click="startChangeQuiz()"><?php esc_html_e( 'Change', 'mint-lms' ); ?></button>
@@ -773,7 +776,10 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 							x-cloak
 						>
 							<div class="mint-assoc-card__badge"><?php esc_html_e( 'Linked lesson', 'mint-lms' ); ?></div>
-							<div class="mint-assoc-card__current mint-truncate" x-text="breadcrumbParentLessonTitle() || breadcrumbQuizContextTitle() || t('lesson')"></div>
+							<div class="mint-assoc-card__current-row">
+								<div class="mint-assoc-card__current mint-truncate" x-text="breadcrumbParentLessonTitle() || breadcrumbQuizContextTitle() || t('lesson')"></div>
+								<span class="mint-count-chip" x-show="attachRailCountLabel()" x-cloak x-text="attachRailCountLabel()"></span>
+							</div>
 							<template x-if="!attach.changing">
 								<div class="mint-assoc-card__actions">
 									<button type="button" class="mint-lesson-choose-file" :disabled="attaching" @click="startChangeLesson()"><?php esc_html_e( 'Change', 'mint-lms' ); ?></button>
@@ -940,7 +946,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 											/>
 										</template>
 									</span>
-									<span class="mint-tree-item__meta" x-text="sectionChildCountLabel(section)"></span>
+									<span class="mint-tree-item__meta mint-count-chip" x-text="sectionChildCountLabel(section)"></span>
 								</div>
 
 								<div
@@ -1008,7 +1014,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 														/>
 													</template>
 												</span>
-												<span class="mint-tree-item__meta" x-text="lessonChildCountLabel(lesson)"></span>
+												<span class="mint-tree-item__meta mint-count-chip" x-text="lessonChildCountLabel(lesson)"></span>
 											</div>
 
 											<template x-if="isLessonVisibleInTree(lesson.id) && filteredQuizzesForLesson(lesson).length">
@@ -1048,7 +1054,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 																<span class="mint-tree-item__body mint-min-w-0 mint-flex-1">
 																	<span class="mint-tree-item__title mint-truncate" x-text="quiz.title || t('newQuiz')"></span>
 																</span>
-																<span class="mint-tree-item__meta" x-text="quizChildCountLabel(quiz)"></span>
+																<span class="mint-tree-item__meta mint-count-chip" x-text="quizChildCountLabel(quiz)"></span>
 															</div>
 															<div class="mint-tree-branch__children" x-show="isQuizVisibleInTree(quiz.id) && filteredQuestionsForQuiz(quiz).length">
 																<template x-for="question in filteredQuestionsForQuiz(quiz)" :key="'lq-q-' + question.id">
@@ -1158,7 +1164,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 													/>
 												</template>
 											</span>
-											<span class="mint-tree-item__meta" x-text="lessonChildCountLabel(lesson)"></span>
+											<span class="mint-tree-item__meta mint-count-chip" x-text="lessonChildCountLabel(lesson)"></span>
 										</div>
 
 										<div
@@ -1200,7 +1206,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 														<span class="mint-tree-item__body mint-min-w-0 mint-flex-1">
 															<span class="mint-tree-item__title mint-truncate" x-text="quiz.title || t('newQuiz')"></span>
 														</span>
-														<span class="mint-tree-item__meta" x-text="quizChildCountLabel(quiz)"></span>
+														<span class="mint-tree-item__meta mint-count-chip" x-text="quizChildCountLabel(quiz)"></span>
 													</div>
 
 													<div class="mint-tree-branch__children" x-show="isQuizExpanded(quiz.id) && sidebarQuestionsForQuiz(quiz).length">
@@ -1290,7 +1296,10 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 					x-cloak
 				>
 					<div class="mint-assoc-card__badge"><?php esc_html_e( 'Linked lesson', 'mint-lms' ); ?></div>
-					<div class="mint-assoc-card__current mint-truncate" x-text="breadcrumbParentLessonTitle() || breadcrumbQuizContextTitle() || t('lesson')"></div>
+					<div class="mint-assoc-card__current-row">
+						<div class="mint-assoc-card__current mint-truncate" x-text="breadcrumbParentLessonTitle() || breadcrumbQuizContextTitle() || t('lesson')"></div>
+						<span class="mint-count-chip" x-show="attachRailCountLabel()" x-cloak x-text="attachRailCountLabel()"></span>
+					</div>
 					<div class="mint-assoc-card__actions" x-show="!attach.changing" x-cloak>
 						<button type="button" class="mint-lesson-choose-file" :disabled="attaching" @click="startChangeLesson()"><?php esc_html_e( 'Change', 'mint-lms' ); ?></button>
 						<button type="button" class="mint-assoc-card__remove" :disabled="attaching" @click="detachQuizFromLesson()"><?php esc_html_e( 'Remove', 'mint-lms' ); ?></button>
@@ -1343,7 +1352,10 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 					x-cloak
 				>
 					<div class="mint-assoc-card__badge"><?php esc_html_e( 'Linked quiz', 'mint-lms' ); ?></div>
-					<div class="mint-assoc-card__current mint-truncate" x-text="breadcrumbQuizLabel() || t('quiz')"></div>
+					<div class="mint-assoc-card__current-row">
+						<div class="mint-assoc-card__current mint-truncate" x-text="breadcrumbQuizLabel() || t('quiz')"></div>
+						<span class="mint-count-chip" x-show="attachRailCountLabel()" x-cloak x-text="attachRailCountLabel()"></span>
+					</div>
 					<div class="mint-assoc-card__actions" x-show="!attach.changing" x-cloak>
 						<button type="button" class="mint-lesson-choose-file" :disabled="attaching" @click="startChangeQuiz()"><?php esc_html_e( 'Change', 'mint-lms' ); ?></button>
 						<button type="button" class="mint-assoc-card__remove" :disabled="attaching" @click="detachQuestionFromQuiz()"><?php esc_html_e( 'Remove', 'mint-lms' ); ?></button>
@@ -1395,7 +1407,10 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 					x-show="selected?.type === 'lesson' && selectedLesson?.id && !fromQuizzes"
 				>
 					<div class="mint-assoc-card__badge"><?php esc_html_e( 'Linked course', 'mint-lms' ); ?></div>
-					<div class="mint-assoc-card__current mint-truncate" x-text="breadcrumbCourseTitle() || t('course')"></div>
+					<div class="mint-assoc-card__current-row">
+						<div class="mint-assoc-card__current mint-truncate" x-text="breadcrumbCourseTitle() || t('course')"></div>
+						<span class="mint-count-chip" x-show="attachRailCountLabel()" x-cloak x-text="attachRailCountLabel()"></span>
+					</div>
 					<template x-if="!attach.changing">
 						<div class="mint-assoc-card__actions">
 							<button type="button" class="mint-lesson-choose-file" :disabled="attaching" @click="startChangeCourse()"><?php esc_html_e( 'Change', 'mint-lms' ); ?></button>
@@ -1511,7 +1526,10 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 					x-cloak
 				>
 					<div class="mint-assoc-card__badge"><?php esc_html_e( 'Linked course', 'mint-lms' ); ?></div>
-					<div class="mint-assoc-card__current mint-truncate" x-text="breadcrumbCourseTitle() || t('course')"></div>
+					<div class="mint-assoc-card__current-row">
+						<div class="mint-assoc-card__current mint-truncate" x-text="breadcrumbCourseTitle() || t('course')"></div>
+						<span class="mint-count-chip" x-show="attachRailCountLabel()" x-cloak x-text="attachRailCountLabel()"></span>
+					</div>
 					<div class="mint-assoc-card__actions">
 						<button type="button" class="mint-assoc-card__remove" :disabled="attaching" @click="detachLessonFromCourse()"><?php esc_html_e( 'Remove', 'mint-lms' ); ?></button>
 					</div>
@@ -1560,7 +1578,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 													</span>
 													<div class="mint-builder-tree-page__identity">
 														<span class="mint-builder-tree-page__name mint-truncate" x-text="lesson.title || t('untitledLesson')"></span>
-														<span class="mint-builder-tree-page__meta" x-text="lessonChildCountLabel(lesson)"></span>
+														<span class="mint-builder-tree-page__meta mint-count-chip" x-text="lessonChildCountLabel(lesson)"></span>
 													</div>
 													<button type="button" class="mint-builder-tree-page__new" :disabled="addingCourseQuiz" @click.stop="treePageStartAddQuiz(lesson, 0)">
 														<svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M10 5v10M5 10h10"/></svg>
@@ -1585,7 +1603,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 																</span>
 																<div class="mint-builder-tree-page__identity">
 																	<span class="mint-builder-tree-page__name mint-truncate" x-text="quiz.title || t('untitledQuiz')"></span>
-																	<span class="mint-builder-tree-page__meta" x-text="quizChildCountLabel(quiz)"></span>
+																	<span class="mint-builder-tree-page__meta mint-count-chip" x-text="quizChildCountLabel(quiz)"></span>
 																</div>
 																<button type="button" class="mint-builder-tree-page__new" :disabled="quizSaving" @click.stop="treePageStartAddQuestion(quiz)">
 																	<svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M10 5v10M5 10h10"/></svg>
@@ -1694,7 +1712,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 											</span>
 											<div class="mint-builder-tree-page__identity">
 												<span class="mint-builder-tree-page__name mint-truncate" x-text="section.title || t('untitledLessonGroup')"></span>
-												<span class="mint-builder-tree-page__meta" x-text="sectionChildCountLabel(section)"></span>
+												<span class="mint-builder-tree-page__meta mint-count-chip" x-text="sectionChildCountLabel(section)"></span>
 											</div>
 											<button type="button" class="mint-builder-tree-page__new" :disabled="addingLesson" @click.stop="treePageStartAddLesson(section.id)">
 												<svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M10 5v10M5 10h10"/></svg>
@@ -1719,7 +1737,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 														</span>
 														<div class="mint-builder-tree-page__identity">
 															<span class="mint-builder-tree-page__name mint-truncate" x-text="lesson.title || t('untitledLesson')"></span>
-															<span class="mint-builder-tree-page__meta" x-text="lessonChildCountLabel(lesson)"></span>
+															<span class="mint-builder-tree-page__meta mint-count-chip" x-text="lessonChildCountLabel(lesson)"></span>
 														</div>
 														<button type="button" class="mint-builder-tree-page__new" :disabled="addingCourseQuiz" @click.stop="treePageStartAddQuiz({ ...lesson, sectionId: section.id }, section.id)">
 															<svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M10 5v10M5 10h10"/></svg>
@@ -1745,7 +1763,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 																	</span>
 																	<div class="mint-builder-tree-page__identity">
 																		<span class="mint-builder-tree-page__name mint-truncate" x-text="quiz.title || t('untitledQuiz')"></span>
-																		<span class="mint-builder-tree-page__meta" x-text="quizChildCountLabel(quiz)"></span>
+																		<span class="mint-builder-tree-page__meta mint-count-chip" x-text="quizChildCountLabel(quiz)"></span>
 																	</div>
 																	<button type="button" class="mint-builder-tree-page__new" :disabled="quizSaving" @click.stop="treePageStartAddQuestion({ ...quiz, sectionId: section.id })">
 																		<svg width="12" height="12" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M10 5v10M5 10h10"/></svg>
@@ -1956,10 +1974,12 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 													</span>
 													<div class="mint-builder-overview__card-body">
 														<div class="mint-builder-overview__card-title mint-truncate" x-text="item.title || t('untitledLessonGroup')"></div>
-														<div class="mint-builder-overview__card-meta" x-text="item.meta"></div>
+														<span class="mint-count-chip" x-text="item.countLabel || item.meta"></span>
 													</div>
 												</div>
-												<div class="mint-builder-overview__td mint-builder-overview__td--count" role="cell" data-col="<?php echo esc_attr__( 'Lessons', 'mint-lms' ); ?>" x-text="item.lessonCount"></div>
+												<div class="mint-builder-overview__td mint-builder-overview__td--count" role="cell" data-col="<?php echo esc_attr__( 'Lessons', 'mint-lms' ); ?>">
+													<span class="mint-count-chip" x-text="item.countLabel || ((item.lessonCount || 0) + ' lessons')"></span>
+												</div>
 												<div class="mint-builder-overview__td mint-builder-overview__td--updated" role="cell" x-text="item.updatedLabel"></div>
 												<div class="mint-builder-overview__td mint-builder-overview__td--actions" role="cell">
 													<button type="button" class="mint-builder-overview__card-edit" @click.stop="openOverviewItem(item)"><?php esc_html_e( 'Edit', 'mint-lms' ); ?></button>
@@ -2114,10 +2134,12 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 													</span>
 													<div class="mint-builder-overview__card-body">
 														<div class="mint-builder-overview__card-title mint-truncate" x-text="item.title || t('untitledLesson')"></div>
-														<div class="mint-builder-overview__card-meta" x-text="item.meta"></div>
+														<span class="mint-count-chip" x-text="item.countLabel || item.meta"></span>
 													</div>
 												</div>
-												<div class="mint-builder-overview__td mint-builder-overview__td--count" role="cell" data-col="<?php echo esc_attr__( 'Quizzes', 'mint-lms' ); ?>" x-text="item.quizCount"></div>
+												<div class="mint-builder-overview__td mint-builder-overview__td--count" role="cell" data-col="<?php echo esc_attr__( 'Quizzes', 'mint-lms' ); ?>">
+													<span class="mint-count-chip" x-text="item.countLabel || ((item.quizCount || 0) + ' quizzes')"></span>
+												</div>
 												<div class="mint-builder-overview__td mint-builder-overview__td--updated" role="cell" x-text="item.updatedLabel"></div>
 												<div class="mint-builder-overview__td mint-builder-overview__td--actions" role="cell">
 													<button type="button" class="mint-builder-overview__card-edit" @click.stop="openOverviewItem(item)"><?php esc_html_e( 'Edit', 'mint-lms' ); ?></button>
@@ -2272,10 +2294,12 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 													</span>
 													<div class="mint-builder-overview__card-body">
 														<div class="mint-builder-overview__card-title mint-truncate" x-text="item.title || t('untitledQuiz')"></div>
-														<div class="mint-builder-overview__card-meta" x-text="item.meta"></div>
+														<span class="mint-count-chip" x-text="item.countLabel || item.meta"></span>
 													</div>
 												</div>
-												<div class="mint-builder-overview__td mint-builder-overview__td--count" role="cell" data-col="<?php echo esc_attr__( 'Questions', 'mint-lms' ); ?>" x-text="item.questionCount"></div>
+												<div class="mint-builder-overview__td mint-builder-overview__td--count" role="cell" data-col="<?php echo esc_attr__( 'Questions', 'mint-lms' ); ?>">
+													<span class="mint-count-chip" x-text="item.countLabel || ((item.questionCount || 0) + ' questions')"></span>
+												</div>
 												<div class="mint-builder-overview__td mint-builder-overview__td--updated" role="cell" x-text="item.updatedLabel"></div>
 												<div class="mint-builder-overview__td mint-builder-overview__td--actions" role="cell">
 													<button type="button" class="mint-builder-overview__card-edit" @click.stop="openOverviewItem(item)"><?php esc_html_e( 'Edit', 'mint-lms' ); ?></button>
@@ -2587,7 +2611,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 								<div class="mint-section-lessons__title"><?php esc_html_e( 'Lessons in this group', 'mint-lms' ); ?></div>
 								<div class="mint-section-lessons__subtitle"><?php esc_html_e( 'Students see these lessons from top to bottom.', 'mint-lms' ); ?></div>
 							</div>
-							<span class="mint-section-lessons__count" x-text="sectionLessonCountLabel()"></span>
+							<span class="mint-section-lessons__count mint-count-chip mint-count-chip--lg" x-text="sectionLessonCountLabel()"></span>
 						</div>
 
 						<ul
@@ -3958,11 +3982,18 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 						</span>
 						<div class="mint-existing-picker__row-copy">
 							<div class="mint-existing-picker__row-title" x-text="item.title"></div>
-							<span
-								class="mint-existing-picker__type"
-								x-show="existingPickerBadge(item)"
-								x-text="existingPickerBadge(item)"
-							></span>
+							<div class="mint-existing-picker__row-meta">
+								<span
+									class="mint-existing-picker__type"
+									x-show="existingPickerBadge(item)"
+									x-text="existingPickerBadge(item)"
+								></span>
+								<span
+									class="mint-count-chip"
+									x-show="existingPickerItemCountLabel(item)"
+									x-text="existingPickerItemCountLabel(item)"
+								></span>
+							</div>
 						</div>
 						<button
 							type="button"
@@ -4050,6 +4081,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 
 			<p id="mint-move-confirm-body" class="mint-move-confirm__body">
 				<b x-text="moveConfirm.itemTitle"></b>
+				<span class="mint-count-chip" x-show="moveConfirm.countLabel" x-cloak x-text="moveConfirm.countLabel" style="margin:0 6px;vertical-align:middle"></span>
 				<span> <?php esc_html_e( 'is already linked to', 'mint-lms' ); ?> </span>
 				<span x-text="moveConfirm.linkedLabel"></span>
 				<span> </span>
@@ -4119,6 +4151,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 
 			<p id="mint-detach-confirm-body" class="mint-detach-confirm__body">
 				<b x-text="detachConfirm.name"></b>
+				<span class="mint-count-chip" x-show="detachConfirm.countLabel" x-cloak x-text="detachConfirm.countLabel" style="margin:0 6px;vertical-align:middle"></span>
 				<span x-text="' ' + (detachConfirm.body || '')"></span>
 			</p>
 			<div class="mint-detach-confirm__note" x-text="detachConfirm.note"></div>
@@ -4185,6 +4218,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 
 			<p id="mint-builder-trash-body" class="mint-confirm__body">
 				<b x-text="trashConfirm.name"></b>
+				<span class="mint-count-chip" x-show="trashConfirm.countLabel" x-cloak x-text="trashConfirm.countLabel" style="margin:0 6px;vertical-align:middle"></span>
 				<span x-text="' ' + (trashConfirm.body || '')"></span>
 			</p>
 			<div class="mint-confirm__note" x-text="trashConfirm.note"></div>

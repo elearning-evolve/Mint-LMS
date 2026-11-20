@@ -201,6 +201,7 @@ function courseBuilder(courseId, opts = {}) {
       name: '',
       body: '',
       note: '',
+      countLabel: '',
       busy: false,
       tossing: false,
       _resolver: null,
@@ -212,6 +213,7 @@ function courseBuilder(courseId, opts = {}) {
       name: '',
       body: '',
       note: '',
+      countLabel: '',
       busy: false,
       _resolver: null,
     },
@@ -224,6 +226,7 @@ function courseBuilder(courseId, opts = {}) {
       linkedName: '',
       groupSentence: '',
       note: '',
+      countLabel: '',
       busy: false,
       item: null,
     },
@@ -1285,6 +1288,7 @@ function courseBuilder(courseId, opts = {}) {
         linkedName,
         groupSentence,
         note,
+        countLabel: this.existingPickerItemCountLabel(item),
         busy: false,
         item,
       };
@@ -1436,7 +1440,7 @@ function courseBuilder(courseId, opts = {}) {
         quiz?.title ||
         (this.courseQuizzes || []).find((row) => Number(row.id) === quizId)?.title ||
         '';
-      if (!(await this.confirmDetach(this.detachCopy('quiz', title)))) return;
+      if (!(await this.confirmDetach(this.detachCopy('quiz', title, quiz)))) return;
       this.clearPersistedQuizAttachLesson(quizId);
       this.attaching = true;
       try {
@@ -1471,7 +1475,7 @@ function courseBuilder(courseId, opts = {}) {
       const courseId = Number(this.courseId) || 0;
       if (!lessonId || !courseId) return;
       const title = lesson?.title || '';
-      if (!(await this.confirmDetach(this.detachCopy('lesson', title)))) return;
+      if (!(await this.confirmDetach(this.detachCopy('lesson', title, lesson)))) return;
       this.attaching = true;
       try {
         await mintApi(`lessons/${lessonId}/attach`, {
@@ -2902,7 +2906,7 @@ function courseBuilder(courseId, opts = {}) {
       const courseId = Number(this.courseId) || 0;
       if (!lessonId || !courseId) return;
       const title = this.selectedLesson?.title || '';
-      if (!(await this.confirmDetach(this.detachCopy('lesson', title)))) return;
+      if (!(await this.confirmDetach(this.detachCopy('lesson', title, this.selectedLesson)))) return;
       this.attaching = true;
       try {
         await mintApi(`lessons/${lessonId}/attach`, {
@@ -4001,6 +4005,58 @@ function courseBuilder(courseId, opts = {}) {
     quizChildCountLabel(quiz) {
       const n = this.sidebarQuestionsForQuiz(quiz).length;
       return n === 1 ? '1 question' : `${n} questions`;
+    },
+
+    /** Child-count pill for Add Existing picker rows. */
+    existingPickerItemCountLabel(item) {
+      const kind = this.existingPicker?.kind;
+      const id = Number(item?.id) || 0;
+      if (!id) return '';
+      if (kind === 'lesson') {
+        const n = (this.courseQuizzes || []).filter(
+          (quiz) => Number(quiz.lessonId) === id && !quiz.disposableHost && !quiz.questionShell
+        ).length;
+        return n === 1 ? '1 quiz' : `${n} quizzes`;
+      }
+      if (kind === 'quiz') {
+        const n = (this.courseQuestions || []).filter(
+          (question) => Number(question.quizId) === id
+        ).length;
+        return n === 1 ? '1 question' : `${n} questions`;
+      }
+      return '';
+    },
+
+    /** Child-count pill for Attach rails (linked parent). */
+    attachRailCountLabel() {
+      if (this.selected?.type === 'question' || this.activeQuestion) {
+        const quizId = Number(this.lessonQuiz?.id || this.selected?.quizId || 0);
+        if (quizId > 0) {
+          return this.quizChildCountLabel({ id: quizId });
+        }
+      }
+      if (this.selected?.type === 'quiz' || this.lessonQuiz?.id) {
+        const lessonId = Number(
+          this.lessonQuiz?.lessonId || this.selected?.lessonId || this.selectedLesson?.id || 0
+        );
+        if (lessonId > 0) {
+          return this.lessonChildCountLabel({ id: lessonId });
+        }
+      }
+      if (this.selected?.type === 'lesson' && this.selectedLesson) {
+        const sectionId = Number(
+          this.selectedLesson.sectionId || this.selected?.sectionId || 0
+        );
+        if (sectionId > 0) {
+          const section =
+            (this.sections || []).find((row) => Number(row.id) === sectionId) || null;
+          if (section) {
+            return this.sectionChildCountLabel(section);
+          }
+        }
+        return this.lessonChildCountLabel(this.selectedLesson);
+      }
+      return '';
     },
 
     isSelected(type, id) {
@@ -5437,6 +5493,7 @@ function courseBuilder(courseId, opts = {}) {
             index: index + 1,
             lessonCount,
             isEmpty: lessonCount === 0,
+            countLabel: this.sectionChildCountLabel(section),
             meta: this.sectionChildCountLabel(section),
             updatedAt,
             updatedLabel: this.formatOverviewDate(updatedAt),
@@ -5458,6 +5515,7 @@ function courseBuilder(courseId, opts = {}) {
             kind: 'lesson',
             sectionId,
             quizCount,
+            countLabel: this.lessonChildCountLabel(lesson),
             meta: `${sectionTitle} · ${this.lessonChildCountLabel(lesson)}`,
             updatedAt,
             updatedLabel: this.formatOverviewDate(updatedAt),
@@ -5488,6 +5546,7 @@ function courseBuilder(courseId, opts = {}) {
             lessonTitle: linked ? lessonTitle : '',
             disposableHost: !!quiz.disposableHost,
             questionCount,
+            countLabel: this.quizChildCountLabel(quiz),
             meta: `${lessonTitle} · ${this.quizChildCountLabel(quiz)}`,
             updatedAt,
             updatedLabel: this.formatOverviewDate(updatedAt),
@@ -5701,7 +5760,7 @@ function courseBuilder(courseId, opts = {}) {
         item?.title ||
         (this.courseQuizzes || []).find((quiz) => Number(quiz.id) === quizId)?.title ||
         '';
-      if (!(await this.confirmMoveToTrash(this.trashCopy('quiz', title)))) return;
+      if (!(await this.confirmMoveToTrash(this.trashCopy('quiz', title, item)))) return;
       try {
         await mintApi(`content/quizzes/${quizId}/trash`, { method: 'POST' });
         this.courseQuizzes = (this.courseQuizzes || []).filter(
@@ -9032,7 +9091,7 @@ function courseBuilder(courseId, opts = {}) {
       }
     },
 
-    trashCopy(kind, itemTitle) {
+    trashCopy(kind, itemTitle, item = null) {
       const name = String(itemTitle || '').trim();
       const label =
         name ||
@@ -9042,12 +9101,21 @@ function courseBuilder(courseId, opts = {}) {
           quiz: 'This quiz',
           question: 'This question',
         }[kind] || 'This item');
+      let countLabel = '';
+      if (kind === 'section') {
+        countLabel = this.sectionChildCountLabel(item);
+      } else if (kind === 'lesson') {
+        countLabel = this.lessonChildCountLabel(item || { id: 0, title: label });
+      } else if (kind === 'quiz') {
+        countLabel = this.quizChildCountLabel(item || { id: 0, title: label });
+      }
       if (kind === 'section') {
         return {
           title: 'Remove lesson group?',
           name: label,
           body: 'will be removed from this course. Its lessons, quizzes, and questions will be moved to trash.',
           note: 'You can restore those items later from Trash.',
+          countLabel,
         };
       }
       if (kind === 'lesson') {
@@ -9056,6 +9124,7 @@ function courseBuilder(courseId, opts = {}) {
           name: label,
           body: 'will be moved to trash, including its quizzes and questions.',
           note: 'You can restore it later from the Lessons trash.',
+          countLabel,
         };
       }
       if (kind === 'quiz') {
@@ -9064,6 +9133,7 @@ function courseBuilder(courseId, opts = {}) {
           name: label,
           body: 'will be moved to trash, including its questions.',
           note: 'You can restore it later from the Quizzes trash.',
+          countLabel,
         };
       }
       return {
@@ -9071,10 +9141,11 @@ function courseBuilder(courseId, opts = {}) {
         name: label,
         body: 'will be moved to trash.',
         note: 'You can restore it later from the Questions trash.',
+        countLabel: '',
       };
     },
 
-    detachCopy(kind, itemTitle) {
+    detachCopy(kind, itemTitle, item = null) {
       const name = String(itemTitle || '').trim();
       const label =
         name ||
@@ -9083,12 +9154,19 @@ function courseBuilder(courseId, opts = {}) {
           quiz: 'This quiz',
           question: 'This question',
         }[kind] || 'This item');
+      let countLabel = '';
+      if (kind === 'lesson') {
+        countLabel = this.lessonChildCountLabel(item || { id: 0 });
+      } else if (kind === 'quiz') {
+        countLabel = this.quizChildCountLabel(item || { id: 0 });
+      }
       if (kind === 'lesson') {
         return {
           title: 'Detach this lesson?',
           name: label,
           body: 'will be removed from this lesson group. It stays in the course — you can attach it to another group later.',
           note: 'This does not move the lesson to trash.',
+          countLabel,
         };
       }
       if (kind === 'quiz') {
@@ -9097,6 +9175,7 @@ function courseBuilder(courseId, opts = {}) {
           name: label,
           body: 'will be removed from this lesson. You can attach it to another lesson later.',
           note: 'This does not move the quiz to trash.',
+          countLabel,
         };
       }
       return {
@@ -9104,10 +9183,11 @@ function courseBuilder(courseId, opts = {}) {
         name: label,
         body: 'will be removed from this quiz. You can attach it to another quiz later.',
         note: 'This does not move the question to trash.',
+        countLabel: '',
       };
     },
 
-    confirmDetach({ title, name, body, note }) {
+    confirmDetach({ title, name, body, note, countLabel }) {
       return new Promise((resolve) => {
         if (this.detachConfirm?._resolver) {
           this.detachConfirm._resolver(false);
@@ -9118,6 +9198,7 @@ function courseBuilder(courseId, opts = {}) {
           name: name || '',
           body: body || '',
           note: note || '',
+          countLabel: countLabel || '',
           busy: false,
           _resolver: resolve,
         };
@@ -9143,7 +9224,7 @@ function courseBuilder(courseId, opts = {}) {
       if (typeof resolve === 'function') resolve(true);
     },
 
-    confirmMoveToTrash({ title, name, body, note }) {
+    confirmMoveToTrash({ title, name, body, note, countLabel }) {
       return new Promise((resolve) => {
         if (this.trashConfirm?._resolver) {
           this.trashConfirm._resolver(false);
@@ -9154,6 +9235,7 @@ function courseBuilder(courseId, opts = {}) {
           name: name || '',
           body: body || '',
           note: note || '',
+          countLabel: countLabel || '',
           busy: false,
           tossing: false,
           _resolver: resolve,
@@ -9188,7 +9270,7 @@ function courseBuilder(courseId, opts = {}) {
     async deleteSection(sectionId) {
       const sid = Number(sectionId) || 0;
       const removed = this.sections.find((s) => Number(s.id) === sid);
-      if (!(await this.confirmMoveToTrash(this.trashCopy('section', removed?.title)))) return;
+      if (!(await this.confirmMoveToTrash(this.trashCopy('section', removed?.title, removed)))) return;
       try {
         const lessonIds = new Set(
           (removed?.lessons || []).map((lesson) => Number(lesson.id)).filter((id) => id > 0)
@@ -9219,7 +9301,7 @@ function courseBuilder(courseId, opts = {}) {
         lessonFromSection ||
         (Number(this.selectedLesson?.id) === lid ? this.selectedLesson : null);
       const title = lesson?.title || this.selectedLesson?.title || '';
-      if (!(await this.confirmMoveToTrash(this.trashCopy('lesson', title)))) return;
+      if (!(await this.confirmMoveToTrash(this.trashCopy('lesson', title, lesson)))) return;
       try {
         await mintApi(`content/lessons/${lid}/trash`, { method: 'POST' });
         if (section) {
@@ -10323,7 +10405,7 @@ function courseBuilder(courseId, opts = {}) {
     async deleteQuiz() {
       if (!this.lessonQuiz?.id) return;
       const quizId = Number(this.lessonQuiz.id);
-      if (!(await this.confirmMoveToTrash(this.trashCopy('quiz', this.lessonQuiz.title)))) return;
+      if (!(await this.confirmMoveToTrash(this.trashCopy('quiz', this.lessonQuiz.title, this.lessonQuiz)))) return;
       try {
         await mintApi(`content/quizzes/${quizId}/trash`, { method: 'POST' });
         this.courseQuizzes = (this.courseQuizzes || []).filter((quiz) => Number(quiz.id) !== quizId);
