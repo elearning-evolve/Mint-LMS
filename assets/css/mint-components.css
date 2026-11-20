@@ -207,7 +207,7 @@
 }
 #mint-lms-root .mint-toggle:focus-visible { box-shadow: var(--mint-focus); }
 #mint-lms-root .mint-toggle[aria-checked="true"],
-#mint-lms-root .mint-toggle.is-on { background: var(--mint-accent); }
+#mint-lms-root .mint-toggle.is-on { background: #98FBCB; }
 #mint-lms-root .mint-toggle__knob {
   width: 22px;
   height: 22px;
@@ -233,7 +233,7 @@
 }
 #mint-lms-root .mint-radio:focus-visible { box-shadow: var(--mint-focus); }
 #mint-lms-root .mint-radio.is-selected {
-  border: 7px solid var(--mint-accent);
+  border: 7px solid #98FBCB;
 }
 
 /* Checkbox */
@@ -253,8 +253,8 @@
 }
 #mint-lms-root .mint-checkbox:focus-visible { box-shadow: var(--mint-focus); }
 #mint-lms-root .mint-checkbox.is-checked {
-  background: var(--mint-accent);
-  border-color: var(--mint-accent);
+  background: #98FBCB;
+  border-color: #98FBCB;
 }
 
 
@@ -449,7 +449,7 @@
 #mint-lms-root .mint-builder-nav {
   flex: none;
   height: 44px;
-  background: #F1FFF9;
+  background: rgba(152, 251, 203, 0.14);
   display: flex;
   align-items: center;
   gap: 26px;
@@ -885,13 +885,13 @@
   width: 18px;
   height: 18px;
   border-radius: 5px;
-  background: #F1FFF9;
+  background: rgba(152, 251, 203, 0.14);
 }
 #mint-lms-root .mint-builder-nav__icon--question {
   width: 18px;
   height: 18px;
   border-radius: 6px;
-  background: #F1FFF9;
+  background: rgba(152, 251, 203, 0.14);
   color: #5B2BFF;
   font-size: 11px;
   font-weight: 700;
@@ -1492,7 +1492,7 @@
   box-shadow: var(--mint-focus-tight);
 }
 #mint-lms-root .mint-section-group.is-selected > .mint-tree-section {
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
   box-shadow: inset 3px 0 0 #98FBCB;
 }
 
@@ -1514,7 +1514,7 @@
   box-shadow: var(--mint-focus-tight);
 }
 #mint-lms-root .mint-tree-lesson.is-active {
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
   box-shadow: inset 3px 0 0 #98FBCB;
 }
 #mint-lms-root .mint-tree-lesson.is-active .mint-tree-lesson__title {
@@ -1584,7 +1584,7 @@
   box-sizing: border-box;
 }
 #mint-lms-root .mint-hierarchy.is-active {
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
   box-shadow: inset 3px 0 0 #98FBCB;
 }
 #mint-lms-root .mint-hierarchy__head {
@@ -1709,7 +1709,7 @@
   color: #1A5AA8;
 }
 #mint-lms-root .mint-hierarchy__icon--quiz {
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
   color: #0F0E1A;
 }
 #mint-lms-root .mint-hierarchy__icon--question {
@@ -1838,7 +1838,7 @@
   color: #9A4E12;
 }
 #mint-lms-root .mint-tree-lesson__icon--quiz {
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
   color: #0F0E1A;
 }
 #mint-lms-root .mint-tree-lesson.is-active .mint-tree-lesson__icon--quiz {
@@ -2055,12 +2055,12 @@
 }
 #mint-lms-root .mint-lesson-title-input:hover,
 #mint-lms-root .mint-section-title-input:hover {
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
   border-bottom-color: #98FBCB;
 }
 #mint-lms-root .mint-lesson-title-input:focus,
 #mint-lms-root .mint-section-title-input:focus {
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
   border-bottom-color: var(--mint-field-border);
   box-shadow: var(--mint-field-focus);
 }
@@ -2128,7 +2128,7 @@
 }
 
 #mint-lms-root .mint-status-chip--published {
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
   color: #0F0E1A;
   border-color: #98FBCB;
 }
@@ -2142,7 +2142,7 @@
   padding: 0 10px;
   border-radius: 999px;
   border: 1px solid #98FBCB;
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
   color: #0F0E1A;
   font-family: var(--mint-font);
   font-size: 12px;
@@ -2418,7 +2418,7 @@
 
 #mint-lms-root .mint-builder-tree-page__grip:hover {
   color: #0F0E1A;
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
 }
 
 #mint-lms-root .mint-builder-tree-page__grip.mint-handle-section,
@@ -2873,7 +2873,7 @@
   font-weight: 700;
   letter-spacing: 0.01em;
   color: #0F0E1A;
-  background: #E8F7F0;
+  background: rgba(152, 251, 203, 0.18);
   border-radius: 999px;
   padding: 4px 10px;
   line-height: 1.3;
@@ -3017,7 +3017,7 @@
   margin-bottom: 16px;
   padding: 13px 15px;
   border-radius: 12px;
-  background: #E8F7F0;
+  background: rgba(152, 251, 203, 0.18);
   color: #0F0E1A;
   font-size: 14px;
   line-height: 1.45;
@@ -3269,7 +3269,7 @@
 }
 
 #mint-lms-root .mint-builder-overview__pager-btn:hover:not(:disabled) {
-  background: #E8F7F0;
+  background: rgba(152, 251, 203, 0.18);
   border-color: #0F0E1A;
   color: #0F0E1A;
 }
@@ -3318,7 +3318,7 @@
 
 #mint-lms-root .mint-builder-overview__card:focus-visible {
   outline: none;
-  background: #F1FFF9;
+  background: rgba(152, 251, 203, 0.14);
   border-color: var(--mint-field-border);
   box-shadow: var(--mint-field-focus);
 }
@@ -3367,7 +3367,7 @@
 
 #mint-lms-root .mint-builder-overview__chip--ok {
   color: #0F0E1A;
-  background: #E8F7F0;
+  background: rgba(152, 251, 203, 0.18);
 }
 
 #mint-lms-root .mint-builder-overview__chip--warn {
@@ -3779,7 +3779,7 @@
   align-items: center;
   gap: 8px;
   padding: 9px 10px;
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
   border-bottom: 1px solid #E4E1F0;
 }
 #mint-lms-root .mint-lesson-editor-toolbar {
@@ -3787,7 +3787,7 @@
   align-items: center;
   gap: 8px;
   padding: 9px 10px;
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
   border-bottom: 1px solid #E4E1F0;
   flex-wrap: wrap;
 }
@@ -3854,7 +3854,7 @@
 }
 #mint-lms-root .mint-lesson-format__option:hover,
 #mint-lms-root .mint-lesson-format__option.is-active {
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
 }
 #mint-lms-root .mint-lesson-format__option.is-active {
   font-weight: 700;
@@ -4027,7 +4027,7 @@
   width: 52px;
   height: 52px;
   border-radius: 14px;
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4098,7 +4098,7 @@
 #mint-lms-root .mint-segmented__item:hover { color: var(--mint-ink); }
 #mint-lms-root .mint-segmented__item:focus-visible { box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55); }
 #mint-lms-root .mint-segmented__item.is-active {
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
   color: #0F0E1A;
   font-weight: 600;
 }
@@ -4109,7 +4109,7 @@
   padding: 0 14px;
   border-radius: 8px;
   border: 1.5px solid #98FBCB !important;
-  background: #E8FFF3 !important;
+  background: rgba(152, 251, 203, 0.18) !important;
   color: #0F0E1A !important;
   font-size: 15px;
   font-weight: 600;
@@ -4127,7 +4127,7 @@
   display: flex;
   gap: 4px;
   padding: 3px;
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
   border-radius: 8px;
 }
 #mint-lms-root .mint-lesson-view-toggle__item {
@@ -4314,14 +4314,14 @@
   height: 34px;
   padding: 0 14px;
   border-radius: 7px;
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
   color: #0F0E1A;
   font-size: 15px;
   font-weight: 600;
   width: fit-content;
 }
 
-/* Escape hatch → native WP editor (below Lesson/Quiz chip; Mint attach-card language) */
+/* Escape hatch → native WP editor (below Lesson/Quiz chip; mint blue only) */
 #mint-lms-root a.mint-wp-content-link {
   margin-top: 14px;
   margin-bottom: 2px;
@@ -4331,8 +4331,8 @@
   gap: 12px;
   padding: 12px 14px;
   border-radius: 12px;
-  border: 1.5px solid #CFF5E2;
-  background: #F1FFF9;
+  border: 1.5px solid #98FBCB;
+  background: rgba(152, 251, 203, 0.14);
   box-shadow: 0 4px 14px rgba(15, 14, 26, 0.04);
   text-decoration: none;
   color: #0F0E1A;
@@ -4342,9 +4342,9 @@
 
 #mint-lms-root a.mint-wp-content-link:hover,
 #mint-lms-root a.mint-wp-content-link:focus-visible {
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.22);
   border-color: #98FBCB;
-  box-shadow: 0 6px 18px rgba(15, 14, 26, 0.08);
+  box-shadow: 0 6px 18px rgba(152, 251, 203, 0.28);
   transform: translateY(-1px);
   outline: none;
 }
@@ -4407,7 +4407,7 @@
 
 #mint-lms-root .mint-quiz-rules__nested {
   padding-left: 16px;
-  border-left: 2px solid #E8FFF3;
+  border-left: 2px solid rgba(152, 251, 203, 0.18);
   display: grid;
   gap: 0;
 }
@@ -4743,7 +4743,7 @@
   display: inline-flex;
   align-items: center;
   padding: 0 14px;
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
   color: #0F0E1A;
   font-size: 14px;
   font-weight: 700;
@@ -4765,7 +4765,7 @@
   border-radius: 999px;
   border: 1.5px solid #98FBCB;
   color: #0F0E1A;
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -4862,7 +4862,7 @@
   padding: 0 16px;
   border-radius: 9px;
   border: 1.5px solid #98FBCB !important;
-  background: #E8FFF3 !important;
+  background: rgba(152, 251, 203, 0.18) !important;
   color: #0F0E1A !important;
   font-size: 15px;
   font-weight: 600;
@@ -4994,7 +4994,7 @@
   font-family: var(--mint-font);
 }
 #mint-lms-root button.mint-quiz-add-option:hover {
-  background: #E8FFF3 !important;
+  background: rgba(152, 251, 203, 0.18) !important;
 }
 #mint-lms-root .mint-quiz-tf {
   display: flex;
@@ -5010,7 +5010,7 @@
   padding: 0 16px;
   border-radius: 999px;
   border: 1.5px solid #98FBCB;
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
   color: #0F0E1A;
   font-size: 15px;
   font-weight: 500;
@@ -5064,7 +5064,7 @@
   padding: 0 16px;
   border-radius: 9px;
   border: 1.5px solid #A79FE0;
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
   color: #0F0E1A;
   font-size: 15px;
   font-weight: 600;
@@ -5140,7 +5140,7 @@
   align-items: center;
   gap: 8px;
   padding: 9px 10px;
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
   border-bottom: 1px solid #E4E1F0;
   flex-wrap: wrap;
 }
@@ -5323,7 +5323,7 @@
   height: 28px;
   flex: none;
   border-radius: 999px;
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
   color: #0F0E1A;
   font-size: 13px;
   font-weight: 700;
@@ -5483,7 +5483,7 @@
   grid-template-columns: 180px 1fr;
 }
 #mint-lms-root .mint-qeditor__option-cols--head {
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
 }
 #mint-lms-root .mint-qeditor__option-cell {
   padding: 16px;
@@ -5496,7 +5496,7 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: #0F0E1A;
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
 }
 #mint-lms-root .mint-qeditor__option-cell--side {
   display: flex;
@@ -5612,7 +5612,7 @@
 }
 #mint-lms-root button.mint-qeditor__tf-flag.is-on {
   border-color: #0F0E1A;
-  background: #E8FFF3 !important;
+  background: rgba(152, 251, 203, 0.18) !important;
   color: #0F0E1A !important;
 }
 #mint-lms-root .mint-qeditor__tf-row {
@@ -5687,7 +5687,7 @@
   cursor: pointer;
 }
 #mint-lms-root button.mint-qeditor__icon-btn:hover:not(:disabled) {
-  background: #E8FFF3 !important;
+  background: rgba(152, 251, 203, 0.18) !important;
 }
 #mint-lms-root button.mint-qeditor__icon-btn:disabled {
   opacity: 0.35;
@@ -5732,7 +5732,7 @@
   cursor: pointer;
 }
 #mint-lms-root button.mint-qeditor__btn-outline:hover {
-  background: #E8FFF3 !important;
+  background: rgba(152, 251, 203, 0.18) !important;
 }
 #mint-lms-root .mint-qeditor__btn-danger,
 #mint-lms-root button.mint-qeditor__btn-danger {
@@ -5765,7 +5765,7 @@
   padding: 0 16px;
   border-radius: 10px;
   border: 1.5px dashed rgba(15, 14, 26, 0.28);
-  background: #F1FFF9 !important;
+  background: rgba(152, 251, 203, 0.14) !important;
   color: #0F0E1A !important;
   font-size: 14px;
   font-weight: 700;
@@ -5773,7 +5773,7 @@
   transition: background 140ms ease-out, border-color 140ms ease-out;
 }
 #mint-lms-root button.mint-qeditor__add-answer:hover {
-  background: #E8FFF3 !important;
+  background: rgba(152, 251, 203, 0.18) !important;
   border-color: #0F0E1A;
 }
 #mint-lms-root .mint-qeditor__add-answer--solid,
@@ -5889,7 +5889,7 @@
   cursor: pointer;
 }
 #mint-lms-root button.mint-qeditor__dropdown-item:hover {
-  background: #E8FFF3 !important;
+  background: rgba(152, 251, 203, 0.18) !important;
 }
 #mint-lms-root button.mint-qeditor__dropdown-item.is-active {
   background: #0F0E1A !important;
@@ -6859,7 +6859,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   height: 28px;
   padding: 0 12px;
   border-radius: 999px;
-  background: #e8fff3;
+  background: rgba(152, 251, 203, 0.18);
   border: 1px solid #98fbcb;
   font-size: 12px;
   font-weight: 700;
@@ -7084,7 +7084,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   margin-bottom: 14px;
   height: 40px;
   border-radius: 12px;
-  background: #e8fff3;
+  background: rgba(152, 251, 203, 0.18);
   border: 1px solid #98fbcb;
   display: flex;
   align-items: center;
@@ -7122,7 +7122,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 #mint-lms-root .mint-dash-zero__slot:focus-visible {
   border-style: solid;
   border-color: #98fbcb;
-  background: #f1fff9;
+  background: rgba(152, 251, 203, 0.14);
   transform: translateY(-2px);
   box-shadow: 0 12px 24px rgba(152, 251, 203, 0.4);
   outline: none;
@@ -7131,7 +7131,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   width: 26px;
   height: 26px;
   border-radius: 8px;
-  background: #e8fff3;
+  background: rgba(152, 251, 203, 0.18);
   border: 1px solid #98fbcb;
   font-size: 12px;
   font-weight: 700;
@@ -7170,7 +7170,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   margin-top: 22px;
   padding: 18px;
   border-radius: 18px;
-  background: linear-gradient(135deg, #f1fff9 0%, #e8fff3 100%);
+  background: linear-gradient(135deg, rgba(152, 251, 203, 0.14) 0%, rgba(152, 251, 203, 0.18) 100%);
   border: 1px solid #98fbcb;
 }
 #mint-lms-root .mint-dash-zero__order-t {
@@ -7265,7 +7265,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   width: 30px;
   height: 30px;
   border-radius: 9px;
-  background: #e8fff3;
+  background: rgba(152, 251, 203, 0.18);
   border: 1px solid #98fbcb;
   display: inline-flex;
   align-items: center;
@@ -7476,8 +7476,8 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   gap: 24px;
   margin-top: 12px;
   padding: 13px 16px;
-  background: #F1FFF9;
-  border: 1.5px solid #CFF5E2;
+  background: rgba(152, 251, 203, 0.14);
+  border: 1.5px solid #98FBCB;
   border-radius: 10px;
 }
 #mint-lms-root .mint-dash-courses__col {
@@ -7896,8 +7896,8 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 #mint-lms-root .mint-settings .mint-settings-card__head {
   padding: 14px 20px;
-  background: #F1FFF9;
-  border-bottom: 1px solid #CFF5E2;
+  background: rgba(152, 251, 203, 0.14);
+  border-bottom: 1px solid #98FBCB;
   border-radius: 14px 14px 0 0;
 }
 #mint-lms-root .mint-settings .mint-settings-card__title {
@@ -8006,7 +8006,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   text-align: left;
   cursor: pointer;
 }
-#mint-lms-root .mint-settings-select__option.is-active { font-weight: 700; background: #E8FFF3; }
+#mint-lms-root .mint-settings-select__option.is-active { font-weight: 700; background: rgba(152, 251, 203, 0.18); }
 #mint-lms-root .mint-settings-select__option:hover { background: #98FBCB; }
 #mint-lms-root .mint-settings-input,
 #mint-lms-root .mint-settings-textarea {
@@ -8060,7 +8060,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   padding: 0 12px;
   border-radius: 999px;
   border: 1.5px solid #98FBCB;
-  background: #F1FFF9;
+  background: rgba(152, 251, 203, 0.14);
   font-size: 13px;
   font-weight: 600;
   color: #17222B;
@@ -8165,7 +8165,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 #mint-lms-root .mint-settings-checklist__item:hover,
 #mint-lms-root .mint-settings-checklist__item:focus {
-  background: #F1FFF9;
+  background: rgba(152, 251, 203, 0.14);
   box-shadow: 0 4px 14px rgba(152, 251, 203, 0.5);
 }
 #mint-lms-root .mint-settings-checklist__icon {
@@ -8217,12 +8217,12 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 #mint-lms-root .mint-settings-enroll:hover,
 #mint-lms-root .mint-settings-enroll:focus {
   border-color: #98FBCB;
-  background: #F1FFF9;
-  box-shadow: 0 4px 14px rgba(152, 251, 203, 0.5);
+  background: rgba(152, 251, 203, 0.14);
+  box-shadow: 0 4px 14px rgba(152, 251, 203, 0.35);
 }
 #mint-lms-root .mint-settings-enroll.is-selected {
-  border-color: #17222B;
-  background: #F1FFF9;
+  border-color: #98FBCB;
+  background: rgba(152, 251, 203, 0.18);
 }
 #mint-lms-root .mint-settings-enroll__radio {
   flex: none;
@@ -8236,7 +8236,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   justify-content: center;
 }
 #mint-lms-root .mint-settings-enroll.is-selected .mint-settings-enroll__radio {
-  border-color: #17222B;
+  border-color: #98FBCB;
 }
 #mint-lms-root .mint-settings-enroll__dot {
   width: 8px;
@@ -8245,7 +8245,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   background: transparent;
 }
 #mint-lms-root .mint-settings-enroll.is-selected .mint-settings-enroll__dot {
-  background: #17222B;
+  background: #98FBCB;
 }
 #mint-lms-root .mint-settings-enroll__title {
   display: block;
@@ -8309,7 +8309,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 #mint-lms-root .mint-settings-btn--outline:hover:not(:disabled),
 #mint-lms-root .mint-settings-btn--outline:focus:not(:disabled) {
-  background: #F1FFF9;
+  background: rgba(152, 251, 203, 0.14);
   box-shadow: 0 4px 12px rgba(152, 251, 203, 0.7);
   transform: translateY(-1px);
 }
@@ -8336,7 +8336,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   padding: 14px 20px;
   border: 1.5px solid #98FBCB;
   border-radius: 14px;
-  background: #F1FFF9;
+  background: rgba(152, 251, 203, 0.14);
   box-shadow:
     0 10px 28px rgba(152, 251, 203, 0.6),
     0 4px 12px rgba(152, 251, 203, 0.35),
@@ -8682,8 +8682,8 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   min-height: 56px;
   padding: 6px;
   border-radius: 16px;
-  background: #F1FFF9;
-  border: 1.5px solid #CFF5E2;
+  background: rgba(152, 251, 203, 0.14);
+  border: 1.5px solid #98FBCB;
   box-sizing: border-box;
 }
 
@@ -8698,7 +8698,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   background: #fff;
   color: #0F0E1A;
   text-decoration: none;
-  border: 1px solid #CFF5E2;
+  border: 1px solid #98FBCB;
   transition: background 150ms ease-out, transform 150ms ease-out, box-shadow 150ms ease-out;
 }
 
@@ -8745,7 +8745,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   font-weight: 700;
   color: #0F0E1A;
   background: #fff;
-  border-color: #CFF5E2;
+  border-color: #98FBCB;
   box-shadow: 0 1px 3px rgba(15, 14, 26, 0.08);
 }
 
@@ -8760,7 +8760,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   padding: 0 8px 0 12px;
   border-radius: 12px;
   background: #fff;
-  border: 1px solid #CFF5E2;
+  border: 1px solid #98FBCB;
 }
 
 #mint-lms-root .mint-cs-switcher__course-kicker {
@@ -8832,8 +8832,8 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 
 #mint-lms-root .mint-cs-card__head {
   padding: 16px 20px;
-  background: #F1FFF9;
-  border-bottom: 1px solid #CFF5E2;
+  background: rgba(152, 251, 203, 0.14);
+  border-bottom: 1px solid #98FBCB;
 }
 
 #mint-lms-root .mint-cs-card__title {
@@ -9125,7 +9125,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   padding: 0 14px;
   border-radius: 8px;
   border: 1.5px solid #98FBCB;
-  background: #F1FFF9;
+  background: rgba(152, 251, 203, 0.14);
   color: #0F0E1A;
   font-size: 15px;
   font-weight: 700;
@@ -9149,8 +9149,8 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   display: flex;
   gap: 4px;
   padding: 3px;
-  background: #F1FFF9;
-  border: 1px solid #CFF5E2;
+  background: rgba(152, 251, 203, 0.14);
+  border: 1px solid #98FBCB;
   border-radius: 8px;
 }
 
@@ -9185,8 +9185,8 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   align-items: center;
   gap: 6px;
   padding: 8px 10px;
-  background: #F1FFF9;
-  border-bottom: 1px solid #CFF5E2;
+  background: rgba(152, 251, 203, 0.14);
+  border-bottom: 1px solid #98FBCB;
   flex-wrap: wrap;
 }
 
@@ -9384,7 +9384,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   padding: 0 14px;
   border-radius: 8px;
   border: 1.5px solid #98FBCB;
-  background: #F1FFF9;
+  background: rgba(152, 251, 203, 0.14);
   color: #0F0E1A;
   font-size: 15px;
   font-weight: 700;
@@ -9448,7 +9448,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root .mint-cs-prereq.is-selected {
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
   border-color: #98FBCB;
   font-weight: 700;
 }
@@ -9813,7 +9813,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 #mint-lms-root .mint-settings-card__header {
   padding: 18px 22px;
   border-bottom: 1.5px solid rgba(15, 14, 26, 0.14);
-  background: #f1fff9;
+  background: rgba(152, 251, 203, 0.14);
 }
 
 #mint-lms-root .mint-settings-card__header--row {
@@ -9916,7 +9916,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 
 #mint-lms-root .mint-settings-choice.is-selected .mint-settings-choice__radio {
   border-color: var(--mint-check-border, #98FBCB);
-  background: #E8FFF3;
+  background: #FFFFFF;
 }
 
 #mint-lms-root .mint-settings-choice.is-selected .mint-settings-choice__radio::after {
@@ -10199,7 +10199,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   padding: 10px 12px;
   border: 1.5px solid var(--mint-check-border, #98FBCB);
   border-radius: 10px;
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
   box-sizing: border-box;
 }
 #mint-lms-root .mint-quiz-attach__check {
@@ -10353,7 +10353,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   width: 100%;
   padding: 18px 22px;
   border: 0;
-  background: #F1FFF9;
+  background: rgba(152, 251, 203, 0.14);
   cursor: pointer;
   text-align: left;
   font-family: var(--mint-font);
@@ -10362,7 +10362,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root .mint-settings-card__head:hover {
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
 }
 
 #mint-lms-root .mint-settings-card__head:focus-visible {
@@ -10370,7 +10370,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root .mint-settings-card__head.is-open {
-  border-bottom: 1px solid #CFF5E2;
+  border-bottom: 1px solid #98FBCB;
 }
 
 #mint-lms-root .mint-settings-card__head-title {
@@ -10924,7 +10924,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   padding: 0 14px;
   border-radius: 8px;
   border: 1.5px solid #98FBCB;
-  background: #F1FFF9;
+  background: rgba(152, 251, 203, 0.14);
   color: #0F0E1A;
   font-size: 15px;
   font-weight: 600;
@@ -10948,7 +10948,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   display: flex;
   gap: 4px;
   padding: 3px;
-  background: #F1FFF9;
+  background: rgba(152, 251, 203, 0.14);
   border-radius: 8px;
 }
 
@@ -10991,7 +10991,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   justify-content: space-between;
   gap: 10px;
   padding: 8px 10px;
-  background: #F1FFF9;
+  background: rgba(152, 251, 203, 0.14);
   border-bottom: 1px solid #E4E1F0;
   flex-wrap: wrap;
 }
@@ -11177,8 +11177,8 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 
 #mint-lms-root .mint-settings-featured__head {
   padding: 16px 22px;
-  background: #F1FFF9;
-  border-bottom: 1px solid #CFF5E2;
+  background: rgba(152, 251, 203, 0.14);
+  border-bottom: 1px solid #98FBCB;
   border-radius: 14px 14px 0 0;
   display: flex;
   align-items: center;
@@ -11355,7 +11355,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   padding: 0 14px;
   border-radius: 999px;
   border: 1.5px solid #98FBCB;
-  background: #F1FFF9;
+  background: rgba(152, 251, 203, 0.14);
   font-size: 13px;
   font-weight: 700;
   color: #17222B;
@@ -11407,7 +11407,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 
 #mint-lms-root .mint-settings-grad__head {
   padding: 12px 16px;
-  background: #F1FFF9;
+  background: rgba(152, 251, 203, 0.14);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -11422,7 +11422,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root .mint-settings-grad__head:hover {
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
 }
 
 #mint-lms-root .mint-settings-grad__head:focus-visible {
@@ -11691,7 +11691,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 #mint-lms-root .mint-lesson-quizzes__grip:hover {
   color: #0F0E1A;
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
 }
 #mint-lms-root .mint-lesson-quizzes__grip:active {
   cursor: grabbing;
@@ -12147,8 +12147,8 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 #mint-lms-root .mint-students-panel__head {
   padding: 14px 18px;
-  background: #F1FFF9;
-  border-bottom: 1px solid #CFF5E2;
+  background: rgba(152, 251, 203, 0.14);
+  border-bottom: 1px solid #98FBCB;
   font-size: 16px;
   font-weight: 700;
   color: #17222B;
@@ -12171,7 +12171,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 #mint-lms-root .mint-students-stat:hover,
 #mint-lms-root .mint-students-stat:focus-visible {
   transform: translateY(-4px);
-  background: #F1FFF9;
+  background: rgba(152, 251, 203, 0.14);
   box-shadow: 0 10px 22px rgba(152, 251, 203, 0.7);
 }
 #mint-lms-root .mint-students-stat:focus-visible {
@@ -12205,7 +12205,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 #mint-lms-root .mint-students-recent:hover,
 #mint-lms-root .mint-students-recent:focus-visible {
-  background: #F1FFF9;
+  background: rgba(152, 251, 203, 0.14);
   box-shadow: 0 4px 14px rgba(152, 251, 203, 0.5);
 }
 #mint-lms-root .mint-students-recent:focus-visible {
@@ -12324,7 +12324,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   padding: 12px 20px;
   border-radius: 12px;
   border: 1.5px solid #98FBCB;
-  background: #F1FFF9;
+  background: rgba(152, 251, 203, 0.14);
   box-shadow: 0 6px 18px rgba(152, 251, 203, 0.45);
 }
 #mint-lms-root .mint-students-course__pill-value {
@@ -12378,7 +12378,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
 }
 #mint-lms-root .mint-students-course__add {
-  background: #F1FFF9;
+  background: rgba(152, 251, 203, 0.14);
   border: 1.5px solid #98FBCB;
   border-radius: 14px;
   padding: 22px;
@@ -12449,7 +12449,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 #mint-lms-root .mint-students-enroll-suggestions__item:hover,
 #mint-lms-root .mint-students-enroll-suggestions__item:focus {
-  background: #F1FFF9;
+  background: rgba(152, 251, 203, 0.14);
   outline: none;
 }
 #mint-lms-root .mint-students-enroll-suggestions__avatar {
@@ -12460,7 +12460,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
   color: #0F0E1A;
   font-size: 12px;
   font-weight: 700;
@@ -12507,7 +12507,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   grid-template-columns: minmax(0, 1fr) 132px 120px 84px 84px;
   gap: 16px;
   padding: 13px 16px;
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
   border-radius: 10px;
 }
 #mint-lms-root .mint-students-table__head-cell {
@@ -12529,7 +12529,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   transition: background 120ms ease-out;
 }
 #mint-lms-root .mint-students-table__row:hover {
-  background: #F1FFF9;
+  background: rgba(152, 251, 203, 0.14);
 }
 #mint-lms-root .mint-students-table__person {
   display: flex;
@@ -12690,7 +12690,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   gap: 4px;
   padding: 4px;
   border-radius: 12px;
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
   border: 1.5px solid #98FBCB;
 }
 #mint-lms-root .mint-reports__range {
@@ -12733,7 +12733,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 #mint-lms-root .mint-reports__stat:hover {
   transform: translateY(-4px);
-  background: #F1FFF9;
+  background: rgba(152, 251, 203, 0.14);
   box-shadow: 0 10px 22px rgba(152, 251, 203, 0.7);
 }
 #mint-lms-root .mint-reports__stat:focus-visible {
@@ -12754,7 +12754,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   width: 30px;
   height: 30px;
   border-radius: 9px;
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -12781,7 +12781,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   height: 22px;
   padding: 0 9px;
   border-radius: 999px;
-  background: #E8FFF3;
+  background: rgba(152, 251, 203, 0.18);
   font-size: 12px;
   font-weight: 700;
   color: #17222B;
@@ -12807,8 +12807,8 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 #mint-lms-root .mint-reports__panel-head {
   padding: 14px 20px;
-  background: #F1FFF9;
-  border-bottom: 1px solid #CFF5E2;
+  background: rgba(152, 251, 203, 0.14);
+  border-bottom: 1px solid #98FBCB;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -12852,7 +12852,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 #mint-lms-root .mint-reports__bar-fill {
   width: 100%;
   border-radius: 8px 8px 3px 3px;
-  background: #CFF5E2;
+  background: #98FBCB;
   transition: background 150ms ease-out;
   min-height: 8px;
 }
@@ -12878,7 +12878,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 #mint-lms-root .mint-reports__course:first-child { border-top: 0; }
 #mint-lms-root .mint-reports__course:hover,
 #mint-lms-root .mint-reports__course:focus-visible {
-  background: #F1FFF9;
+  background: rgba(152, 251, 203, 0.14);
   box-shadow: 0 4px 14px rgba(152, 251, 203, 0.5);
 }
 #mint-lms-root .mint-reports__course-tile {
@@ -12946,7 +12946,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 #mint-lms-root .mint-reports__event:first-child { border-top: 0; }
 #mint-lms-root .mint-reports__event:hover,
 #mint-lms-root .mint-reports__event:focus-visible {
-  background: #F1FFF9;
+  background: rgba(152, 251, 203, 0.14);
   box-shadow: 0 4px 14px rgba(152, 251, 203, 0.5);
 }
 #mint-lms-root .mint-reports__avatar {
@@ -13137,7 +13137,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   cursor: pointer;
 }
 #mint-lms-root .mint-assign__item:hover {
-  background: #f1fff9;
+  background: rgba(152, 251, 203, 0.14);
 }
 #mint-lms-root .mint-assign__item.is-selected {
   background: #98fbcb;
@@ -13550,7 +13550,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   padding: 10px 12px;
   border: 1.5px dashed #98FBCB;
   border-radius: 12px;
-  background: #F1FFF9;
+  background: rgba(152, 251, 203, 0.14);
   color: #0F0E1A;
   font-size: 13px;
   font-weight: 500;
@@ -13604,7 +13604,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 }
 
 #mint-lms-root button.mint-existing-add-btn:hover:not(:disabled) {
-  background: #F1FFF9 !important;
+  background: rgba(152, 251, 203, 0.14) !important;
   box-shadow: 0 4px 12px rgba(152, 251, 203, 0.28);
   transform: translateY(-1px);
 }
