@@ -367,6 +367,20 @@ final class LessonService {
 		$this->lessonRepository->delete( $lesson->id );
 	}
 
+	/**
+	 * Move a lesson (and nested quizzes/questions) to trash — restorable from lists.
+	 */
+	public function trash( int $id, int $userId ): void {
+		$lesson = $this->findLessonOrFail( $id );
+		$this->assertCanManageLesson( $userId, $lesson );
+
+		if ( null !== $this->quizService ) {
+			$this->quizService->onLessonTrashed( $lesson->id );
+		}
+
+		$this->lessonRepository->trash( $lesson->id );
+	}
+
 	public function get( int $id, int $userId ): LessonDto {
 		$lesson = $this->findLessonOrFail( $id );
 		$this->assertCanViewLesson( $userId, $lesson );

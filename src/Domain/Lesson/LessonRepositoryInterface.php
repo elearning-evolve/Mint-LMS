@@ -25,6 +25,11 @@ interface LessonRepositoryInterface {
 
 	public function delete( int $id ): bool;
 
+	/**
+	 * Soft-delete (WordPress trash) when the storage layer supports it.
+	 */
+	public function trash( int $id ): bool;
+
 	public function deleteBySectionId( int $sectionId ): void;
 
 	/**

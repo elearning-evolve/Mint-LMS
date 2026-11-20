@@ -34,7 +34,11 @@ interface QuizRepositoryInterface {
 
 	public function deleteQuiz( int $id ): bool;
 
+	public function trashQuiz( int $id ): bool;
+
 	public function deleteQuestion( int $id ): bool;
+
+	public function trashQuestion( int $id ): bool;
 
 	public function deleteQuestionsByQuizId( int $quizId ): void;
 

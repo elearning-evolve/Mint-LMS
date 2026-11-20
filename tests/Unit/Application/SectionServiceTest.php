@@ -131,7 +131,7 @@ final class SectionServiceTest extends TestCase
         $this->assertSame('Updated Section', $result->title);
     }
 
-    public function test_delete_cascades_lessons_quizzes_and_progress(): void
+    public function test_delete_trashes_nested_lessons_and_quizzes(): void
     {
         $section = $this->sampleSection();
         $course = $this->sampleCourse();
@@ -146,26 +146,21 @@ final class SectionServiceTest extends TestCase
         $this->lessonRepository->method('findBySectionId')->with(10)->willReturn($lessons);
 
         $this->lessonRepository->expects($this->never())->method('deleteBySectionId');
+        $this->progressLifecycle->expects($this->never())->method('onLessonDeleted');
+        $this->lessonRepository->expects($this->never())->method('delete');
 
-        $progressIds = [];
-        $this->progressLifecycle->expects($this->exactly(2))
-            ->method('onLessonDeleted')
-            ->willReturnCallback(static function (int $lessonId) use (&$progressIds): void {
-                $progressIds[] = $lessonId;
-            });
-
-        $quizIds = [];
+        $trashedQuizLessons = [];
         $this->quizLifecycle->expects($this->exactly(2))
-            ->method('onLessonDeleted')
-            ->willReturnCallback(static function (int $lessonId) use (&$quizIds): void {
-                $quizIds[] = $lessonId;
+            ->method('onLessonTrashed')
+            ->willReturnCallback(static function (int $lessonId) use (&$trashedQuizLessons): void {
+                $trashedQuizLessons[] = $lessonId;
             });
 
-        $deletedLessonIds = [];
+        $trashedLessonIds = [];
         $this->lessonRepository->expects($this->exactly(2))
-            ->method('delete')
-            ->willReturnCallback(static function (int $lessonId) use (&$deletedLessonIds): bool {
-                $deletedLessonIds[] = $lessonId;
+            ->method('trash')
+            ->willReturnCallback(static function (int $lessonId) use (&$trashedLessonIds): bool {
+                $trashedLessonIds[] = $lessonId;
                 return true;
             });
 
@@ -173,9 +168,8 @@ final class SectionServiceTest extends TestCase
 
         $this->service->delete(10, 2);
 
-        $this->assertSame([20, 21], $progressIds);
-        $this->assertSame([20, 21], $quizIds);
-        $this->assertSame([20, 21], $deletedLessonIds);
+        $this->assertSame([20, 21], $trashedQuizLessons);
+        $this->assertSame([20, 21], $trashedLessonIds);
     }
 
     public function test_reorder_updates_section_order(): void

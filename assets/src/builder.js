@@ -194,6 +194,17 @@ function courseBuilder(courseId, opts = {}) {
     ],
     quizMaterialsCodeTags: ['b', 'i', 'link', 'ul', 'ol', 'li', 'code', 'img'],
     addingCourseQuiz: false,
+    /** Mint “Move to trash” confirm (builder permanent-remove paths). */
+    trashConfirm: {
+      open: false,
+      title: '',
+      name: '',
+      body: '',
+      note: '',
+      busy: false,
+      tossing: false,
+      _resolver: null,
+    },
     /** Inline “Quiz title + Save” row inside lesson Quizzes card. */
     lessonQuizDraftOpen: false,
     lessonQuizDraftTitle: '',
@@ -5062,9 +5073,14 @@ function courseBuilder(courseId, opts = {}) {
 
     async deleteOverviewQuiz(item) {
       const quizId = Number(item?.id) || 0;
-      if (!quizId || !window.confirm('Delete this quiz and all questions?')) return;
+      if (!quizId) return;
+      const title =
+        item?.title ||
+        (this.courseQuizzes || []).find((quiz) => Number(quiz.id) === quizId)?.title ||
+        '';
+      if (!(await this.confirmMoveToTrash(this.trashCopy('quiz', title)))) return;
       try {
-        await mintApi(`quizzes/${quizId}`, { method: 'DELETE' });
+        await mintApi(`content/quizzes/${quizId}/trash`, { method: 'POST' });
         this.courseQuizzes = (this.courseQuizzes || []).filter(
           (quiz) => Number(quiz.id) !== quizId
         );
@@ -5077,7 +5093,7 @@ function courseBuilder(courseId, opts = {}) {
         if (this.selected?.type === 'quiz' && Number(this.selected.id) === quizId) {
           this.selected = null;
         }
-        window.MintLMS.toast.success('Quiz deleted');
+        window.MintLMS.toast.success('Moved to trash');
       } catch (err) {
         window.MintLMS.toast.error(err.message);
       }
@@ -5086,13 +5102,23 @@ function courseBuilder(courseId, opts = {}) {
     async deleteOverviewQuestion(item) {
       const questionId = Number(item?.id) || 0;
       const quizId = Number(item?.quizId) || 0;
-      if (!questionId || !quizId || !window.confirm('Delete this question?')) return;
+      if (!questionId) return;
+      const title =
+        item?.title ||
+        (this.courseQuestions || []).find((question) => Number(question.id) === questionId)
+          ?.title ||
+        '';
+      if (!(await this.confirmMoveToTrash(this.trashCopy('question', title)))) return;
       try {
-        await mintApi(`quizzes/${quizId}/questions/${questionId}`, { method: 'DELETE' });
+        await mintApi(`content/questions/${questionId}/trash`, { method: 'POST' });
         this.courseQuestions = (this.courseQuestions || []).filter(
           (question) => Number(question.id) !== questionId
         );
         if (Number(this.lessonQuiz?.id) === quizId && Array.isArray(this.lessonQuiz?.questions)) {
+          this.lessonQuiz.questions = this.lessonQuiz.questions.filter(
+            (question) => Number(question.id) !== questionId
+          );
+        } else if (Array.isArray(this.lessonQuiz?.questions)) {
           this.lessonQuiz.questions = this.lessonQuiz.questions.filter(
             (question) => Number(question.id) !== questionId
           );
@@ -5104,7 +5130,7 @@ function courseBuilder(courseId, opts = {}) {
           this.selected = null;
           this.activeQuestion = null;
         }
-        window.MintLMS.toast.success('Question deleted');
+        window.MintLMS.toast.success('Moved to trash');
       } catch (err) {
         window.MintLMS.toast.error(err.message);
       }
@@ -6150,7 +6176,7 @@ function courseBuilder(courseId, opts = {}) {
 
     /**
      * Quiz → Questions list Remove — detach (parallel to Lesson → Quizzes Remove).
-     * Permanent delete stays on Overview / header Delete question.
+     * Trash stays on Overview / header Move to trash.
      */
     async removeQuizQuestionFromList(question) {
       const questionId = Number(question?.id || 0);
@@ -6610,7 +6636,7 @@ function courseBuilder(courseId, opts = {}) {
       if (!deleted) return;
       this.activeQuestion = null;
       this.questionAnswerReady = false;
-      window.MintLMS.toast.success('Question deleted');
+      window.MintLMS.toast.success('Moved to trash');
       this.redirectToTypeOverview('questions');
     },
 
@@ -8383,11 +8409,95 @@ function courseBuilder(courseId, opts = {}) {
       }
     },
 
+    trashCopy(kind, itemTitle) {
+      const name = String(itemTitle || '').trim();
+      const label =
+        name ||
+        ({
+          section: 'This lesson group',
+          lesson: 'This lesson',
+          quiz: 'This quiz',
+          question: 'This question',
+        }[kind] || 'This item');
+      if (kind === 'section') {
+        return {
+          title: 'Remove lesson group?',
+          name: label,
+          body: 'will be removed from this course. Its lessons, quizzes, and questions will be moved to trash.',
+          note: 'You can restore those items later from Trash.',
+        };
+      }
+      if (kind === 'lesson') {
+        return {
+          title: 'Move lesson to trash?',
+          name: label,
+          body: 'will be moved to trash, including its quizzes and questions.',
+          note: 'You can restore it later from the Lessons trash.',
+        };
+      }
+      if (kind === 'quiz') {
+        return {
+          title: 'Move quiz to trash?',
+          name: label,
+          body: 'will be moved to trash, including its questions.',
+          note: 'You can restore it later from the Quizzes trash.',
+        };
+      }
+      return {
+        title: 'Move question to trash?',
+        name: label,
+        body: 'will be moved to trash.',
+        note: 'You can restore it later from the Questions trash.',
+      };
+    },
+
+    confirmMoveToTrash({ title, name, body, note }) {
+      return new Promise((resolve) => {
+        if (this.trashConfirm?._resolver) {
+          this.trashConfirm._resolver(false);
+        }
+        this.trashConfirm = {
+          open: true,
+          title: title || 'Move to trash?',
+          name: name || '',
+          body: body || '',
+          note: note || '',
+          busy: false,
+          tossing: false,
+          _resolver: resolve,
+        };
+      });
+    },
+
+    cancelTrashConfirm() {
+      if (this.trashConfirm.busy) return;
+      const resolve = this.trashConfirm._resolver;
+      this.trashConfirm.open = false;
+      this.trashConfirm.tossing = false;
+      this.trashConfirm.busy = false;
+      this.trashConfirm._resolver = null;
+      if (typeof resolve === 'function') resolve(false);
+    },
+
+    acceptTrashConfirm() {
+      if (this.trashConfirm.busy) return;
+      const resolve = this.trashConfirm._resolver;
+      this.trashConfirm.busy = true;
+      this.trashConfirm.tossing = true;
+      this.trashConfirm._resolver = null;
+      window.setTimeout(() => {
+        this.trashConfirm.open = false;
+        this.trashConfirm.busy = false;
+        this.trashConfirm.tossing = false;
+        if (typeof resolve === 'function') resolve(true);
+      }, 420);
+    },
+
     async deleteSection(sectionId) {
-      if (!window.confirm('Delete this lesson group and all its lessons?')) return;
+      const sid = Number(sectionId) || 0;
+      const removed = this.sections.find((s) => Number(s.id) === sid);
+      if (!(await this.confirmMoveToTrash(this.trashCopy('section', removed?.title)))) return;
       try {
-        const sid = Number(sectionId) || 0;
-        const removed = this.sections.find((s) => Number(s.id) === sid);
         const lessonIds = new Set(
           (removed?.lessons || []).map((lesson) => Number(lesson.id)).filter((id) => id > 0)
         );
@@ -8401,7 +8511,7 @@ function courseBuilder(courseId, opts = {}) {
             (question) => !lessonIds.has(Number(question.lessonId))
           );
         }
-        window.MintLMS.toast.success('Lesson group deleted');
+        window.MintLMS.toast.success('Moved to trash');
         this.redirectToTypeOverview('sections');
       } catch (err) {
         window.MintLMS.toast.error(err.message);
@@ -8409,14 +8519,23 @@ function courseBuilder(courseId, opts = {}) {
     },
 
     async deleteLesson(lessonId, sectionId) {
-      if (!window.confirm('Delete this lesson?')) return;
+      const lid = Number(lessonId) || 0;
+      const sid = Number(sectionId);
+      const section = this.sections.find((s) => Number(s.id) === sid);
+      const lessonFromSection = (section?.lessons || []).find((l) => Number(l.id) === lid);
+      const lesson =
+        lessonFromSection ||
+        (Number(this.selectedLesson?.id) === lid ? this.selectedLesson : null);
+      const title = lesson?.title || this.selectedLesson?.title || '';
+      if (!(await this.confirmMoveToTrash(this.trashCopy('lesson', title)))) return;
       try {
-        const lid = Number(lessonId) || 0;
-        const sid = Number(sectionId);
-        await mintApi(`lessons/${lid}`, { method: 'DELETE' });
-        const section = this.sections.find((s) => Number(s.id) === sid);
+        await mintApi(`content/lessons/${lid}/trash`, { method: 'POST' });
         if (section) {
           section.lessons = (section.lessons || []).filter((l) => Number(l.id) !== lid);
+        } else {
+          for (const row of this.sections || []) {
+            row.lessons = (row.lessons || []).filter((l) => Number(l.id) !== lid);
+          }
         }
         this.courseQuizzes = (this.courseQuizzes || []).filter(
           (quiz) => Number(quiz.lessonId) !== lid
@@ -8424,7 +8543,7 @@ function courseBuilder(courseId, opts = {}) {
         this.courseQuestions = (this.courseQuestions || []).filter(
           (question) => Number(question.lessonId) !== lid
         );
-        window.MintLMS.toast.success('Lesson deleted');
+        window.MintLMS.toast.success('Moved to trash');
         this.redirectToTypeOverview('lessons');
       } catch (err) {
         window.MintLMS.toast.error(err.message);
@@ -8768,9 +8887,7 @@ function courseBuilder(courseId, opts = {}) {
     },
 
     headerDeleteLabel() {
-      if (this.selected?.type === 'quiz') return 'Delete quiz';
-      if (this.selected?.type === 'question') return 'Delete question';
-      return 'Delete lesson';
+      return 'Move to trash';
     },
 
     headerDeleteAction() {
@@ -9494,16 +9611,17 @@ function courseBuilder(courseId, opts = {}) {
     },
 
     async deleteQuiz() {
-      if (!this.lessonQuiz?.id || !window.confirm('Delete this quiz and all questions?')) return;
+      if (!this.lessonQuiz?.id) return;
+      const quizId = Number(this.lessonQuiz.id);
+      if (!(await this.confirmMoveToTrash(this.trashCopy('quiz', this.lessonQuiz.title)))) return;
       try {
-        const quizId = Number(this.lessonQuiz.id);
-        await mintApi(`quizzes/${quizId}`, { method: 'DELETE' });
+        await mintApi(`content/quizzes/${quizId}/trash`, { method: 'POST' });
         this.courseQuizzes = (this.courseQuizzes || []).filter((quiz) => Number(quiz.id) !== quizId);
         this.courseQuestions = (this.courseQuestions || []).filter(
           (question) => Number(question.quizId) !== quizId
         );
         this.lessonQuiz = this.emptyQuizState();
-        window.MintLMS.toast.success('Quiz deleted');
+        window.MintLMS.toast.success('Moved to trash');
         this.redirectToTypeOverview('quizzes');
       } catch (err) {
         window.MintLMS.toast.error(err.message);
@@ -10110,15 +10228,6 @@ function courseBuilder(courseId, opts = {}) {
 
     async deleteQuizQuestion(question) {
       const questionId = Number(question?.id) || 0;
-      // Prefer loaded quiz, then selection / row meta — never fake-succeed without API.
-      const quizId =
-        Number(this.lessonQuiz?.id) ||
-        Number(this.selected?.quizId) ||
-        Number(question?.quizId) ||
-        Number(
-          (this.courseQuestions || []).find((row) => Number(row.id) === questionId)?.quizId
-        ) ||
-        0;
 
       if (!questionId) {
         // Unsaved draft — local remove only.
@@ -10128,19 +10237,17 @@ function courseBuilder(courseId, opts = {}) {
         return true;
       }
 
-      if (!quizId) {
-        window.MintLMS.toast.error('Could not delete question: quiz not loaded.');
-        return false;
-      }
+      const title =
+        question?.title ||
+        question?.displayTitle ||
+        (this.courseQuestions || []).find((row) => Number(row.id) === questionId)?.title ||
+        this.activeQuestion?.title ||
+        '';
+      if (!(await this.confirmMoveToTrash(this.trashCopy('question', title)))) return false;
 
-      if (!window.confirm('Delete this question?')) return false;
       try {
-        const quiz = await mintApi(`quizzes/${quizId}/questions/${questionId}`, {
-          method: 'DELETE',
-        });
-        if (Number(this.lessonQuiz?.id) === quizId) {
-          this.lessonQuiz = this.normalizeQuiz(quiz);
-        } else if (Array.isArray(this.lessonQuiz?.questions)) {
+        await mintApi(`content/questions/${questionId}/trash`, { method: 'POST' });
+        if (Array.isArray(this.lessonQuiz?.questions)) {
           this.lessonQuiz.questions = this.lessonQuiz.questions.filter(
             (q) => Number(q.id) !== questionId
           );

@@ -3760,5 +3760,69 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 		</section>
 	</div>
 
+	<div
+		class="mint-confirm"
+		x-show="trashConfirm.open"
+		x-cloak
+		x-transition.opacity.duration.200ms
+		role="presentation"
+		@keydown.escape.window="cancelTrashConfirm()"
+	>
+		<div class="mint-confirm__backdrop" @click="cancelTrashConfirm()"></div>
+		<div
+			class="mint-confirm__panel"
+			:class="{ 'is-toss': trashConfirm.tossing }"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="mint-builder-trash-title"
+			aria-describedby="mint-builder-trash-body"
+			@click.stop
+		>
+			<button
+				type="button"
+				class="mint-confirm__close"
+				@click="cancelTrashConfirm()"
+				aria-label="<?php echo esc_attr__( 'Close', 'mint-lms' ); ?>"
+			>
+				<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15" /></svg>
+			</button>
+
+			<div class="mint-confirm__top">
+				<div class="mint-confirm__icon" aria-hidden="true">
+					<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<g><path d="M3.5 6h13M7.5 6V4.2h5V6" /></g>
+						<path d="M5.2 6l.9 10h7.8l.9-10" />
+						<path d="M8.5 9v5M11.5 9v5" />
+					</svg>
+				</div>
+				<h2 id="mint-builder-trash-title" class="mint-confirm__title" x-text="trashConfirm.title"></h2>
+			</div>
+
+			<p id="mint-builder-trash-body" class="mint-confirm__body">
+				<b x-text="trashConfirm.name"></b>
+				<span x-text="' ' + (trashConfirm.body || '')"></span>
+			</p>
+			<div class="mint-confirm__note" x-text="trashConfirm.note"></div>
+
+			<div class="mint-confirm__actions">
+				<button type="button" class="mint-confirm__cancel" @click="cancelTrashConfirm()">
+					<?php esc_html_e( 'Cancel', 'mint-lms' ); ?>
+				</button>
+				<button
+					type="button"
+					class="mint-confirm__submit"
+					:class="{ 'is-busy': trashConfirm.busy }"
+					@click="acceptTrashConfirm()"
+				>
+					<svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+						<g class="mint-confirm__lid"><path d="M3.5 5.5h13M7.5 5.5V3.8h5v1.7" /></g>
+						<g class="mint-confirm__bin"><path d="M5.2 5.5l.9 10.2h7.8l.9-10.2" /><path d="M8.3 8.6v5M11.7 8.6v5" /></g>
+					</svg>
+					<?php esc_html_e( 'Move to trash', 'mint-lms' ); ?>
+				</button>
+			</div>
+		</div>
+	</div>
+
 	<?php echo ( new MintLMS\Infrastructure\Admin\ViewRenderer() )->component( 'toast' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 </div>

@@ -174,6 +174,22 @@ final class WpPostLessonRepository implements LessonRepositoryInterface {
 		return $result instanceof \WP_Post;
 	}
 
+	public function trash( int $id ): bool {
+		$post = get_post( $id );
+
+		if ( ! $post instanceof \WP_Post || PostTypes::LESSON !== $post->post_type ) {
+			return false;
+		}
+
+		if ( 'trash' === $post->post_status ) {
+			return true;
+		}
+
+		$result = wp_trash_post( $id );
+
+		return $result instanceof \WP_Post;
+	}
+
 	public function deleteBySectionId( int $sectionId ): void {
 		// section_id 0 is the ungrouped/library bucket — never mass-delete it.
 		if ( $sectionId <= 0 ) {
