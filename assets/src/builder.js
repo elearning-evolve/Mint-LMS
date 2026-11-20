@@ -1031,9 +1031,10 @@ function courseBuilder(courseId, opts = {}) {
 
     existingPickerAddLabel() {
       const kind = this.existingPicker.kind;
-      if (kind === 'lesson') return 'Add to lesson group';
-      if (kind === 'quiz') return 'Add to lesson';
-      return 'Add to quiz';
+      // Destination-aware CTA: child → parent (never a bare “Add”).
+      if (kind === 'lesson') return 'Add to Lesson Group';
+      if (kind === 'quiz') return 'Add to Lesson';
+      return 'Add to Quiz';
     },
 
     existingPickerCountLabel() {
