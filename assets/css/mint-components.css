@@ -4321,6 +4321,82 @@
   width: fit-content;
 }
 
+/* Escape hatch → native WP editor (below Lesson/Quiz chip; Mint attach-card language) */
+#mint-lms-root a.mint-wp-content-link {
+  margin-top: 14px;
+  margin-bottom: 2px;
+  max-width: 420px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1.5px solid #CFF5E2;
+  background: #F1FFF9;
+  box-shadow: 0 4px 14px rgba(15, 14, 26, 0.04);
+  text-decoration: none;
+  color: #0F0E1A;
+  box-sizing: border-box;
+  transition: background 140ms ease-out, border-color 140ms ease-out, box-shadow 140ms ease-out, transform 140ms ease-out;
+}
+
+#mint-lms-root a.mint-wp-content-link:hover,
+#mint-lms-root a.mint-wp-content-link:focus-visible {
+  background: #E8FFF3;
+  border-color: #98FBCB;
+  box-shadow: 0 6px 18px rgba(15, 14, 26, 0.08);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+#mint-lms-root .mint-wp-content-link__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #98FBCB;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+#mint-lms-root .mint-wp-content-link__copy {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+#mint-lms-root .mint-wp-content-link__title {
+  font-family: var(--mint-font);
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  color: #0F0E1A;
+}
+
+#mint-lms-root .mint-wp-content-link__hint {
+  font-family: var(--mint-font);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: #5C5C77;
+}
+
+#mint-lms-root .mint-wp-content-link__arrow {
+  flex: none;
+  color: #0F0E1A;
+  opacity: 0.55;
+  display: inline-flex;
+}
+
+#mint-lms-root a.mint-wp-content-link:hover .mint-wp-content-link__arrow,
+#mint-lms-root a.mint-wp-content-link:focus-visible .mint-wp-content-link__arrow {
+  opacity: 1;
+}
+
 #mint-lms-root .mint-quiz-rules {
   border: 1px solid #E4E1F0;
   border-radius: 16px;
