@@ -4017,6 +4017,71 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 	</div>
 
 	<div
+		class="mint-move-confirm"
+		x-show="moveConfirm.open"
+		x-cloak
+		role="presentation"
+		@keydown.escape.window="cancelMoveConfirm()"
+	>
+		<div class="mint-move-confirm__backdrop" @click="cancelMoveConfirm()"></div>
+		<div
+			class="mint-move-confirm__dialog"
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="mint-move-confirm-title"
+			aria-describedby="mint-move-confirm-body"
+			@click.stop
+		>
+			<button
+				type="button"
+				class="mint-move-confirm__close"
+				@click="cancelMoveConfirm()"
+				aria-label="<?php echo esc_attr__( 'Close', 'mint-lms' ); ?>"
+			>
+				<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15" /></svg>
+			</button>
+
+			<div class="mint-move-confirm__top">
+				<div class="mint-move-confirm__icon" aria-hidden="true">
+					<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h11M11 6l4 4-4 4" /></svg>
+				</div>
+				<h2 id="mint-move-confirm-title" class="mint-move-confirm__title" x-text="moveConfirm.title"></h2>
+			</div>
+
+			<p id="mint-move-confirm-body" class="mint-move-confirm__body">
+				<b x-text="moveConfirm.itemTitle"></b>
+				<span> <?php esc_html_e( 'is already linked to', 'mint-lms' ); ?> </span>
+				<span x-text="moveConfirm.linkedLabel"></span>
+				<span> </span>
+				<b x-text="moveConfirm.linkedName"></b><span>.</span>
+				<span x-show="moveConfirm.groupSentence" x-cloak>
+					<span> <?php esc_html_e( 'It is part of the lesson group', 'mint-lms' ); ?> </span>
+					<b x-text="moveConfirm.groupSentence"></b><span>.</span>
+				</span>
+			</p>
+			<div class="mint-move-confirm__note" x-text="moveConfirm.note"></div>
+
+			<div class="mint-move-confirm__foot">
+				<button type="button" class="mint-move-confirm__cancel" @click="cancelMoveConfirm()">
+					<?php esc_html_e( 'Cancel', 'mint-lms' ); ?>
+				</button>
+				<button
+					type="button"
+					class="mint-move-confirm__submit"
+					:class="{ 'is-busy': moveConfirm.busy }"
+					:disabled="moveConfirm.busy"
+					@click="acceptMoveConfirm()"
+				>
+					<?php esc_html_e( 'Move', 'mint-lms' ); ?>
+					<span class="mint-move-confirm__arw" aria-hidden="true">
+						<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10h11M11 6l4 4-4 4" /></svg>
+					</span>
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<div
 		class="mint-confirm"
 		x-show="trashConfirm.open"
 		x-cloak

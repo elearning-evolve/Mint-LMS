@@ -205,6 +205,18 @@ function courseBuilder(courseId, opts = {}) {
       tossing: false,
       _resolver: null,
     },
+    /** Mint “Move linked item” confirm (Add Existing when already associated). */
+    moveConfirm: {
+      open: false,
+      title: '',
+      itemTitle: '',
+      linkedLabel: '',
+      linkedName: '',
+      groupSentence: '',
+      note: '',
+      busy: false,
+      item: null,
+    },
     /** Parent → “Add existing …” picker (lesson group / lesson / quiz). */
     existingPicker: {
       open: false,
@@ -1132,6 +1144,10 @@ function courseBuilder(courseId, opts = {}) {
             sectionId: Number(row.sectionId) || 0,
             lessonId: Number(row.lessonId) || 0,
             quizId: Number(row.quizId) || 0,
+            courseTitle: row.courseTitle || '',
+            sectionTitle: row.sectionTitle || '',
+            lessonTitle: row.lessonTitle || '',
+            quizTitle: row.quizTitle || '',
             disposableHost: !!row.disposableHost,
             status: row.status || '',
             questionType: row.questionType || '',
@@ -1198,15 +1214,96 @@ function courseBuilder(courseId, opts = {}) {
 
     async addExistingPickerItem(item) {
       const id = Number(item?.id) || 0;
-      if (!id || this.existingPicker.busy || this.isExistingPickerAdded(item)) return;
+      if (!id || this.existingPicker.busy || this.isExistingPickerAdded(item) || this.moveConfirm.open) {
+        return;
+      }
       if (this.needsExistingMoveConfirm(item)) {
-        const label = String(item.title || 'This item').trim() || 'This item';
-        const ok = window.confirm(
-          `${label} is already linked elsewhere. Adding it here will move it (remove from the previous place). Continue?`
-        );
-        if (!ok) return;
+        this.openMoveConfirm(item);
+        return;
+      }
+      try {
+        await this.runExistingPickerAttach(item);
+      } catch (err) {
+        window.MintLMS.toast.error(err.message || 'Could not add item.');
+      }
+    },
+
+    openMoveConfirm(item) {
+      const kind = this.existingPicker.kind;
+      const itemTitle = String(item?.title || '').trim() || '(no title)';
+      let title = '';
+      let linkedLabel = '';
+      let linkedName = '';
+      let groupSentence = '';
+      let note = '';
+
+      if (kind === 'lesson') {
+        const courseTitle = String(item?.courseTitle || '').trim() || 'another course';
+        const sectionTitle = String(item?.sectionTitle || '').trim();
+        const sameCourse = Number(item?.courseId) === Number(this.courseId) && Number(this.courseId) > 0;
+        if (sameCourse) {
+          title = 'This lesson is linked to another lesson group';
+          linkedLabel = 'the lesson group';
+          linkedName = sectionTitle || 'another lesson group';
+        } else {
+          title = 'This lesson is linked to another course';
+          linkedLabel = 'the course';
+          linkedName = courseTitle;
+          if (sectionTitle && Number(item?.sectionId) > 0) {
+            groupSentence = sectionTitle;
+          }
+        }
+        note = 'If you want to add this lesson to this lesson group, click Move.';
+      } else if (kind === 'quiz') {
+        // Quiz → lesson only (never course name).
+        title = 'This quiz is linked to another lesson';
+        linkedLabel = 'the lesson';
+        linkedName = String(item?.lessonTitle || '').trim() || 'another lesson';
+        note = 'If you want to add this quiz to this lesson, click Move.';
+      } else {
+        title = 'This question is linked to another quiz';
+        linkedLabel = 'the quiz';
+        linkedName = String(item?.quizTitle || '').trim() || 'another quiz';
+        note = 'If you want to add this question to this quiz, click Move.';
       }
 
+      this.moveConfirm = {
+        open: true,
+        title,
+        itemTitle,
+        linkedLabel,
+        linkedName,
+        groupSentence,
+        note,
+        busy: false,
+        item,
+      };
+    },
+
+    cancelMoveConfirm() {
+      if (this.moveConfirm.busy) return;
+      this.moveConfirm.open = false;
+      this.moveConfirm.item = null;
+      this.moveConfirm.busy = false;
+    },
+
+    async acceptMoveConfirm() {
+      if (this.moveConfirm.busy || !this.moveConfirm.item) return;
+      this.moveConfirm.busy = true;
+      try {
+        await this.runExistingPickerAttach(this.moveConfirm.item);
+        this.moveConfirm.open = false;
+        this.moveConfirm.item = null;
+        this.moveConfirm.busy = false;
+      } catch (err) {
+        this.moveConfirm.busy = false;
+        window.MintLMS.toast.error(err.message || 'Could not move item.');
+      }
+    },
+
+    async runExistingPickerAttach(item) {
+      const id = Number(item?.id) || 0;
+      if (!id || this.existingPicker.busy) return;
       this.existingPicker.busy = true;
       try {
         const kind = this.existingPicker.kind;
@@ -1226,7 +1323,7 @@ function courseBuilder(courseId, opts = {}) {
         this.existingPicker.busy = false;
       } catch (err) {
         this.existingPicker.busy = false;
-        window.MintLMS.toast.error(err.message || 'Could not add item.');
+        throw err;
       }
     },
 
