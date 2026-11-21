@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-use MintLMS\Infrastructure\Ai\AiSettings;
 use MintLMS\Infrastructure\Setup\PageSettings;
 
 /** @var PageSettings $pageSettings */
@@ -13,11 +12,7 @@ $dashboardId     = $pageSettings->getDashboardPageId();
 $catalogId       = $pageSettings->getCatalogPageId();
 $playerId        = $pageSettings->getPlayerPageId();
 $certTemplate    = (string) get_option( 'mintlms_certificate_template', '' );
-$aiSettings      = new AiSettings();
-$aiStatus        = $aiSettings->status();
-$aiKeyFieldValue = $aiSettings->hasApiKey() ? AiSettings::MASK_PLACEHOLDER : '';
-$aiUsesConstant  = in_array( (string) $aiStatus['key_source'], array( 'constant', 'env' ), true );
-$doneCount       = count( array_filter( $checklist, static fn( array $item ): bool => $item['done'] ) );
+$doneCount = count( array_filter( $checklist, static fn( array $item ): bool => $item['done'] ) );
 $totalCount      = count( $checklist );
 $progressPct     = $totalCount > 0 ? (int) round( ( $doneCount / $totalCount ) * 100 ) : 0;
 $pagesCreated    = isset( $_GET['mintlms_pages'] ) && '1' === sanitize_text_field( wp_unslash( (string) $_GET['mintlms_pages'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -72,36 +67,16 @@ $enrollment_modes = array(
 $cert_tags = array( 'student_name', 'course_name', 'completion_date' );
 
 $boot = array(
-	'enrollment'     => $pageSettings->getDefaultEnrollment(),
-	'emailEnroll'    => $pageSettings->isEmailEnrollEnabled(),
-	'emailComplete'  => $pageSettings->isEmailCompleteEnabled(),
-	'aiEnabled'      => $aiSettings->isEnabled(),
-	'aiProvider'     => $aiSettings->getProvider(),
-	'aiModel'        => (string) get_option( AiSettings::OPTION_MODEL, '' ),
-	'aiKey'          => $aiKeyFieldValue,
-	'aiUsesConstant' => $aiUsesConstant,
-	'aiReady'        => $aiSettings->isReady(),
-	'pages'          => $page_options,
-	'dashboardId'    => $dashboardId,
-	'catalogId'      => $catalogId,
-	'playerId'       => $playerId,
-	'certTemplate'   => $certTemplate,
-	'i18n'           => array(
-		'selectPage'   => __( '— Select —', 'mint-lms' ),
-		'openai'       => __( 'OpenAI (paid)', 'mint-lms' ),
-		'anthropic'    => __( 'Anthropic (paid)', 'mint-lms' ),
-		'groq'         => __( 'Groq (free tier)', 'mint-lms' ),
-		'gemini'       => __( 'Google Gemini (free tier)', 'mint-lms' ),
-		'testing'      => __( 'Testing…', 'mint-lms' ),
-		'connectionOk' => __( 'Connection OK', 'mint-lms' ),
-		'testFailed'   => __( 'Test failed', 'mint-lms' ),
-		'keyCleared'   => __( 'Saved key will be removed on save.', 'mint-lms' ),
-	),
-	'aiDefaultModels' => array(
-		'openai'    => AiSettings::defaultModelFor( AiSettings::PROVIDER_OPENAI ),
-		'anthropic' => AiSettings::defaultModelFor( AiSettings::PROVIDER_ANTHROPIC ),
-		'groq'      => AiSettings::defaultModelFor( AiSettings::PROVIDER_GROQ ),
-		'gemini'    => AiSettings::defaultModelFor( AiSettings::PROVIDER_GEMINI ),
+	'enrollment'    => $pageSettings->getDefaultEnrollment(),
+	'emailEnroll'   => $pageSettings->isEmailEnrollEnabled(),
+	'emailComplete' => $pageSettings->isEmailCompleteEnabled(),
+	'pages'         => $page_options,
+	'dashboardId'   => $dashboardId,
+	'catalogId'     => $catalogId,
+	'playerId'      => $playerId,
+	'certTemplate'  => $certTemplate,
+	'i18n'          => array(
+		'selectPage' => __( '— Select —', 'mint-lms' ),
 	),
 );
 
@@ -144,9 +119,6 @@ $checklist_subtitle = $doneCount === $totalCount && $totalCount > 0
 		<input type="hidden" name="<?php echo esc_attr( PageSettings::OPTION_DEFAULT_ENROLLMENT ); ?>" :value="enrollment" />
 		<input type="hidden" name="<?php echo esc_attr( PageSettings::OPTION_EMAIL_ENROLL ); ?>" :value="emailEnroll ? '1' : '0'" />
 		<input type="hidden" name="<?php echo esc_attr( PageSettings::OPTION_EMAIL_COMPLETE ); ?>" :value="emailComplete ? '1' : '0'" />
-		<input type="hidden" name="<?php echo esc_attr( AiSettings::OPTION_ENABLED ); ?>" :value="aiEnabled ? '1' : '0'" />
-		<input type="hidden" name="<?php echo esc_attr( AiSettings::OPTION_PROVIDER ); ?>" :value="aiProvider" />
-		<input type="hidden" name="mintlms_ai_clear_key" :value="clearKey ? '1' : '0'" />
 
 		<div class="mint-settings__footer">
 			<p class="mint-settings__footer-note"><?php esc_html_e( 'Changes apply to your whole site once saved.', 'mint-lms' ); ?></p>
@@ -376,124 +348,6 @@ $checklist_subtitle = $doneCount === $totalCount && $totalCount > 0
 					</div>
 				</section>
 
-				<section class="mint-settings-card" id="mintlms-ai-settings">
-					<header class="mint-settings-card__head">
-						<h2 class="mint-settings-card__title"><?php esc_html_e( 'AI assistant (optional)', 'mint-lms' ); ?></h2>
-						<p class="mint-settings-card__desc"><?php esc_html_e( 'Optional AI drafting (quiz drafts). Bring your own key — free-tier providers (Groq, Gemini) or paid (OpenAI, Anthropic). Keys stay on the server.', 'mint-lms' ); ?></p>
-					</header>
-					<div class="mint-settings-card__body">
-						<div class="mint-settings-toggle-row mint-settings-toggle-row--solo">
-							<div>
-								<div class="mint-settings-toggle-row__title"><?php esc_html_e( 'Turn on AI features', 'mint-lms' ); ?></div>
-								<div class="mint-settings-toggle-row__help"><?php esc_html_e( 'Your key stays on the server, never in the browser.', 'mint-lms' ); ?></div>
-							</div>
-							<button
-								type="button"
-								class="mint-settings-switch"
-								role="switch"
-								:aria-checked="aiEnabled ? 'true' : 'false'"
-								:class="{ 'is-on': aiEnabled }"
-								@click="toggleAi()"
-							>
-								<span class="mint-settings-switch__knob" aria-hidden="true"></span>
-							</button>
-						</div>
-
-						<div class="mint-settings-ai" x-show="aiEnabled" x-cloak>
-							<div class="mint-settings-ai__row">
-								<div class="mint-settings-field">
-									<div class="mint-settings-field__label"><?php esc_html_e( 'Provider', 'mint-lms' ); ?></div>
-									<div class="mint-settings-select" :class="{ 'is-open': openSelect === 'provider' }">
-										<button
-											type="button"
-											class="mint-settings-select__trigger"
-											@click="toggleSelect('provider')"
-											:aria-expanded="openSelect === 'provider' ? 'true' : 'false'"
-										>
-											<span x-text="providerLabel()"></span>
-											<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 5 5 5-5" /></svg>
-										</button>
-										<div class="mint-settings-select__menu" x-show="openSelect === 'provider'" x-cloak @click.stop>
-											<button type="button" class="mint-settings-select__option" :class="{ 'is-active': aiProvider === 'groq' }" @click="pickProvider('groq')" x-text="i18n.groq"></button>
-											<button type="button" class="mint-settings-select__option" :class="{ 'is-active': aiProvider === 'gemini' }" @click="pickProvider('gemini')" x-text="i18n.gemini"></button>
-											<button type="button" class="mint-settings-select__option" :class="{ 'is-active': aiProvider === 'openai' }" @click="pickProvider('openai')" x-text="i18n.openai"></button>
-											<button type="button" class="mint-settings-select__option" :class="{ 'is-active': aiProvider === 'anthropic' }" @click="pickProvider('anthropic')" x-text="i18n.anthropic"></button>
-										</div>
-									</div>
-								</div>
-								<div class="mint-settings-field">
-									<label class="mint-settings-field__label" for="mintlms_ai_model"><?php esc_html_e( 'Model', 'mint-lms' ); ?></label>
-									<input
-										type="text"
-										id="mintlms_ai_model"
-										name="<?php echo esc_attr( AiSettings::OPTION_MODEL ); ?>"
-										class="mint-settings-input"
-										x-model="aiModel"
-										placeholder="<?php echo esc_attr( $aiSettings->getModel() ); ?>"
-									/>
-								</div>
-							</div>
-
-							<div class="mint-settings-field">
-								<label class="mint-settings-field__label" for="mintlms_ai_api_key"><?php esc_html_e( 'API key', 'mint-lms' ); ?></label>
-								<?php if ( $aiUsesConstant ) : ?>
-									<p class="mint-settings-field__help mint-m-0">
-										<?php
-										printf(
-											/* translators: %s: key source (constant or env) */
-											esc_html__( 'Using key from %s (database field ignored).', 'mint-lms' ),
-											esc_html( (string) $aiStatus['key_source'] )
-										);
-										?>
-									</p>
-								<?php else : ?>
-									<input
-										type="password"
-										id="mintlms_ai_api_key"
-										name="<?php echo esc_attr( AiSettings::OPTION_API_KEY_ENC ); ?>"
-										class="mint-settings-input"
-										autocomplete="new-password"
-										placeholder="<?php esc_attr_e( 'Paste your API key', 'mint-lms' ); ?>"
-										x-model="aiKey"
-									/>
-									<?php if ( $aiSettings->hasApiKey() && '' !== (string) $aiStatus['key_hint'] ) : ?>
-										<p class="mint-settings-field__help" x-show="!clearKey">
-											<?php
-											printf(
-												/* translators: %s: last four characters of API key */
-												esc_html__( 'Saved key ending in %s', 'mint-lms' ),
-												esc_html( (string) $aiStatus['key_hint'] )
-											);
-											?>
-										</p>
-									<?php endif; ?>
-								<?php endif; ?>
-							</div>
-
-							<div class="mint-settings-ai__actions">
-								<button
-									type="button"
-									class="mint-settings-btn mint-settings-btn--outline"
-									@click="testAi()"
-									:disabled="aiTesting || (!aiReady && !aiKey)"
-								>
-									<?php esc_html_e( 'Test connection', 'mint-lms' ); ?>
-								</button>
-								<?php if ( ! $aiUsesConstant ) : ?>
-									<button
-										type="button"
-										class="mint-settings-btn mint-settings-btn--outline"
-										@click="markClearKey()"
-										x-show="aiReady || aiKey"
-									>
-										<?php esc_html_e( 'Remove saved key', 'mint-lms' ); ?>
-									</button>
-								<?php endif; ?>
-							</div>
-							<p class="mint-settings-ai__result" x-text="aiTestResult" aria-live="polite"></p>
-						</div>
-					</div>
-				</section>
 			</div>
 		</div>
 	</form>

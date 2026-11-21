@@ -42,6 +42,7 @@ use MintLMS\Infrastructure\Admin\NativeEditorSaveGuard;
 use MintLMS\Infrastructure\Admin\NativeEditorViewLinks;
 use MintLMS\Infrastructure\Admin\QuestionPostEditUi;
 use MintLMS\Infrastructure\Admin\QuizPostEditUi;
+use MintLMS\Infrastructure\Admin\AiAssistantPage;
 use MintLMS\Infrastructure\Admin\SettingsPage;
 use MintLMS\Infrastructure\Admin\UserProfileEnrollment;
 use MintLMS\Infrastructure\Capability\AdminAccessGuard;
@@ -138,6 +139,7 @@ final class Bootstrap {
 		);
 
 		( new MenuRegistrar() )->register();
+		( new AiAssistantPage() )->register();
 		( new SettingsPage() )->register();
 		( new CourseBuilderPage() )->register();
 		( new CoursePostEditUi() )->register();

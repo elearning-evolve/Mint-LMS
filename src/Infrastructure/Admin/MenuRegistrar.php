@@ -11,8 +11,21 @@ final class MenuRegistrar {
 
 	public function register(): void {
 		add_action( 'admin_menu', array( $this, 'registerMenu' ) );
+		add_action( 'admin_head', array( $this, 'printMenuIconStyles' ) );
 		add_filter( 'parent_file', array( $this, 'keepMintMenuOpen' ) );
 		add_filter( 'submenu_file', array( $this, 'highlightMintCptSubmenu' ) );
+	}
+
+	/**
+	 * Submenu icon sizing in wp-admin (outside #mint-lms-root).
+	 */
+	public function printMenuIconStyles(): void {
+		echo '<style id="mint-lms-menu-icons">'
+			. '#adminmenu .mint-lms-menu-icon{display:inline-flex;width:16px;height:16px;margin-right:6px;vertical-align:-3px;align-items:center;justify-content:center;flex:none;color:inherit;}'
+			. '#adminmenu .mint-lms-menu-icon svg{width:16px;height:16px;display:block;color:inherit;}'
+			. '#adminmenu .mint-lms-menu-label{vertical-align:middle;}'
+			. '#adminmenu #toplevel_page_mint-lms .wp-submenu a{display:flex;align-items:center;}'
+			. '</style>';
 	}
 
 	/**
@@ -41,7 +54,7 @@ final class MenuRegistrar {
 		add_submenu_page(
 			'mint-lms',
 			__( 'Dashboard', 'mint-lms' ),
-			__( 'Dashboard', 'mint-lms' ),
+			MenuIcons::labeled( 'dashboard', __( 'Dashboard', 'mint-lms' ) ),
 			'edit_mintlms_courses',
 			'mint-lms',
 			array( $this, 'renderDashboard' )
@@ -51,7 +64,7 @@ final class MenuRegistrar {
 		add_submenu_page(
 			'mint-lms',
 			__( 'Courses', 'mint-lms' ),
-			__( 'Courses', 'mint-lms' ),
+			MenuIcons::labeled( 'courses', __( 'Courses', 'mint-lms' ) ),
 			'edit_mintlms_courses',
 			'edit.php?post_type=' . PostTypes::COURSE
 		);
@@ -59,7 +72,7 @@ final class MenuRegistrar {
 		add_submenu_page(
 			'mint-lms',
 			__( 'Lessons', 'mint-lms' ),
-			__( 'Lessons', 'mint-lms' ),
+			MenuIcons::labeled( 'lessons', __( 'Lessons', 'mint-lms' ) ),
 			'edit_mintlms_courses',
 			'edit.php?post_type=' . PostTypes::LESSON
 		);
@@ -67,7 +80,7 @@ final class MenuRegistrar {
 		add_submenu_page(
 			'mint-lms',
 			__( 'Quizzes', 'mint-lms' ),
-			__( 'Quizzes', 'mint-lms' ),
+			MenuIcons::labeled( 'quizzes', __( 'Quizzes', 'mint-lms' ) ),
 			'edit_mintlms_courses',
 			'edit.php?post_type=' . PostTypes::QUIZ
 		);
@@ -75,7 +88,7 @@ final class MenuRegistrar {
 		add_submenu_page(
 			'mint-lms',
 			__( 'Questions', 'mint-lms' ),
-			__( 'Questions', 'mint-lms' ),
+			MenuIcons::labeled( 'questions', __( 'Questions', 'mint-lms' ) ),
 			'edit_mintlms_courses',
 			'edit.php?post_type=' . PostTypes::QUESTION
 		);
@@ -83,7 +96,7 @@ final class MenuRegistrar {
 		add_submenu_page(
 			'mint-lms',
 			__( 'Students', 'mint-lms' ),
-			__( 'Students', 'mint-lms' ),
+			MenuIcons::labeled( 'students', __( 'Students', 'mint-lms' ) ),
 			'enroll_mintlms_students',
 			'mint-lms-course-students',
 			array( $this, 'renderCourseStudents' )
@@ -92,7 +105,7 @@ final class MenuRegistrar {
 		add_submenu_page(
 			'mint-lms',
 			__( 'Reports', 'mint-lms' ),
-			__( 'Reports', 'mint-lms' ),
+			MenuIcons::labeled( 'reports', __( 'Reports', 'mint-lms' ) ),
 			'view_mintlms_reports',
 			'mint-lms-reports',
 			array( $this, 'renderReports' )

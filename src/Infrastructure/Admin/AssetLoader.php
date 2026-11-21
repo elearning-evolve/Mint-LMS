@@ -64,6 +64,8 @@ final class AssetLoader {
 					'newQuiz'      => admin_url( 'post-new.php?post_type=' . PostTypes::QUIZ ),
 					'newQuestion'  => admin_url( 'post-new.php?post_type=' . PostTypes::QUESTION ),
 					'dashboard'   => admin_url( 'admin.php?page=mint-lms' ),
+					'aiAssistant' => admin_url( 'admin.php?page=mint-lms-ai-assistant' ),
+					'settings'    => admin_url( 'admin.php?page=mint-lms-settings' ),
 					'playerPage'  => $pageSettings->getPlayerUrl(),
 					'catalogPage' => $pageSettings->getCatalogUrl(),
 				),
