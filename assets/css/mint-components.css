@@ -8384,7 +8384,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-top: 24px;
+  margin: 0 0 24px;
   padding: 14px 20px;
   border: 1.5px solid #98FBCB;
   border-radius: 14px;
