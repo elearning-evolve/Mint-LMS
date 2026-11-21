@@ -32,19 +32,43 @@ final class AiProviderClient {
 		$provider = $this->settings->getProvider();
 		$model    = $this->settings->getModel();
 
-		if ( AiSettings::PROVIDER_ANTHROPIC === $provider ) {
-			return $this->chatAnthropic( $resolved['key'], $model, $messages, $maxTokens );
-		}
-
-		return $this->chatOpenAi( $resolved['key'], $model, $messages, $maxTokens );
+		return match ( $provider ) {
+			AiSettings::PROVIDER_ANTHROPIC => $this->chatAnthropic( $resolved['key'], $model, $messages, $maxTokens ),
+			AiSettings::PROVIDER_GROQ      => $this->chatOpenAiCompatible(
+				'https://api.groq.com/openai/v1/chat/completions',
+				$resolved['key'],
+				$model,
+				$messages,
+				$maxTokens,
+				'Groq'
+			),
+			AiSettings::PROVIDER_GEMINI    => $this->chatGemini( $resolved['key'], $model, $messages, $maxTokens ),
+			default                        => $this->chatOpenAiCompatible(
+				'https://api.openai.com/v1/chat/completions',
+				$resolved['key'],
+				$model,
+				$messages,
+				$maxTokens,
+				'OpenAI'
+			),
+		};
 	}
 
 	/**
+	 * OpenAI-compatible chat (OpenAI, Groq, etc.).
+	 *
 	 * @param list<array{role: string, content: string}> $messages
 	 */
-	private function chatOpenAi( string $apiKey, string $model, array $messages, int $maxTokens ): string {
+	private function chatOpenAiCompatible(
+		string $url,
+		string $apiKey,
+		string $model,
+		array $messages,
+		int $maxTokens,
+		string $label
+	): string {
 		$response = wp_remote_post(
-			'https://api.openai.com/v1/chat/completions',
+			$url,
 			array(
 				'timeout' => 60,
 				'headers' => array(
@@ -62,7 +86,7 @@ final class AiProviderClient {
 			)
 		);
 
-		return $this->extractOpenAiContent( $response );
+		return $this->extractOpenAiContent( $response, $label );
 	}
 
 	/**
@@ -110,10 +134,70 @@ final class AiProviderClient {
 	}
 
 	/**
+	 * Google Gemini generateContent (AI Studio / free-tier friendly).
+	 *
+	 * @param list<array{role: string, content: string}> $messages
+	 */
+	private function chatGemini( string $apiKey, string $model, array $messages, int $maxTokens ): string {
+		$model  = sanitize_text_field( $model );
+		$system = '';
+		$parts  = array();
+
+		foreach ( $messages as $message ) {
+			$role = (string) ( $message['role'] ?? '' );
+			$text = (string) ( $message['content'] ?? '' );
+			if ( 'system' === $role ) {
+				$system .= ( '' === $system ? '' : "\n\n" ) . $text;
+				continue;
+			}
+			$parts[] = array(
+				'role'  => 'assistant' === $role ? 'model' : 'user',
+				'parts' => array(
+					array( 'text' => $text ),
+				),
+			);
+		}
+
+		$body = array(
+			'contents'         => $parts,
+			'generationConfig' => array(
+				'maxOutputTokens' => $maxTokens,
+				'temperature'     => 0.4,
+			),
+		);
+		if ( '' !== $system ) {
+			$body['systemInstruction'] = array(
+				'parts' => array(
+					array( 'text' => $system ),
+				),
+			);
+		}
+
+		$url = sprintf(
+			'https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent',
+			rawurlencode( $model )
+		);
+
+		$response = wp_remote_post(
+			$url,
+			array(
+				'timeout' => 60,
+				'headers' => array(
+					'Content-Type'   => 'application/json',
+					'x-goog-api-key' => $apiKey,
+				),
+				'body'    => wp_json_encode( $body ),
+			)
+		);
+
+		return $this->extractGeminiContent( $response );
+	}
+
+	/**
 	 * @param array<string, mixed>|\WP_Error $response
 	 */
-	private function extractOpenAiContent( $response ): string {
-		$data    = $this->decodeResponse( $response, 'OpenAI' );
+	private function extractOpenAiContent( $response, string $label = 'OpenAI' ): string {
+		$data    = $this->decodeResponse( $response, $label );
 		$content = $data['choices'][0]['message']['content'] ?? '';
 		if ( ! is_string( $content ) || '' === trim( $content ) ) {
 			throw new ValidationException( 'AI provider returned an empty response.', array( 'ai' => 'empty_response' ) );
@@ -133,6 +217,36 @@ final class AiProviderClient {
 			foreach ( $parts as $part ) {
 				if ( is_array( $part ) && isset( $part['text'] ) && is_string( $part['text'] ) ) {
 					$text .= $part['text'];
+				}
+			}
+		}
+		if ( '' === trim( $text ) ) {
+			throw new ValidationException( 'AI provider returned an empty response.', array( 'ai' => 'empty_response' ) );
+		}
+
+		return trim( $text );
+	}
+
+	/**
+	 * @param array<string, mixed>|\WP_Error $response
+	 */
+	private function extractGeminiContent( $response ): string {
+		$data = $this->decodeResponse( $response, 'Gemini' );
+		$text = '';
+		$cands = $data['candidates'] ?? array();
+		if ( is_array( $cands ) ) {
+			foreach ( $cands as $cand ) {
+				if ( ! is_array( $cand ) ) {
+					continue;
+				}
+				$content = $cand['content']['parts'] ?? array();
+				if ( ! is_array( $content ) ) {
+					continue;
+				}
+				foreach ( $content as $part ) {
+					if ( is_array( $part ) && isset( $part['text'] ) && is_string( $part['text'] ) ) {
+						$text .= $part['text'];
+					}
 				}
 			}
 		}
@@ -170,7 +284,17 @@ final class AiProviderClient {
 		$data = json_decode( $body, true );
 
 		if ( $code < 200 || $code >= 300 ) {
-			$message = is_array( $data ) ? (string) ( $data['error']['message'] ?? $data['error']['type'] ?? $body ) : $body;
+			$message = '';
+			if ( is_array( $data ) ) {
+				$message = (string) (
+					$data['error']['message']
+					?? $data['error']['status']
+					?? $data['error']['type']
+					?? $body
+				);
+			} else {
+				$message = $body;
+			}
 			throw new ValidationException(
 				esc_html(
 					sprintf(
