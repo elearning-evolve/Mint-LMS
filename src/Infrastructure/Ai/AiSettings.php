@@ -9,6 +9,8 @@ defined( 'ABSPATH' ) || exit;
  * Site-level AI connector settings (opt-in SaaS). Consent = admin enables AI + configures a provider.
  *
  * Credential precedence (WP Connectors-style): constant → env → encrypted option.
+ * Providers include paid (OpenAI, Anthropic) and free-tier friendly (Groq, Google Gemini).
+ * Keys are always BYOK — Mint LMS never ships or bills API usage.
  */
 final class AiSettings {
 
@@ -22,12 +24,19 @@ final class AiSettings {
 
 	public const PROVIDER_OPENAI    = 'openai';
 	public const PROVIDER_ANTHROPIC = 'anthropic';
+	public const PROVIDER_GROQ      = 'groq';
+	public const PROVIDER_GEMINI    = 'gemini';
 
 	public const MASK_PLACEHOLDER = '••••••••••••';
 
 	/** @return list<string> */
 	public static function allowedProviders(): array {
-		return array( self::PROVIDER_OPENAI, self::PROVIDER_ANTHROPIC );
+		return array(
+			self::PROVIDER_OPENAI,
+			self::PROVIDER_ANTHROPIC,
+			self::PROVIDER_GROQ,
+			self::PROVIDER_GEMINI,
+		);
 	}
 
 	public function isEnabled(): bool {
@@ -46,9 +55,16 @@ final class AiSettings {
 			return $model;
 		}
 
-		return self::PROVIDER_ANTHROPIC === $this->getProvider()
-			? 'claude-sonnet-4-20250514'
-			: 'gpt-4o-mini';
+		return self::defaultModelFor( $this->getProvider() );
+	}
+
+	public static function defaultModelFor( string $provider ): string {
+		return match ( $provider ) {
+			self::PROVIDER_ANTHROPIC => 'claude-sonnet-4-20250514',
+			self::PROVIDER_GROQ      => 'llama-3.1-8b-instant',
+			self::PROVIDER_GEMINI    => 'gemini-2.0-flash',
+			default                  => 'gpt-4o-mini',
+		};
 	}
 
 	/**

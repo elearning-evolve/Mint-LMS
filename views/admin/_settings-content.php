@@ -88,12 +88,20 @@ $boot = array(
 	'certTemplate'   => $certTemplate,
 	'i18n'           => array(
 		'selectPage'   => __( '— Select —', 'mint-lms' ),
-		'openai'       => __( 'OpenAI', 'mint-lms' ),
-		'anthropic'    => __( 'Anthropic', 'mint-lms' ),
+		'openai'       => __( 'OpenAI (paid)', 'mint-lms' ),
+		'anthropic'    => __( 'Anthropic (paid)', 'mint-lms' ),
+		'groq'         => __( 'Groq (free tier)', 'mint-lms' ),
+		'gemini'       => __( 'Google Gemini (free tier)', 'mint-lms' ),
 		'testing'      => __( 'Testing…', 'mint-lms' ),
 		'connectionOk' => __( 'Connection OK', 'mint-lms' ),
 		'testFailed'   => __( 'Test failed', 'mint-lms' ),
 		'keyCleared'   => __( 'Saved key will be removed on save.', 'mint-lms' ),
+	),
+	'aiDefaultModels' => array(
+		'openai'    => AiSettings::defaultModelFor( AiSettings::PROVIDER_OPENAI ),
+		'anthropic' => AiSettings::defaultModelFor( AiSettings::PROVIDER_ANTHROPIC ),
+		'groq'      => AiSettings::defaultModelFor( AiSettings::PROVIDER_GROQ ),
+		'gemini'    => AiSettings::defaultModelFor( AiSettings::PROVIDER_GEMINI ),
 	),
 );
 
@@ -371,7 +379,7 @@ $checklist_subtitle = $doneCount === $totalCount && $totalCount > 0
 				<section class="mint-settings-card" id="mintlms-ai-settings">
 					<header class="mint-settings-card__head">
 						<h2 class="mint-settings-card__title"><?php esc_html_e( 'AI assistant (optional)', 'mint-lms' ); ?></h2>
-						<p class="mint-settings-card__desc"><?php esc_html_e( 'Let AI help you draft lessons. It stays off until you switch it on.', 'mint-lms' ); ?></p>
+						<p class="mint-settings-card__desc"><?php esc_html_e( 'Optional AI drafting (quiz drafts). Bring your own key — free-tier providers (Groq, Gemini) or paid (OpenAI, Anthropic). Keys stay on the server.', 'mint-lms' ); ?></p>
 					</header>
 					<div class="mint-settings-card__body">
 						<div class="mint-settings-toggle-row mint-settings-toggle-row--solo">
@@ -406,6 +414,8 @@ $checklist_subtitle = $doneCount === $totalCount && $totalCount > 0
 											<svg width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 5 5 5-5" /></svg>
 										</button>
 										<div class="mint-settings-select__menu" x-show="openSelect === 'provider'" x-cloak @click.stop>
+											<button type="button" class="mint-settings-select__option" :class="{ 'is-active': aiProvider === 'groq' }" @click="pickProvider('groq')" x-text="i18n.groq"></button>
+											<button type="button" class="mint-settings-select__option" :class="{ 'is-active': aiProvider === 'gemini' }" @click="pickProvider('gemini')" x-text="i18n.gemini"></button>
 											<button type="button" class="mint-settings-select__option" :class="{ 'is-active': aiProvider === 'openai' }" @click="pickProvider('openai')" x-text="i18n.openai"></button>
 											<button type="button" class="mint-settings-select__option" :class="{ 'is-active': aiProvider === 'anthropic' }" @click="pickProvider('anthropic')" x-text="i18n.anthropic"></button>
 										</div>

@@ -16,6 +16,8 @@ export function mintSettings(config = {}) {
     aiKey: String(cfg.aiKey || ''),
     aiUsesConstant: !!cfg.aiUsesConstant,
     aiReady: !!cfg.aiReady,
+    aiDefaultModels:
+      cfg.aiDefaultModels && typeof cfg.aiDefaultModels === 'object' ? cfg.aiDefaultModels : {},
     aiTestResult: '',
     aiTesting: false,
     clearKey: false,
@@ -76,15 +78,28 @@ export function mintSettings(config = {}) {
     },
 
     pickProvider(value) {
-      this.aiProvider = String(value);
+      const next = String(value || 'openai');
+      const prevDefault = this.aiDefaultModels[this.aiProvider] || '';
+      const nextDefault = this.aiDefaultModels[next] || '';
+      // If model was empty or still the previous provider default, switch to the new default.
+      if (!this.aiModel || this.aiModel === prevDefault) {
+        this.aiModel = nextDefault;
+      }
+      this.aiProvider = next;
       this.openSelect = null;
     },
 
     providerLabel() {
       if (this.aiProvider === 'anthropic') {
-        return this.i18n.anthropic || 'Anthropic';
+        return this.i18n.anthropic || 'Anthropic (paid)';
       }
-      return this.i18n.openai || 'OpenAI';
+      if (this.aiProvider === 'groq') {
+        return this.i18n.groq || 'Groq (free tier)';
+      }
+      if (this.aiProvider === 'gemini') {
+        return this.i18n.gemini || 'Google Gemini (free tier)';
+      }
+      return this.i18n.openai || 'OpenAI (paid)';
     },
 
     insertCertTag(tag) {
