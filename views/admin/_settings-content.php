@@ -140,6 +140,13 @@ $checklist_subtitle = $doneCount === $totalCount && $totalCount > 0
 		<input type="hidden" name="<?php echo esc_attr( AiSettings::OPTION_PROVIDER ); ?>" :value="aiProvider" />
 		<input type="hidden" name="mintlms_ai_clear_key" :value="clearKey ? '1' : '0'" />
 
+		<div class="mint-settings__footer">
+			<p class="mint-settings__footer-note"><?php esc_html_e( 'Changes apply to your whole site once saved.', 'mint-lms' ); ?></p>
+			<button type="submit" class="mint-settings-btn mint-settings-btn--primary">
+				<?php esc_html_e( 'Save settings', 'mint-lms' ); ?>
+			</button>
+		</div>
+
 		<div class="mint-settings__grid">
 			<div class="mint-settings__col mint-settings__col--main">
 				<section class="mint-settings-card">
@@ -478,13 +485,6 @@ $checklist_subtitle = $doneCount === $totalCount && $totalCount > 0
 					</div>
 				</section>
 			</div>
-		</div>
-
-		<div class="mint-settings__footer">
-			<p class="mint-settings__footer-note"><?php esc_html_e( 'Changes apply to your whole site once saved.', 'mint-lms' ); ?></p>
-			<button type="submit" class="mint-settings-btn mint-settings-btn--primary">
-				<?php esc_html_e( 'Save settings', 'mint-lms' ); ?>
-			</button>
 		</div>
 	</form>
 </div>
