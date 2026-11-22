@@ -33,6 +33,13 @@ function mintlms_run_uninstall(): void {
 	delete_option( 'mintlms_guided_course_complete' );
 	delete_option( 'mintlms_certificate_template' );
 
+	// Legacy BYOK options (removed in favour of Claude Desktop / MCP).
+	delete_option( 'mintlms_ai_enabled' );
+	delete_option( 'mintlms_ai_provider' );
+	delete_option( 'mintlms_ai_model' );
+	delete_option( 'mintlms_ai_api_key_enc' );
+	delete_option( 'mintlms_ai_api_key_hint' );
+
 	$mintlms_page_ids = array(
 		(int) get_option( PageSettings::OPTION_DASHBOARD, 0 ),
 		(int) get_option( PageSettings::OPTION_CATALOG, 0 ),

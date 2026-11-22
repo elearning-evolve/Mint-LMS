@@ -57,8 +57,6 @@ final class LayerBoundaryTest extends TestCase
         'tests/Architecture/../../src/Application/Admin/SampleCourseSeeder.php uses esc_html__()',
         'tests/Architecture/../../src/Application/Admin/SampleCourseSeeder.php uses ABSPATH',
         'tests/Architecture/../../src/Application/Admin/CreatorDashboardService.php uses __() translation',
-        'tests/Architecture/../../src/Application/Ai/AiAssistantService.php uses sanitize_* function',
-        'tests/Architecture/../../src/Application/Ai/AiAssistantService.php uses ABSPATH',
         'tests/Architecture/../../src/Application/Course/Dto/CourseDto.php uses ABSPATH',
         'tests/Architecture/../../src/Application/Student/StudentExperienceService.php uses wp_* function',
         'tests/Architecture/../../src/Application/Student/StudentExperienceService.php uses WP_* class',
@@ -69,7 +67,6 @@ final class LayerBoundaryTest extends TestCase
     /** @var list<string> */
     private const KNOWN_APPLICATION_INFRA_IMPORTS = [
         'SampleCourseSeeder.php imports MintLMS\Infrastructure',
-        'AiAssistantService.php imports MintLMS\Infrastructure',
     ];
 
     /** @var list<string> */

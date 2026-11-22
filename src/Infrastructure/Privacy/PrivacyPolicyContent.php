@@ -6,7 +6,7 @@ namespace MintLMS\Infrastructure\Privacy;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Suggests privacy policy text for Mint LMS (incl. optional AI SaaS).
+ * Suggests privacy policy text for Mint LMS (incl. optional Claude Desktop / MCP).
  *
  * @see https://developer.wordpress.org/plugins/privacy/
  */
@@ -22,8 +22,8 @@ final class PrivacyPolicyContent {
 		}
 
 		$content  = '<p>' . esc_html__( 'Mint LMS stores course content, enrollments, and learning progress on this WordPress site.', 'mint-lms' ) . '</p>';
-		$content .= '<p>' . esc_html__( 'If the site administrator enables Mint LMS AI features and connects an AI provider (for example Groq, Google Gemini, OpenAI, or Anthropic), prompts and related course/quiz drafting text you submit may be sent to that provider’s servers to generate draft content. API keys are stored on this site (or supplied via server configuration) and are not exposed to browsers. Mint LMS does not send AI traffic until AI is enabled and configured.', 'mint-lms' ) . '</p>';
-		$content .= '<p>' . esc_html__( 'Review your AI provider’s terms and privacy policy. You can disable AI or remove the API key under Mint LMS → Settings.', 'mint-lms' ) . '</p>';
+		$content .= '<p>' . esc_html__( 'If the site administrator connects Claude Desktop (or another MCP client) through the WordPress MCP Adapter, prompts you send in that client may cause draft Mint LMS courses, lessons, quizzes, or questions to be created on this site. Those items are saved as drafts for review. Mint LMS does not send prompts to third-party AI APIs from this WordPress admin for that flow — the AI client talks to this site’s MCP endpoint using an Application Password.', 'mint-lms' ) . '</p>';
+		$content .= '<p>' . esc_html__( 'Review your AI client’s terms and privacy policy. You can disconnect the MCP client or revoke the Application Password under your WordPress profile.', 'mint-lms' ) . '</p>';
 
 		wp_add_privacy_policy_content(
 			'Mint LMS',

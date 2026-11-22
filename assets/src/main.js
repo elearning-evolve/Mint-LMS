@@ -191,3 +191,52 @@ document.addEventListener('alpine:init', () => {
 
 window.Alpine = Alpine;
 Alpine.start();
+
+/**
+ * AI Assistant — MCP endpoint copy (no Alpine dependency).
+ */
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('mintlms_mcp_endpoint_copy');
+  const input = document.getElementById('mintlms_mcp_endpoint');
+  if (!btn || !input) {
+    return;
+  }
+
+  let resetTimer = null;
+  const labelCopy = btn.getAttribute('data-label-copy') || 'Copy';
+  const labelCopied = btn.getAttribute('data-label-copied') || 'Copied';
+
+  const markCopied = () => {
+    btn.textContent = labelCopied;
+    btn.setAttribute('aria-label', labelCopied);
+    clearTimeout(resetTimer);
+    resetTimer = setTimeout(() => {
+      btn.textContent = labelCopy;
+      btn.setAttribute('aria-label', btn.getAttribute('data-label-copy-aria') || labelCopy);
+    }, 2000);
+  };
+
+  const fallbackCopy = () => {
+    input.focus();
+    input.select();
+    input.setSelectionRange(0, input.value.length);
+    try {
+      document.execCommand('copy');
+    } catch (e) {
+      // Browser blocked legacy copy.
+    }
+    markCopied();
+  };
+
+  btn.addEventListener('click', () => {
+    const value = String(input.value || '');
+    if (!value) {
+      return;
+    }
+    if (navigator.clipboard && window.isSecureContext && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(value).then(markCopied).catch(fallbackCopy);
+      return;
+    }
+    fallbackCopy();
+  });
+});

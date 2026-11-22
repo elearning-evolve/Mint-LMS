@@ -5,20 +5,25 @@ namespace MintLMS\Infrastructure\Admin;
 
 defined( 'ABSPATH' ) || exit;
 
-use MintLMS\Infrastructure\Ai\AiSecretStore;
-use MintLMS\Infrastructure\Ai\AiSettings;
-
 /**
- * Dedicated Mint LMS → AI Assistant admin page (BYOK free + paid providers).
+ * Mint LMS → AI Assistant admin page (Claude Desktop / MCP onboarding).
  */
 final class AiAssistantPage {
 
-	public const PAGE_SLUG    = 'mint-lms-ai-assistant';
-	public const OPTION_GROUP = 'mintlms_ai_settings';
+	public const PAGE_SLUG = 'mint-lms-ai-assistant';
+
+	/** @var list<string> */
+	private const LEGACY_BYOK_OPTIONS = array(
+		'mintlms_ai_enabled',
+		'mintlms_ai_provider',
+		'mintlms_ai_model',
+		'mintlms_ai_api_key_enc',
+		'mintlms_ai_api_key_hint',
+	);
 
 	public function register(): void {
 		add_action( 'admin_menu', array( $this, 'registerMenu' ) );
-		add_action( 'admin_init', array( $this, 'registerSettings' ) );
+		add_action( 'admin_init', array( $this, 'cleanupLegacyByokOptions' ) );
 	}
 
 	public function registerMenu(): void {
@@ -32,46 +37,17 @@ final class AiAssistantPage {
 		);
 	}
 
-	public function registerSettings(): void {
-		register_setting(
-			self::OPTION_GROUP,
-			AiSettings::OPTION_ENABLED,
-			array(
-				'type'              => 'boolean',
-				'sanitize_callback' => array( $this, 'sanitizeCheckbox' ),
-				'default'           => false,
-			)
-		);
+	/**
+	 * Remove leftover BYOK options from older releases (idempotent).
+	 */
+	public function cleanupLegacyByokOptions(): void {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
 
-		register_setting(
-			self::OPTION_GROUP,
-			AiSettings::OPTION_PROVIDER,
-			array(
-				'type'              => 'string',
-				'sanitize_callback' => array( $this, 'sanitizeAiProvider' ),
-				'default'           => AiSettings::PROVIDER_GROQ,
-			)
-		);
-
-		register_setting(
-			self::OPTION_GROUP,
-			AiSettings::OPTION_MODEL,
-			array(
-				'type'              => 'string',
-				'sanitize_callback' => 'sanitize_text_field',
-				'default'           => '',
-			)
-		);
-
-		register_setting(
-			self::OPTION_GROUP,
-			AiSettings::OPTION_API_KEY_ENC,
-			array(
-				'type'              => 'string',
-				'sanitize_callback' => array( $this, 'sanitizeAiApiKey' ),
-				'default'           => '',
-			)
-		);
+		foreach ( self::LEGACY_BYOK_OPTIONS as $option ) {
+			delete_option( $option );
+		}
 	}
 
 	public function render(): void {
@@ -80,37 +56,6 @@ final class AiAssistantPage {
 		}
 
 		include MINTLMS_PATH . 'views/admin/ai-assistant.php';
-	}
-
-	public function sanitizeCheckbox( mixed $value ): bool {
-		return ! empty( $value );
-	}
-
-	public function sanitizeAiProvider( mixed $value ): string {
-		$value = sanitize_key( (string) $value );
-
-		return in_array( $value, AiSettings::allowedProviders(), true ) ? $value : AiSettings::PROVIDER_GROQ;
-	}
-
-	/**
-	 * Encrypt a new key; keep existing ciphertext when the masked placeholder is posted.
-	 */
-	public function sanitizeAiApiKey( mixed $value ): string {
-		$value = is_string( $value ) ? trim( $value ) : '';
-
-		$clear = isset( $_POST['mintlms_ai_clear_key'] ) && '1' === sanitize_text_field( wp_unslash( (string) $_POST['mintlms_ai_clear_key'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Handled by options.php settings nonce.
-		if ( $clear ) {
-			update_option( AiSettings::OPTION_API_KEY_HINT, '', false );
-			return '';
-		}
-
-		if ( '' === $value || AiSettings::MASK_PLACEHOLDER === $value ) {
-			return (string) get_option( AiSettings::OPTION_API_KEY_ENC, '' );
-		}
-
-		update_option( AiSettings::OPTION_API_KEY_HINT, AiSecretStore::hint( $value ), false );
-
-		return AiSecretStore::encrypt( $value );
 	}
 
 	public static function url(): string {
