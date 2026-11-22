@@ -16,9 +16,7 @@ use MintLMS\Application\Student\StudentExperienceService;
 use MintLMS\Frontend\ShortcodeRegistrar;
 use MintLMS\Frontend\StudentAssetLoader;
 use MintLMS\Frontend\TemplateLoader;
-use MintLMS\Application\Ai\AiAssistantService;
 use MintLMS\Application\Ai\AiDraftContentService;
-use MintLMS\Http\Rest\Controller\AiController;
 use MintLMS\Http\Rest\Controller\ContentPostListController;
 use MintLMS\Http\Rest\Controller\CourseController;
 use MintLMS\Http\Rest\Controller\EnrollmentController;
@@ -30,8 +28,6 @@ use MintLMS\Http\Rest\Controller\SectionController;
 use MintLMS\Http\Rest\Controller\UserController;
 use MintLMS\Http\Rest\RouteRegistrar;
 use MintLMS\Infrastructure\Ai\AiAbilitiesRegistrar;
-use MintLMS\Infrastructure\Ai\AiProviderClient;
-use MintLMS\Infrastructure\Ai\AiSettings;
 use MintLMS\Infrastructure\Ai\AiStructureDraftNormalizer;
 use MintLMS\Infrastructure\Ai\McpAdapterNotice;
 use MintLMS\Infrastructure\Privacy\PrivacyPolicyContent;
@@ -335,9 +331,7 @@ final class Bootstrap {
 			new WpUserLookup(),
 			$authorization,
 		);
-		$aiSettings           = new AiSettings();
-		$aiAssistant          = new AiAssistantService( $aiSettings, new AiProviderClient( $aiSettings ) );
-		$routeRegistrar       = new RouteRegistrar(
+		$routeRegistrar = new RouteRegistrar(
 			$courseController,
 			$sectionController,
 			$lessonController,
@@ -347,7 +341,6 @@ final class Bootstrap {
 			$onboardingController,
 			$userController,
 			new ContentPostListController(),
-			new AiController( $aiSettings, $aiAssistant ),
 		);
 
 		$routeRegistrar->register();
