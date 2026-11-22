@@ -17,6 +17,7 @@ use MintLMS\Frontend\ShortcodeRegistrar;
 use MintLMS\Frontend\StudentAssetLoader;
 use MintLMS\Frontend\TemplateLoader;
 use MintLMS\Application\Ai\AiAssistantService;
+use MintLMS\Application\Ai\AiDraftContentService;
 use MintLMS\Http\Rest\Controller\AiController;
 use MintLMS\Http\Rest\Controller\ContentPostListController;
 use MintLMS\Http\Rest\Controller\CourseController;
@@ -28,8 +29,11 @@ use MintLMS\Http\Rest\Controller\QuizController;
 use MintLMS\Http\Rest\Controller\SectionController;
 use MintLMS\Http\Rest\Controller\UserController;
 use MintLMS\Http\Rest\RouteRegistrar;
+use MintLMS\Infrastructure\Ai\AiAbilitiesRegistrar;
 use MintLMS\Infrastructure\Ai\AiProviderClient;
 use MintLMS\Infrastructure\Ai\AiSettings;
+use MintLMS\Infrastructure\Ai\AiStructureDraftNormalizer;
+use MintLMS\Infrastructure\Ai\McpAdapterNotice;
 use MintLMS\Infrastructure\Privacy\PrivacyPolicyContent;
 use MintLMS\Infrastructure\Admin\AdminAjaxHandler;
 use MintLMS\Infrastructure\Admin\AssetLoader;
@@ -140,6 +144,7 @@ final class Bootstrap {
 
 		( new MenuRegistrar() )->register();
 		( new AiAssistantPage() )->register();
+		( new McpAdapterNotice() )->register();
 		( new SettingsPage() )->register();
 		( new CourseBuilderPage() )->register();
 		( new CoursePostEditUi() )->register();
@@ -346,6 +351,14 @@ final class Bootstrap {
 		);
 
 		$routeRegistrar->register();
+
+		$aiDrafts = new AiDraftContentService(
+			$courseService,
+			$sectionService,
+			$lessonService,
+			$quizService
+		);
+		( new AiAbilitiesRegistrar( $aiDrafts, new AiStructureDraftNormalizer() ) )->register();
 	}
 
 	private static function runMigrations(): void {
