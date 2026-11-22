@@ -5,20 +5,19 @@ namespace MintLMS\Infrastructure\Ai;
 
 defined( 'ABSPATH' ) || exit;
 
+use MintLMS\Application\Ai\AiScope as ApplicationAiScope;
 use MintLMS\Infrastructure\PostType\PostTypes;
 
 /**
- * Hard boundary for AI features: Mint LMS content only.
+ * Infrastructure facade over Application AiScope, cross-checked with PostTypes.
  *
- * Never allow AI flows to target core posts/pages, media libraries as content
- * hosts, or third-party plugin post types. Writes must go through Mint services
- * with Mint capabilities — this class is the allowlist gate for drafts too.
+ * Prefer Application\Ai\AiScope from Application code.
  */
 final class AiScope {
 
-	public const ROOT_COURSE = 'course';
-	public const ROOT_LESSON = 'lesson';
-	public const ROOT_QUIZ   = 'quiz';
+	public const ROOT_COURSE = ApplicationAiScope::ROOT_COURSE;
+	public const ROOT_LESSON = ApplicationAiScope::ROOT_LESSON;
+	public const ROOT_QUIZ   = ApplicationAiScope::ROOT_QUIZ;
 
 	/**
 	 * @return list<string>
@@ -28,75 +27,41 @@ final class AiScope {
 	}
 
 	public static function isAllowedPostType( string $postType ): bool {
-		return PostTypes::isContentType( sanitize_key( $postType ) );
+		$type = sanitize_key( $postType );
+
+		return PostTypes::isContentType( $type ) && ApplicationAiScope::isAllowedPostType( $type );
 	}
 
 	/**
 	 * @return list<string>
 	 */
 	public static function allowedRoots(): array {
-		return array( self::ROOT_COURSE, self::ROOT_LESSON, self::ROOT_QUIZ );
+		return ApplicationAiScope::allowedRoots();
 	}
 
 	public static function isAllowedRoot( string $root ): bool {
-		return in_array( sanitize_key( $root ), self::allowedRoots(), true );
+		return ApplicationAiScope::isAllowedRoot( sanitize_key( $root ) );
 	}
 
 	/**
-	 * Types AI must never create/update via Mint AI endpoints.
-	 *
 	 * @return list<string>
 	 */
 	public static function forbiddenPostTypes(): array {
-		return array(
-			'post',
-			'page',
-			'attachment',
-			'revision',
-			'nav_menu_item',
-			'wp_block',
-			'wp_template',
-			'wp_template_part',
-			'wp_navigation',
-			'wp_global_styles',
-			'product',
-			'product_variation',
-			'shop_order',
-			'shop_coupon',
-		);
+		return ApplicationAiScope::forbiddenPostTypes();
 	}
 
 	public static function isForbiddenPostType( string $postType ): bool {
-		$type = sanitize_key( $postType );
-		if ( '' === $type ) {
-			return false;
-		}
-		if ( in_array( $type, self::forbiddenPostTypes(), true ) ) {
-			return true;
-		}
-
-		// Anything not in the Mint CPT allowlist is out of bounds.
-		return ! self::isAllowedPostType( $type );
+		return ApplicationAiScope::isForbiddenPostType( sanitize_key( $postType ) );
 	}
 
 	/**
 	 * @return list<string>
 	 */
 	public static function allowedQuestionTypes(): array {
-		return array( 'mcq', 'true_false' );
+		return ApplicationAiScope::allowedQuestionTypes();
 	}
 
-	/**
-	 * Human-readable scope blurb for AI system prompts.
-	 */
 	public static function systemBoundaryText(): string {
-		return 'You assist Mint LMS only. You may describe ONLY these content types: '
-			. 'mint-course, mint-lesson (inside lesson groups), mint-quiz, mint-question. '
-			. 'Hierarchy: Lesson Groups → Lessons → Quizzes → Questions. '
-			. 'Roots may be a full course, a standalone lesson, or a standalone quiz. '
-			. 'NEVER create, edit, delete, or mention WordPress pages, posts, media as site content, '
-			. 'menus, widgets, themes, users, WooCommerce, or any other plugin. '
-			. 'NEVER output SQL, PHP, shell, or WordPress option keys. '
-			. 'Return JSON only for Mint LMS structure — no markdown fences.';
+		return ApplicationAiScope::systemBoundaryText();
 	}
 }

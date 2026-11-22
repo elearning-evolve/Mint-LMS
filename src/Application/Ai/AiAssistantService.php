@@ -7,8 +7,8 @@ defined( 'ABSPATH' ) || exit;
 
 use MintLMS\Application\Exception\ValidationException;
 use MintLMS\Infrastructure\Ai\AiProviderClient;
-use MintLMS\Infrastructure\Ai\AiScope;
 use MintLMS\Infrastructure\Ai\AiSettings;
+use MintLMS\Infrastructure\Ai\AiStructureDraftNormalizer;
 
 /**
  * Allowlisted AI actions. Never persists content — callers confirm before save.
@@ -124,13 +124,13 @@ final class AiAssistantService {
 		$prompt = sanitize_textarea_field( trim( $prompt ) );
 		if ( '' === $prompt ) {
 			throw new ValidationException(
-				esc_html__( 'Enter a prompt describing the Mint LMS content you want.', 'mint-lms' ),
+				'Enter a prompt describing the Mint LMS content you want.',
 				array( 'prompt' => 'required' )
 			);
 		}
 		if ( strlen( $prompt ) > 8000 ) {
 			throw new ValidationException(
-				esc_html__( 'Prompt is too long (max 8000 characters).', 'mint-lms' ),
+				'Prompt is too long (max 8000 characters).',
 				array( 'prompt' => 'too_long' )
 			);
 		}
@@ -165,7 +165,7 @@ final class AiAssistantService {
 			array(
 				'persisted' => false,
 				'scope'     => 'mintlms_only',
-				'note'      => __( 'Draft only — nothing was saved. Review in Mint LMS; WordPress pages/posts were not touched.', 'mint-lms' ),
+				'note'      => 'Draft only — nothing was saved. Review in Mint LMS; WordPress pages/posts were not touched.',
 			)
 		);
 	}

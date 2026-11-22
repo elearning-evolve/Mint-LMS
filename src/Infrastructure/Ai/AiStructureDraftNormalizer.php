@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace MintLMS\Application\Ai;
+namespace MintLMS\Infrastructure\Ai;
 
 defined( 'ABSPATH' ) || exit;
 
+use MintLMS\Application\Ai\AiScope;
 use MintLMS\Application\Exception\ValidationException;
-use MintLMS\Infrastructure\Ai\AiScope;
 
 /**
  * Validates + strips AI JSON so only Mint LMS hierarchy remains.
