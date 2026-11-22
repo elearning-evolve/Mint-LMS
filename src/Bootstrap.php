@@ -297,7 +297,7 @@ final class Bootstrap {
 			$progressRepo
 		);
 		// Progress + Quiz wired so Lesson Group delete cascades quizzes/questions.
-		$sectionService      = new SectionService(
+		$sectionService   = new SectionService(
 			$sectionRepo,
 			$lessonRepo,
 			$courseRepo,
@@ -306,7 +306,7 @@ final class Bootstrap {
 			$progressService,
 			$quizService
 		);
-		$lessonService       = new LessonService(
+		$lessonService    = new LessonService(
 			$lessonRepo,
 			$sectionRepo,
 			$courseRepo,
@@ -315,7 +315,7 @@ final class Bootstrap {
 			$progressService,
 			$quizService
 		);
-		$structureService    = new CourseStructureService( $courseRepo, $sectionRepo, $authorization );
+		$structureService = new CourseStructureService( $courseRepo, $sectionRepo, $authorization );
 		Plugin::registerCourseServices( $courseService, $structureService );
 		Plugin::registerEnrollmentService( $enrollmentService );
 		Plugin::registerProgressService( $progressService );

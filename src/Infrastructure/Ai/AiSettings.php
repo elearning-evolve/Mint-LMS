@@ -52,7 +52,7 @@ final class AiSettings {
 	public function getModel(): string {
 		$model = sanitize_text_field( (string) get_option( self::OPTION_MODEL, '' ) );
 		if ( '' !== $model ) {
-			return $model;
+			return self::migrateDeprecatedModel( $model );
 		}
 
 		return self::defaultModelFor( $this->getProvider() );
@@ -61,10 +61,26 @@ final class AiSettings {
 	public static function defaultModelFor( string $provider ): string {
 		return match ( $provider ) {
 			self::PROVIDER_ANTHROPIC => 'claude-sonnet-4-20250514',
-			self::PROVIDER_GROQ      => 'llama-3.1-8b-instant',
+			// Groq free/dev: llama-3.1-8b-instant shut down 2026-08-16 → gpt-oss-20b.
+			self::PROVIDER_GROQ      => 'openai/gpt-oss-20b',
 			self::PROVIDER_GEMINI    => 'gemini-2.0-flash',
 			default                  => 'gpt-4o-mini',
 		};
+	}
+
+	/**
+	 * Map retired provider model IDs to current replacements.
+	 */
+	public static function migrateDeprecatedModel( string $model ): string {
+		$map = array(
+			'llama-3.1-8b-instant'                      => 'openai/gpt-oss-20b',
+			'llama-3.3-70b-versatile'                   => 'openai/gpt-oss-120b',
+			'qwen/qwen3-32b'                            => 'openai/gpt-oss-120b',
+			'meta-llama/llama-4-scout-17b-16e-instruct' => 'openai/gpt-oss-120b',
+			'qwen/qwen3.6-27b'                          => 'qwen/qwen3.8-27b',
+		);
+
+		return $map[ $model ] ?? $model;
 	}
 
 	/**
@@ -118,6 +134,36 @@ final class AiSettings {
 		}
 
 		return sanitize_text_field( (string) get_option( self::OPTION_API_KEY_HINT, '' ) );
+	}
+
+	/**
+	 * Persist a new BYOK value (encrypted). No-op for constant/env-managed keys.
+	 */
+	public function saveApiKey( string $plain ): bool {
+		$resolved = $this->resolveApiKey();
+		if ( in_array( $resolved['source'], array( 'constant', 'env' ), true ) ) {
+			return false;
+		}
+
+		$plain = trim( $plain );
+		if ( '' === $plain || self::MASK_PLACEHOLDER === $plain ) {
+			return false;
+		}
+
+		update_option( self::OPTION_API_KEY_ENC, AiSecretStore::encrypt( $plain ), false );
+		update_option( self::OPTION_API_KEY_HINT, AiSecretStore::hint( $plain ), false );
+
+		return true;
+	}
+
+	public function clearStoredApiKey(): void {
+		$resolved = $this->resolveApiKey();
+		if ( in_array( $resolved['source'], array( 'constant', 'env' ), true ) ) {
+			return;
+		}
+
+		update_option( self::OPTION_API_KEY_ENC, '', false );
+		update_option( self::OPTION_API_KEY_HINT, '', false );
 	}
 
 	/**

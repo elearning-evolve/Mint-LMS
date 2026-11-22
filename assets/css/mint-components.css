@@ -8093,6 +8093,51 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   border-color: #98FBCB;
   box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55);
 }
+#mint-lms-root .mint-settings-secret {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+#mint-lms-root .mint-settings-secret__input {
+  padding-right: 48px !important;
+}
+#mint-lms-root .mint-settings-secret__input.is-masked {
+  -webkit-user-select: none;
+  user-select: none;
+}
+#mint-lms-root .mint-settings-secret__toggle {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  z-index: 3;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 8px;
+  background: #F4F3F8;
+  color: #0F0E1A;
+  cursor: pointer;
+  outline: none;
+  padding: 0;
+  line-height: 0;
+  transition: background-color 120ms ease-out, box-shadow 120ms ease-out;
+}
+#mint-lms-root .mint-settings-secret__toggle svg {
+  display: block;
+  pointer-events: none;
+}
+#mint-lms-root .mint-settings-secret__toggle:hover,
+#mint-lms-root .mint-settings-secret__toggle:focus-visible {
+  background: #98FBCB;
+  box-shadow: 0 0 0 2px rgba(152, 251, 203, 0.55);
+}
+#mint-lms-root .mint-settings-secret.is-revealed .mint-settings-secret__toggle {
+  background: rgba(152, 251, 203, 0.55);
+}
 #mint-lms-root .mint-settings-tags {
   display: flex;
   align-items: center;

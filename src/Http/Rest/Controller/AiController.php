@@ -46,6 +46,26 @@ final class AiController {
 
 		register_rest_route(
 			self::NAMESPACE,
+			'/ai/save-key',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'saveKey' ),
+				'permission_callback' => array( $this, 'canManageAi' ),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/ai/reveal-key',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'revealKey' ),
+				'permission_callback' => array( $this, 'canManageAi' ),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
 			'/ai/generate-quiz-draft',
 			array(
 				'methods'             => 'POST',
@@ -75,6 +95,87 @@ final class AiController {
 		} catch ( \Throwable $e ) {
 			return ApiResponse::error( 'ai_error', 'AI request failed.', 500 );
 		}
+	}
+
+	/**
+	 * Reveal the stored API key to a manage_options admin (eye toggle).
+	 * Key is not localized on page load — only fetched when the admin asks.
+	 */
+	public function revealKey(): \WP_REST_Response {
+		$resolved = $this->settings->resolveApiKey();
+		if ( '' === $resolved['key'] ) {
+			return ApiResponse::error( 'ai_key_missing', __( 'No API key is saved yet.', 'mint-lms' ), 404 );
+		}
+
+		return ApiResponse::success(
+			array(
+				'api_key'    => $resolved['key'],
+				'key_hint'   => $this->settings->getApiKeyHint(),
+				'key_source' => $resolved['source'],
+			)
+		);
+	}
+
+	/**
+	 * Save or clear the API key only (does not touch enabled / provider / model).
+	 */
+	public function saveKey( \WP_REST_Request $request ): \WP_REST_Response {
+		$api_key = is_string( $request->get_param( 'api_key' ) ) ? trim( (string) $request->get_param( 'api_key' ) ) : '';
+		$clear   = (bool) $request->get_param( 'clear' );
+
+		$status = $this->settings->status();
+		if ( in_array( (string) $status['key_source'], array( 'constant', 'env' ), true ) ) {
+			return ApiResponse::success(
+				array_merge(
+					$this->settings->status(),
+					array(
+						'message' => __( 'API key is managed by constant/env — database key ignored.', 'mint-lms' ),
+					)
+				)
+			);
+		}
+
+		if ( $clear ) {
+			$this->settings->clearStoredApiKey();
+
+			return ApiResponse::success(
+				array_merge(
+					$this->settings->status(),
+					array(
+						'message' => __( 'API key removed.', 'mint-lms' ),
+					)
+				)
+			);
+		}
+
+		$is_mask = '' === $api_key || AiSettings::MASK_PLACEHOLDER === $api_key;
+		if ( $is_mask ) {
+			if ( ! $this->settings->hasApiKey() ) {
+				return ApiResponse::error( 'ai_key_missing', __( 'Paste an API key first.', 'mint-lms' ), 400 );
+			}
+
+			return ApiResponse::success(
+				array_merge(
+					$this->settings->status(),
+					array(
+						'message' => __( 'API key already saved.', 'mint-lms' ),
+					)
+				)
+			);
+		}
+
+		if ( ! $this->settings->saveApiKey( $api_key ) ) {
+			return ApiResponse::error( 'ai_key_save_failed', __( 'Could not save API key.', 'mint-lms' ), 400 );
+		}
+
+		return ApiResponse::success(
+			array_merge(
+				$this->settings->status(),
+				array(
+					'message' => __( 'API key saved.', 'mint-lms' ),
+				)
+			)
+		);
 	}
 
 	public function generateQuizDraft( \WP_REST_Request $request ): \WP_REST_Response {

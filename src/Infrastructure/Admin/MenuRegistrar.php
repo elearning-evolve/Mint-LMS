@@ -110,7 +110,6 @@ final class MenuRegistrar {
 			'mint-lms-reports',
 			array( $this, 'renderReports' )
 		);
-
 	}
 
 	/**

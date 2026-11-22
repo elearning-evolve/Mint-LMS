@@ -8,15 +8,15 @@ use MintLMS\Infrastructure\Setup\PageSettings;
 /** @var PageSettings $pageSettings */
 /** @var list<array{key: string, label: string, done: bool, detail: string}> $checklist */
 
-$dashboardId     = $pageSettings->getDashboardPageId();
-$catalogId       = $pageSettings->getCatalogPageId();
-$playerId        = $pageSettings->getPlayerPageId();
-$certTemplate    = (string) get_option( 'mintlms_certificate_template', '' );
-$doneCount = count( array_filter( $checklist, static fn( array $item ): bool => $item['done'] ) );
-$totalCount      = count( $checklist );
-$progressPct     = $totalCount > 0 ? (int) round( ( $doneCount / $totalCount ) * 100 ) : 0;
-$pagesCreated    = isset( $_GET['mintlms_pages'] ) && '1' === sanitize_text_field( wp_unslash( (string) $_GET['mintlms_pages'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-$settingsSaved   = isset( $_GET['settings-updated'] ) && 'true' === sanitize_text_field( wp_unslash( (string) $_GET['settings-updated'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+$dashboardId   = $pageSettings->getDashboardPageId();
+$catalogId     = $pageSettings->getCatalogPageId();
+$playerId      = $pageSettings->getPlayerPageId();
+$certTemplate  = (string) get_option( 'mintlms_certificate_template', '' );
+$doneCount     = count( array_filter( $checklist, static fn( array $item ): bool => $item['done'] ) );
+$totalCount    = count( $checklist );
+$progressPct   = $totalCount > 0 ? (int) round( ( $doneCount / $totalCount ) * 100 ) : 0;
+$pagesCreated  = isset( $_GET['mintlms_pages'] ) && '1' === sanitize_text_field( wp_unslash( (string) $_GET['mintlms_pages'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+$settingsSaved = isset( $_GET['settings-updated'] ) && 'true' === sanitize_text_field( wp_unslash( (string) $_GET['settings-updated'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 $wp_pages     = get_pages(
 	array(

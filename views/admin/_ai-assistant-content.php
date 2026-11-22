@@ -6,17 +6,22 @@ defined( 'ABSPATH' ) || exit;
 use MintLMS\Infrastructure\Admin\AiAssistantPage;
 use MintLMS\Infrastructure\Ai\AiSettings;
 
-$aiSettings      = new AiSettings();
-$aiStatus        = $aiSettings->status();
-$aiKeyFieldValue = $aiSettings->hasApiKey() ? AiSettings::MASK_PLACEHOLDER : '';
-$aiUsesConstant  = in_array( (string) $aiStatus['key_source'], array( 'constant', 'env' ), true );
-$settingsSaved   = isset( $_GET['settings-updated'] ) && 'true' === sanitize_text_field( wp_unslash( (string) $_GET['settings-updated'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+$aiSettings     = new AiSettings();
+$aiStatus       = $aiSettings->status();
+$aiUsesConstant = in_array( (string) $aiStatus['key_source'], array( 'constant', 'env' ), true );
+$settingsSaved  = isset( $_GET['settings-updated'] ) && 'true' === sanitize_text_field( wp_unslash( (string) $_GET['settings-updated'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+$stored_model   = sanitize_text_field( (string) get_option( AiSettings::OPTION_MODEL, '' ) );
+$boot_model     = '' !== $stored_model ? AiSettings::migrateDeprecatedModel( $stored_model ) : '';
 
 $boot = array(
 	'aiEnabled'       => $aiSettings->isEnabled(),
 	'aiProvider'      => $aiSettings->getProvider(),
-	'aiModel'         => (string) get_option( AiSettings::OPTION_MODEL, '' ),
-	'aiKey'           => $aiKeyFieldValue,
+	'aiModel'         => $boot_model,
+	// Mask only on load (not the real key). Eye fetches plaintext via REST when opened.
+	'aiKey'           => $aiSettings->hasApiKey() ? AiSettings::MASK_PLACEHOLDER : '',
+	'aiKeyHint'       => (string) ( $aiStatus['key_hint'] ?? '' ),
+	'hasStoredKey'    => $aiSettings->hasApiKey(),
+	'aiKeyMask'       => AiSettings::MASK_PLACEHOLDER,
 	'aiUsesConstant'  => $aiUsesConstant,
 	'aiReady'         => $aiSettings->isReady(),
 	'enrollment'      => 'free',
@@ -28,14 +33,27 @@ $boot = array(
 	'playerId'        => 0,
 	'certTemplate'    => '',
 	'i18n'            => array(
-		'openai'       => __( 'OpenAI (paid)', 'mint-lms' ),
-		'anthropic'    => __( 'Anthropic (paid)', 'mint-lms' ),
-		'groq'         => __( 'Groq (free tier)', 'mint-lms' ),
-		'gemini'       => __( 'Google Gemini (free tier)', 'mint-lms' ),
-		'testing'      => __( 'Testing…', 'mint-lms' ),
-		'connectionOk' => __( 'Connection OK', 'mint-lms' ),
-		'testFailed'   => __( 'Test failed', 'mint-lms' ),
-		'keyCleared'   => __( 'Saved key will be removed on save.', 'mint-lms' ),
+		'openai'           => __( 'OpenAI (paid)', 'mint-lms' ),
+		'anthropic'        => __( 'Anthropic (paid)', 'mint-lms' ),
+		'groq'             => __( 'Groq (free tier)', 'mint-lms' ),
+		'gemini'           => __( 'Google Gemini (free tier)', 'mint-lms' ),
+		'testing'          => __( 'Testing…', 'mint-lms' ),
+		'connectionOk'     => __( 'Connection OK', 'mint-lms' ),
+		'testFailed'       => __( 'Test failed', 'mint-lms' ),
+		'keyCleared'       => __( 'Saved key will be removed on save.', 'mint-lms' ),
+		'savingKey'        => __( 'Saving API key…', 'mint-lms' ),
+		'removingKey'      => __( 'Removing API key…', 'mint-lms' ),
+		'saveKey'          => __( 'Save API key', 'mint-lms' ),
+		'keySaved'         => __( 'API key saved.', 'mint-lms' ),
+		'keyRemoved'       => __( 'API key removed.', 'mint-lms' ),
+		'keySaveFailed'    => __( 'Could not save API key.', 'mint-lms' ),
+		'showKey'          => __( 'Show API key', 'mint-lms' ),
+		'hideKey'          => __( 'Hide API key', 'mint-lms' ),
+		'revealingKey'     => __( 'Showing key…', 'mint-lms' ),
+		'revealFailed'     => __( 'Could not show API key.', 'mint-lms' ),
+		'pasteToReplace'   => __( 'Paste a new API key to replace the saved one', 'mint-lms' ),
+		'pasteYourKey'     => __( 'Paste your API key', 'mint-lms' ),
+		'saveKeyNeedPaste' => __( 'Paste a new API key first, then click Save API key.', 'mint-lms' ),
 	),
 	'aiDefaultModels' => array(
 		'openai'    => AiSettings::defaultModelFor( AiSettings::PROVIDER_OPENAI ),
@@ -77,10 +95,12 @@ if ( ! is_string( $boot_json ) ) {
 
 		<input type="hidden" name="<?php echo esc_attr( AiSettings::OPTION_ENABLED ); ?>" :value="aiEnabled ? '1' : '0'" />
 		<input type="hidden" name="<?php echo esc_attr( AiSettings::OPTION_PROVIDER ); ?>" :value="aiProvider" />
-		<input type="hidden" name="mintlms_ai_clear_key" :value="clearKey ? '1' : '0'" />
+		<?php // Key is saved only via "Save API key" (REST). Form keeps the existing encrypted key. ?>
+		<input type="hidden" name="<?php echo esc_attr( AiSettings::OPTION_API_KEY_ENC ); ?>" value="<?php echo esc_attr( AiSettings::MASK_PLACEHOLDER ); ?>" />
+		<input type="hidden" name="mintlms_ai_clear_key" value="0" />
 
 		<div class="mint-settings__footer mint-ai-page__savebar">
-			<p class="mint-settings__footer-note"><?php esc_html_e( 'Save stores your AI choices on this site. Test connection talks to the provider.', 'mint-lms' ); ?></p>
+			<p class="mint-settings__footer-note"><?php esc_html_e( 'Save AI settings = on/off, provider, model. Save API key = credential only.', 'mint-lms' ); ?></p>
 			<button type="submit" class="mint-settings-btn mint-settings-btn--primary">
 				<?php esc_html_e( 'Save AI settings', 'mint-lms' ); ?>
 			</button>
@@ -91,7 +111,7 @@ if ( ! is_string( $boot_json ) ) {
 				<section class="mint-settings-card" id="mintlms-ai-settings">
 					<header class="mint-settings-card__head">
 						<h2 class="mint-settings-card__title"><?php esc_html_e( 'Connection', 'mint-lms' ); ?></h2>
-						<p class="mint-settings-card__desc"><?php esc_html_e( 'Turn AI on, pick a provider, paste your key, then save. After saving, use Test connection.', 'mint-lms' ); ?></p>
+						<p class="mint-settings-card__desc"><?php esc_html_e( 'Turn AI on and pick a provider, then Save AI settings. Paste your key and use Save API key. Then Test connection.', 'mint-lms' ); ?></p>
 					</header>
 					<div class="mint-settings-card__body">
 						<div class="mint-settings-toggle-row mint-settings-toggle-row--solo">
@@ -159,35 +179,71 @@ if ( ! is_string( $boot_json ) ) {
 										?>
 									</p>
 								<?php else : ?>
-									<input
-										type="password"
-										id="mintlms_ai_api_key"
-										name="<?php echo esc_attr( AiSettings::OPTION_API_KEY_ENC ); ?>"
-										class="mint-settings-input"
-										autocomplete="new-password"
-										placeholder="<?php esc_attr_e( 'Paste your API key', 'mint-lms' ); ?>"
-										x-model="aiKey"
-									/>
-									<?php if ( $aiSettings->hasApiKey() && '' !== (string) $aiStatus['key_hint'] ) : ?>
-										<p class="mint-settings-field__help" x-show="!clearKey">
-											<?php
-											printf(
-												/* translators: %s: last four characters of API key */
-												esc_html__( 'Saved key ending in %s', 'mint-lms' ),
-												esc_html( (string) $aiStatus['key_hint'] )
-											);
-											?>
-										</p>
-									<?php endif; ?>
+									<div class="mint-settings-secret" :class="{ 'is-revealed': aiKeyVisible && canRevealAiKey() }">
+										<input
+											:type="aiKeyVisible && canRevealAiKey() ? 'text' : 'password'"
+											id="mintlms_ai_api_key"
+											class="mint-settings-input mint-settings-secret__input"
+											autocomplete="new-password"
+											spellcheck="false"
+											:placeholder="hasStoredKey ? (i18n.pasteToReplace || 'Paste a new API key to replace the saved one') : (i18n.pasteYourKey || 'Paste your API key')"
+											x-model="aiKey"
+											@input="onAiKeyInput()"
+											@paste="$nextTick(() => onAiKeyInput())"
+											:class="{ 'is-masked': !(aiKeyVisible && canRevealAiKey()) }"
+											@copy="onAiKeyCopy($event)"
+											@cut="onAiKeyCut($event)"
+										/>
+										<button
+											type="button"
+											class="mint-settings-secret__toggle"
+											@click="toggleAiKeyVisible()"
+											:disabled="aiKeyRevealing"
+											:aria-pressed="aiKeyVisible && canRevealAiKey() ? 'true' : 'false'"
+											:aria-label="aiKeyVisible && canRevealAiKey() ? (i18n.hideKey || 'Hide API key') : (i18n.showKey || 'Show API key')"
+											:title="aiKeyVisible && canRevealAiKey() ? (i18n.hideKey || 'Hide API key') : (i18n.showKey || 'Show API key')"
+										>
+											<svg x-show="!(aiKeyVisible && canRevealAiKey())" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0F0E1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+												<path d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12s-3.5 6.5-9.5 6.5S2.5 12 2.5 12Z"/>
+												<circle cx="12" cy="12" r="2.75"/>
+												<path d="m4 4 16 16"/>
+											</svg>
+											<svg x-show="aiKeyVisible && canRevealAiKey()" x-cloak width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0F0E1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+												<path d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12s-3.5 6.5-9.5 6.5S2.5 12 2.5 12Z"/>
+												<circle cx="12" cy="12" r="2.75"/>
+											</svg>
+										</button>
+									</div>
+									<p class="mint-settings-field__help" x-show="hasStoredKey && isAiKeyMask()" x-cloak>
+										<template x-if="aiKeyHint">
+											<span x-text="'<?php echo esc_js( __( 'Saved key ending in', 'mint-lms' ) ); ?> ' + aiKeyHint + '. <?php echo esc_js( __( 'Paste a new key to enable Save API key.', 'mint-lms' ) ); ?>'"></span>
+										</template>
+										<template x-if="!aiKeyHint">
+											<span><?php esc_html_e( 'A key is already saved. Paste a new key to enable Save API key.', 'mint-lms' ); ?></span>
+										</template>
+									</p>
+									<p class="mint-settings-field__help" x-show="aiKeyDirty && !aiKeyVisible" x-cloak><?php esc_html_e( 'New key ready — click Save API key. Eye only shows/hides; it does not save.', 'mint-lms' ); ?></p>
+									<p class="mint-settings-field__help" x-show="aiKeyDirty && aiKeyVisible" x-cloak><?php esc_html_e( 'Key is visible — you can copy it, then click Save API key.', 'mint-lms' ); ?></p>
+									<p class="mint-settings-field__help" x-show="!aiKeyDirty && aiKeyVisible && canRevealAiKey()" x-cloak><?php esc_html_e( 'Viewing saved key — edit or paste a new key to enable Save API key.', 'mint-lms' ); ?></p>
 								<?php endif; ?>
 							</div>
 
 							<div class="mint-settings-ai__actions">
+								<?php if ( ! $aiUsesConstant ) : ?>
+									<button
+										type="button"
+										class="mint-settings-btn mint-settings-btn--primary"
+										@click="saveAiKey()"
+										:disabled="!canSaveAiKey()"
+									>
+										<span x-text="aiKeySaving ? (i18n.savingKey || 'Saving API key…') : (i18n.saveKey || 'Save API key')"></span>
+									</button>
+								<?php endif; ?>
 								<button
 									type="button"
 									class="mint-settings-btn mint-settings-btn--outline"
 									@click="testAi()"
-									:disabled="aiTesting || (!aiReady && !aiKey)"
+									:disabled="aiTesting || aiKeySaving || aiKeyRevealing || (!aiReady && !hasStoredKey && !aiKeyDirty)"
 								>
 									<?php esc_html_e( 'Test connection', 'mint-lms' ); ?>
 								</button>
@@ -196,7 +252,7 @@ if ( ! is_string( $boot_json ) ) {
 										type="button"
 										class="mint-settings-btn mint-settings-btn--outline"
 										@click="markClearKey()"
-										x-show="aiReady || aiKey"
+										x-show="hasStoredKey || aiKey"
 									>
 										<?php esc_html_e( 'Remove saved key', 'mint-lms' ); ?>
 									</button>
@@ -265,7 +321,7 @@ if ( ! is_string( $boot_json ) ) {
 							</li>
 							<li>
 								<strong><?php esc_html_e( 'Save, then Test', 'mint-lms' ); ?></strong>
-								<span><?php esc_html_e( 'Click Save AI settings first. After the page reloads, click Test connection. You should see Connection OK.', 'mint-lms' ); ?></span>
+								<span><?php esc_html_e( 'Click Save API key to store the credential (Save AI settings only saves on/off, provider, model). Then click Test connection. You should see Connection OK.', 'mint-lms' ); ?></span>
 							</li>
 						</ol>
 					</div>

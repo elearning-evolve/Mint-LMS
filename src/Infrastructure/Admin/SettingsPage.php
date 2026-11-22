@@ -101,7 +101,6 @@ final class SettingsPage {
 				'default'           => '',
 			)
 		);
-
 	}
 
 	public function handleCreatePages(): void {
@@ -152,5 +151,4 @@ final class SettingsPage {
 
 		return wp_kses_post( $value );
 	}
-
 }
