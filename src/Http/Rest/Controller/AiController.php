@@ -73,6 +73,16 @@ final class AiController {
 				'permission_callback' => array( $this, 'canUseAi' ),
 			)
 		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/ai/generate-structure-draft',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'generateStructureDraft' ),
+				'permission_callback' => array( $this, 'canUseAi' ),
+			)
+		);
 	}
 
 	public function canUseAi(): bool {
@@ -179,6 +189,11 @@ final class AiController {
 	}
 
 	public function generateQuizDraft( \WP_REST_Request $request ): \WP_REST_Response {
+		$not_ready = $this->rejectIfAiNotReady();
+		if ( null !== $not_ready ) {
+			return $not_ready;
+		}
+
 		$topic = sanitize_text_field( (string) $request->get_param( 'topic' ) );
 		$count = absint( $request->get_param( 'count' ) );
 		if ( $count <= 0 ) {
@@ -193,7 +208,8 @@ final class AiController {
 					$draft,
 					array(
 						'persisted' => false,
-						'note'      => __( 'Draft only — review and save questions in the quiz builder.', 'mint-lms' ),
+						'scope'     => 'mintlms_only',
+						'note'      => __( 'Draft only — review and save questions in the quiz builder. WordPress pages/posts were not touched.', 'mint-lms' ),
 					)
 				)
 			);
@@ -202,5 +218,38 @@ final class AiController {
 		} catch ( \Throwable $e ) {
 			return ApiResponse::error( 'ai_error', 'AI request failed.', 500 );
 		}
+	}
+
+	/**
+	 * Prompt → Mint LMS hierarchy draft. Never writes posts/pages or Mint CPTs.
+	 */
+	public function generateStructureDraft( \WP_REST_Request $request ): \WP_REST_Response {
+		$not_ready = $this->rejectIfAiNotReady();
+		if ( null !== $not_ready ) {
+			return $not_ready;
+		}
+
+		$prompt = sanitize_textarea_field( (string) $request->get_param( 'prompt' ) );
+
+		try {
+			return ApiResponse::success( $this->assistant->generateStructureDraft( $prompt ) );
+		} catch ( ValidationException $e ) {
+			return ApiResponse::error( 'ai_error', $e->getMessage(), 400, $e->errors() );
+		} catch ( \Throwable $e ) {
+			return ApiResponse::error( 'ai_error', 'AI request failed.', 500 );
+		}
+	}
+
+	private function rejectIfAiNotReady(): ?\WP_REST_Response {
+		if ( $this->settings->isReady() ) {
+			return null;
+		}
+
+		return ApiResponse::error(
+			'ai_not_ready',
+			__( 'Turn on AI, save a provider, and add an API key before generating drafts.', 'mint-lms' ),
+			400,
+			array( 'ai' => 'not_ready' )
+		);
 	}
 }

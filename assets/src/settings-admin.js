@@ -23,11 +23,21 @@ export function mintSettings(config = {}) {
       cfg.aiDefaultModels && typeof cfg.aiDefaultModels === 'object' ? cfg.aiDefaultModels : {},
     aiTestResult: '',
     aiTesting: false,
+    aiTestFail: {
+      open: false,
+      title: '',
+      message: '',
+      note: '',
+    },
     aiKeySaving: false,
     aiKeyRevealing: false,
     aiKeyVisible: false,
     /** True only after the user types/pastes a new key (not after reveal of stored key). */
     aiKeyDirty: false,
+    aiDraftPrompt: '',
+    aiDraftBusy: false,
+    aiDraftStatus: '',
+    aiDraft: null,
     clearKey: false,
     openSelect: null,
     pages: Array.isArray(cfg.pages) ? cfg.pages : [],
@@ -322,12 +332,30 @@ export function mintSettings(config = {}) {
       }
     },
 
+    closeAiTestFail() {
+      this.aiTestFail.open = false;
+    },
+
+    openAiTestFail(message) {
+      const msg = String(message || this.i18n.testFailed || 'Test failed').trim();
+      this.aiTestResult = msg;
+      this.aiTestFail = {
+        open: true,
+        title: this.i18n.testFailedTitle || 'Test connection failed',
+        message: msg,
+        note:
+          this.i18n.testFailedNote ||
+          'Check your API key, provider, and model, then try Test connection again.',
+      };
+    },
+
     async testAi() {
       if (!window.mintLmsAdmin || this.aiTesting) {
         return;
       }
       this.aiTesting = true;
       this.aiTestResult = this.i18n.testing || 'Testing…';
+      this.aiTestFail.open = false;
       try {
         const base = String(mintLmsAdmin.restBase || '').replace(/\/?$/, '');
         const res = await fetch(`${base}/ai/test`, {
@@ -338,7 +366,16 @@ export function mintSettings(config = {}) {
           },
           body: '{}',
         });
-        const json = await res.json();
+        let json = null;
+        try {
+          json = await res.json();
+        } catch (parseErr) {
+          this.openAiTestFail(
+            this.i18n.testFailedNetwork ||
+              'Could not read the provider response. Check your network and try again.'
+          );
+          return;
+        }
         if (json && json.success) {
           const ms = json.data && json.data.latency_ms ? ` (${json.data.latency_ms}ms)` : '';
           const model = json.data && json.data.model ? ` · ${json.data.model}` : '';
@@ -349,14 +386,127 @@ export function mintSettings(config = {}) {
             err && err.details && (err.details.ai || err.details.message)
               ? String(err.details.ai || err.details.message)
               : '';
-          const base =
+          const baseMsg =
             (err && err.message) || this.i18n.testFailed || 'Test failed';
-          this.aiTestResult = detail && detail !== base ? `${base} — ${detail}` : base;
+          const full =
+            detail && detail !== baseMsg ? `${baseMsg} — ${detail}` : baseMsg;
+          this.openAiTestFail(full);
         }
       } catch (e) {
-        this.aiTestResult = this.i18n.testFailed || 'Test failed';
+        this.openAiTestFail(
+          this.i18n.testFailedNetwork ||
+            'Could not reach the AI service. Check your network and try again.'
+        );
       } finally {
         this.aiTesting = false;
+      }
+    },
+
+    draftRootLabel() {
+      const root = this.aiDraft && this.aiDraft.root ? String(this.aiDraft.root) : '';
+      if (root === 'course') {
+        return this.i18n.rootCourse || 'Course';
+      }
+      if (root === 'lesson') {
+        return this.i18n.rootLesson || 'Lesson';
+      }
+      if (root === 'quiz') {
+        return this.i18n.rootQuiz || 'Quiz';
+      }
+      return root || '—';
+    },
+
+    draftPreviewJson() {
+      if (!this.aiDraft) {
+        return '';
+      }
+      const { persisted, scope, note, ...preview } = this.aiDraft;
+      try {
+        return JSON.stringify(preview, null, 2);
+      } catch (e) {
+        return '';
+      }
+    },
+
+    clearStructureDraft() {
+      this.aiDraft = null;
+      this.aiDraftStatus = '';
+    },
+
+    openAiDraftFail(message) {
+      const msg = String(message || this.i18n.draftFailed || 'Could not generate draft').trim();
+      this.aiDraftStatus = msg;
+      this.aiTestFail = {
+        open: true,
+        title: this.i18n.draftFailedTitle || 'Draft generation failed',
+        message: msg,
+        note:
+          this.i18n.draftFailedNote ||
+          'AI stays inside Mint LMS only. Check connection, then try a clearer prompt.',
+      };
+    },
+
+    async generateStructureDraft() {
+      if (!window.mintLmsAdmin || this.aiDraftBusy) {
+        return;
+      }
+      const prompt = String(this.aiDraftPrompt || '').trim();
+      if (!prompt) {
+        this.aiDraftStatus = this.i18n.draftNeedPrompt || 'Describe the Mint LMS content you want first.';
+        return;
+      }
+      if (!this.aiReady && !this.hasStoredKey) {
+        this.aiDraftStatus =
+          this.i18n.draftNeedReady ||
+          'Turn AI on, save settings, and add an API key before generating.';
+        return;
+      }
+
+      this.aiDraftBusy = true;
+      this.aiDraftStatus = this.i18n.draftGenerating || 'Generating Mint LMS draft…';
+      this.aiTestFail.open = false;
+      try {
+        const base = String(mintLmsAdmin.restBase || '').replace(/\/?$/, '');
+        const res = await fetch(`${base}/ai/generate-structure-draft`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-WP-Nonce': mintLmsAdmin.nonce || '',
+          },
+          body: JSON.stringify({ prompt }),
+        });
+        let json = null;
+        try {
+          json = await res.json();
+        } catch (parseErr) {
+          this.openAiDraftFail(
+            this.i18n.testFailedNetwork ||
+              'Could not read the provider response. Check your network and try again.'
+          );
+          return;
+        }
+        if (json && json.success && json.data) {
+          this.aiDraft = json.data;
+          this.aiDraftStatus = this.i18n.draftReady || 'Draft ready — nothing was saved.';
+        } else {
+          const err = json && json.error ? json.error : null;
+          const detail =
+            err && err.details && (err.details.ai || err.details.post_type || err.details.message)
+              ? String(err.details.ai || err.details.post_type || err.details.message)
+              : '';
+          const baseMsg = (err && err.message) || this.i18n.draftFailed || 'Could not generate draft';
+          const full = detail && detail !== baseMsg ? `${baseMsg} — ${detail}` : baseMsg;
+          this.aiDraft = null;
+          this.openAiDraftFail(full);
+        }
+      } catch (e) {
+        this.aiDraft = null;
+        this.openAiDraftFail(
+          this.i18n.testFailedNetwork ||
+            'Could not reach the AI service. Check your network and try again.'
+        );
+      } finally {
+        this.aiDraftBusy = false;
       }
     },
   };
