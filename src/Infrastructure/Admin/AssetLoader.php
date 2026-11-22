@@ -46,28 +46,30 @@ final class AssetLoader {
 			'mint-lms-admin',
 			'mintLmsAdmin',
 			array(
-				'restBase'           => $restBase,
-				'mediaBase'          => esc_url_raw( rest_url( 'wp/v2/media' ) ),
-				'nonce'              => wp_create_nonce( 'wp_rest' ),
-				'defaultEnrollment'  => $pageSettings->getDefaultEnrollment(),
-				'urls'               => array(
-					'courses'      => PostTypes::listUrl( PostTypes::COURSE ),
-					'lessons'      => PostTypes::listUrl( PostTypes::LESSON ),
-					'quizzes'      => PostTypes::listUrl( PostTypes::QUIZ ),
-					'questions'    => PostTypes::listUrl( PostTypes::QUESTION ),
-					'builder'      => admin_url( 'admin.php?page=mint-lms-builder' ),
-					'editQuiz'     => admin_url( 'admin.php?page=mint-lms-edit-quiz' ),
-					'edit'         => admin_url( 'admin.php?page=mint-lms-course-edit' ),
-					'lessonEdit'   => admin_url( 'admin.php?page=mint-lms-lesson-edit' ),
-					'newCourse'    => CourseBuilderPage::newCourseUrl(),
-					'newLesson'    => admin_url( 'post-new.php?post_type=' . PostTypes::LESSON ),
-					'newQuiz'      => admin_url( 'post-new.php?post_type=' . PostTypes::QUIZ ),
-					'newQuestion'  => admin_url( 'post-new.php?post_type=' . PostTypes::QUESTION ),
+				'restBase'          => $restBase,
+				'mediaBase'         => esc_url_raw( rest_url( 'wp/v2/media' ) ),
+				'nonce'             => wp_create_nonce( 'wp_rest' ),
+				'defaultEnrollment' => $pageSettings->getDefaultEnrollment(),
+				'urls'              => array(
+					'courses'     => PostTypes::listUrl( PostTypes::COURSE ),
+					'lessons'     => PostTypes::listUrl( PostTypes::LESSON ),
+					'quizzes'     => PostTypes::listUrl( PostTypes::QUIZ ),
+					'questions'   => PostTypes::listUrl( PostTypes::QUESTION ),
+					'builder'     => admin_url( 'admin.php?page=mint-lms-builder' ),
+					'editQuiz'    => admin_url( 'admin.php?page=mint-lms-edit-quiz' ),
+					'edit'        => admin_url( 'admin.php?page=mint-lms-course-edit' ),
+					'lessonEdit'  => admin_url( 'admin.php?page=mint-lms-lesson-edit' ),
+					'newCourse'   => CourseBuilderPage::newCourseUrl(),
+					'newLesson'   => admin_url( 'post-new.php?post_type=' . PostTypes::LESSON ),
+					'newQuiz'     => admin_url( 'post-new.php?post_type=' . PostTypes::QUIZ ),
+					'newQuestion' => admin_url( 'post-new.php?post_type=' . PostTypes::QUESTION ),
 					'dashboard'   => admin_url( 'admin.php?page=mint-lms' ),
+					'aiAssistant' => admin_url( 'admin.php?page=mint-lms-ai-assistant' ),
+					'settings'    => admin_url( 'admin.php?page=mint-lms-settings' ),
 					'playerPage'  => $pageSettings->getPlayerUrl(),
 					'catalogPage' => $pageSettings->getCatalogUrl(),
 				),
-				'i18n'               => AdminI18n::strings(),
+				'i18n'              => AdminI18n::strings(),
 			)
 		);
 	}
@@ -153,7 +155,7 @@ final class AssetLoader {
 	}
 
 	private function enqueueScripts( string $handle ): void {
-		$script = MINTLMS_PATH . 'assets/dist/main.js';
+		$script  = MINTLMS_PATH . 'assets/dist/main.js';
 		$version = is_readable( $script ) ? (string) filemtime( $script ) : MINTLMS_VERSION;
 
 		wp_enqueue_script(

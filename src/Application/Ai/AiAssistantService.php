@@ -25,14 +25,15 @@ final class AiAssistantService {
 	 */
 	public function testConnection(): array {
 		$started = microtime( true );
-		$text    = $this->client->chat(
+		// Keep budget high enough for Groq GPT-OSS reasoning tokens + a short reply.
+		$text = $this->client->chat(
 			array(
 				array(
 					'role'    => 'user',
 					'content' => 'Reply with exactly: OK',
 				),
 			),
-			32
+			256
 		);
 
 		return array(

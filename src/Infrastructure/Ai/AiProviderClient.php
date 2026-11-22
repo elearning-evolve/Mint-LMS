@@ -67,6 +67,21 @@ final class AiProviderClient {
 		int $maxTokens,
 		string $label
 	): string {
+		// Reasoning models (e.g. Groq openai/gpt-oss-*) spend completion budget on
+		// hidden thought tokens first — a tiny max_tokens yields HTTP 200 + empty content.
+		$body = array(
+			'model'                 => $model,
+			'messages'              => $messages,
+			'max_completion_tokens' => max( 1, $maxTokens ),
+			'temperature'           => 0.4,
+		);
+
+		if ( self::isReasoningChatModel( $model ) ) {
+			$body['reasoning_effort'] = 'low';
+			// Prefer the final answer in content; keep some headroom above caller budget.
+			$body['max_completion_tokens'] = max( $maxTokens, 256 );
+		}
+
 		$response = wp_remote_post(
 			$url,
 			array(
@@ -75,18 +90,22 @@ final class AiProviderClient {
 					'Authorization' => 'Bearer ' . $apiKey,
 					'Content-Type'  => 'application/json',
 				),
-				'body'    => wp_json_encode(
-					array(
-						'model'       => $model,
-						'messages'    => $messages,
-						'max_tokens'  => $maxTokens,
-						'temperature' => 0.4,
-					)
-				),
+				'body'    => wp_json_encode( $body ),
 			)
 		);
 
 		return $this->extractOpenAiContent( $response, $label );
+	}
+
+	/**
+	 * Models that burn completion tokens on internal reasoning before content.
+	 */
+	private static function isReasoningChatModel( string $model ): bool {
+		$m = strtolower( $model );
+
+		return str_contains( $m, 'gpt-oss' )
+			|| str_starts_with( $m, 'qwen/qwen3' )
+			|| str_contains( $m, 'muse-spark' );
 	}
 
 	/**
@@ -198,9 +217,32 @@ final class AiProviderClient {
 	 */
 	private function extractOpenAiContent( $response, string $label = 'OpenAI' ): string {
 		$data    = $this->decodeResponse( $response, $label );
-		$content = $data['choices'][0]['message']['content'] ?? '';
+		$message = is_array( $data['choices'][0]['message'] ?? null ) ? $data['choices'][0]['message'] : array();
+		$content = $message['content'] ?? '';
+
+		// Some providers put the visible answer in content; reasoning models may leave it empty
+		// when the token budget was spent on thought tokens (finish_reason=length).
+		if ( ( ! is_string( $content ) || '' === trim( $content ) ) && isset( $message['reasoning'] ) && is_string( $message['reasoning'] ) ) {
+			// Do not treat reasoning as the answer — surface a clearer failure instead.
+			$content = '';
+		}
+
 		if ( ! is_string( $content ) || '' === trim( $content ) ) {
-			throw new ValidationException( 'AI provider returned an empty response.', array( 'ai' => 'empty_response' ) );
+			$finish = sanitize_key( (string) ( $data['choices'][0]['finish_reason'] ?? '' ) );
+			if ( 'length' === $finish ) {
+				throw new ValidationException(
+					esc_html__( 'AI used all tokens on reasoning and returned no answer. Try again, or pick a non-reasoning model.', 'mint-lms' ),
+					array(
+						'ai' => 'token_budget',
+					)
+				);
+			}
+			throw new ValidationException(
+				esc_html__( 'AI provider returned an empty response.', 'mint-lms' ),
+				array(
+					'ai' => 'empty_response',
+				)
+			);
 		}
 
 		return trim( $content );
@@ -231,8 +273,8 @@ final class AiProviderClient {
 	 * @param array<string, mixed>|\WP_Error $response
 	 */
 	private function extractGeminiContent( $response ): string {
-		$data = $this->decodeResponse( $response, 'Gemini' );
-		$text = '';
+		$data  = $this->decodeResponse( $response, 'Gemini' );
+		$text  = '';
 		$cands = $data['candidates'] ?? array();
 		if ( is_array( $cands ) ) {
 			foreach ( $cands as $cand ) {
@@ -295,17 +337,20 @@ final class AiProviderClient {
 			} else {
 				$message = $body;
 			}
+			$detail  = sanitize_text_field( wp_strip_all_tags( substr( $message, 0, 300 ) ) );
+			$summary = sprintf(
+				/* translators: 1: AI provider label, 2: HTTP status code */
+				__( '%1$s returned HTTP %2$d.', 'mint-lms' ),
+				$safe_label,
+				$code
+			);
+			if ( '' !== $detail ) {
+				$summary .= ' ' . $detail;
+			}
 			throw new ValidationException(
-				esc_html(
-					sprintf(
-						/* translators: 1: AI provider label, 2: HTTP status code */
-						__( '%1$s returned HTTP %2$d.', 'mint-lms' ),
-						$safe_label,
-						$code
-					)
-				),
+				esc_html( $summary ),
 				array(
-					'ai' => esc_html( sanitize_text_field( wp_strip_all_tags( substr( $message, 0, 300 ) ) ) ),
+					'ai' => esc_html( $detail ),
 				)
 			);
 		}

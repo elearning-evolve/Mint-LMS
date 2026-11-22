@@ -42,6 +42,7 @@ use MintLMS\Infrastructure\Admin\NativeEditorSaveGuard;
 use MintLMS\Infrastructure\Admin\NativeEditorViewLinks;
 use MintLMS\Infrastructure\Admin\QuestionPostEditUi;
 use MintLMS\Infrastructure\Admin\QuizPostEditUi;
+use MintLMS\Infrastructure\Admin\AiAssistantPage;
 use MintLMS\Infrastructure\Admin\SettingsPage;
 use MintLMS\Infrastructure\Admin\UserProfileEnrollment;
 use MintLMS\Infrastructure\Capability\AdminAccessGuard;
@@ -138,6 +139,7 @@ final class Bootstrap {
 		);
 
 		( new MenuRegistrar() )->register();
+		( new AiAssistantPage() )->register();
 		( new SettingsPage() )->register();
 		( new CourseBuilderPage() )->register();
 		( new CoursePostEditUi() )->register();
@@ -295,7 +297,7 @@ final class Bootstrap {
 			$progressRepo
 		);
 		// Progress + Quiz wired so Lesson Group delete cascades quizzes/questions.
-		$sectionService      = new SectionService(
+		$sectionService   = new SectionService(
 			$sectionRepo,
 			$lessonRepo,
 			$courseRepo,
@@ -304,7 +306,7 @@ final class Bootstrap {
 			$progressService,
 			$quizService
 		);
-		$lessonService       = new LessonService(
+		$lessonService    = new LessonService(
 			$lessonRepo,
 			$sectionRepo,
 			$courseRepo,
@@ -313,7 +315,7 @@ final class Bootstrap {
 			$progressService,
 			$quizService
 		);
-		$structureService    = new CourseStructureService( $courseRepo, $sectionRepo, $authorization );
+		$structureService = new CourseStructureService( $courseRepo, $sectionRepo, $authorization );
 		Plugin::registerCourseServices( $courseService, $structureService );
 		Plugin::registerEnrollmentService( $enrollmentService );
 		Plugin::registerProgressService( $progressService );
