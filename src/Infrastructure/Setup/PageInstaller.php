@@ -5,9 +5,30 @@ namespace MintLMS\Infrastructure\Setup;
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Installs Mint student pages (dashboard / catalog / player).
+ *
+ * Uses Mint-owned slugs so Tutor/LearnDash/Lifter rewrite bases (e.g. "courses")
+ * cannot steal View/Preview URLs. Existing installs are migrated off conflict slugs.
+ */
 final class PageInstaller {
 
-	private const META_ROLE = '_mintlms_page_role';
+	private const META_ROLE           = '_mintlms_page_role';
+	private const OPTION_FLUSH_NEEDED = 'mintlms_student_pages_flush_rewrites';
+
+	/**
+	 * Slugs commonly claimed by other LMS plugins or course archives.
+	 *
+	 * @var list<string>
+	 */
+	private const CONFLICT_SLUGS = array(
+		'courses',
+		'course',
+		'lessons',
+		'lesson',
+		'quizzes',
+		'quiz',
+	);
 
 	/**
 	 * @var array<string, array{title: string, shortcode: string, slug: string, option: string}>
@@ -16,27 +37,45 @@ final class PageInstaller {
 		'dashboard' => array(
 			'title'     => 'My Learning',
 			'shortcode' => '[mint_lms_dashboard]',
-			'slug'      => 'my-learning',
+			'slug'      => 'mint-lms-learning',
 			'option'    => PageSettings::OPTION_DASHBOARD,
 		),
 		'catalog'   => array(
 			'title'     => 'Courses',
 			'shortcode' => '[mint_lms_catalog]',
-			'slug'      => 'courses',
+			'slug'      => 'mint-lms-courses',
 			'option'    => PageSettings::OPTION_CATALOG,
 		),
 		'player'    => array(
 			'title'     => 'Course Player',
 			'shortcode' => '[mint_lms_player]',
-			'slug'      => 'course-player',
+			'slug'      => 'mint-lms-player',
 			'option'    => PageSettings::OPTION_PLAYER,
 		),
 	);
+
+	public function register(): void {
+		add_action( 'init', array( $this, 'maybeRepairStudentPages' ), 30 );
+	}
 
 	public function install(): void {
 		foreach ( self::PAGES as $role => $config ) {
 			$this->ensurePage( $role, $config );
 		}
+
+		$this->ensureConflictFreeSlugs();
+	}
+
+	/**
+	 * Existing sites: keep pages, move off colliding slugs without user action.
+	 */
+	public function maybeRepairStudentPages(): void {
+		if ( wp_installing() ) {
+			return;
+		}
+
+		$this->install();
+		$this->maybeFlushRewrites();
 	}
 
 	/**
@@ -54,7 +93,8 @@ final class PageInstaller {
 		$existingId = $this->findPageByRole( $role );
 
 		if ( null !== $existingId && $this->isUsablePage( $existingId, $config['shortcode'] ) ) {
-			update_option( $config['option'], $existingId );
+			update_option( $config['option'], $existingId, false );
+			update_post_meta( $existingId, self::META_ROLE, $role );
 
 			return;
 		}
@@ -76,7 +116,63 @@ final class PageInstaller {
 		}
 
 		update_post_meta( $pageId, self::META_ROLE, $role );
-		update_option( $config['option'], $pageId );
+		update_option( $config['option'], $pageId, false );
+		$this->markFlushNeeded();
+	}
+
+	private function ensureConflictFreeSlugs(): void {
+		foreach ( self::PAGES as $role => $config ) {
+			$pageId = (int) get_option( $config['option'], 0 );
+
+			if ( $pageId <= 0 || ! $this->isUsablePage( $pageId, $config['shortcode'] ) ) {
+				continue;
+			}
+
+			$post = get_post( $pageId );
+
+			if ( ! $post instanceof \WP_Post ) {
+				continue;
+			}
+
+			$current = (string) $post->post_name;
+			$desired = $config['slug'];
+
+			if ( $current === $desired || ! $this->slugNeedsMigration( $current ) ) {
+				continue;
+			}
+
+			$unique = wp_unique_post_slug( $desired, $pageId, $post->post_status, 'page', $post->post_parent );
+			$result = wp_update_post(
+				array(
+					'ID'        => $pageId,
+					'post_name' => $unique,
+				),
+				true
+			);
+
+			if ( ! is_wp_error( $result ) ) {
+				$this->markFlushNeeded();
+			}
+		}
+	}
+
+	private function slugNeedsMigration( string $current ): bool {
+		$current = sanitize_title( $current );
+
+		return in_array( $current, self::CONFLICT_SLUGS, true );
+	}
+
+	private function markFlushNeeded(): void {
+		update_option( self::OPTION_FLUSH_NEEDED, '1', false );
+	}
+
+	private function maybeFlushRewrites(): void {
+		if ( '1' !== (string) get_option( self::OPTION_FLUSH_NEEDED, '' ) ) {
+			return;
+		}
+
+		flush_rewrite_rules( false );
+		delete_option( self::OPTION_FLUSH_NEEDED );
 	}
 
 	private function findPageByRole( string $role ): ?int {

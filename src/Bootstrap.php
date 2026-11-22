@@ -77,6 +77,7 @@ use MintLMS\Infrastructure\Notification\EmailNotificationRegistrar;
 use MintLMS\Infrastructure\PostType\PostTypeRegistrar;
 use MintLMS\Infrastructure\Setup\Activator;
 use MintLMS\Infrastructure\Setup\ContentMigrator;
+use MintLMS\Infrastructure\Setup\PageInstaller;
 use MintLMS\Infrastructure\Setup\PageSettings;
 use MintLMS\Infrastructure\User\WpUserLookup;
 use MintLMS\Infrastructure\WooCommerce\WooCommerceIntegration;
@@ -93,6 +94,8 @@ final class Bootstrap {
 	public static function activate(): void {
 		self::runMigrations();
 		( new Activator() )->activate();
+		// Student pages may have been created/renamed — refresh rewrite map.
+		flush_rewrite_rules( false );
 		set_transient( FirstRunRedirect::ACTIVATION_REDIRECT_TRANSIENT, true, 30 );
 	}
 
@@ -111,6 +114,7 @@ final class Bootstrap {
 		( new AdminContentListScope() )->register();
 
 		( new PostTypeRegistrar() )->register();
+		( new PageInstaller() )->register();
 
 		// Needs registered CPTs + WP_Rewrite (after init). plugins_loaded is too early for wp_insert_post.
 		add_action(

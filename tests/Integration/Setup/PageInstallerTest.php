@@ -61,6 +61,36 @@ final class PageInstallerTest extends TestCase
         $this->assertStringContainsString('[mint_lms_dashboard]', (string) $dashboard->post_content);
         $this->assertStringContainsString('[mint_lms_catalog]', (string) $catalog->post_content);
         $this->assertStringContainsString('[mint_lms_player]', (string) $player->post_content);
+
+        $this->assertSame('mint-lms-learning', (string) $dashboard->post_name);
+        $this->assertSame('mint-lms-courses', (string) $catalog->post_name);
+        $this->assertSame('mint-lms-player', (string) $player->post_name);
+    }
+
+    public function test_install_migrates_conflict_catalog_slug(): void
+    {
+        $pageId = wp_insert_post(
+            array(
+                'post_title'   => 'Courses',
+                'post_name'    => 'courses',
+                'post_content' => '[mint_lms_catalog]',
+                'post_status'  => 'publish',
+                'post_type'    => 'page',
+            ),
+            true
+        );
+        $this->assertIsInt($pageId);
+        $this->assertGreaterThan(0, $pageId);
+        $this->createdPageIds[] = $pageId;
+
+        update_option(PageSettings::OPTION_CATALOG, $pageId, false);
+        update_post_meta($pageId, '_mintlms_page_role', 'catalog');
+
+        (new PageInstaller())->install();
+
+        $updated = get_post($pageId);
+        $this->assertInstanceOf(\WP_Post::class, $updated);
+        $this->assertSame('mint-lms-courses', (string) $updated->post_name);
     }
 
     public function test_install_is_idempotent_when_pages_already_exist(): void
