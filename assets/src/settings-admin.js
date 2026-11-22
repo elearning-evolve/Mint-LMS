@@ -293,12 +293,17 @@ export function mintSettings(config = {}) {
           body: JSON.stringify({
             api_key: shouldClear ? '' : raw,
             clear: shouldClear,
+            // Persist the ON switch with the key so Test works without a second save.
+            enabled: !!this.aiEnabled,
           }),
         });
         const json = await res.json();
         if (json && json.success) {
           const data = json.data || {};
           this.aiReady = !!data.ready;
+          if (typeof data.enabled === 'boolean') {
+            this.aiEnabled = data.enabled;
+          }
           this.clearKey = false;
           this.aiKeyVisible = false;
           this.aiKeyDirty = false;
@@ -367,7 +372,7 @@ export function mintSettings(config = {}) {
       return msg.trim() || String(this.i18n.testFailed || 'Test failed');
     },
 
-    openAiTestFail(message) {
+    openAiTestFail(message, note) {
       const msg = this.formatAiFailMessage(message);
       this.aiTestResult = msg;
       this.aiTestFail = {
@@ -375,6 +380,64 @@ export function mintSettings(config = {}) {
         title: this.i18n.testFailedTitle || 'Test connection failed',
         message: msg,
         note:
+          note ||
+          this.i18n.testFailedNote ||
+          'Check your API key, provider, and model, then try Test connection again.',
+      };
+    },
+
+    /**
+     * Map REST AI errors into short popup copy + helpful note.
+     *
+     * @param {Record<string, unknown>|null} err
+     * @returns {{ message: string, note: string }}
+     */
+    mapAiFailCopy(err) {
+      const details = err && err.details && typeof err.details === 'object' ? err.details : {};
+      const code = String(details.ai || details.code || '').trim();
+      const hint = String(details.hint || '').trim();
+      const baseMsg = String((err && err.message) || this.i18n.testFailed || 'Test failed').trim();
+
+      if (code === 'ai_disabled') {
+        return {
+          message: this.i18n.aiDisabled || 'AI is still turned off on the server.',
+          note:
+            hint ||
+            this.i18n.aiDisabledNote ||
+            'Turn the switch ON, click Save AI settings (or Save API key), then Test again.',
+        };
+      }
+      if (code === 'ai_key_unreadable') {
+        return {
+          message: this.i18n.aiKeyUnreadable || 'Saved API key cannot be read on this site.',
+          note:
+            hint ||
+            this.i18n.aiKeyUnreadableNote ||
+            'Paste your API key again and click Save API key. This often happens after moving a site.',
+        };
+      }
+      if (code === 'ai_key_missing' || code === 'not_ready') {
+        return {
+          message: this.i18n.aiKeyMissing || 'API key is missing.',
+          note:
+            hint ||
+            this.i18n.aiKeyMissingNote ||
+            'Paste your API key and click Save API key, then Test connection.',
+        };
+      }
+
+      const detail = String(details.message || details.ai || '').trim();
+      const full =
+        detail &&
+        detail !== baseMsg &&
+        !['ai_disabled', 'ai_key_missing', 'ai_key_unreadable', 'not_ready'].includes(detail)
+          ? `${baseMsg} — ${detail}`
+          : baseMsg;
+
+      return {
+        message: full,
+        note:
+          hint ||
           this.i18n.testFailedNote ||
           'Check your API key, provider, and model, then try Test connection again.',
       };
@@ -384,6 +447,25 @@ export function mintSettings(config = {}) {
       if (!window.mintLmsAdmin || this.aiTesting) {
         return;
       }
+
+      if (!this.aiEnabled) {
+        this.openAiTestFail(
+          this.i18n.aiDisabled || 'AI is turned off.',
+          this.i18n.aiDisabledNote ||
+            'Turn the switch ON, click Save AI settings, then Test again.'
+        );
+        return;
+      }
+
+      if (!this.aiReady && !this.hasStoredKey && !this.aiKeyDirty) {
+        this.openAiTestFail(
+          this.i18n.aiKeyMissing || 'API key is missing.',
+          this.i18n.aiKeyMissingNote ||
+            'Paste your API key and click Save API key, then Test connection.'
+        );
+        return;
+      }
+
       this.aiTesting = true;
       this.aiTestResult = this.i18n.testing || 'Testing…';
       this.aiTestFail.open = false;
@@ -411,17 +493,10 @@ export function mintSettings(config = {}) {
           const ms = json.data && json.data.latency_ms ? ` (${json.data.latency_ms}ms)` : '';
           const model = json.data && json.data.model ? ` · ${json.data.model}` : '';
           this.aiTestResult = `${this.i18n.connectionOk || 'Connection OK'}${ms}${model}`;
+          this.aiReady = true;
         } else {
-          const err = json && json.error ? json.error : null;
-          const detail =
-            err && err.details && (err.details.ai || err.details.message)
-              ? String(err.details.ai || err.details.message)
-              : '';
-          const baseMsg =
-            (err && err.message) || this.i18n.testFailed || 'Test failed';
-          const full =
-            detail && detail !== baseMsg ? `${baseMsg} — ${detail}` : baseMsg;
-          this.openAiTestFail(full);
+          const mapped = this.mapAiFailCopy(json && json.error ? json.error : null);
+          this.openAiTestFail(mapped.message, mapped.note);
         }
       } catch (e) {
         this.openAiTestFail(

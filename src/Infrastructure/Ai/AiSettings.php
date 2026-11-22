@@ -43,6 +43,22 @@ final class AiSettings {
 		return (bool) get_option( self::OPTION_ENABLED, false );
 	}
 
+	public function setEnabled( bool $enabled ): void {
+		update_option( self::OPTION_ENABLED, $enabled, false );
+	}
+
+	/**
+	 * True when the options table still holds ciphertext (even if decrypt fails).
+	 */
+	public function hasStoredCiphertext(): bool {
+		$resolved = $this->resolveApiKey();
+		if ( in_array( $resolved['source'], array( 'constant', 'env' ), true ) ) {
+			return true;
+		}
+
+		return '' !== trim( (string) get_option( self::OPTION_API_KEY_ENC, '' ) );
+	}
+
 	public function getProvider(): string {
 		$provider = sanitize_key( (string) get_option( self::OPTION_PROVIDER, self::PROVIDER_OPENAI ) );
 
@@ -201,15 +217,19 @@ final class AiSettings {
 	public function status(): array {
 		$resolved = $this->resolveApiKey();
 
+		$unreadable = $this->hasStoredCiphertext() && '' === $resolved['key']
+			&& ! in_array( $resolved['source'], array( 'constant', 'env' ), true );
+
 		return array(
-			'enabled'    => $this->isEnabled(),
-			'ready'      => $this->isReady(),
-			'provider'   => $this->getProvider(),
-			'model'      => $this->getModel(),
-			'key_source' => $resolved['source'],
-			'key_hint'   => $this->getApiKeyHint(),
-			'key_masked' => $this->hasApiKey() ? self::MASK_PLACEHOLDER : '',
-			'providers'  => self::allowedProviders(),
+			'enabled'        => $this->isEnabled(),
+			'ready'          => $this->isReady(),
+			'provider'       => $this->getProvider(),
+			'model'          => $this->getModel(),
+			'key_source'     => $resolved['source'],
+			'key_hint'       => $unreadable ? '' : $this->getApiKeyHint(),
+			'key_masked'     => $this->hasApiKey() ? self::MASK_PLACEHOLDER : '',
+			'key_unreadable' => $unreadable,
+			'providers'      => self::allowedProviders(),
 		);
 	}
 }
