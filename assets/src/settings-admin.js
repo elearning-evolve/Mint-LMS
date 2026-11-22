@@ -336,8 +336,39 @@ export function mintSettings(config = {}) {
       this.aiTestFail.open = false;
     },
 
+    /**
+     * Keep fail-modal copy short: strip key-like tokens and collapse duplicate provider lines.
+     *
+     * @param {string} message
+     * @returns {string}
+     */
+    formatAiFailMessage(message) {
+      let msg = String(message || this.i18n.testFailed || 'Test failed').trim();
+      // Mask long secrets / partial keys so they cannot blow out the panel.
+      msg = msg.replace(/\b(?:sk|gsk|AIza|xai)-?[A-Za-z0-9_*·•.]{12,}\b/g, '[api-key]');
+      msg = msg.replace(/[A-Za-z0-9_*·•]{48,}/g, '[truncated]');
+      // Drop trailing "You can find your API key at …" provider boilerplate (often duplicated).
+      msg = msg.replace(/\s*You can find your API key at\s+\S+/gi, '');
+      // Collapse "msg — msg" style duplicates from message + details.
+      const parts = msg.split(/\s+[—-]\s+/).map((p) => p.trim()).filter(Boolean);
+      if (parts.length >= 2) {
+        const unique = [];
+        parts.forEach((p) => {
+          const norm = p.toLowerCase();
+          if (!unique.some((u) => u.toLowerCase() === norm || u.toLowerCase().includes(norm) || norm.includes(u.toLowerCase()))) {
+            unique.push(p);
+          }
+        });
+        msg = unique.join(' — ');
+      }
+      if (msg.length > 280) {
+        msg = `${msg.slice(0, 277)}…`;
+      }
+      return msg.trim() || String(this.i18n.testFailed || 'Test failed');
+    },
+
     openAiTestFail(message) {
-      const msg = String(message || this.i18n.testFailed || 'Test failed').trim();
+      const msg = this.formatAiFailMessage(message);
       this.aiTestResult = msg;
       this.aiTestFail = {
         open: true,
@@ -434,7 +465,9 @@ export function mintSettings(config = {}) {
     },
 
     openAiDraftFail(message) {
-      const msg = String(message || this.i18n.draftFailed || 'Could not generate draft').trim();
+      const msg = this.formatAiFailMessage(
+        message || this.i18n.draftFailed || 'Could not generate draft'
+      );
       this.aiDraftStatus = msg;
       this.aiTestFail = {
         open: true,

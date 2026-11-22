@@ -6163,6 +6163,9 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   font-family: var(--mint-font);
   color: var(--mint-ink);
   box-sizing: border-box;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 #mint-lms-root .mint-confirm__panel.is-toss {
@@ -6251,11 +6254,16 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 #mint-lms-root .mint-confirm__body {
   margin: 16px 0 0 62px;
   padding: 0;
+  max-width: calc(100% - 62px);
+  min-width: 0;
   font-family: var(--mint-font);
   font-size: 15px;
   font-weight: 500;
   line-height: 24px;
   color: var(--mint-ink-3);
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  white-space: pre-wrap;
 }
 
 #mint-lms-root .mint-confirm__body b {
@@ -6266,12 +6274,17 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 #mint-lms-root .mint-confirm__note {
   margin: 16px 0 0 62px;
   padding: 12px 14px;
+  max-width: calc(100% - 62px);
+  min-width: 0;
+  box-sizing: border-box;
   border-radius: 12px;
   background: rgba(152, 251, 203, 0.12);
   border: 1px dashed #98FBCB;
   font-family: var(--mint-font);
   font-size: 14px;
   font-weight: 500;
+  overflow-wrap: anywhere;
+  word-break: break-word;
   line-height: 21px;
   color: var(--mint-ink-2);
 }
@@ -6409,6 +6422,7 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   #mint-lms-root .mint-confirm__body,
   #mint-lms-root .mint-confirm__note {
     margin-left: 0;
+    max-width: 100%;
   }
 
   #mint-lms-root .mint-confirm__actions {
