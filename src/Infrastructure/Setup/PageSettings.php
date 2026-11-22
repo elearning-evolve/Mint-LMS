@@ -194,6 +194,12 @@ final class PageSettings {
 		return $fallbackTitle;
 	}
 
+	/**
+	 * Resolve a stable front-end URL for an installed Mint student page.
+	 *
+	 * Prefers the page permalink (Mint-owned slug after PageInstaller repair).
+	 * Falls back to page_id query form when permalink resolution fails.
+	 */
 	private function permalinkForPageId( int $pageId ): string {
 		if ( $pageId <= 0 ) {
 			return home_url( '/' );
@@ -201,7 +207,11 @@ final class PageSettings {
 
 		$url = get_permalink( $pageId );
 
-		return is_string( $url ) && '' !== $url ? $url : home_url( '/' );
+		if ( is_string( $url ) && '' !== $url && home_url( '/' ) !== $url ) {
+			return $url;
+		}
+
+		return add_query_arg( 'page_id', (string) $pageId, home_url( '/' ) );
 	}
 
 	private function currentPageUrl(): string {
