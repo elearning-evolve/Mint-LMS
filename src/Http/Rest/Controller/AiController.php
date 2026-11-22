@@ -127,11 +127,17 @@ final class AiController {
 	}
 
 	/**
-	 * Save or clear the API key only (does not touch enabled / provider / model).
+	 * Save or clear the API key. Optionally sync the AI enabled flag from the UI
+	 * so Test connection works after Save API key without a separate settings save.
 	 */
 	public function saveKey( \WP_REST_Request $request ): \WP_REST_Response {
 		$api_key = is_string( $request->get_param( 'api_key' ) ) ? trim( (string) $request->get_param( 'api_key' ) ) : '';
 		$clear   = (bool) $request->get_param( 'clear' );
+
+		// Keep the ON switch in sync when the admin already flipped it in the UI.
+		if ( null !== $request->get_param( 'enabled' ) ) {
+			$this->settings->setEnabled( (bool) $request->get_param( 'enabled' ) );
+		}
 
 		$status = $this->settings->status();
 		if ( in_array( (string) $status['key_source'], array( 'constant', 'env' ), true ) ) {
@@ -161,7 +167,12 @@ final class AiController {
 		$is_mask = '' === $api_key || AiSettings::MASK_PLACEHOLDER === $api_key;
 		if ( $is_mask ) {
 			if ( ! $this->settings->hasApiKey() ) {
-				return ApiResponse::error( 'ai_key_missing', __( 'Paste an API key first.', 'mint-lms' ), 400 );
+				$code = $this->settings->hasStoredCiphertext() ? 'ai_key_unreadable' : 'ai_key_missing';
+				$msg  = 'ai_key_unreadable' === $code
+					? __( 'Saved API key cannot be read. Paste your key again and click Save API key.', 'mint-lms' )
+					: __( 'Paste an API key first.', 'mint-lms' );
+
+				return ApiResponse::error( $code, $msg, 400 );
 			}
 
 			return ApiResponse::success(
@@ -245,11 +256,38 @@ final class AiController {
 			return null;
 		}
 
+		if ( ! $this->settings->isEnabled() ) {
+			return ApiResponse::error(
+				'ai_not_ready',
+				__( 'AI is turned off.', 'mint-lms' ),
+				400,
+				array(
+					'ai'   => 'ai_disabled',
+					'hint' => __( 'Turn on AI features, click Save AI settings, then try again.', 'mint-lms' ),
+				)
+			);
+		}
+
+		if ( $this->settings->hasStoredCiphertext() && ! $this->settings->hasApiKey() ) {
+			return ApiResponse::error(
+				'ai_not_ready',
+				__( 'Saved API key cannot be read on this site.', 'mint-lms' ),
+				400,
+				array(
+					'ai'   => 'ai_key_unreadable',
+					'hint' => __( 'Paste your API key again and click Save API key.', 'mint-lms' ),
+				)
+			);
+		}
+
 		return ApiResponse::error(
 			'ai_not_ready',
-			__( 'Turn on AI, save a provider, and add an API key before generating drafts.', 'mint-lms' ),
+			__( 'API key is missing.', 'mint-lms' ),
 			400,
-			array( 'ai' => 'not_ready' )
+			array(
+				'ai'   => 'ai_key_missing',
+				'hint' => __( 'Paste your API key and click Save API key, then try again.', 'mint-lms' ),
+			)
 		);
 	}
 }

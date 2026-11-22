@@ -21,10 +21,33 @@ final class AiProviderClient {
 	 * @param list<array{role: string, content: string}> $messages
 	 */
 	public function chat( array $messages, int $maxTokens = 2048 ): string {
-		if ( ! $this->settings->isReady() ) {
+		if ( ! $this->settings->isEnabled() ) {
 			throw new ValidationException(
-				'AI is not enabled or an API key is missing.',
-				array( 'ai' => 'Enable AI under Mint LMS → Settings and add an API key (or define MINTLMS_AI_API_KEY).' )
+				'AI is turned off.',
+				array(
+					'ai'   => 'ai_disabled',
+					'hint' => 'Turn on AI features, click Save AI settings, then try again.',
+				)
+			);
+		}
+
+		if ( ! $this->settings->hasApiKey() ) {
+			if ( $this->settings->hasStoredCiphertext() ) {
+				throw new ValidationException(
+					'Saved API key cannot be read on this site.',
+					array(
+						'ai'   => 'ai_key_unreadable',
+						'hint' => 'Site security keys may have changed. Paste your API key again and click Save API key.',
+					)
+				);
+			}
+
+			throw new ValidationException(
+				'API key is missing.',
+				array(
+					'ai'   => 'ai_key_missing',
+					'hint' => 'Paste your API key and click Save API key (or set MINTLMS_AI_API_KEY in wp-config).',
+				)
 			);
 		}
 

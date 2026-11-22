@@ -6222,24 +6222,6 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   background: #FFE8A3;
 }
 
-#mint-lms-root .mint-confirm__submit--ok,
-#mint-lms-root button.mint-confirm__submit--ok {
-  border: 1.5px solid #0F0E1A !important;
-  background: #98FBCB !important;
-  color: #0F0E1A !important;
-}
-
-#mint-lms-root .mint-confirm__submit--ok:hover,
-#mint-lms-root button.mint-confirm__submit--ok:hover {
-  background: #7FF0B8 !important;
-  box-shadow: 0 8px 18px rgba(152, 251, 203, 0.45) !important;
-}
-
-#mint-lms-root .mint-confirm__submit--ok:focus-visible,
-#mint-lms-root button.mint-confirm__submit--ok:focus-visible {
-  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55) !important;
-}
-
 #mint-lms-root .mint-confirm__title {
   margin: 2px 36px 0 0;
   padding: 0;
@@ -6396,6 +6378,97 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
 
 #mint-lms-root .mint-confirm__submit.is-busy .mint-confirm__lid {
   transform: translate(0, -3px) rotate(-28deg);
+}
+
+/* OK / non-destructive confirm — must win over trash-red .mint-confirm__submit */
+#mint-lms-root .mint-confirm__submit.mint-confirm__submit--ok,
+#mint-lms-root button.mint-confirm__submit.mint-confirm__submit--ok {
+  border: 1.5px solid #0F0E1A !important;
+  background: #98FBCB !important;
+  color: #0F0E1A !important;
+}
+
+#mint-lms-root .mint-confirm__submit.mint-confirm__submit--ok:hover,
+#mint-lms-root button.mint-confirm__submit.mint-confirm__submit--ok:hover {
+  background: #7FF0B8 !important;
+  box-shadow: 0 8px 18px rgba(152, 251, 203, 0.45) !important;
+  transform: translateY(-2px);
+}
+
+#mint-lms-root .mint-confirm__submit.mint-confirm__submit--ok:focus-visible,
+#mint-lms-root button.mint-confirm__submit.mint-confirm__submit--ok:focus-visible {
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55) !important;
+}
+
+/* AI fail dialog — single column: header, then content flush left */
+#mint-lms-root .mint-confirm--ai-fail .mint-confirm__panel {
+  max-width: 420px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+#mint-lms-root .mint-confirm--ai-fail .mint-confirm__top {
+  align-items: center;
+  gap: 12px;
+}
+
+#mint-lms-root .mint-confirm--ai-fail .mint-confirm__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+}
+
+#mint-lms-root .mint-confirm--ai-fail .mint-confirm__title {
+  margin: 0 32px 0 0 !important;
+  font-size: 20px;
+  line-height: 26px;
+}
+
+#mint-lms-root .mint-confirm--ai-fail .mint-confirm__content {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+  width: 100%;
+  min-width: 0;
+}
+
+#mint-lms-root .mint-confirm--ai-fail .mint-confirm__body,
+#mint-lms-root .mint-confirm--ai-fail .mint-confirm__note {
+  margin: 0 !important;
+  max-width: 100% !important;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+#mint-lms-root .mint-confirm--ai-fail .mint-confirm__body {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #33334A;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+#mint-lms-root .mint-confirm--ai-fail .mint-confirm__note {
+  padding: 12px 14px;
+  border-style: solid;
+  border-width: 1px;
+  border-color: rgba(152, 251, 203, 0.9);
+  border-radius: 12px;
+  background: rgba(152, 251, 203, 0.14);
+  font-size: 13px;
+  line-height: 1.45;
+  color: #33334A;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+#mint-lms-root .mint-confirm--ai-fail .mint-confirm__actions {
+  margin-top: 18px;
+  justify-content: flex-end;
 }
 
 @keyframes mint-confirm-toss {
