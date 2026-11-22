@@ -5,6 +5,7 @@ defined( 'ABSPATH' ) || exit;
 
 use MintLMS\Infrastructure\Admin\AiAssistantPage;
 use MintLMS\Infrastructure\Ai\AiSettings;
+use MintLMS\Infrastructure\Ai\McpAdapterNotice;
 
 $aiSettings     = new AiSettings();
 $aiStatus       = $aiSettings->status();
@@ -106,7 +107,7 @@ if ( ! is_string( $boot_json ) ) {
 		</div>
 		<div>
 			<h1 class="mint-settings__title"><?php esc_html_e( 'AI Assistant', 'mint-lms' ); ?></h1>
-			<p class="mint-settings__sub"><?php esc_html_e( 'Connect your own AI key to draft Mint LMS courses, lessons, quizzes, and questions. Never touches WordPress pages or posts. Off by default.', 'mint-lms' ); ?></p>
+			<p class="mint-settings__sub"><?php esc_html_e( 'Optional BYOK for Mint-side tests, plus Claude Desktop (MCP) to create Mint LMS drafts from external prompts. Never touches WordPress pages or posts.', 'mint-lms' ); ?></p>
 		</div>
 	</div>
 
@@ -353,10 +354,10 @@ if ( ! is_string( $boot_json ) ) {
 					</header>
 					<div class="mint-settings-card__body">
 						<ul class="mint-ai-page__bullets">
-							<li><?php esc_html_e( 'Drafts Mint LMS structure only (courses, lesson groups, lessons, quizzes, questions).', 'mint-lms' ); ?></li>
+							<li><?php esc_html_e( 'Claude Desktop can create Mint LMS drafts (courses, lessons, quizzes, questions) via MCP.', 'mint-lms' ); ?></li>
 							<li><?php esc_html_e( 'Never creates or edits WordPress pages, posts, menus, media, or other plugins.', 'mint-lms' ); ?></li>
-							<li><?php esc_html_e( 'Nothing is saved until you review and confirm in Mint LMS.', 'mint-lms' ); ?></li>
-							<li><?php esc_html_e( 'Prompts may be sent to the provider you selected — check their privacy terms.', 'mint-lms' ); ?></li>
+							<li><?php esc_html_e( 'New items are saved as drafts in the Mint LMS list tables for review.', 'mint-lms' ); ?></li>
+							<li><?php esc_html_e( 'Optional BYOK below is only for Mint-side connection tests — not required for Claude Desktop MCP.', 'mint-lms' ); ?></li>
 						</ul>
 					</div>
 				</section>
@@ -364,53 +365,71 @@ if ( ! is_string( $boot_json ) ) {
 		</div>
 	</form>
 
-	<section class="mint-settings-card mint-ai-page__draft" x-show="aiEnabled" x-cloak>
+	<?php
+	$mcp_active    = McpAdapterNotice::isMcpAdapterActive();
+	$mcp_install   = self_admin_url( 'plugin-install.php?s=MCP%20Adapter&tab=search&type=term' );
+	$app_passwords = admin_url( 'profile.php#application-passwords-section' );
+	$mcp_endpoint  = rest_url( 'mcp/mcp-adapter-default-server' );
+	?>
+	<section class="mint-settings-card mint-ai-page__mcp">
 		<header class="mint-settings-card__head">
-			<h2 class="mint-settings-card__title"><?php esc_html_e( 'Draft Mint LMS content', 'mint-lms' ); ?></h2>
-			<p class="mint-settings-card__desc"><?php esc_html_e( 'Describe a course tree, a standalone lesson, or a quiz. AI returns a reviewable draft only — WordPress pages and posts stay untouched.', 'mint-lms' ); ?></p>
+			<h2 class="mint-settings-card__title"><?php esc_html_e( 'Claude Desktop (MCP)', 'mint-lms' ); ?></h2>
+			<p class="mint-settings-card__desc"><?php esc_html_e( 'Prompt in Claude Desktop. Mint LMS abilities create draft courses, lessons, quizzes, and questions on this site — WP_List_Table draft status only.', 'mint-lms' ); ?></p>
 		</header>
 		<div class="mint-settings-card__body">
-			<div class="mint-settings-field">
-				<label class="mint-settings-field__label" for="mintlms_ai_structure_prompt"><?php esc_html_e( 'Prompt', 'mint-lms' ); ?></label>
-				<textarea
-					id="mintlms_ai_structure_prompt"
-					class="mint-settings-input mint-ai-page__prompt"
-					rows="5"
-					x-model="aiDraftPrompt"
-					placeholder="<?php echo esc_attr__( 'Example: Create a short course on kitchen safety with 2 lesson groups, each with 1 lesson and a 3-question quiz.', 'mint-lms' ); ?>"
-				></textarea>
-			</div>
-			<div class="mint-ai-page__draft-actions">
-				<button
-					type="button"
-					class="mint-settings-btn mint-settings-btn--primary"
-					@click="generateStructureDraft()"
-					:disabled="aiDraftBusy || (!aiReady && !hasStoredKey)"
-				>
-					<span x-text="aiDraftBusy ? (i18n.draftGenerating || 'Generating…') : '<?php echo esc_js( __( 'Generate draft', 'mint-lms' ) ); ?>'"></span>
-				</button>
-				<button
-					type="button"
-					class="mint-settings-btn mint-settings-btn--outline"
-					@click="clearStructureDraft()"
-					x-show="aiDraft"
-					x-cloak
-				>
-					<?php esc_html_e( 'Clear draft', 'mint-lms' ); ?>
-				</button>
-			</div>
-			<p class="mint-settings-ai__result" x-text="aiDraftStatus" aria-live="polite"></p>
-
-			<div class="mint-ai-page__draft-preview" x-show="aiDraft" x-cloak>
-				<div class="mint-ai-page__draft-banner">
-					<strong x-text="i18n.draftReady || 'Draft ready — nothing was saved.'"></strong>
-					<span x-text="aiDraft && aiDraft.note ? aiDraft.note : ''"></span>
+			<?php if ( ! $mcp_active ) : ?>
+				<div class="notice notice-error inline" style="margin:0 0 16px;">
+					<p>
+						<?php
+						printf(
+							/* translators: %s: MCP Adapter install URL */
+							wp_kses_post( __( 'MCP Adapter is not active. <a href="%s">Install or activate MCP Adapter</a> to use AI Assistance with Claude Desktop. Mint LMS still works without it.', 'mint-lms' ) ),
+							esc_url( $mcp_install )
+						);
+						?>
+					</p>
 				</div>
-				<p class="mint-ai-page__draft-root">
-					<span><?php esc_html_e( 'Root', 'mint-lms' ); ?>:</span>
-					<strong x-text="draftRootLabel()"></strong>
-				</p>
-				<pre class="mint-ai-page__draft-json" x-text="draftPreviewJson()"></pre>
+			<?php else : ?>
+				<p class="mint-settings-field__help" style="margin-top:0;"><?php esc_html_e( 'MCP Adapter is active. Connect Claude Desktop with an Application Password.', 'mint-lms' ); ?></p>
+			<?php endif; ?>
+
+			<ol class="mint-ai-page__steps">
+				<li>
+					<strong><?php esc_html_e( 'Install MCP Adapter', 'mint-lms' ); ?></strong>
+					<span><?php esc_html_e( 'Plugins → Add New → search “MCP Adapter” (WordPress.org). Mint LMS works alone; MCP is only for external AI.', 'mint-lms' ); ?></span>
+				</li>
+				<li>
+					<strong><?php esc_html_e( 'Create an Application Password', 'mint-lms' ); ?></strong>
+					<span>
+						<?php
+						printf(
+							/* translators: %s: profile URL */
+							wp_kses_post( __( 'In your <a href="%s">WordPress profile</a>, create an Application Password for Claude. Use a user who can edit Mint LMS content.', 'mint-lms' ) ),
+							esc_url( $app_passwords )
+						);
+						?>
+					</span>
+				</li>
+				<li>
+					<strong><?php esc_html_e( 'Point Claude Desktop at this site', 'mint-lms' ); ?></strong>
+					<span><?php esc_html_e( 'Add an MCP server entry with this site’s MCP URL, your username, and the Application Password.', 'mint-lms' ); ?></span>
+				</li>
+				<li>
+					<strong><?php esc_html_e( 'Prompt in Claude Desktop', 'mint-lms' ); ?></strong>
+					<span><?php esc_html_e( 'Ask Claude to create a Mint LMS course, standalone lesson, or quiz. Items appear as drafts in Mint LMS lists — not as pages/posts.', 'mint-lms' ); ?></span>
+				</li>
+			</ol>
+
+			<div class="mint-settings-field" style="margin-top:16px;">
+				<label class="mint-settings-field__label" for="mintlms_mcp_endpoint"><?php esc_html_e( 'MCP endpoint (copy)', 'mint-lms' ); ?></label>
+				<input
+					type="text"
+					id="mintlms_mcp_endpoint"
+					class="mint-settings-input"
+					readonly
+					value="<?php echo esc_attr( $mcp_endpoint ); ?>"
+					onclick="this.select();"
+				/>
 			</div>
 		</div>
 	</section>
