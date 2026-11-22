@@ -3890,9 +3890,10 @@ function courseBuilder(courseId, opts = {}) {
      * empty course → Lesson Group + Course Hierarchy only;
      * after a lesson exists → Lesson; after a quiz → Quiz; after a question → Question.
      *
-     * Standalone lesson / quiz (library): hide the whole bar until a quiz or question
-     * exists — never Lesson Group / Lesson / Course Hierarchy. Standalone question
-     * keeps Question-only.
+     * Standalone lesson / quiz (Open in Mint LMS Builder): same forward-only tabs as
+     * library flows — always show the current entity (Lesson or Quiz); reveal Quiz /
+     * Question only after children exist. Never Lesson Group / Course Hierarchy.
+     * Standalone question keeps Question-only.
      *
      * Lessons/Quizzes library on a course: same forward-only tabs (no Group / Hierarchy).
      *
@@ -3903,16 +3904,18 @@ function courseBuilder(courseId, opts = {}) {
         return kind === 'question';
       }
 
-      // Standalone quiz (Quizzes → Add new): nothing until a question exists, then Quiz + Question.
+      // Standalone quiz (Quizzes → Open in builder): Quiz always; Question after children.
       if (this.isStandaloneQuizSurface()) {
-        if (kind === 'quiz' || kind === 'question') {
+        if (kind === 'quiz') return true;
+        if (kind === 'question') {
           return this.standaloneHasQuestions();
         }
         return false;
       }
 
-      // Standalone lesson (Lessons → Add new): nothing until quiz/question exists.
+      // Standalone lesson (Lessons → Open in builder): Lesson always; Quiz/Question after children.
       if (this.isStandalone) {
+        if (kind === 'lesson') return true;
         if (kind === 'quiz') {
           return this.standaloneHasQuizzes();
         }
@@ -8577,7 +8580,7 @@ function courseBuilder(courseId, opts = {}) {
 
     /**
      * Quizzes library → standalone quiz editor (no course).
-     * Top nav stays hidden until a question exists, then Quiz + Question only.
+     * Top nav shows Quiz always; Question after a question exists.
      */
     isStandaloneQuizSurface() {
       return Boolean(this.isStandalone && this.fromQuizzes && !this.fromQuestions);
