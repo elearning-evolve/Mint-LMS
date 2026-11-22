@@ -33,27 +33,41 @@ $boot = array(
 	'playerId'        => 0,
 	'certTemplate'    => '',
 	'i18n'            => array(
-		'openai'           => __( 'OpenAI (paid)', 'mint-lms' ),
-		'anthropic'        => __( 'Anthropic (paid)', 'mint-lms' ),
-		'groq'             => __( 'Groq (free tier)', 'mint-lms' ),
-		'gemini'           => __( 'Google Gemini (free tier)', 'mint-lms' ),
-		'testing'          => __( 'Testing…', 'mint-lms' ),
-		'connectionOk'     => __( 'Connection OK', 'mint-lms' ),
-		'testFailed'       => __( 'Test failed', 'mint-lms' ),
-		'keyCleared'       => __( 'Saved key will be removed on save.', 'mint-lms' ),
-		'savingKey'        => __( 'Saving API key…', 'mint-lms' ),
-		'removingKey'      => __( 'Removing API key…', 'mint-lms' ),
-		'saveKey'          => __( 'Save API key', 'mint-lms' ),
-		'keySaved'         => __( 'API key saved.', 'mint-lms' ),
-		'keyRemoved'       => __( 'API key removed.', 'mint-lms' ),
-		'keySaveFailed'    => __( 'Could not save API key.', 'mint-lms' ),
-		'showKey'          => __( 'Show API key', 'mint-lms' ),
-		'hideKey'          => __( 'Hide API key', 'mint-lms' ),
-		'revealingKey'     => __( 'Showing key…', 'mint-lms' ),
-		'revealFailed'     => __( 'Could not show API key.', 'mint-lms' ),
-		'pasteToReplace'   => __( 'Paste a new API key to replace the saved one', 'mint-lms' ),
-		'pasteYourKey'     => __( 'Paste your API key', 'mint-lms' ),
-		'saveKeyNeedPaste' => __( 'Paste a new API key first, then click Save API key.', 'mint-lms' ),
+		'openai'            => __( 'OpenAI (paid)', 'mint-lms' ),
+		'anthropic'         => __( 'Anthropic (paid)', 'mint-lms' ),
+		'groq'              => __( 'Groq (free tier)', 'mint-lms' ),
+		'gemini'            => __( 'Google Gemini (free tier)', 'mint-lms' ),
+		'testing'           => __( 'Testing…', 'mint-lms' ),
+		'connectionOk'      => __( 'Connection OK', 'mint-lms' ),
+		'testFailed'        => __( 'Test failed', 'mint-lms' ),
+		'testFailedTitle'   => __( 'Test connection failed', 'mint-lms' ),
+		'testFailedNote'    => __( 'Check your API key, provider, and model, then try Test connection again.', 'mint-lms' ),
+		'testFailedNetwork' => __( 'Could not reach the AI service. Check your network and try again.', 'mint-lms' ),
+		'testFailedClose'   => __( 'OK', 'mint-lms' ),
+		'keyCleared'        => __( 'Saved key will be removed on save.', 'mint-lms' ),
+		'savingKey'         => __( 'Saving API key…', 'mint-lms' ),
+		'removingKey'       => __( 'Removing API key…', 'mint-lms' ),
+		'saveKey'           => __( 'Save API key', 'mint-lms' ),
+		'keySaved'          => __( 'API key saved.', 'mint-lms' ),
+		'keyRemoved'        => __( 'API key removed.', 'mint-lms' ),
+		'keySaveFailed'     => __( 'Could not save API key.', 'mint-lms' ),
+		'showKey'           => __( 'Show API key', 'mint-lms' ),
+		'hideKey'           => __( 'Hide API key', 'mint-lms' ),
+		'revealingKey'      => __( 'Showing key…', 'mint-lms' ),
+		'revealFailed'      => __( 'Could not show API key.', 'mint-lms' ),
+		'pasteToReplace'    => __( 'Paste a new API key to replace the saved one', 'mint-lms' ),
+		'pasteYourKey'      => __( 'Paste your API key', 'mint-lms' ),
+		'saveKeyNeedPaste'  => __( 'Paste a new API key first, then click Save API key.', 'mint-lms' ),
+		'draftGenerating'   => __( 'Generating Mint LMS draft…', 'mint-lms' ),
+		'draftReady'        => __( 'Draft ready — nothing was saved.', 'mint-lms' ),
+		'draftFailed'       => __( 'Could not generate draft', 'mint-lms' ),
+		'draftFailedTitle'  => __( 'Draft generation failed', 'mint-lms' ),
+		'draftFailedNote'   => __( 'AI stays inside Mint LMS only. Check connection, then try a clearer prompt about a course, lesson, or quiz.', 'mint-lms' ),
+		'draftNeedPrompt'   => __( 'Describe the Mint LMS content you want first.', 'mint-lms' ),
+		'draftNeedReady'    => __( 'Turn AI on, save settings, and add an API key before generating.', 'mint-lms' ),
+		'rootCourse'        => __( 'Course', 'mint-lms' ),
+		'rootLesson'        => __( 'Lesson', 'mint-lms' ),
+		'rootQuiz'          => __( 'Quiz', 'mint-lms' ),
 	),
 	'aiDefaultModels' => array(
 		'openai'    => AiSettings::defaultModelFor( AiSettings::PROVIDER_OPENAI ),
@@ -86,7 +100,7 @@ if ( ! is_string( $boot_json ) ) {
 		</div>
 		<div>
 			<h1 class="mint-settings__title"><?php esc_html_e( 'AI Assistant', 'mint-lms' ); ?></h1>
-			<p class="mint-settings__sub"><?php esc_html_e( 'Connect your own AI key so Mint can help draft quiz questions. Free-tier or paid — you choose. Off by default.', 'mint-lms' ); ?></p>
+			<p class="mint-settings__sub"><?php esc_html_e( 'Connect your own AI key to draft Mint LMS courses, lessons, quizzes, and questions. Never touches WordPress pages or posts. Off by default.', 'mint-lms' ); ?></p>
 		</div>
 	</div>
 
@@ -333,8 +347,9 @@ if ( ! is_string( $boot_json ) ) {
 					</header>
 					<div class="mint-settings-card__body">
 						<ul class="mint-ai-page__bullets">
-							<li><?php esc_html_e( 'Can draft quiz questions from a topic (review before you save them).', 'mint-lms' ); ?></li>
-							<li><?php esc_html_e( 'Does not auto-publish or change student data.', 'mint-lms' ); ?></li>
+							<li><?php esc_html_e( 'Drafts Mint LMS structure only (courses, lesson groups, lessons, quizzes, questions).', 'mint-lms' ); ?></li>
+							<li><?php esc_html_e( 'Never creates or edits WordPress pages, posts, menus, media, or other plugins.', 'mint-lms' ); ?></li>
+							<li><?php esc_html_e( 'Nothing is saved until you review and confirm in Mint LMS.', 'mint-lms' ); ?></li>
 							<li><?php esc_html_e( 'Prompts may be sent to the provider you selected — check their privacy terms.', 'mint-lms' ); ?></li>
 						</ul>
 					</div>
@@ -342,4 +357,109 @@ if ( ! is_string( $boot_json ) ) {
 			</aside>
 		</div>
 	</form>
+
+	<section class="mint-settings-card mint-ai-page__draft" x-show="aiEnabled" x-cloak>
+		<header class="mint-settings-card__head">
+			<h2 class="mint-settings-card__title"><?php esc_html_e( 'Draft Mint LMS content', 'mint-lms' ); ?></h2>
+			<p class="mint-settings-card__desc"><?php esc_html_e( 'Describe a course tree, a standalone lesson, or a quiz. AI returns a reviewable draft only — WordPress pages and posts stay untouched.', 'mint-lms' ); ?></p>
+		</header>
+		<div class="mint-settings-card__body">
+			<div class="mint-settings-field">
+				<label class="mint-settings-field__label" for="mintlms_ai_structure_prompt"><?php esc_html_e( 'Prompt', 'mint-lms' ); ?></label>
+				<textarea
+					id="mintlms_ai_structure_prompt"
+					class="mint-settings-input mint-ai-page__prompt"
+					rows="5"
+					x-model="aiDraftPrompt"
+					placeholder="<?php echo esc_attr__( 'Example: Create a short course on kitchen safety with 2 lesson groups, each with 1 lesson and a 3-question quiz.', 'mint-lms' ); ?>"
+				></textarea>
+			</div>
+			<div class="mint-ai-page__draft-actions">
+				<button
+					type="button"
+					class="mint-settings-btn mint-settings-btn--primary"
+					@click="generateStructureDraft()"
+					:disabled="aiDraftBusy || (!aiReady && !hasStoredKey)"
+				>
+					<span x-text="aiDraftBusy ? (i18n.draftGenerating || 'Generating…') : '<?php echo esc_js( __( 'Generate draft', 'mint-lms' ) ); ?>'"></span>
+				</button>
+				<button
+					type="button"
+					class="mint-settings-btn mint-settings-btn--outline"
+					@click="clearStructureDraft()"
+					x-show="aiDraft"
+					x-cloak
+				>
+					<?php esc_html_e( 'Clear draft', 'mint-lms' ); ?>
+				</button>
+			</div>
+			<p class="mint-settings-ai__result" x-text="aiDraftStatus" aria-live="polite"></p>
+
+			<div class="mint-ai-page__draft-preview" x-show="aiDraft" x-cloak>
+				<div class="mint-ai-page__draft-banner">
+					<strong x-text="i18n.draftReady || 'Draft ready — nothing was saved.'"></strong>
+					<span x-text="aiDraft && aiDraft.note ? aiDraft.note : ''"></span>
+				</div>
+				<p class="mint-ai-page__draft-root">
+					<span><?php esc_html_e( 'Root', 'mint-lms' ); ?>:</span>
+					<strong x-text="draftRootLabel()"></strong>
+				</p>
+				<pre class="mint-ai-page__draft-json" x-text="draftPreviewJson()"></pre>
+			</div>
+		</div>
+	</section>
+
+	<div
+		class="mint-confirm mint-confirm--ai-fail"
+		x-show="aiTestFail.open"
+		x-cloak
+		x-transition.opacity.duration.200ms
+		role="presentation"
+		@keydown.escape.window="closeAiTestFail()"
+	>
+		<div class="mint-confirm__backdrop" @click="closeAiTestFail()"></div>
+		<div
+			class="mint-confirm__panel"
+			role="alertdialog"
+			aria-modal="true"
+			aria-labelledby="mint-ai-test-fail-title"
+			aria-describedby="mint-ai-test-fail-body"
+			@click.stop
+		>
+			<button
+				type="button"
+				class="mint-confirm__close"
+				@click="closeAiTestFail()"
+				aria-label="<?php echo esc_attr__( 'Close', 'mint-lms' ); ?>"
+			>
+				<svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15" /></svg>
+			</button>
+
+			<div class="mint-confirm__top">
+				<div class="mint-confirm__icon mint-confirm__icon--warn" aria-hidden="true">
+					<svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M10 3.5 17.2 16H2.8L10 3.5Z"/>
+						<path d="M10 8v4.2"/>
+						<path d="M10 14.6h.01"/>
+					</svg>
+				</div>
+				<h2 id="mint-ai-test-fail-title" class="mint-confirm__title" x-text="aiTestFail.title"></h2>
+			</div>
+
+			<p id="mint-ai-test-fail-body" class="mint-confirm__body">
+				<span x-text="aiTestFail.message"></span>
+			</p>
+			<div class="mint-confirm__note" x-show="aiTestFail.note" x-cloak x-text="aiTestFail.note"></div>
+
+			<div class="mint-confirm__actions">
+				<button
+					type="button"
+					class="mint-confirm__submit mint-confirm__submit--ok"
+					@click="closeAiTestFail()"
+				>
+					<span x-text="i18n.testFailedClose || 'OK'"></span>
+				</button>
+			</div>
+		</div>
+	</div>
 </div>

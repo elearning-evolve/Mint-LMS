@@ -6215,6 +6215,28 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   color: #0F0E1A;
 }
 
+#mint-lms-root .mint-confirm__icon--warn {
+  background: #FFE8A3;
+}
+
+#mint-lms-root .mint-confirm__submit--ok,
+#mint-lms-root button.mint-confirm__submit--ok {
+  border: 1.5px solid #0F0E1A !important;
+  background: #98FBCB !important;
+  color: #0F0E1A !important;
+}
+
+#mint-lms-root .mint-confirm__submit--ok:hover,
+#mint-lms-root button.mint-confirm__submit--ok:hover {
+  background: #7FF0B8 !important;
+  box-shadow: 0 8px 18px rgba(152, 251, 203, 0.45) !important;
+}
+
+#mint-lms-root .mint-confirm__submit--ok:focus-visible,
+#mint-lms-root button.mint-confirm__submit--ok:focus-visible {
+  box-shadow: 0 0 0 3px rgba(152, 251, 203, 0.55) !important;
+}
+
 #mint-lms-root .mint-confirm__title {
   margin: 2px 36px 0 0;
   padding: 0;
@@ -8568,6 +8590,58 @@ body.folded.mint-lms-focus-mode .mint-lms-admin-wrap.wrap {
   color: #33334A;
   font-size: 14px;
   line-height: 1.45;
+}
+#mint-lms-root .mint-ai-page__draft {
+  margin-top: 22px;
+  max-width: 920px;
+}
+#mint-lms-root .mint-ai-page__prompt {
+  min-height: 120px;
+  resize: vertical;
+  line-height: 1.45;
+}
+#mint-lms-root .mint-ai-page__draft-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+#mint-lms-root .mint-ai-page__draft-preview {
+  margin-top: 16px;
+  border: 1px solid rgba(15, 14, 26, 0.12);
+  border-radius: 12px;
+  background: #FAFFFC;
+  padding: 14px 16px;
+}
+#mint-lms-root .mint-ai-page__draft-banner {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 12px;
+  color: #33334A;
+  font-size: 13px;
+  line-height: 1.4;
+}
+#mint-lms-root .mint-ai-page__draft-banner strong {
+  color: #0F0E1A;
+  font-size: 14px;
+}
+#mint-lms-root .mint-ai-page__draft-root {
+  margin: 0 0 10px;
+  font-size: 13px;
+  color: #33334A;
+}
+#mint-lms-root .mint-ai-page__draft-json {
+  margin: 0;
+  max-height: 420px;
+  overflow: auto;
+  padding: 12px;
+  border-radius: 8px;
+  background: #0F0E1A;
+  color: #98FBCB;
+  font-size: 12px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 #mint-lms-root .mint-ai-settings-linkcard__status {
   margin: 0 0 14px;

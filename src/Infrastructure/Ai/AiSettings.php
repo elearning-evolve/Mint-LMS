@@ -60,11 +60,14 @@ final class AiSettings {
 
 	public static function defaultModelFor( string $provider ): string {
 		return match ( $provider ) {
-			self::PROVIDER_ANTHROPIC => 'claude-sonnet-4-20250514',
+			// Anthropic: claude-sonnet-4-20250514 retired 2026-06-15 → Sonnet 5.5.
+			self::PROVIDER_ANTHROPIC => 'claude-sonnet-5-5',
 			// Groq free/dev: llama-3.1-8b-instant shut down 2026-08-16 → gpt-oss-20b.
 			self::PROVIDER_GROQ      => 'openai/gpt-oss-20b',
-			self::PROVIDER_GEMINI    => 'gemini-2.0-flash',
-			default                  => 'gpt-4o-mini',
+			// Gemini: gemini-2.0-flash shut down 2026-06-01 → 3.8 Flash (free-tier friendly).
+			self::PROVIDER_GEMINI    => 'gemini-3.8-flash',
+			// OpenAI: gpt-4o-mini deprecated (shutdown 2027-01-14) → gpt-6-luna.
+			default                  => 'gpt-6-luna',
 		};
 	}
 
@@ -73,11 +76,35 @@ final class AiSettings {
 	 */
 	public static function migrateDeprecatedModel( string $model ): string {
 		$map = array(
+			// Groq.
 			'llama-3.1-8b-instant'                      => 'openai/gpt-oss-20b',
 			'llama-3.3-70b-versatile'                   => 'openai/gpt-oss-120b',
 			'qwen/qwen3-32b'                            => 'openai/gpt-oss-120b',
 			'meta-llama/llama-4-scout-17b-16e-instruct' => 'openai/gpt-oss-120b',
 			'qwen/qwen3.6-27b'                          => 'qwen/qwen3.8-27b',
+			// Google Gemini.
+			'gemini-2.0-flash'                          => 'gemini-3.8-flash',
+			'gemini-2.0-flash-001'                      => 'gemini-3.8-flash',
+			'gemini-2.0-flash-exp'                      => 'gemini-3.8-flash',
+			'gemini-2.0-flash-lite'                     => 'gemini-3.1-flash-lite',
+			'gemini-2.0-flash-lite-001'                 => 'gemini-3.1-flash-lite',
+			'gemini-3.6-flash'                          => 'gemini-3.8-flash',
+			// Anthropic.
+			'claude-sonnet-4-20250514'                  => 'claude-sonnet-5-5',
+			'claude-sonnet-4'                           => 'claude-sonnet-5-5',
+			'claude-opus-4-20250514'                    => 'claude-opus-4-8',
+			'claude-sonnet-4-5-20250929'                => 'claude-sonnet-5-5',
+			'claude-sonnet-4-5'                         => 'claude-sonnet-5-5',
+			// OpenAI.
+			'gpt-4o-mini'                               => 'gpt-6-luna',
+			'gpt-4o-mini-2024-07-18'                    => 'gpt-6-luna',
+			'gpt-4o'                                    => 'gpt-6-luna',
+			'gpt-4o-2024-08-06'                         => 'gpt-6-luna',
+			'gpt-4o-2024-11-20'                         => 'gpt-6-luna',
+			'gpt-4.1-mini'                              => 'gpt-6-luna',
+			'gpt-4.1-mini-2025-04-14'                   => 'gpt-6-luna',
+			'gpt-4.1'                                   => 'gpt-6-luna',
+			'gpt-4.1-2025-04-14'                        => 'gpt-6-luna',
 		);
 
 		return $map[ $model ] ?? $model;

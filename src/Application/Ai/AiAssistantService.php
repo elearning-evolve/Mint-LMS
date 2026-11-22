@@ -7,16 +7,19 @@ defined( 'ABSPATH' ) || exit;
 
 use MintLMS\Application\Exception\ValidationException;
 use MintLMS\Infrastructure\Ai\AiProviderClient;
+use MintLMS\Infrastructure\Ai\AiScope;
 use MintLMS\Infrastructure\Ai\AiSettings;
 
 /**
  * Allowlisted AI actions. Never persists content — callers confirm before save.
+ * All generation is scoped to Mint LMS CPTs only (see AiScope).
  */
 final class AiAssistantService {
 
 	public function __construct(
 		private AiSettings $settings,
 		private AiProviderClient $client,
+		private AiStructureDraftNormalizer $structureNormalizer = new AiStructureDraftNormalizer(),
 	) {
 	}
 
@@ -58,8 +61,8 @@ final class AiAssistantService {
 			throw new ValidationException( 'Validation failed.', array( 'topic' => 'Topic is required.' ) );
 		}
 
-		$system = 'You are a helper for Mint LMS, a WordPress learning plugin. '
-			. 'Return ONLY valid JSON (no markdown fences) with this shape: '
+		$system = AiScope::systemBoundaryText()
+			. ' Return ONLY valid JSON with this shape: '
 			. '{"questions":[{"type":"mcq"|"true_false","prompt":"...","options":["..."],"correct_answer":"..."}]} . '
 			. 'For mcq provide 3-5 options and set correct_answer to the exact option text. '
 			. 'For true_false options must be ["True","False"] and correct_answer True or False. '
@@ -109,6 +112,61 @@ final class AiAssistantService {
 		return array(
 			'topic'     => $topic,
 			'questions' => array_slice( $questions, 0, $count ),
+		);
+	}
+
+	/**
+	 * Free-form author prompt → Mint LMS hierarchy draft only (no DB writes, no WP pages/posts).
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function generateStructureDraft( string $prompt ): array {
+		$prompt = sanitize_textarea_field( trim( $prompt ) );
+		if ( '' === $prompt ) {
+			throw new ValidationException(
+				esc_html__( 'Enter a prompt describing the Mint LMS content you want.', 'mint-lms' ),
+				array( 'prompt' => 'required' )
+			);
+		}
+		if ( strlen( $prompt ) > 8000 ) {
+			throw new ValidationException(
+				esc_html__( 'Prompt is too long (max 8000 characters).', 'mint-lms' ),
+				array( 'prompt' => 'too_long' )
+			);
+		}
+
+		$system = AiScope::systemBoundaryText()
+			. ' Output JSON with root "course", "lesson", or "quiz" matching the user request. '
+			. 'Shape examples: '
+			. '{"root":"course","course":{"title":"...","description":"...","lesson_groups":[{"title":"...","lessons":[{"title":"...","description":"...","quizzes":[{"title":"...","description":"...","questions":[{"type":"mcq","prompt":"...","options":["A","B"],"correct_answer":"A"}]}]}]}}]} '
+			. 'or {"root":"lesson","lesson":{"title":"...","description":"...","quizzes":[]}} '
+			. 'or {"root":"quiz","quiz":{"title":"...","description":"...","questions":[...]}}. '
+			. 'Question types only: mcq, true_false. Keep the structure small enough to review.';
+
+		$raw = $this->client->chat(
+			array(
+				array(
+					'role'    => 'system',
+					'content' => $system,
+				),
+				array(
+					'role'    => 'user',
+					'content' => $prompt,
+				),
+			),
+			3500
+		);
+
+		$decoded = $this->parseJsonObject( $raw );
+		$draft   = $this->structureNormalizer->normalize( $decoded );
+
+		return array_merge(
+			$draft,
+			array(
+				'persisted' => false,
+				'scope'     => 'mintlms_only',
+				'note'      => __( 'Draft only — nothing was saved. Review in Mint LMS; WordPress pages/posts were not touched.', 'mint-lms' ),
+			)
 		);
 	}
 
