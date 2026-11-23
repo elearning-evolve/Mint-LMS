@@ -273,6 +273,48 @@ final class QuizController {
 				),
 			)
 		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/quizzes/(?P<id>\d+)/questions/(?P<question_id>\d+)/essay-upload',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'uploadEssay' ),
+					'permission_callback' => array( $this, 'canTrackProgress' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/essays',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'listEssays' ),
+					'permission_callback' => array( $this, 'canManageCourses' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/essays/(?P<id>\d+)/grade',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'gradeEssay' ),
+					'permission_callback' => array( $this, 'canManageCourses' ),
+					'args'                => array(
+						'points' => array(
+							'required' => true,
+							'type'     => 'number',
+						),
+					),
+				),
+			)
+		);
 	}
 
 	public function canManageCourses(): bool {
@@ -734,6 +776,101 @@ final class QuizController {
 			$attempt = $this->quizService->submitAttempt( $id, $dto, $userId, $this->readQuizSettings( $id ) );
 
 			return ApiResponse::success( $attempt->toArray() );
+		} catch ( ValidationException $exception ) {
+			return ApiResponse::error( 'validation_error', $exception->getMessage(), 400, $exception->errors() );
+		} catch ( NotFoundException $exception ) {
+			return ApiResponse::error( 'not_found', $exception->getMessage(), 404 );
+		} catch ( ForbiddenException $exception ) {
+			return ApiResponse::error( 'forbidden', $exception->getMessage(), 403 );
+		}
+	}
+
+	public function uploadEssay( \WP_REST_Request $request ): \WP_REST_Response {
+		try {
+			$userId     = $this->authorization->getCurrentUserId();
+			$quizId     = (int) $request->get_param( 'id' );
+			$questionId = (int) $request->get_param( 'question_id' );
+			$files      = $request->get_file_params();
+			$file       = is_array( $files['file'] ?? null ) ? $files['file'] : array();
+			if ( array() === $file ) {
+				return ApiResponse::error( 'validation_error', __( 'Choose a file to upload.', 'mint-lms' ), 400 );
+			}
+
+			$this->quizService->assertCanUploadEssay( $quizId, $questionId, $userId );
+
+			if ( ! function_exists( 'media_handle_upload' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/file.php';
+				require_once ABSPATH . 'wp-admin/includes/media.php';
+				require_once ABSPATH . 'wp-admin/includes/image.php';
+			}
+
+			// Bridge REST multipart into $_FILES for media_handle_upload().
+			$_FILES['file'] = $file; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+			$attachmentId = media_handle_upload( 'file', 0 );
+			if ( is_wp_error( $attachmentId ) ) {
+				return ApiResponse::error( 'validation_error', $attachmentId->get_error_message(), 400 );
+			}
+
+			$attachmentId = (int) $attachmentId;
+			$encoded      = $this->quizService->encodeEssayUploadAnswer( $attachmentId );
+			$url          = wp_get_attachment_url( $attachmentId );
+			$name         = basename( (string) ( get_attached_file( $attachmentId ) ?: $url ) );
+
+			return ApiResponse::success(
+				array(
+					'answer'         => $encoded['answer'],
+					'attachmentId'   => $attachmentId,
+					'attachmentUrl'  => is_string( $url ) ? $url : '',
+					'attachmentName' => $name,
+				)
+			);
+		} catch ( ValidationException $exception ) {
+			return ApiResponse::error( 'validation_error', $exception->getMessage(), 400, $exception->errors() );
+		} catch ( NotFoundException $exception ) {
+			return ApiResponse::error( 'not_found', $exception->getMessage(), 404 );
+		} catch ( ForbiddenException $exception ) {
+			return ApiResponse::error( 'forbidden', $exception->getMessage(), 403 );
+		}
+	}
+
+	public function listEssays( \WP_REST_Request $request ): \WP_REST_Response {
+		try {
+			$userId = $this->authorization->getCurrentUserId();
+			$status = $request->get_param( 'status' );
+			$status = is_string( $status ) ? sanitize_key( $status ) : null;
+			if ( null !== $status && ! in_array( $status, array( 'pending', 'graded' ), true ) ) {
+				$status = null;
+			}
+			$quizId = absint( $request->get_param( 'quiz_id' ) );
+			$rows   = $this->quizService->listEssaySubmissions(
+				$userId,
+				$status,
+				$quizId > 0 ? $quizId : null
+			);
+
+			foreach ( $rows as $index => $row ) {
+				$attachmentId = (int) ( $row['attachmentId'] ?? 0 );
+				if ( $attachmentId > 0 ) {
+					$url = wp_get_attachment_url( $attachmentId );
+					$rows[ $index ]['attachmentUrl'] = is_string( $url ) ? $url : null;
+				}
+			}
+
+			return ApiResponse::success( $rows );
+		} catch ( ForbiddenException $exception ) {
+			return ApiResponse::error( 'forbidden', $exception->getMessage(), 403 );
+		}
+	}
+
+	public function gradeEssay( \WP_REST_Request $request ): \WP_REST_Response {
+		try {
+			$userId = $this->authorization->getCurrentUserId();
+			$id     = (int) $request->get_param( 'id' );
+			$points = (float) $request->get_param( 'points' );
+			$row    = $this->quizService->gradeEssaySubmission( $id, $points, $userId );
+
+			return ApiResponse::success( $row );
 		} catch ( ValidationException $exception ) {
 			return ApiResponse::error( 'validation_error', $exception->getMessage(), 400, $exception->errors() );
 		} catch ( NotFoundException $exception ) {
@@ -1389,6 +1526,7 @@ final class QuizController {
 		}
 		if ( array_key_exists( 'points', $settings ) ) {
 			$clean['points'] = max( 0, absint( $settings['points'] ) );
+			$this->quizService->syncQuestionPoints( $questionId, $clean['points'] );
 		}
 		if ( array_key_exists( 'extraTf', $settings ) ) {
 			$clean['extraTf'] = $this->sanitizeExtraTfList( $settings['extraTf'] );

@@ -177,6 +177,8 @@ document.addEventListener('alpine:init', () => {
     timeSpentSeconds: 0,
     showReview: false,
     focusQuestionId: Number(config.focusQuestionId || 0),
+    uploadingQuestionId: 0,
+    essayUploads: {},
 
     init() {
       this.startedAt = Date.now();
@@ -287,6 +289,9 @@ document.addEventListener('alpine:init', () => {
         const map = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
         return (question.options || []).every((option) => map[option] === 'true' || map[option] === 'false');
       }
+      if (question.type === 'essay') {
+        return this.essayHasContent(value);
+      }
       return String(value ?? '').trim() !== '';
     },
 
@@ -294,6 +299,65 @@ document.addEventListener('alpine:init', () => {
       if (this.settings.skipQuestion || !this.settings.questionCompletion) return true;
       const question = this.questions[index];
       return question ? this.isAnswered(question) : true;
+    },
+
+    essayHasContent(raw) {
+      const value = String(raw ?? '').trim();
+      if (!value) return false;
+      if (value.startsWith('{')) {
+        try {
+          const parsed = JSON.parse(value);
+          if (parsed && typeof parsed === 'object') {
+            return String(parsed.text || '').trim() !== '' || Number(parsed.attachmentId || 0) > 0;
+          }
+        } catch {
+          /* plain text */
+        }
+      }
+      return true;
+    },
+
+    essayUploadLabel(questionId) {
+      return this.essayUploads[questionId] || '';
+    },
+
+    async uploadEssayFile(question, event) {
+      const file = event?.target?.files?.[0];
+      if (!file || !question?.id) return;
+      this.uploadingQuestionId = question.id;
+      this.error = '';
+      try {
+        const body = new FormData();
+        body.append('file', file);
+        const response = await fetch(
+          joinRestUrl(mintLmsStudent.restUrl, `quizzes/${this.quizId}/questions/${question.id}/essay-upload`),
+          {
+            method: 'POST',
+            headers: {
+              'X-WP-Nonce': mintLmsStudent.nonce,
+            },
+            body,
+          }
+        );
+        const payload = await response.json();
+        if (!response.ok || payload.success === false) {
+          throw new Error(payload?.error?.message || mintLmsStudent.i18n.uploadError || 'Upload failed.');
+        }
+        const data = payload.data || {};
+        this.answers[question.id] = data.answer || '';
+        this.essayUploads = {
+          ...this.essayUploads,
+          [question.id]: data.attachmentName || file.name,
+        };
+        this.persistProgress();
+      } catch (err) {
+        this.error = err.message || mintLmsStudent.i18n.uploadError || 'Upload failed.';
+      } finally {
+        this.uploadingQuestionId = 0;
+        if (event?.target) {
+          event.target.value = '';
+        }
+      }
     },
 
     canSubmit() {
@@ -519,11 +583,7 @@ document.addEventListener('alpine:init', () => {
     },
 
     essayHasAnswer(item) {
-      const given = item?.given;
-      if (given == null) {
-        return false;
-      }
-      return String(given).trim() !== '';
+      return this.essayHasContent(item?.given);
     },
 
     essayAnswerText(item) {
@@ -531,7 +591,23 @@ document.addEventListener('alpine:init', () => {
       if (!this.essayHasAnswer(item)) {
         return i18n.essayEmpty || 'No answer submitted.';
       }
-      return String(item.given);
+      const raw = String(item.given);
+      if (raw.trim().startsWith('{')) {
+        try {
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === 'object') {
+            if (String(parsed.text || '').trim()) {
+              return String(parsed.text);
+            }
+            if (Number(parsed.attachmentId || 0) > 0) {
+              return i18n.essayFileSubmitted || 'File uploaded for review.';
+            }
+          }
+        } catch {
+          /* plain */
+        }
+      }
+      return raw;
     },
 
     essayStatusClass(item) {

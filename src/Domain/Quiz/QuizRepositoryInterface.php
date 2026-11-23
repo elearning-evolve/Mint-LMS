@@ -32,6 +32,8 @@ interface QuizRepositoryInterface {
 
 	public function saveQuestion( QuizQuestion $question ): QuizQuestion;
 
+	public function updateQuestionPoints( int $questionId, int $points ): void;
+
 	public function deleteQuiz( int $id ): bool;
 
 	public function trashQuiz( int $id ): bool;
@@ -61,6 +63,10 @@ interface QuizRepositoryInterface {
 	public function reorderQuestions( int $quizId, array $questionIds ): void;
 
 	public function saveAttempt( QuizAttempt $attempt ): QuizAttempt;
+
+	public function findAttemptById( int $attemptId ): ?QuizAttempt;
+
+	public function updateAttemptScore( int $attemptId, float $scorePercent, bool $passed ): void;
 
 	/**
 	 * @return list<QuizAttempt>

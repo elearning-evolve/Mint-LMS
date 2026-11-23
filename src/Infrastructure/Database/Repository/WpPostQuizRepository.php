@@ -5,6 +5,7 @@ namespace MintLMS\Infrastructure\Database\Repository;
 
 defined( 'ABSPATH' ) || exit;
 
+use MintLMS\Domain\Quiz\EssayGradingMode;
 use MintLMS\Domain\Quiz\Quiz;
 use MintLMS\Domain\Quiz\QuizAttempt;
 use MintLMS\Domain\Quiz\QuizQuestion;
@@ -99,7 +100,7 @@ final class WpPostQuizRepository implements QuizRepositoryInterface {
 			$rows = $wpdb->get_results(
 				$wpdb->prepare(
 					"SELECT p.ID AS id, j.quiz_id, qd.question_type AS type, p.post_title, p.post_content,
-						qd.options_json, qd.correct_answer, j.sort_order
+						qd.options_json, qd.correct_answer, qd.points, j.sort_order
 					FROM %i j
 					INNER JOIN %i p ON p.ID = j.question_id AND p.post_type = %s AND p.post_status = 'publish'
 					INNER JOIN %i qd ON qd.post_id = j.question_id
@@ -117,7 +118,7 @@ final class WpPostQuizRepository implements QuizRepositoryInterface {
 			$rows = $wpdb->get_results(
 				$wpdb->prepare(
 					"SELECT p.ID AS id, j.quiz_id, qd.question_type AS type, p.post_title, p.post_content,
-						qd.options_json, qd.correct_answer, j.sort_order
+						qd.options_json, qd.correct_answer, qd.points, j.sort_order
 					FROM %i j
 					INNER JOIN %i p ON p.ID = j.question_id AND p.post_type = %s AND p.post_status NOT IN ('trash','auto-draft')
 					INNER JOIN %i qd ON qd.post_id = j.question_id
@@ -153,7 +154,7 @@ final class WpPostQuizRepository implements QuizRepositoryInterface {
 		$row = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT p.ID AS id, j.quiz_id, qd.question_type AS type, p.post_title, p.post_content,
-					qd.options_json, qd.correct_answer, j.sort_order
+					qd.options_json, qd.correct_answer, qd.points, j.sort_order
 				FROM %i qd
 				INNER JOIN %i p ON p.ID = qd.post_id AND p.post_type = %s AND p.post_status != 'trash'
 				LEFT JOIN %i j ON j.question_id = qd.post_id
@@ -218,6 +219,27 @@ final class WpPostQuizRepository implements QuizRepositoryInterface {
 		$this->updateQuizMeta( $quiz->id, $quiz );
 
 		return $quiz;
+	}
+
+	public function updateQuestionPoints( int $questionId, int $points ): void {
+		if ( $questionId <= 0 ) {
+			return;
+		}
+
+		$wpdb = $this->wpdb;
+		$data = Schema::validateTable( Schema::questionDataTable( $wpdb->prefix ), $wpdb->prefix );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update(
+			$data,
+			array(
+				'points'     => max( 0, $points ),
+				'updated_at' => current_time( 'mysql' ),
+			),
+			array( 'post_id' => $questionId ),
+			array( '%d', '%s' ),
+			array( '%d' )
+		);
 	}
 
 	public function saveQuestion( QuizQuestion $question ): QuizQuestion {
@@ -550,6 +572,46 @@ final class WpPostQuizRepository implements QuizRepositoryInterface {
 		);
 	}
 
+	public function findAttemptById( int $attemptId ): ?QuizAttempt {
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::quizAttemptsTable( $wpdb->prefix ), $wpdb->prefix );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT id, user_id, quiz_id, score_percent, passed, answers_json, completed_at
+				FROM %i
+				WHERE id = %d
+				LIMIT 1',
+				$table,
+				$attemptId
+			)
+		);
+
+		return null !== $row ? $this->mapRowToAttempt( $row ) : null;
+	}
+
+	public function updateAttemptScore( int $attemptId, float $scorePercent, bool $passed ): void {
+		if ( $attemptId <= 0 ) {
+			return;
+		}
+
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::quizAttemptsTable( $wpdb->prefix ), $wpdb->prefix );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update(
+			$table,
+			array(
+				'score_percent' => $scorePercent,
+				'passed'        => $passed ? 1 : 0,
+			),
+			array( 'id' => $attemptId ),
+			array( '%f', '%d' ),
+			array( '%d' )
+		);
+	}
+
 	public function findAttemptsByQuizId( int $quizId ): array {
 		$wpdb  = $this->wpdb;
 		$table = Schema::validateTable( Schema::quizAttemptsTable( $wpdb->prefix ), $wpdb->prefix );
@@ -796,15 +858,40 @@ final class WpPostQuizRepository implements QuizRepositoryInterface {
 			(string) ( $row->post_content ?? '' )
 		);
 
+		$questionId = (int) $row->id;
+		$points     = isset( $row->points ) ? max( 0, (int) $row->points ) : 1;
+		$settings   = $this->readQuestionSettingsMeta( $questionId );
+		if ( isset( $settings['points'] ) ) {
+			$points = max( 0, (int) $settings['points'] );
+		}
+
 		return new QuizQuestion(
-			(int) $row->id,
+			$questionId,
 			(int) ( $row->quiz_id ?? 0 ),
 			(string) $row->type,
 			$prompt,
 			$options,
 			(string) $row->correct_answer,
 			(int) $row->sort_order,
+			$points,
+			EssayGradingMode::normalize( (string) ( $settings['gradingMode'] ?? EssayGradingMode::NOT_GRADED_NO_POINTS ) ),
+			in_array( (string) ( $settings['submitMethod'] ?? '' ), array( 'Text Box', 'Upload' ), true )
+				? (string) $settings['submitMethod']
+				: 'Text Box',
 		);
+	}
+
+	/**
+	 * @return array<string, mixed>
+	 */
+	private function readQuestionSettingsMeta( int $questionId ): array {
+		if ( $questionId <= 0 || ! function_exists( 'get_post_meta' ) ) {
+			return array();
+		}
+
+		$raw = get_post_meta( $questionId, PostTypes::META_QUESTION_SETTINGS, true );
+
+		return is_array( $raw ) ? $raw : array();
 	}
 
 	private function mapRowToAttempt( object $row ): QuizAttempt {

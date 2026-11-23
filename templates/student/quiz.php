@@ -278,7 +278,7 @@ if ( ! is_string( $quizBoot ) ) {
 							</div>
 						</template>
 
-						<template x-if="question.type === 'essay'">
+						<template x-if="question.type === 'essay' && question.submitMethod !== 'Upload'">
 							<div class="mint-s3-quiz__body mint-s3-choice-list">
 								<textarea
 									class="mint-s3-essay"
@@ -286,6 +286,21 @@ if ( ! is_string( $quizBoot ) ) {
 									x-model="answers[question.id]"
 									placeholder="<?php echo esc_attr__( 'Write your answer…', 'mint-lms' ); ?>"
 								></textarea>
+							</div>
+						</template>
+
+						<template x-if="question.type === 'essay' && question.submitMethod === 'Upload'">
+							<div class="mint-s3-quiz__body mint-s3-choice-list">
+								<label class="mint-s3-essay-upload">
+									<input
+										type="file"
+										class="mint-sr-only"
+										:disabled="uploadingQuestionId === question.id"
+										@change="uploadEssayFile(question, $event)"
+									/>
+									<span class="mint-s3b-nav__next mint-inline-flex" x-text="uploadingQuestionId === question.id ? (mintLmsStudent.i18n.uploading || 'Uploading…') : (mintLmsStudent.i18n.chooseFile || 'Choose file')"></span>
+								</label>
+								<p class="mint-mt-2 mint-mb-0 mint-text-sm mint-text-ink-2" x-show="essayUploadLabel(question.id)" x-text="essayUploadLabel(question.id)" x-cloak></p>
 							</div>
 						</template>
 					</div>

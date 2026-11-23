@@ -19,6 +19,7 @@ final class SchemaTest extends TestCase
         $this->assertSame('wp_mintlms_quiz_questions', Schema::quizQuestionsTable($prefix));
         $this->assertSame('wp_mintlms_quiz_attempts', Schema::quizAttemptsTable($prefix));
         $this->assertSame('wp_mintlms_question_data', Schema::questionDataTable($prefix));
+        $this->assertSame('wp_mintlms_essay_submissions', Schema::essaySubmissionsTable($prefix));
         $this->assertSame('wp_mintlms_id_map', Schema::idMapTable($prefix));
         $this->assertSame('wp_mintlms_courses', Schema::coursesTable($prefix));
         $this->assertSame('wp_mintlms_lessons', Schema::lessonsTable($prefix));
@@ -30,9 +31,10 @@ final class SchemaTest extends TestCase
     {
         $tables = Schema::allTables('wp_');
 
-        $this->assertCount(12, $tables);
+        $this->assertCount(13, $tables);
         $this->assertContains('wp_mintlms_sections', $tables);
         $this->assertContains('wp_mintlms_question_data', $tables);
+        $this->assertContains('wp_mintlms_essay_submissions', $tables);
         $this->assertContains('wp_mintlms_quiz_questions', $tables);
         $this->assertContains('wp_mintlms_courses', $tables);
         $this->assertContains('wp_mintlms_quiz_questions_legacy', $tables);

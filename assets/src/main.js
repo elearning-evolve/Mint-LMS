@@ -7,6 +7,7 @@ import { mintCourseStudents, mintCourseSettingsEnroll, mintUserCourseEnroll } fr
 import './students-admin.js';
 import { mintReports } from './reports-admin.js';
 import './reports-admin.js';
+import { mintEssayGrading } from './essays-admin.js';
 import { mintSettings } from './settings-admin.js';
 import './settings-admin.js';
 
@@ -93,6 +94,7 @@ document.addEventListener('alpine:init', () => {
   Alpine.data('mintCourseSettingsEnroll', (courseId) => mintCourseSettingsEnroll(courseId));
   Alpine.data('mintUserCourseEnroll', (config = {}) => mintUserCourseEnroll(config));
   Alpine.data('mintReports', (config = {}) => mintReports(config));
+  Alpine.data('mintEssayGrading', (config = {}) => mintEssayGrading(config));
   Alpine.data('mintSettings', (config = {}) => mintSettings(config));
 
   Alpine.data('mintWelcomeDashboard', (steps = []) => ({

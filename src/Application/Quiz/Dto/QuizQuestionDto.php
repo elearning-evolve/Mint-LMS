@@ -16,6 +16,9 @@ final readonly class QuizQuestionDto {
 		public array $options,
 		public ?string $correctAnswer,
 		public int $sortOrder,
+		public int $points = 1,
+		public string $submitMethod = 'Text Box',
+		public string $gradingMode = 'Not Graded, No Points Awarded',
 	) {
 	}
 
@@ -27,6 +30,9 @@ final readonly class QuizQuestionDto {
 			$question->options,
 			$includeAnswer ? $question->correctAnswer : null,
 			$question->sortOrder,
+			$question->pointsPossible(),
+			$question->submitMethod,
+			$question->gradingMode,
 		);
 	}
 
@@ -35,11 +41,14 @@ final readonly class QuizQuestionDto {
 	 */
 	public function toArray(): array {
 		$data = array(
-			'id'        => $this->id,
-			'type'      => $this->type,
-			'prompt'    => $this->prompt,
-			'options'   => $this->options,
-			'sortOrder' => $this->sortOrder,
+			'id'           => $this->id,
+			'type'         => $this->type,
+			'prompt'       => $this->prompt,
+			'options'      => $this->options,
+			'sortOrder'    => $this->sortOrder,
+			'points'       => $this->points,
+			'submitMethod' => $this->submitMethod,
+			'gradingMode'  => $this->gradingMode,
 		);
 
 		if ( null !== $this->correctAnswer ) {

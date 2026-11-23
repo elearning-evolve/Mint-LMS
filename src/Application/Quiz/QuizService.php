@@ -23,6 +23,9 @@ use MintLMS\Application\Quiz\Dto\UpdateQuizDto;
 use MintLMS\Domain\Course\CourseRepositoryInterface;
 use MintLMS\Domain\Lesson\LessonRepositoryInterface;
 use MintLMS\Domain\Progress\ProgressRepositoryInterface;
+use MintLMS\Domain\Quiz\EssayGradingMode;
+use MintLMS\Domain\Quiz\EssaySubmission;
+use MintLMS\Domain\Quiz\EssaySubmissionRepositoryInterface;
 use MintLMS\Domain\Quiz\Quiz;
 use MintLMS\Domain\Quiz\QuizAttempt;
 use MintLMS\Domain\Quiz\QuizQuestion;
@@ -40,6 +43,7 @@ final class QuizService implements QuizLifecycleInterface {
 		private ProgressRepositoryInterface $progressRepository,
 		private UserLookupInterface $userLookup,
 		private ?LessonAccessService $lessonAccessService = null,
+		private ?EssaySubmissionRepositoryInterface $essaySubmissionRepository = null,
 	) {
 	}
 
@@ -652,6 +656,8 @@ final class QuizService implements QuizLifecycleInterface {
 			)
 		);
 
+		$this->persistEssaySubmissions( $attempt, $questions, $dto->answers, $grade );
+
 		return QuizAttemptDto::fromAttempt( $attempt, null, $grade );
 	}
 
@@ -691,6 +697,10 @@ final class QuizService implements QuizLifecycleInterface {
 		}
 
 		return $this->quizRepository->hasPassed( $userId, $quizId );
+	}
+
+	public function syncQuestionPoints( int $questionId, int $points ): void {
+		$this->quizRepository->updateQuestionPoints( $questionId, max( 0, $points ) );
 	}
 
 	public function lessonRequiresQuizPass( int $lessonId ): bool {
@@ -791,33 +801,50 @@ final class QuizService implements QuizLifecycleInterface {
 	 * @param array<int, string>   $answers
 	 */
 	public function evaluateAttempt( array $questions, array $answers, int $passPercent, bool $persisted ): QuizGradeDto {
-		$items         = array();
-		$correctCount  = 0;
-		$gradedCount   = 0;
-		$pendingEssay  = false;
+		$items          = array();
+		$correctCount   = 0;
+		$gradedCount    = 0;
+		$pendingEssay   = false;
+		$pointsPossible = 0.0;
+		$pointsEarned   = 0.0;
 
 		foreach ( $questions as $question ) {
 			$submitted = $answers[ $question->id ] ?? '';
 			if ( is_array( $submitted ) ) {
 				$submitted = QuestionAnswerCodec::encodeMulti( array_map( 'strval', $submitted ) );
 			}
-			$given = (string) $submitted;
+			$given  = (string) $submitted;
+			$points = (float) $question->pointsPossible();
+			$pointsPossible += $points;
 
 			if ( QuizQuestion::TYPE_ESSAY === $question->type ) {
-				$pendingEssay = true;
-				$items[]      = array(
-					'id'            => $question->id,
-					'type'          => $question->type,
-					'pending'       => true,
-					'correct'       => null,
-					'given'         => $given,
-					'correctAnswer' => null,
+				$mode     = EssayGradingMode::normalize( $question->gradingMode );
+				$awards   = EssayGradingMode::awardsPointsOnSubmit( $mode );
+				$pending  = EssayGradingMode::requiresManualGrade( $mode );
+				$earned   = $awards ? $points : 0.0;
+				$pointsEarned += $earned;
+				if ( $pending ) {
+					$pendingEssay = true;
+				}
+
+				$items[] = array(
+					'id'             => $question->id,
+					'type'           => $question->type,
+					'pending'        => $pending,
+					'correct'        => EssayGradingMode::GRADED_FULL_POINTS === $mode ? true : null,
+					'given'          => $given,
+					'correctAnswer'  => null,
+					'pointsPossible' => $points,
+					'pointsEarned'   => $earned,
+					'gradingMode'    => $mode,
 				);
 				continue;
 			}
 
 			++$gradedCount;
 			$isCorrect = $this->isAnswerCorrect( $question, $given );
+			$earned    = $isCorrect ? $points : 0.0;
+			$pointsEarned += $earned;
 			if ( $isCorrect ) {
 				++$correctCount;
 			}
@@ -833,17 +860,19 @@ final class QuizService implements QuizLifecycleInterface {
 			}
 
 			$items[] = array(
-				'id'            => $question->id,
-				'type'          => $question->type,
-				'pending'       => false,
-				'correct'       => $isCorrect,
-				'given'         => $givenOut,
-				'correctAnswer' => $correctAnswer,
+				'id'             => $question->id,
+				'type'           => $question->type,
+				'pending'        => false,
+				'correct'        => $isCorrect,
+				'given'          => $givenOut,
+				'correctAnswer'  => $correctAnswer,
+				'pointsPossible' => $points,
+				'pointsEarned'   => $earned,
 			);
 		}
 
-		$score  = $gradedCount > 0 ? round( ( $correctCount / $gradedCount ) * 100, 2 ) : 0.0;
-		$passed = $gradedCount > 0 && ( $score + 0.0001 ) >= $passPercent;
+		$score  = $pointsPossible > 0.0 ? round( ( $pointsEarned / $pointsPossible ) * 100, 2 ) : 0.0;
+		$passed = $pointsPossible > 0.0 && ( $score + 0.0001 ) >= $passPercent;
 
 		return new QuizGradeDto(
 			$score,
@@ -853,6 +882,8 @@ final class QuizService implements QuizLifecycleInterface {
 			$correctCount,
 			$items,
 			$persisted,
+			$pointsEarned,
+			$pointsPossible,
 		);
 	}
 
@@ -1160,9 +1191,222 @@ final class QuizService implements QuizLifecycleInterface {
 				}
 				continue;
 			}
-			if ( '' === trim( (string) $submitted ) ) {
+			$raw = (string) $submitted;
+			if ( QuizQuestion::TYPE_ESSAY === $question->type ) {
+				if ( ! EssayAnswerCodec::hasContent( $raw ) ) {
+					throw new ValidationException( 'Validation failed.', array( 'answers' => 'Answer every question before submitting.' ) );
+				}
+				continue;
+			}
+			if ( '' === trim( $raw ) ) {
 				throw new ValidationException( 'Validation failed.', array( 'answers' => 'Answer every question before submitting.' ) );
 			}
 		}
+	}
+
+	/**
+	 * @param list<QuizQuestion> $questions
+	 * @param array<int, string> $answers
+	 */
+	private function persistEssaySubmissions( QuizAttempt $attempt, array $questions, array $answers, QuizGradeDto $grade ): void {
+		if ( null === $this->essaySubmissionRepository || $attempt->id <= 0 ) {
+			return;
+		}
+
+		$now = $this->clock->now();
+		foreach ( $grade->questions as $item ) {
+			if ( ( $item['type'] ?? '' ) !== QuizQuestion::TYPE_ESSAY ) {
+				continue;
+			}
+
+			$questionId = (int) ( $item['id'] ?? 0 );
+			$decoded    = EssayAnswerCodec::decode( (string) ( $answers[ $questionId ] ?? '' ) );
+			$pending    = ! empty( $item['pending'] );
+			$earned     = (float) ( $item['pointsEarned'] ?? 0 );
+			$possible   = (int) ( $item['pointsPossible'] ?? 1 );
+
+			$this->essaySubmissionRepository->save(
+				new EssaySubmission(
+					0,
+					$attempt->id,
+					$questionId,
+					$attempt->userId,
+					$attempt->quizId,
+					$pending ? EssaySubmission::STATUS_PENDING : EssaySubmission::STATUS_GRADED,
+					max( 0, $possible ),
+					$earned,
+					$decoded['text'],
+					$decoded['attachmentId'] > 0 ? $decoded['attachmentId'] : null,
+					null,
+					$pending ? null : $now,
+					$now,
+				)
+			);
+		}
+	}
+
+	/**
+	 * Authorize essay file upload; controller persists the media attachment.
+	 */
+	public function assertCanUploadEssay( int $quizId, int $questionId, int $userId ): void {
+		if ( $userId <= 0 ) {
+			throw new ForbiddenException( 'You must be logged in to upload.' );
+		}
+
+		$quiz     = $this->findQuizOrFail( $quizId );
+		$question = $this->findQuestionOrFail( $questionId );
+		if ( $question->quizId !== $quizId || QuizQuestion::TYPE_ESSAY !== $question->type ) {
+			throw new NotFoundException( 'Question not found.' );
+		}
+		if ( 'Upload' !== $question->submitMethod ) {
+			throw new ValidationException( 'Validation failed.', array( 'upload' => 'This essay does not accept file uploads.' ) );
+		}
+
+		$lesson   = $this->findLessonOrFail( $quiz->lessonId );
+		$enrolled = $quiz->courseId > 0 && $this->progressRepository->isUserEnrolled( $userId, $quiz->courseId );
+		if ( ! $enrolled && ! $lesson->isPreview ) {
+			throw new ForbiddenException( 'You must be enrolled to upload.' );
+		}
+		if ( null !== $this->lessonAccessService ) {
+			$this->lessonAccessService->assertCanAccessLesson( $userId, $lesson->id );
+		}
+	}
+
+	/**
+	 * @return array{answer: string, attachmentId: int}
+	 */
+	public function encodeEssayUploadAnswer( int $attachmentId ): array {
+		$attachmentId = max( 0, $attachmentId );
+
+		return array(
+			'answer'       => EssayAnswerCodec::encode( '', $attachmentId ),
+			'attachmentId' => $attachmentId,
+		);
+	}
+
+	/**
+	 * @return list<array<string, mixed>>
+	 */
+	public function listEssaySubmissions( int $userId, ?string $status = null, ?int $quizId = null ): array {
+		if ( null === $this->essaySubmissionRepository ) {
+			return array();
+		}
+
+		$authorId = $this->authorization->canViewAllContent( $userId ) ? null : $userId;
+		$rows     = $this->essaySubmissionRepository->listForGrading( $status, $quizId, $authorId );
+
+		$out = array();
+		foreach ( $rows as $row ) {
+			$out[] = $this->serializeEssaySubmission( $row );
+		}
+
+		return $out;
+	}
+
+	/**
+	 * @return array<string, mixed>
+	 */
+	public function gradeEssaySubmission( int $submissionId, float $pointsAwarded, int $graderId ): array {
+		if ( null === $this->essaySubmissionRepository ) {
+			throw new NotFoundException( 'Essay submission not found.' );
+		}
+
+		$submission = $this->essaySubmissionRepository->findById( $submissionId );
+		if ( null === $submission ) {
+			throw new NotFoundException( 'Essay submission not found.' );
+		}
+
+		$quiz   = $this->findQuizOrFail( $submission->quizId );
+		$lesson = $this->findLessonOrFail( $quiz->lessonId );
+		$this->assertCanManageLessonContent( $graderId, $lesson );
+
+		$pointsAwarded = max( 0.0, min( (float) $submission->pointsPossible, $pointsAwarded ) );
+		$updated       = $this->essaySubmissionRepository->updateGrade(
+			$submissionId,
+			EssaySubmission::STATUS_GRADED,
+			$pointsAwarded,
+			$graderId,
+			$this->clock->now()
+		);
+
+		$this->recalculateAttemptAfterEssayGrade( $updated->attemptId, $quiz->passPercent );
+
+		return $this->serializeEssaySubmission( $updated );
+	}
+
+	private function recalculateAttemptAfterEssayGrade( int $attemptId, int $passPercent ): void {
+		if ( null === $this->essaySubmissionRepository || $attemptId <= 0 ) {
+			return;
+		}
+
+		$attempt = $this->quizRepository->findAttemptById( $attemptId );
+		if ( null === $attempt ) {
+			return;
+		}
+
+		$questions = $this->quizRepository->findQuestionsByQuizId( $attempt->quizId );
+		$essays    = $this->essaySubmissionRepository->findByAttemptId( $attemptId );
+		$byQ       = array();
+		foreach ( $essays as $essay ) {
+			$byQ[ $essay->questionId ] = $essay;
+		}
+
+		$pointsPossible = 0.0;
+		$pointsEarned   = 0.0;
+
+		foreach ( $questions as $question ) {
+			$points = (float) $question->pointsPossible();
+			$pointsPossible += $points;
+
+			if ( QuizQuestion::TYPE_ESSAY === $question->type ) {
+				$essay = $byQ[ $question->id ] ?? null;
+				if ( null !== $essay && EssaySubmission::STATUS_GRADED === $essay->status ) {
+					$pointsEarned += (float) $essay->pointsAwarded;
+				} elseif ( null !== $essay ) {
+					$pointsEarned += (float) $essay->pointsAwarded;
+				} elseif ( EssayGradingMode::awardsPointsOnSubmit( $question->gradingMode ) ) {
+					$pointsEarned += $points;
+				}
+				continue;
+			}
+
+			$given = (string) ( $attempt->answers[ $question->id ] ?? '' );
+			if ( $this->isAnswerCorrect( $question, $given ) ) {
+				$pointsEarned += $points;
+			}
+		}
+
+		$score  = $pointsPossible > 0.0 ? round( ( $pointsEarned / $pointsPossible ) * 100, 2 ) : 0.0;
+		$passed = $pointsPossible > 0.0 && ( $score + 0.0001 ) >= $passPercent;
+		$this->quizRepository->updateAttemptScore( $attemptId, $score, $passed );
+	}
+
+	/**
+	 * @return array<string, mixed>
+	 */
+	private function serializeEssaySubmission( EssaySubmission $submission ): array {
+		$question = $this->quizRepository->findQuestionById( $submission->questionId );
+		$quiz     = $this->quizRepository->findById( $submission->quizId );
+		$userName = $this->userLookup->getDisplayName( $submission->userId );
+
+		return array(
+			'id'             => $submission->id,
+			'attemptId'      => $submission->attemptId,
+			'questionId'     => $submission->questionId,
+			'userId'         => $submission->userId,
+			'userName'       => $userName,
+			'quizId'         => $submission->quizId,
+			'quizTitle'      => null !== $quiz ? $quiz->title : '',
+			'questionPrompt' => null !== $question ? trim( strip_tags( $question->prompt ) ) : '',
+			'status'         => $submission->status,
+			'pointsPossible' => $submission->pointsPossible,
+			'pointsAwarded'  => $submission->pointsAwarded,
+			'answerText'     => $submission->answerText,
+			'attachmentId'   => $submission->attachmentId,
+			'attachmentUrl'  => null,
+			'gradedBy'       => $submission->gradedBy,
+			'gradedAt'       => null !== $submission->gradedAt ? $submission->gradedAt->format( 'c' ) : null,
+			'createdAt'      => $submission->createdAt->format( 'c' ),
+		);
 	}
 }

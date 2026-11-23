@@ -45,6 +45,10 @@ final class Schema {
 		return $prefix . 'mintlms_question_data';
 	}
 
+	public static function essaySubmissionsTable( string $prefix ): string {
+		return $prefix . 'mintlms_essay_submissions';
+	}
+
 	public static function idMapTable( string $prefix ): string {
 		return $prefix . 'mintlms_id_map';
 	}
@@ -78,6 +82,7 @@ final class Schema {
 			self::quizQuestionsTable( $prefix ),
 			self::quizAttemptsTable( $prefix ),
 			self::questionDataTable( $prefix ),
+			self::essaySubmissionsTable( $prefix ),
 			self::idMapTable( $prefix ),
 			// Legacy content tables kept during/after migration for uninstall cleanup.
 			self::coursesTable( $prefix ),

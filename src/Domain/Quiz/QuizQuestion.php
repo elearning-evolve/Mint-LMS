@@ -31,10 +31,17 @@ final readonly class QuizQuestion {
 		public array $options,
 		public string $correctAnswer,
 		public int $sortOrder,
+		public int $points = 1,
+		public string $gradingMode = EssayGradingMode::NOT_GRADED_NO_POINTS,
+		public string $submitMethod = 'Text Box',
 	) {
 	}
 
 	public function isAutoGradable(): bool {
 		return self::TYPE_ESSAY !== $this->type;
+	}
+
+	public function pointsPossible(): int {
+		return max( 0, $this->points );
 	}
 }
