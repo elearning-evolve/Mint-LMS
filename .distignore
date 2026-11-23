@@ -9,8 +9,8 @@
 /phpcs.xml
 /phpstan.neon
 /phpunit.xml.dist
-/composer.json
-/composer.lock
+# Keep composer.json + lock in any .distignore-based package (staging download,
+# wp.org Git deploy). Plugin Check requires them when /vendor is present.
 /package.json
 /package-lock.json
 /tailwind.config.js
