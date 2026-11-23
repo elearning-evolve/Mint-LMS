@@ -43,6 +43,7 @@
         "plugin-check": "bash dev/plugin-check.sh",
         "ci-local": "bash dev/ci-local.sh",
         "hooks:install": "git config core.hooksPath dev/hooks",
+        "build:release": "bash dev/build-release.sh",
         "check": [
             "@arch",
             "@stan",
