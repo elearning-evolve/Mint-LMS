@@ -8,15 +8,16 @@ use MintLMS\Domain\Course\CourseStatus;
 use MintLMS\Domain\Course\EnrollmentType;
 use MintLMS\Infrastructure\Database\Repository\WpPostCourseRepository;
 use MintLMS\Infrastructure\PostType\PostTypes;
-use PHPUnit\Framework\TestCase;
+use MintLMS\Tests\Integration\IntegrationTestCase;
 
-final class WpPostCourseRepositoryTest extends TestCase
+/**
+ * @group integration
+ */
+final class WpPostCourseRepositoryTest extends IntegrationTestCase
 {
     protected function setUp(): void
     {
-        if (!defined('ABSPATH') || !isset($GLOBALS['wpdb']) || !$GLOBALS['wpdb'] instanceof \wpdb) {
-            $this->markTestSkipped('WordPress test environment not available.');
-        }
+        parent::setUp();
 
         if (!post_type_exists(PostTypes::COURSE)) {
             $registrar = new \MintLMS\Infrastructure\PostType\PostTypeRegistrar();

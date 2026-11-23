@@ -13,15 +13,16 @@ use MintLMS\Infrastructure\Database\Repository\WpPostLessonRepository;
 use MintLMS\Infrastructure\Database\Repository\WpdbSectionRepository;
 use MintLMS\Infrastructure\PostType\PostTypeRegistrar;
 use MintLMS\Infrastructure\PostType\PostTypes;
-use PHPUnit\Framework\TestCase;
+use MintLMS\Tests\Integration\IntegrationTestCase;
 
-final class WpdbSectionRepositoryStructureTest extends TestCase
+/**
+ * @group integration
+ */
+final class WpdbSectionRepositoryStructureTest extends IntegrationTestCase
 {
     protected function setUp(): void
     {
-        if (!defined('ABSPATH') || !isset($GLOBALS['wpdb']) || !$GLOBALS['wpdb'] instanceof \wpdb) {
-            $this->markTestSkipped('WordPress test environment not available.');
-        }
+        parent::setUp();
 
         if (!post_type_exists(PostTypes::COURSE)) {
             $registrar = new PostTypeRegistrar();
