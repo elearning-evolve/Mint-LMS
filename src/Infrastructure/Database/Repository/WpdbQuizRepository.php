@@ -191,6 +191,11 @@ final class WpdbQuizRepository implements QuizRepositoryInterface {
 		return $quiz;
 	}
 
+	public function updateQuestionPoints( int $questionId, int $points ): void {
+		// Legacy table store has no separate points column on older schemas.
+		unset( $questionId, $points );
+	}
+
 	public function saveQuestion( QuizQuestion $question ): QuizQuestion {
 		$wpdb        = $this->wpdb;
 		$table       = Schema::validateTable( Schema::quizQuestionsTable( $wpdb->prefix ), $wpdb->prefix );
@@ -401,6 +406,46 @@ final class WpdbQuizRepository implements QuizRepositoryInterface {
 			$attempt->passed,
 			$attempt->answers,
 			$attempt->completedAt,
+		);
+	}
+
+	public function findAttemptById( int $attemptId ): ?QuizAttempt {
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::quizAttemptsTable( $wpdb->prefix ), $wpdb->prefix );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
+				'SELECT id, user_id, quiz_id, score_percent, passed, answers_json, completed_at
+				FROM %i
+				WHERE id = %d
+				LIMIT 1',
+				$table,
+				$attemptId
+			)
+		);
+
+		return null !== $row ? $this->mapRowToAttempt( $row ) : null;
+	}
+
+	public function updateAttemptScore( int $attemptId, float $scorePercent, bool $passed ): void {
+		if ( $attemptId <= 0 ) {
+			return;
+		}
+
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::quizAttemptsTable( $wpdb->prefix ), $wpdb->prefix );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->update(
+			$table,
+			array(
+				'score_percent' => $scorePercent,
+				'passed'        => $passed ? 1 : 0,
+			),
+			array( 'id' => $attemptId ),
+			array( '%f', '%d' ),
+			array( '%d' )
 		);
 	}
 

@@ -95,6 +95,15 @@ final class MenuRegistrar {
 
 		add_submenu_page(
 			'mint-lms',
+			__( 'Essay grading', 'mint-lms' ),
+			MenuIcons::labeled( 'questions', __( 'Essay grading', 'mint-lms' ) ),
+			'edit_mintlms_courses',
+			'mint-lms-essay-grading',
+			array( $this, 'renderEssayGrading' )
+		);
+
+		add_submenu_page(
+			'mint-lms',
 			__( 'Students', 'mint-lms' ),
 			MenuIcons::labeled( 'students', __( 'Students', 'mint-lms' ) ),
 			'enroll_mintlms_students',
@@ -172,6 +181,14 @@ final class MenuRegistrar {
 		}
 
 		include MINTLMS_PATH . 'views/admin/dashboard.php';
+	}
+
+	public function renderEssayGrading(): void {
+		if ( ! current_user_can( 'edit_mintlms_courses' ) ) {
+			wp_die( esc_html__( 'You do not have permission to grade essays.', 'mint-lms' ) );
+		}
+
+		include MINTLMS_PATH . 'views/admin/essays/grading.php';
 	}
 
 	public function renderCourseStudents(): void {

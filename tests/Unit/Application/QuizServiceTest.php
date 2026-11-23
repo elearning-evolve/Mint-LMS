@@ -242,11 +242,21 @@ final class QuizServiceTest extends TestCase
         $this->assertFalse($this->service->isAnswerCorrect($question, 'A'));
     }
 
-    public function test_grade_attempt_excludes_essay_from_denominator(): void
+    public function test_grade_attempt_includes_essay_points_when_mode_awards_full(): void
     {
         $questions = [
             $this->mcqQuestion(1, 'A'),
-            new QuizQuestion(2, 5, QuizQuestion::TYPE_ESSAY, 'Explain', [], '', 1),
+            new QuizQuestion(
+                2,
+                5,
+                QuizQuestion::TYPE_ESSAY,
+                'Explain',
+                [],
+                '',
+                1,
+                1,
+                \MintLMS\Domain\Quiz\EssayGradingMode::GRADED_FULL_POINTS
+            ),
         ];
 
         $score = $this->service->gradeAttempt($questions, [
@@ -257,11 +267,11 @@ final class QuizServiceTest extends TestCase
         $this->assertSame(100.0, $score);
     }
 
-    public function test_grade_attempt_essay_only_scores_zero_pending(): void
+    public function test_grade_attempt_essay_only_no_points_stays_pending_fail(): void
     {
         $questions = [
-            new QuizQuestion(1, 5, QuizQuestion::TYPE_ESSAY, 'Explain A', [], '', 0),
-            new QuizQuestion(2, 5, QuizQuestion::TYPE_ESSAY, 'Explain B', [], '', 1),
+            new QuizQuestion(1, 5, QuizQuestion::TYPE_ESSAY, 'Explain A', [], '', 0, 1, \MintLMS\Domain\Quiz\EssayGradingMode::NOT_GRADED_NO_POINTS),
+            new QuizQuestion(2, 5, QuizQuestion::TYPE_ESSAY, 'Explain B', [], '', 1, 1, \MintLMS\Domain\Quiz\EssayGradingMode::NOT_GRADED_NO_POINTS),
         ];
 
         $grade = $this->service->evaluateAttempt(
@@ -278,6 +288,48 @@ final class QuizServiceTest extends TestCase
         $this->assertFalse($grade->passed);
         $this->assertTrue($grade->pendingEssay);
         $this->assertFalse($grade->persisted);
+    }
+
+    public function test_grade_attempt_essay_only_auto_graded_full_points_passes(): void
+    {
+        $questions = [
+            new QuizQuestion(1, 5, QuizQuestion::TYPE_ESSAY, 'Explain A', [], '', 0, 1, \MintLMS\Domain\Quiz\EssayGradingMode::GRADED_FULL_POINTS),
+        ];
+
+        $grade = $this->service->evaluateAttempt(
+            $questions,
+            [1 => 'Answer A'],
+            70,
+            false
+        );
+
+        $this->assertSame(100.0, $grade->scorePercent);
+        $this->assertTrue($grade->passed);
+        $this->assertFalse($grade->pendingEssay);
+    }
+
+    public function test_points_weighting_across_questions(): void
+    {
+        $questions = [
+            new QuizQuestion(1, 5, QuizQuestion::TYPE_MCQ, 'Q1', ['A', 'B'], 'A', 0, 1),
+            new QuizQuestion(2, 5, QuizQuestion::TYPE_MCQ, 'Q2', ['A', 'B'], 'A', 1, 3),
+        ];
+
+        $grade = $this->service->evaluateAttempt(
+            $questions,
+            [
+                1 => 'A',
+                2 => 'B',
+            ],
+            50,
+            false
+        );
+
+        // 1 of 4 points → 25%.
+        $this->assertSame(25.0, $grade->scorePercent);
+        $this->assertFalse($grade->passed);
+        $this->assertSame(1.0, $grade->pointsEarned);
+        $this->assertSame(4.0, $grade->pointsPossible);
     }
 
     public function test_submit_attempt_rejects_editor_without_enrollment(): void

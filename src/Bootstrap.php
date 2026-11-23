@@ -65,6 +65,8 @@ use MintLMS\Infrastructure\Database\Migration\Migration_007_MultiQuizPerLesson;
 use MintLMS\Infrastructure\Database\Migration\Migration_008_CourseAccessSettings;
 use MintLMS\Infrastructure\Database\Migration\Migration_009_LdCourseSettingDefaults;
 use MintLMS\Infrastructure\Database\Migration\Migration_010_LdEnrollmentDefaultFree;
+use MintLMS\Infrastructure\Database\Migration\Migration_011_EssaySubmissions;
+use MintLMS\Infrastructure\Database\Repository\WpdbEssaySubmissionRepository;
 use MintLMS\Infrastructure\Database\Migration\MigrationRunner;
 use MintLMS\Infrastructure\Database\Repository\WpdbAdminDashboardRepository;
 use MintLMS\Infrastructure\Database\Repository\WpdbEnrollmentRepository;
@@ -239,7 +241,8 @@ final class Bootstrap {
 			$courseRepo,
 			$sectionRepo,
 		);
-		$quizService         = new QuizService( $quizRepo, $lessonRepo, $courseRepo, $authorization, $clock, $progressRepo, $userLookup, $lessonAccessService );
+		$essayRepo           = new WpdbEssaySubmissionRepository( $wpdb );
+		$quizService         = new QuizService( $quizRepo, $lessonRepo, $courseRepo, $authorization, $clock, $progressRepo, $userLookup, $lessonAccessService, $essayRepo );
 
 		$studentExperience = new StudentExperienceService(
 			$courseRepo,
@@ -291,7 +294,8 @@ final class Bootstrap {
 			$courseRepo,
 			$sectionRepo,
 		);
-		$quizService         = new QuizService( $quizRepo, $lessonRepo, $courseRepo, $authorization, $clock, $progressRepo, $userLookup, $lessonAccessService );
+		$essayRepo           = new WpdbEssaySubmissionRepository( $wpdb );
+		$quizService         = new QuizService( $quizRepo, $lessonRepo, $courseRepo, $authorization, $clock, $progressRepo, $userLookup, $lessonAccessService, $essayRepo );
 		$progressService     = new ProgressService( $progressRepo, Plugin::eventPublisher(), $clock, $quizService, $lessonAccessService, $courseRepo );
 		$enrollmentService   = new EnrollmentService(
 			$enrollmentRepo,
@@ -335,7 +339,7 @@ final class Bootstrap {
 			new WpUserLookup(),
 			$authorization,
 		);
-		$routeRegistrar = new RouteRegistrar(
+		$routeRegistrar       = new RouteRegistrar(
 			$courseController,
 			$sectionController,
 			$lessonController,
@@ -378,6 +382,7 @@ final class Bootstrap {
 				new Migration_008_CourseAccessSettings(),
 				new Migration_009_LdCourseSettingDefaults(),
 				new Migration_010_LdEnrollmentDefaultFree(),
+				new Migration_011_EssaySubmissions(),
 			)
 		);
 
