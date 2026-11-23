@@ -325,14 +325,13 @@ final class Bootstrap {
 			Plugin::eventPublisher(),
 			$progressRepo
 		);
-		// Progress + Quiz wired so Lesson Group delete cascades quizzes/questions.
+		// Quiz lifecycle wired so Lesson Group delete cascades quizzes/questions.
 		$sectionService   = new SectionService(
 			$sectionRepo,
 			$lessonRepo,
 			$courseRepo,
 			$authorization,
 			$clock,
-			$progressService,
 			$quizService
 		);
 		$lessonService    = new LessonService(

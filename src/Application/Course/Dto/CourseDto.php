@@ -52,6 +52,9 @@ final readonly class CourseDto {
 	) {
 	}
 
+	/**
+	 * @param array{lesson_count?: int|numeric-string, students?: int|numeric-string, finished?: int|numeric-string, completion_pct?: int|numeric-string|null}|null $stats
+	 */
 	public static function fromCourse( Course $course, ?array $stats = null, string $authorName = '', string $category = '' ): self {
 		$lessonCount    = 0;
 		$studentCount   = 0;

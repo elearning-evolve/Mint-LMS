@@ -100,7 +100,7 @@ final class AiStructureDraftNormalizer {
 
 	/**
 	 * @param array<string, mixed> $course
-	 * @return array{title: string, description: string, lesson_groups: list<array<string, mixed>}|null
+	 * @return array{title: string, description: string, lesson_groups: list<array<string, mixed>>}|null
 	 */
 	private function normalizeCourse( array $course ): ?array {
 		$title = sanitize_text_field( (string) ( $course['title'] ?? '' ) );
@@ -115,10 +115,7 @@ final class AiStructureDraftNormalizer {
 				if ( ! is_array( $group ) ) {
 					continue;
 				}
-				$normalized = $this->normalizeLessonGroup( $group );
-				if ( null !== $normalized ) {
-					$groups[] = $normalized;
-				}
+				$groups[] = $this->normalizeLessonGroup( $group );
 			}
 		}
 
@@ -131,9 +128,9 @@ final class AiStructureDraftNormalizer {
 
 	/**
 	 * @param array<string, mixed> $group
-	 * @return array{title: string, lessons: list<array<string, mixed>}|null
+	 * @return array{title: string, lessons: list<array<string, mixed>>}
 	 */
-	private function normalizeLessonGroup( array $group ): ?array {
+	private function normalizeLessonGroup( array $group ): array {
 		$title      = sanitize_text_field( (string) ( $group['title'] ?? __( 'Lesson Group', 'mint-lms' ) ) );
 		$lessons_in = $group['lessons'] ?? array();
 		$lessons    = array();
@@ -157,7 +154,7 @@ final class AiStructureDraftNormalizer {
 
 	/**
 	 * @param array<string, mixed> $lesson
-	 * @return array{title: string, description: string, quizzes: list<array<string, mixed>}|null
+	 * @return array{title: string, description: string, quizzes: list<array<string, mixed>>}|null
 	 */
 	private function normalizeLesson( array $lesson ): ?array {
 		$title = sanitize_text_field( (string) ( $lesson['title'] ?? '' ) );
@@ -188,7 +185,7 @@ final class AiStructureDraftNormalizer {
 
 	/**
 	 * @param array<string, mixed> $quiz
-	 * @return array{title: string, description: string, questions: list<array<string, mixed>}|null
+	 * @return array{title: string, description: string, questions: list<array<string, mixed>>}|null
 	 */
 	private function normalizeQuiz( array $quiz ): ?array {
 		$title = sanitize_text_field( (string) ( $quiz['title'] ?? '' ) );

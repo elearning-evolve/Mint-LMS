@@ -95,7 +95,6 @@ final class SampleCourseSeeder {
 			$courseRepo,
 			$authorization,
 			$clock,
-			$progressLifecycle,
 			$quizService
 		);
 		$lessonService  = new LessonService(

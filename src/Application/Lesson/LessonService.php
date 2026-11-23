@@ -209,12 +209,10 @@ final class LessonService {
 			return LessonDto::fromLesson( $lesson );
 		}
 
-		$slug = $lesson->slug;
-		if ( null !== $this->lessonRepository->findBySlugAndCourseId( $slug, $courseId ) ) {
-			$existing = $this->lessonRepository->findBySlugAndCourseId( $slug, $courseId );
-			if ( null === $existing || $existing->id !== $lesson->id ) {
-				$slug = $this->generateUniqueSlug( $lesson->title, $courseId );
-			}
+		$slug     = $lesson->slug;
+		$existing = $this->lessonRepository->findBySlugAndCourseId( $slug, $courseId );
+		if ( null !== $existing && $existing->id !== $lesson->id ) {
+			$slug = $this->generateUniqueSlug( $lesson->title, $courseId );
 		}
 
 		$updated = new Lesson(
@@ -257,12 +255,10 @@ final class LessonService {
 			return LessonDto::fromLesson( $lesson );
 		}
 
-		$slug = $lesson->slug;
-		if ( null !== $this->lessonRepository->findBySlugAndCourseId( $slug, 0 ) ) {
-			$existing = $this->lessonRepository->findBySlugAndCourseId( $slug, 0 );
-			if ( null === $existing || $existing->id !== $lesson->id ) {
-				$slug = $this->generateUniqueSlug( $lesson->title, 0 );
-			}
+		$slug     = $lesson->slug;
+		$existing = $this->lessonRepository->findBySlugAndCourseId( $slug, 0 );
+		if ( null !== $existing && $existing->id !== $lesson->id ) {
+			$slug = $this->generateUniqueSlug( $lesson->title, 0 );
 		}
 
 		$updated = new Lesson(

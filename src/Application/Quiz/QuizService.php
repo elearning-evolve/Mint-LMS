@@ -605,6 +605,9 @@ final class QuizService implements QuizLifecycleInterface, QuizStudentQueryInter
 		return $this->evaluateAttempt( $questions, $dto->answers, $quiz->passPercent, false, true );
 	}
 
+	/**
+	 * @param array<string, mixed> $runtimeSettings Optional attempt runtime (e.g. timer attestation).
+	 */
 	public function submitAttempt( int $quizId, SubmitQuizAttemptDto $dto, int $userId, array $runtimeSettings = array() ): QuizAttemptDto {
 		if ( $userId <= 0 ) {
 			throw new ForbiddenException( 'You must be logged in to submit a quiz.' );

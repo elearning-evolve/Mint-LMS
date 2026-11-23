@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace MintLMS\Application\Section;
 
 use MintLMS\Application\Contract\AuthorizationInterface;
-use MintLMS\Application\Contract\ProgressLifecycleInterface;
 use MintLMS\Application\Contract\QuizLifecycleInterface;
 use MintLMS\Application\Exception\ForbiddenException;
 use MintLMS\Application\Exception\NotFoundException;
@@ -27,7 +26,6 @@ final class SectionService {
 		private CourseRepositoryInterface $courseRepository,
 		private AuthorizationInterface $authorization,
 		private Clock $clock,
-		private ?ProgressLifecycleInterface $progressLifecycle = null,
 		private ?QuizLifecycleInterface $quizLifecycle = null,
 	) {
 	}
