@@ -300,6 +300,7 @@ final class WpPostQuizRepository implements QuizRepositoryInterface {
 			);
 
 			if ( false === $linked ) {
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Rollback orphan CPT row after failed junction insert.
 				$wpdb->delete( $dataTable, array( 'post_id' => $postId ), array( '%d' ) );
 				wp_delete_post( $postId, true );
 				throw new \RuntimeException( 'Failed to link question to quiz.' );

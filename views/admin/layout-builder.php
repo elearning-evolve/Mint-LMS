@@ -2,6 +2,8 @@
 declare(strict_types=1);
 defined( 'ABSPATH' ) || exit;
 
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- View/template variables scoped to this file.
+
 $content = $content ?? '';
 ?>
 <div class="wrap mint-lms-admin-wrap mint-m-0 mint-p-0 mint-overflow-hidden">

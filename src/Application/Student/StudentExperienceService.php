@@ -1105,7 +1105,7 @@ final class StudentExperienceService {
 			$questionCount = count( $quizDto->questions );
 
 			foreach ( $quizDto->questions as $question ) {
-				$text = trim( strip_tags( $question->prompt ) );
+				$text = trim( wp_strip_all_tags( (string) $question->prompt ) );
 				if ( '' === $text ) {
 					$text = \MintLMS\Infrastructure\PostType\PostTypes::questionContentsTitle( $question->id, $question->prompt );
 				}

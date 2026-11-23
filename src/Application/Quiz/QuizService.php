@@ -1452,7 +1452,7 @@ final class QuizService implements QuizLifecycleInterface, QuizStudentQueryInter
 			'userName'       => $userName,
 			'quizId'         => $submission->quizId,
 			'quizTitle'      => null !== $quiz ? $quiz->title : '',
-			'questionPrompt' => null !== $question ? trim( strip_tags( $question->prompt ) ) : '',
+			'questionPrompt' => null !== $question ? self::plainTextPrompt( $question->prompt ) : '',
 			'status'         => $submission->status,
 			'pointsPossible' => $submission->pointsPossible,
 			'pointsAwarded'  => $submission->pointsAwarded,
@@ -1463,5 +1463,14 @@ final class QuizService implements QuizLifecycleInterface, QuizStudentQueryInter
 			'gradedAt'       => null !== $submission->gradedAt ? $submission->gradedAt->format( 'c' ) : null,
 			'createdAt'      => $submission->createdAt->format( 'c' ),
 		);
+	}
+
+	/**
+	 * Strip HTML for admin list display without PHP strip_tags() (PCP) or wp_* (pure Application).
+	 */
+	private static function plainTextPrompt( string $html ): string {
+		$plain = preg_replace( '/<[^>]*>/u', '', $html );
+
+		return trim( is_string( $plain ) ? $plain : '' );
 	}
 }

@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- View/template variables scoped to this file.
+
 $newCourseUrl      = $newCourseUrl ?? \MintLMS\Infrastructure\Admin\CourseBuilderPage::newCourseUrl();
 $pageLabel         = $pageLabel ?? '';
 $pageLabelHtml     = $pageLabelHtml ?? '';

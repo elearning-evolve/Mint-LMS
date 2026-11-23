@@ -152,14 +152,12 @@ final class WpdbEnrollmentRepository implements EnrollmentRepositoryInterface {
 			ORDER BY enrolled_at DESC
 			LIMIT %d OFFSET %d';
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- SQL built from validated table (%i) + whitelist WHERE fragments.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Custom LMS table; SQL fragments use placeholders and $wpdb->prepare() with Schema::validateTable().
 		$total = (int) $wpdb->get_var( $wpdb->prepare( $countSql, $table, ...$params ) );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
-		$rows = $wpdb->get_results(
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- SQL built from validated table (%i) + whitelist WHERE fragments.
+		$rows  = $wpdb->get_results(
 			$wpdb->prepare( $listSql, $table, ...array_merge( $params, array( $perPage, $offset ) ) )
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		$enrollments = array();
 
@@ -202,14 +200,12 @@ final class WpdbEnrollmentRepository implements EnrollmentRepositoryInterface {
 			ORDER BY enrolled_at DESC
 			LIMIT %d OFFSET %d';
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- SQL built from validated table (%i) + whitelist WHERE fragments.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Custom LMS table; SQL fragments use placeholders and $wpdb->prepare() with Schema::validateTable().
 		$total = (int) $wpdb->get_var( $wpdb->prepare( $countSql, $table, ...$params ) );
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
-		$rows = $wpdb->get_results(
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- SQL built from validated table (%i) + whitelist WHERE fragments.
+		$rows  = $wpdb->get_results(
 			$wpdb->prepare( $listSql, $table, ...array_merge( $params, array( $perPage, $offset ) ) )
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		$enrollments = array();
 

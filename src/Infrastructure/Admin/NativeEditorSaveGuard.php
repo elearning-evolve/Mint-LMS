@@ -51,12 +51,14 @@ final class NativeEditorSaveGuard {
 		}
 
 		// Prefer query post ID over $GLOBALS['post'] (WPCS / no direct global read).
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only post ID for block-editor localize on already-authorized edit screen.
 		$postId = 0;
-		if ( isset( $_GET['post'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only editor bootstrap.
+		if ( isset( $_GET['post'] ) ) {
 			$postId = absint( wp_unslash( $_GET['post'] ) );
-		} elseif ( isset( $_GET['post_ID'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		} elseif ( isset( $_GET['post_ID'] ) ) {
 			$postId = absint( wp_unslash( $_GET['post_ID'] ) );
 		}
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		$post     = $postId > 0 ? get_post( $postId ) : null;
 		$postId   = $post instanceof \WP_Post ? (int) $post->ID : 0;

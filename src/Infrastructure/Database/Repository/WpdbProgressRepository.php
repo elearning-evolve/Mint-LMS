@@ -332,7 +332,7 @@ final class WpdbProgressRepository implements ProgressRepositoryInterface {
 		$table = Schema::validateTable( Schema::progressSummaryTable( $wpdb->prefix ), $wpdb->prefix );
 		$now   = $updatedAt->format( 'Y-m-d H:i:s' );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Progress summary upsert; request-scoped custom table.
 		$replaced = $wpdb->replace(
 			$table,
 			array(
