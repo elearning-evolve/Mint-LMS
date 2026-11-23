@@ -26,8 +26,11 @@ $continueUrl   = $startLessonId
 	)
 	: $playerUrl;
 
-$pct     = null !== $overview->progressPct ? (int) round( $overview->progressPct ) : 0;
-$outline = is_array( $overview->contentOutline ) ? $overview->contentOutline : array();
+$pct = null !== $overview->progressPct ? (int) round( $overview->progressPct ) : 0;
+// Prefer edge-localized outline from ShortcodeRegistrar; fall back to Application payload.
+$outline = isset( $contentOutline ) && is_array( $contentOutline )
+	? $contentOutline
+	: ( is_array( $overview->contentOutline ) ? $overview->contentOutline : array() );
 
 $lessonPlayerUrls = array();
 foreach ( $outline as $section ) {
@@ -138,7 +141,13 @@ $showCta = $overview->isEnrolled || $overview->canEnroll || ( 'paid' === $overvi
 					<a href="<?php echo esc_url( $purchaseUrl ); ?>" class="mint-inline-flex mint-h-[42px] mint-items-center mint-justify-center mint-rounded-lg mint-border-0 mint-bg-cta mint-px-[18px] mint-text-sm mint-font-bold mint-text-ink mint-no-underline hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(15,14,26,0.35)]">
 					<?php
 						echo '' !== $productPrice
-							? esc_html( sprintf( __( 'Buy course — %s', 'mint-lms' ), function_exists( 'wc_price' ) ? wp_strip_all_tags( wc_price( (float) $productPrice ) ) : $productPrice ) )
+							? esc_html(
+								sprintf(
+									/* translators: %s: formatted product price */
+									__( 'Buy course — %s', 'mint-lms' ),
+									function_exists( 'wc_price' ) ? wp_strip_all_tags( wc_price( (float) $productPrice ) ) : $productPrice
+								)
+							)
 							: esc_html__( 'Buy course', 'mint-lms' );
 					?>
 					</a>

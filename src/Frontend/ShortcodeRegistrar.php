@@ -621,11 +621,14 @@ final class ShortcodeRegistrar {
 			$productPrice = $productId > 0 ? $wc->productSync()->getProductPrice( $productId ) : '';
 		}
 
+		$contentOutline = StudentCopy::localizeContentOutline( $overview->contentOutline );
+
 		return $this->wrap(
 			$this->templateLoader->render(
 				'student/course-overview.php',
 				array(
 					'overview'      => $overview,
+					'contentOutline' => $contentOutline,
 					'playerUrl'     => $settings->resolvePlayerUrl( $atts['player_page'] ),
 					'dashboardUrl'  => $settings->resolveDashboardUrl( $atts['dashboard_page'] ),
 					'catalogUrl'    => $settings->getCatalogUrl(),
@@ -927,48 +930,8 @@ final class ShortcodeRegistrar {
 		);
 	}
 
-	/**
-	 * Translate known lock messages at the presentation edge (Application keeps stable English keys).
-	 */
 	private function localizeLockMessage( string $reason, string $rawMessage ): string {
-		$rawMessage = trim( $rawMessage );
-
-		switch ( $reason ) {
-			case ForbiddenException::REASON_ENROLLMENT:
-				return __( 'Enroll in this course to access this lesson.', 'mint-lms' );
-			case ForbiddenException::REASON_PROGRESSION:
-				return __( 'Finish the previous lesson first.', 'mint-lms' );
-			case ForbiddenException::REASON_EXPIRED:
-				return __( 'Your access to this course has expired.', 'mint-lms' );
-			case ForbiddenException::REASON_UNAVAILABLE:
-				if ( 'This course has not opened yet.' === $rawMessage ) {
-					return __( 'This course has not opened yet.', 'mint-lms' );
-				}
-				if ( 'This course is no longer available.' === $rawMessage ) {
-					return __( 'This course is no longer available.', 'mint-lms' );
-				}
-				return __( 'This lesson is not available.', 'mint-lms' );
-			case ForbiddenException::REASON_DRIP:
-				if ( 1 === preg_match( '/^Available in (\d+) day$/', $rawMessage, $matches ) ) {
-					return sprintf(
-						/* translators: %d: number of days until drip unlock */
-						__( 'Available in %d day', 'mint-lms' ),
-						(int) $matches[1]
-					);
-				}
-				if ( 1 === preg_match( '/^Available in (\d+) days$/', $rawMessage, $matches ) ) {
-					return sprintf(
-						/* translators: %d: number of days until drip unlock */
-						__( 'Available in %d days', 'mint-lms' ),
-						(int) $matches[1]
-					);
-				}
-				return __( 'This lesson is not available yet.', 'mint-lms' );
-			default:
-				return '' !== $rawMessage
-					? $rawMessage
-					: __( 'This lesson is part of a course that requires enrollment. Enroll to unlock all lessons.', 'mint-lms' );
-		}
+		return StudentCopy::lockMessage( $reason, $rawMessage );
 	}
 
 	private function errorMessage( string $message ): string {

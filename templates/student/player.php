@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
+use MintLMS\Application\Exception\ForbiddenException;
+use MintLMS\Frontend\StudentCopy;
+
 use MintLMS\Application\Student\Dto\StudentPlayerContextDto;
 
 /** @var StudentPlayerContextDto $context */
@@ -209,14 +212,23 @@ $pct          = (int) round( $context->progressPct );
 									<span class="mint-min-w-0 mint-truncate mint-font-medium"><?php echo esc_html( $sectionLesson->title ); ?></span>
 								</a>
 							<?php else : ?>
-								<div class="mint-flex mint-items-start mint-gap-2.5 mint-rounded-md mint-px-2 mint-py-2 mint-opacity-60" title="<?php echo esc_attr( $sectionLesson->dripMessage ?? '' ); ?>">
+								<?php
+								$lock_reason  = is_string( $sectionLesson->lockReason ?? null ) && '' !== $sectionLesson->lockReason
+									? $sectionLesson->lockReason
+									: ForbiddenException::REASON_DRIP;
+								$lock_message = StudentCopy::lockMessage(
+									$lock_reason,
+									is_string( $sectionLesson->dripMessage ?? null ) ? (string) $sectionLesson->dripMessage : ''
+								);
+								?>
+								<div class="mint-flex mint-items-start mint-gap-2.5 mint-rounded-md mint-px-2 mint-py-2 mint-opacity-60" title="<?php echo esc_attr( $lock_message ); ?>">
 									<div class="mint-flex mint-h-7 mint-w-7 mint-shrink-0 mint-items-center mint-justify-center mint-rounded-full mint-bg-bg-subtle mint-text-ink-3">
 										<svg class="mint-h-3 mint-w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
 									</div>
 									<div class="mint-min-w-0">
 										<span class="mint-block mint-truncate mint-text-sm mint-font-medium mint-text-ink-2"><?php echo esc_html( $sectionLesson->title ); ?></span>
-										<?php if ( $sectionLesson->isDripLocked && is_string( $sectionLesson->dripMessage ) && '' !== $sectionLesson->dripMessage ) : ?>
-											<span class="mint-mt-0.5 mint-block mint-text-xs mint-text-ink-3"><?php echo esc_html( $sectionLesson->dripMessage ); ?></span>
+										<?php if ( $sectionLesson->isDripLocked && '' !== $lock_message ) : ?>
+											<span class="mint-mt-0.5 mint-block mint-text-xs mint-text-ink-3"><?php echo esc_html( $lock_message ); ?></span>
 										<?php endif; ?>
 									</div>
 								</div>
