@@ -9,6 +9,7 @@ use MintLMS\Application\Enrollment\Dto\EnrollmentDto;
 use MintLMS\Application\Exception\ForbiddenException;
 use MintLMS\Application\Exception\NotFoundException;
 use MintLMS\Application\Exception\ValidationException;
+use MintLMS\Logger;
 use MintLMS\Plugin;
 
 final class EnrollmentBridge {
@@ -250,10 +251,6 @@ final class EnrollmentBridge {
 	}
 
 	private function log( string $level, string $message ): void {
-		if ( ! function_exists( 'wc_get_logger' ) ) {
-			return;
-		}
-
-		wc_get_logger()->log( $level, $message, array( 'source' => 'mint-lms' ) );
+		Logger::log( $level, $message );
 	}
 }

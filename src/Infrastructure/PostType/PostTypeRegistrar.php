@@ -10,6 +10,7 @@ use MintLMS\Domain\Quiz\Quiz;
 use MintLMS\Domain\Quiz\QuizQuestion;
 use MintLMS\Infrastructure\Database\Repository\WpPostLessonRepository;
 use MintLMS\Infrastructure\Database\Repository\WpPostQuizRepository;
+use MintLMS\Logger;
 
 final class PostTypeRegistrar {
 
@@ -98,8 +99,7 @@ final class PostTypeRegistrar {
 					fn (): array => $this->createNewQuizStarter()
 				);
 			} catch ( \Throwable $e ) {
-				// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Surface ensure failure without white-screen.
-				error_log( 'Mint LMS ensure question for builder failed: ' . $e->getMessage() );
+				Logger::error( 'Mint LMS ensure question for builder failed: ' . $e->getMessage() );
 				$quizId = 0;
 			}
 		}
@@ -116,8 +116,7 @@ final class PostTypeRegistrar {
 		try {
 			$target = $this->resolveQuizBuilderTarget( $quizId );
 		} catch ( \Throwable $e ) {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Surface resolve failure without white-screen.
-			error_log( 'Mint LMS edit quiz resolve failed: ' . $e->getMessage() );
+			Logger::error( 'Mint LMS edit quiz resolve failed: ' . $e->getMessage() );
 			wp_safe_redirect( PostTypes::listUrl( PostTypes::QUIZ ) );
 			exit;
 		}
@@ -186,8 +185,7 @@ final class PostTypeRegistrar {
 			);
 			exit;
 		} catch ( \Throwable $e ) {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Surface create failure without white-screen.
-			error_log( 'Mint LMS new content starter failed: ' . $e->getMessage() );
+			Logger::error( 'Mint LMS new content starter failed: ' . $e->getMessage() );
 			wp_safe_redirect(
 				match ( $type ) {
 					'quiz'     => PostTypes::listUrl( PostTypes::QUIZ ),
@@ -424,8 +422,7 @@ final class PostTypeRegistrar {
 		try {
 			$target = $this->resolveQuizBuilderTarget( $postId );
 		} catch ( \Throwable $e ) {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Surface resolve failure without white-screen.
-			error_log( 'Mint LMS quiz edit redirect failed: ' . $e->getMessage() );
+			Logger::error( 'Mint LMS quiz edit redirect failed: ' . $e->getMessage() );
 			$target = null;
 		}
 
@@ -463,8 +460,7 @@ final class PostTypeRegistrar {
 				fn (): array => $this->createNewQuizStarter()
 			);
 		} catch ( \Throwable $e ) {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Surface ensure failure without white-screen.
-			error_log( 'Mint LMS question edit redirect ensure failed: ' . $e->getMessage() );
+			Logger::error( 'Mint LMS question edit redirect ensure failed: ' . $e->getMessage() );
 			$quizId = 0;
 		}
 
@@ -476,8 +472,7 @@ final class PostTypeRegistrar {
 		try {
 			$target = $this->resolveQuizBuilderTarget( $quizId );
 		} catch ( \Throwable $e ) {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Surface resolve failure without white-screen.
-			error_log( 'Mint LMS question edit redirect failed: ' . $e->getMessage() );
+			Logger::error( 'Mint LMS question edit redirect failed: ' . $e->getMessage() );
 			$target = null;
 		}
 
