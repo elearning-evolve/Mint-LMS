@@ -1543,13 +1543,14 @@ function courseBuilder(courseId, opts = {}) {
     },
 
     quizCustomResultsToggles() {
+      const surface = (typeof mintLmsAdmin !== 'undefined' && mintLmsAdmin.settingsSurface) || {};
       return [
-        { key: 'showAverageScore', label: 'Average score', hint: 'Show how the class averaged' },
-        { key: 'showCategoryScore', label: 'Category score', hint: 'Show scores per question category' },
+        { key: 'showAverageScore', label: 'Average score', hint: 'Show how the class averaged', feature: 'quiz.show_average_score' },
+        { key: 'showCategoryScore', label: 'Category score', hint: 'Show scores per question category', feature: 'quiz.show_category_score' },
         { key: 'showOverallScore', label: 'Overall score' },
         { key: 'showCorrectCount', label: 'No. of correct answers' },
         { key: 'showTimeSpent', label: 'Time spent' },
-      ];
+      ].filter((el) => !el.feature || surface[el.feature] !== false);
     },
 
     quizAnswerFeedbackToggles() {

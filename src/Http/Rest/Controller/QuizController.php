@@ -17,6 +17,7 @@ use MintLMS\Application\Quiz\Dto\SubmitQuizAttemptDto;
 use MintLMS\Application\Quiz\Dto\UpdateQuestionDto;
 use MintLMS\Application\Quiz\Dto\UpdateQuizDto;
 use MintLMS\Application\Quiz\QuestionAnswerCodec;
+use MintLMS\Application\Progress\ProgressService;
 use MintLMS\Application\Quiz\QuizService;
 use MintLMS\Domain\Quiz\QuizQuestion;
 use MintLMS\Http\Rest\Response\ApiResponse;
@@ -30,6 +31,7 @@ final class QuizController {
 	public function __construct(
 		private QuizService $quizService,
 		private AuthorizationInterface $authorization,
+		private ?ProgressService $progressService = null,
 	) {
 	}
 
@@ -220,6 +222,18 @@ final class QuizController {
 					'methods'             => \WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'deleteQuestion' ),
 					'permission_callback' => array( $this, 'canManageCourses' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/quizzes/(?P<id>\d+)/start',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'startAttempt' ),
+					'permission_callback' => array( $this, 'canTrackProgress' ),
 				),
 			)
 		);
@@ -768,12 +782,44 @@ final class QuizController {
 		}
 	}
 
+	public function startAttempt( \WP_REST_Request $request ): \WP_REST_Response {
+		try {
+			$userId = $this->authorization->getCurrentUserId();
+			$id     = (int) $request->get_param( 'id' );
+			$timer  = $this->quizService->startTimedAttempt( $id, $userId, $this->readQuizSettings( $id ) );
+
+			return ApiResponse::success(
+				null === $timer
+					? array( 'timed' => false )
+					: array_merge( array( 'timed' => true ), $timer )
+			);
+		} catch ( NotFoundException $exception ) {
+			return ApiResponse::error( 'not_found', $exception->getMessage(), 404 );
+		} catch ( ForbiddenException $exception ) {
+			return ApiResponse::error( 'forbidden', $exception->getMessage(), 403 );
+		}
+	}
+
 	public function submitAttempt( \WP_REST_Request $request ): \WP_REST_Response {
 		try {
 			$userId  = $this->authorization->getCurrentUserId();
 			$id      = (int) $request->get_param( 'id' );
 			$dto     = new SubmitQuizAttemptDto( $this->answersFromRequest( $request ) );
 			$attempt = $this->quizService->submitAttempt( $id, $dto, $userId, $this->readQuizSettings( $id ) );
+
+			if ( $attempt->passed && null !== $this->progressService ) {
+				try {
+					$quiz = $this->quizService->get( $id, $userId, true );
+					if ( $quiz->lessonId > 0 ) {
+						$this->progressService->tryAutoCompleteLesson(
+							$userId,
+							$quiz->lessonId,
+							$quiz->courseId > 0 ? $quiz->courseId : null
+						);
+					}
+				} catch ( NotFoundException | ForbiddenException ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch -- Auto-complete is best-effort after a successful submit.
+				}
+			}
 
 			return ApiResponse::success( $attempt->toArray() );
 		} catch ( ValidationException $exception ) {

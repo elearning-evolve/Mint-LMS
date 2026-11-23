@@ -6,6 +6,8 @@
  */
 
 defined( 'ABSPATH' ) || exit;
+
+use MintLMS\Infrastructure\Admin\SettingsSurface;
 ?>
 <div class="mint-settings-page" x-show="lessonSettingsView && selectedLesson && selectedLesson.settings" x-cloak>
 	<button type="button" class="mint-settings-page__back" @click="closeLessonSettings()">
@@ -41,19 +43,8 @@ defined( 'ABSPATH' ) || exit;
 			</div>
 			<div class="mint-settings-nested" x-show="selectedLesson.settings.materialsEnabled" x-cloak>
 				<div class="mint-settings-editor">
-					<div class="mint-settings-editor__toolbar">
-						<div class="mint-settings-editor__tools">
-							<span class="mint-settings-editor__chip"><?php esc_html_e( 'Paragraph', 'mint-lms' ); ?></span>
-							<span class="mint-settings-editor__tool" style="font-weight:700" aria-hidden="true">B</span>
-							<span class="mint-settings-editor__tool" style="font-style:italic" aria-hidden="true">I</span>
-							<span class="mint-settings-editor__tool" style="font-weight:600" aria-hidden="true">H2</span>
-							<span class="mint-settings-editor__tool" style="font-weight:600" aria-hidden="true">•</span>
-							<span class="mint-settings-editor__tool" aria-hidden="true">1.</span>
-							<span class="mint-settings-editor__tool" aria-hidden="true">🔗</span>
-						</div>
-						<button type="button" class="mint-settings-editor__media"><?php esc_html_e( 'Add media', 'mint-lms' ); ?></button>
-					</div>
-					<textarea class="mint-settings-editor__textarea" x-model="selectedLesson.settings.materialsContent" placeholder="<?php echo esc_attr__( 'Add downloads, notes or links for this lesson…', 'mint-lms' ); ?>"></textarea>
+					<textarea class="mint-settings-editor__textarea" x-model="selectedLesson.settings.materialsContent" placeholder="<?php echo esc_attr__( 'Add downloads, notes or links for this lesson…', 'mint-lms' ); ?>" rows="6"></textarea>
+					<p class="mint-settings-hint-text"><?php esc_html_e( 'Plain text or HTML is fine. A visual toolbar will return when the materials editor is wired.', 'mint-lms' ); ?></p>
 				</div>
 			</div>
 			<div class="mint-settings-divider"></div>
@@ -102,6 +93,7 @@ defined( 'ABSPATH' ) || exit;
 						<span class="mint-settings-hint-text" x-show="selectedLesson.settings.videoControls" x-cloak><?php esc_html_e( 'Students can pause and skip', 'mint-lms' ); ?></span>
 					</div>
 				</div>
+				<?php if ( SettingsSurface::enabled( 'lesson.video_pause_hidden' ) ) : ?>
 				<div class="mint-settings-subrow">
 					<div class="mint-settings-subrow__label"><?php esc_html_e( 'Pause when tab is hidden', 'mint-lms' ); ?></div>
 					<div class="mint-settings-row__control">
@@ -109,6 +101,8 @@ defined( 'ABSPATH' ) || exit;
 						<button type="button" role="switch" class="mint-lesson-preview-toggle" :class="selectedLesson.settings.videoPauseHidden ? 'is-on' : ''" :aria-pressed="selectedLesson.settings.videoPauseHidden ? 'true' : 'false'" @click="selectedLesson.settings.videoPauseHidden = !selectedLesson.settings.videoPauseHidden"><span class="mint-lesson-preview-toggle__knob"></span></button>
 					</div>
 				</div>
+				<?php endif; ?>
+				<?php if ( SettingsSurface::enabled( 'lesson.video_resume' ) ) : ?>
 				<div class="mint-settings-subrow">
 					<div class="mint-settings-subrow__label"><?php esc_html_e( 'Resume where they left off', 'mint-lms' ); ?></div>
 					<div class="mint-settings-row__control">
@@ -116,7 +110,9 @@ defined( 'ABSPATH' ) || exit;
 						<button type="button" role="switch" class="mint-lesson-preview-toggle" :class="selectedLesson.settings.videoResume ? 'is-on' : ''" :aria-pressed="selectedLesson.settings.videoResume ? 'true' : 'false'" @click="selectedLesson.settings.videoResume = !selectedLesson.settings.videoResume"><span class="mint-lesson-preview-toggle__knob"></span></button>
 					</div>
 				</div>
+				<?php endif; ?>
 			</div>
+			<?php if ( SettingsSurface::enabled( 'lesson.assignment_uploads' ) ) : ?>
 			<div class="mint-settings-divider"></div>
 
 			<div class="mint-settings-row">
@@ -185,6 +181,8 @@ defined( 'ABSPATH' ) || exit;
 					</div>
 				</div>
 			</div>
+			<?php endif; ?>
+			<?php if ( SettingsSurface::enabled( 'lesson.min_time' ) ) : ?>
 			<div class="mint-settings-divider"></div>
 
 			<div class="mint-settings-row">
@@ -207,6 +205,7 @@ defined( 'ABSPATH' ) || exit;
 					</div>
 				</div>
 			</div>
+			<?php endif; ?>
 		</div>
 	</div>
 
@@ -250,6 +249,7 @@ defined( 'ABSPATH' ) || exit;
 						<input type="number" min="0" class="mint-settings-input mint-settings-input--days" x-model.number="selectedLesson.availableAfterDays" @input="selectedLesson.settings.releaseDays = selectedLesson.availableAfterDays; debouncedSaveLesson(selectedLesson)" placeholder="7" />
 						<span class="mint-settings-hint-text"><?php esc_html_e( 'days after enrolling', 'mint-lms' ); ?></span>
 					</div>
+					<?php if ( SettingsSurface::enabled( 'lesson.release_date' ) ) : ?>
 					<button type="button" class="mint-settings-choice" :class="selectedLesson.settings.releaseSchedule === 'specific_date' ? 'is-selected' : ''" @click="setLessonReleaseSchedule('specific_date')">
 						<span class="mint-settings-choice__dot" aria-hidden="true"><span class="mint-settings-choice__dot-inner"></span></span>
 						<span><span class="mint-settings-choice__title"><?php esc_html_e( 'On a specific date', 'mint-lms' ); ?></span><span class="mint-settings-choice__copy"><?php esc_html_e( 'Opens for everyone on the date you choose.', 'mint-lms' ); ?></span></span>
@@ -257,8 +257,10 @@ defined( 'ABSPATH' ) || exit;
 					<div class="mint-settings-nested--indent" x-show="selectedLesson.settings.releaseSchedule === 'specific_date'" x-cloak>
 						<input type="text" class="mint-settings-input mint-settings-input--date" x-model="selectedLesson.settings.releaseDate" placeholder="<?php echo esc_attr__( 'DD / MM / YYYY', 'mint-lms' ); ?>" />
 					</div>
+					<?php endif; ?>
 				</div>
 			</div>
+			<?php if ( SettingsSurface::enabled( 'lesson.external' ) ) : ?>
 			<div class="mint-settings-divider"></div>
 			<div class="mint-settings-row">
 				<div class="mint-settings-row__label"><?php esc_html_e( 'External lesson', 'mint-lms' ); ?></div>
@@ -296,6 +298,7 @@ defined( 'ABSPATH' ) || exit;
 					</div>
 				</div>
 			</div>
+			<?php endif; ?>
 		</div>
 	</div>
 

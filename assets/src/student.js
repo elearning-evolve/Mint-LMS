@@ -37,9 +37,90 @@ document.addEventListener('alpine:init', () => {
     hasPassedQuiz: config.hasPassedQuiz || false,
     videoProgression: !!config.videoProgression,
     videoWatched: !config.videoProgression,
+    autoComplete: !!config.autoComplete,
     sidebarOpen: false,
     marking: false,
     error: '',
+
+    init() {
+      if (this.autoComplete && this.isEnrolled && !this.isComplete) {
+        this.tryAutoComplete();
+      }
+    },
+
+    async onVideoEnded() {
+      this.videoWatched = true;
+      if (!this.isEnrolled || this.isComplete) {
+        return;
+      }
+      try {
+        const response = await fetch(
+          joinRestUrl(mintLmsStudent.restUrl, `lessons/${this.lessonId}/video-watched`),
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-WP-Nonce': mintLmsStudent.nonce,
+            },
+            body: JSON.stringify({ course_id: this.courseId }),
+          }
+        );
+        const payload = await response.json();
+        if (!response.ok || payload.success === false) {
+          return;
+        }
+        this.applyCompletionPayload(payload);
+      } catch {
+        /* soft fail — mark-complete still gated client-side */
+      }
+    },
+
+    async tryAutoComplete() {
+      if (!this.isEnrolled || this.isComplete || this.marking) {
+        return;
+      }
+      if (this.videoProgression && !this.videoWatched) {
+        return;
+      }
+      if (this.quizRequired && !this.hasPassedQuiz) {
+        return;
+      }
+      try {
+        const response = await fetch(
+          joinRestUrl(mintLmsStudent.restUrl, `lessons/${this.lessonId}/auto-complete`),
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-WP-Nonce': mintLmsStudent.nonce,
+            },
+            body: JSON.stringify({ course_id: this.courseId }),
+          }
+        );
+        const payload = await response.json();
+        if (!response.ok || payload.success === false) {
+          return;
+        }
+        this.applyCompletionPayload(payload);
+      } catch {
+        /* ignore */
+      }
+    },
+
+    applyCompletionPayload(payload) {
+      if (payload?.data?.was_newly_completed) {
+        this.isComplete = true;
+        if (!this.completedIds.includes(this.lessonId)) {
+          this.completedIds.push(this.lessonId);
+        }
+      }
+      if (typeof payload?.data?.progress === 'number') {
+        this.progressPct = payload.data.progress;
+      }
+      if (payload?.data?.course_just_completed) {
+        window.location.reload();
+      }
+    },
 
     async markComplete() {
       if (!this.isEnrolled || this.isComplete || this.marking) {
@@ -255,13 +336,39 @@ document.addEventListener('alpine:init', () => {
       this.saveTimerId = window.setInterval(() => this.persistProgress(), ms);
     },
 
-    startTimer() {
-      if (!this.settings.timeLimitEnabled) return;
+    async startTimer() {
+      if (!this.settings.timeLimitEnabled || this.previewMode) return;
       const hours = Number(this.settings.timeLimitHours || 0);
       const minutes = Number(this.settings.timeLimitMinutes || 0);
       const seconds = Number(this.settings.timeLimitSeconds || 0);
-      this.timerSeconds = hours * 3600 + minutes * 60 + seconds;
-      if (this.timerSeconds <= 0) return;
+      let remaining = hours * 3600 + minutes * 60 + seconds;
+      if (remaining <= 0) return;
+
+      try {
+        const response = await fetch(
+          joinRestUrl(mintLmsStudent.restUrl, `quizzes/${this.quizId}/start`),
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-WP-Nonce': mintLmsStudent.nonce,
+            },
+            body: '{}',
+          }
+        );
+        const payload = await response.json();
+        if (response.ok && payload?.success !== false && payload?.data?.timed) {
+          remaining = Math.max(0, Number(payload.data.remainingSeconds || 0));
+        }
+      } catch {
+        /* fall back to local countdown */
+      }
+
+      this.timerSeconds = remaining;
+      if (this.timerSeconds <= 0) {
+        this.submitQuiz(true);
+        return;
+      }
       this.timerId = window.setInterval(() => {
         this.timerSeconds -= 1;
         if (this.timerSeconds <= 0) {

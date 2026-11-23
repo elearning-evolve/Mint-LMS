@@ -5,7 +5,7 @@ Tags: lms, learning, courses, quizzes, elearning
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 8.2
-Stable tag: 1.1.6
+Stable tag: 1.1.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,6 +48,10 @@ LMS features (courses, lessons, quizzes, progress) do not require any third-part
 WordPress 6.2 or later and **PHP 8.2** or later. Optional AI Assistance also needs the MCP Adapter plugin and a compatible MCP client (e.g. Claude Desktop).
 
 == Changelog ==
+
+= 1.1.7 =
+* Settings hygiene: hide unfinished admin toggles (SettingsSurface); server-enforce quiz time limit and video progression; auto-complete when mark-complete is off; write EnrollmentStatus::Completed on course finish.
+* Remove dead Extension Registry API stubs (unused mintlms_register_* / Registry/*); keep mintlms_wpdb().
 
 = 1.1.6 =
 * Logging: shared MintLMS\Logger routes to wc_get_logger() when available, else WP_DEBUG-gated fallback; remove unconditional error_log().

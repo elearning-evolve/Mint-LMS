@@ -9,8 +9,11 @@ use MintLMS\Application\Course\CourseStructureService;
 use MintLMS\Application\Enrollment\EnrollmentService;
 use MintLMS\Application\Lesson\LessonAccessService;
 use MintLMS\Application\Lesson\LessonService;
+use MintLMS\Application\Progress\LessonRequirementService;
 use MintLMS\Application\Progress\ProgressService;
 use MintLMS\Application\Quiz\QuizService;
+use MintLMS\Application\Quiz\QuizTimerService;
+use MintLMS\Infrastructure\Progress\WpLessonVideoProgress;
 use MintLMS\Application\Section\SectionService;
 use MintLMS\Application\Student\StudentExperienceService;
 use MintLMS\Frontend\ShortcodeRegistrar;
@@ -242,7 +245,8 @@ final class Bootstrap {
 			$sectionRepo,
 		);
 		$essayRepo           = new WpdbEssaySubmissionRepository( $wpdb );
-		$quizService         = new QuizService( $quizRepo, $lessonRepo, $courseRepo, $authorization, $clock, $progressRepo, $userLookup, $lessonAccessService, $essayRepo );
+		$quizTimer           = new QuizTimerService( $clock );
+		$quizService         = new QuizService( $quizRepo, $lessonRepo, $courseRepo, $authorization, $clock, $progressRepo, $userLookup, $lessonAccessService, $essayRepo, $quizTimer );
 
 		$studentExperience = new StudentExperienceService(
 			$courseRepo,
@@ -295,8 +299,8 @@ final class Bootstrap {
 			$sectionRepo,
 		);
 		$essayRepo           = new WpdbEssaySubmissionRepository( $wpdb );
-		$quizService         = new QuizService( $quizRepo, $lessonRepo, $courseRepo, $authorization, $clock, $progressRepo, $userLookup, $lessonAccessService, $essayRepo );
-		$progressService     = new ProgressService( $progressRepo, Plugin::eventPublisher(), $clock, $quizService, $lessonAccessService, $courseRepo );
+		$lessonRequirements  = new LessonRequirementService( new WpLessonVideoProgress(), $quizService );
+		$progressService     = new ProgressService( $progressRepo, Plugin::eventPublisher(), $clock, $quizService, $lessonAccessService, $courseRepo, $lessonRequirements );
 		$enrollmentService   = new EnrollmentService(
 			$enrollmentRepo,
 			$courseRepo,
@@ -333,7 +337,7 @@ final class Bootstrap {
 		$lessonController     = new LessonController( $lessonService, $authorization );
 		$enrollmentController = new EnrollmentController( $enrollmentService, $authorization );
 		$progressController   = new ProgressController( $progressService, $authorization );
-		$quizController       = new QuizController( $quizService, $authorization );
+		$quizController       = new QuizController( $quizService, $authorization, $progressService );
 		$onboardingController = new OnboardingController( $authorization );
 		$userController       = new UserController(
 			new WpUserLookup(),

@@ -185,7 +185,7 @@ final class WpdbAdminDashboardRepository implements AdminDashboardRepositoryInte
 						"SELECT e.user_id, c.post_title AS course_title, e.completed_at AS occurred_at, 'completed' AS type
 					FROM %%i e
 					INNER JOIN %%i c ON c.ID = e.course_id AND c.post_type = %%s
-					WHERE e.course_id IN (%s) AND e.status = 'active' AND e.completed_at IS NOT NULL
+					WHERE e.course_id IN (%s) AND e.completed_at IS NOT NULL AND e.status IN ('active', 'completed')
 					ORDER BY e.completed_at DESC LIMIT 5",
 						implode( ',', array_fill( 0, count( $courseIds ), '%d' ) )
 					),

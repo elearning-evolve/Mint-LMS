@@ -65,7 +65,7 @@ final class StudentExperienceServiceTest extends TestCase
 
         $this->enrollmentRepository
             ->method('listByUser')
-            ->with($userId, 1, 100, EnrollmentStatus::Active)
+            ->with($userId, 1, 100, null)
             ->willReturn([
                 'enrollments' => [
                     new Enrollment(1, $userId, 10, EnrollmentStatus::Active, $now, null, null),

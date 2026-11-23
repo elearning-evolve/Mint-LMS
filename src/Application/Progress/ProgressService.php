@@ -27,14 +27,24 @@ final class ProgressService implements ProgressLifecycleInterface {
 		private ?QuizService $quizService = null,
 		private ?LessonAccessService $lessonAccessService = null,
 		private ?CourseRepositoryInterface $courseRepository = null,
+		private ?LessonRequirementService $lessonRequirements = null,
 	) {
 	}
 
-	public function completeLesson( int $userId, int $lessonId, ?int $expectedCourseId = null ): CompleteLessonResult {
+	/**
+	 * @param bool $studentInitiated When true, respects course "students can mark complete".
+	 *                               System auto-complete (video/quiz) passes false.
+	 */
+	public function completeLesson(
+		int $userId,
+		int $lessonId,
+		?int $expectedCourseId = null,
+		bool $studentInitiated = true,
+	): CompleteLessonResult {
 		$courseId = $this->resolveLessonCourse( $lessonId, $expectedCourseId );
 		$this->assertEnrolled( $userId, $courseId );
 
-		if ( null !== $this->courseRepository ) {
+		if ( $studentInitiated && null !== $this->courseRepository ) {
 			$course = $this->courseRepository->findById( $courseId );
 
 			if ( null !== $course && ! $course->settings->studentComplete ) {
@@ -46,10 +56,62 @@ final class ProgressService implements ProgressLifecycleInterface {
 			$this->lessonAccessService->assertCanAccessLesson( $userId, $lessonId );
 		}
 
-		if ( null !== $this->quizService && ! $this->quizService->hasPassedLessonQuiz( $userId, $lessonId ) ) {
+		if ( null !== $this->lessonRequirements ) {
+			$this->lessonRequirements->assertCanComplete( $userId, $lessonId );
+		} elseif ( null !== $this->quizService && ! $this->quizService->hasPassedLessonQuiz( $userId, $lessonId ) ) {
 			throw new ForbiddenException( 'You must pass the lesson quiz before marking it complete.' );
 		}
 
+		return $this->persistCompletion( $userId, $lessonId, $courseId );
+	}
+
+	/**
+	 * Auto-complete when requirements are met (used when student mark-complete is off,
+	 * or after video/quiz gates clear).
+	 */
+	public function tryAutoCompleteLesson( int $userId, int $lessonId, ?int $expectedCourseId = null ): ?CompleteLessonResult {
+		$courseId = $this->resolveLessonCourse( $lessonId, $expectedCourseId );
+
+		if ( ! $this->repository->isUserEnrolled( $userId, $courseId ) ) {
+			return null;
+		}
+
+		if ( $this->repository->isLessonComplete( $userId, $lessonId ) ) {
+			return null;
+		}
+
+		if ( null !== $this->lessonRequirements && ! $this->lessonRequirements->requirementsMet( $userId, $lessonId ) ) {
+			return null;
+		}
+
+		if ( null === $this->lessonRequirements && null !== $this->quizService
+			&& ! $this->quizService->hasPassedLessonQuiz( $userId, $lessonId ) ) {
+			return null;
+		}
+
+		try {
+			return $this->completeLesson( $userId, $lessonId, $courseId, false );
+		} catch ( ForbiddenException | NotFoundException ) {
+			return null;
+		}
+	}
+
+	public function markVideoWatched( int $userId, int $lessonId, ?int $expectedCourseId = null ): ?CompleteLessonResult {
+		$courseId = $this->resolveLessonCourse( $lessonId, $expectedCourseId );
+		$this->assertEnrolled( $userId, $courseId );
+
+		if ( null !== $this->lessonAccessService ) {
+			$this->lessonAccessService->assertCanAccessLesson( $userId, $lessonId );
+		}
+
+		if ( null !== $this->lessonRequirements ) {
+			$this->lessonRequirements->markVideoWatched( $userId, $lessonId );
+		}
+
+		return $this->tryAutoCompleteLesson( $userId, $lessonId, $courseId );
+	}
+
+	private function persistCompletion( int $userId, int $lessonId, int $courseId ): CompleteLessonResult {
 		$now    = $this->clock->now();
 		$result = $this->repository->completeLesson( $userId, $lessonId, $courseId, $now );
 
