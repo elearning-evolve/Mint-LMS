@@ -36,6 +36,7 @@
     "scripts": {
         "arch": "phpunit -c phpunit.xml.dist --testsuite architecture",
         "test:unit": "phpunit -c phpunit.xml.dist --testsuite unit",
+        "test:ci": "phpunit -c phpunit.xml.dist --testsuite ci",
         "test:integ": "phpunit -c phpunit.xml.dist --testsuite integration",
         "stan": "phpstan analyse --memory-limit=512M",
         "sniff": "phpcs",

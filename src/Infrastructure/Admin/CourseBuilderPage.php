@@ -162,9 +162,12 @@ final class CourseBuilderPage {
 		}
 
 		$from = isset( $_GET['from'] ) ? sanitize_key( wp_unslash( (string) $_GET['from'] ) ) : 'lessons'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$url  = 'admin.php?page=mint-lms-builder&course_id=' . $courseId
+		if ( '' === $from ) {
+			$from = 'lessons';
+		}
+		$url = 'admin.php?page=mint-lms-builder&course_id=' . $courseId
 			. '&lesson_id=' . $lessonId
-			. '&from=' . ( $from ?: 'lessons' );
+			. '&from=' . $from;
 		if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$url .= '&tab=' . sanitize_key( wp_unslash( (string) $_GET['tab'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		}

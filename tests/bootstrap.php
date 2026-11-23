@@ -104,6 +104,79 @@ if ( ! function_exists( 'get_userdata' ) ) {
 	}
 }
 
+if ( ! function_exists( 'home_url' ) ) {
+	/**
+	 * @param string $path Optional path relative to home.
+	 */
+	function home_url( $path = '' ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound
+		$path = is_string( $path ) ? $path : '';
+
+		return 'http://example.com' . ( '' === $path || str_starts_with( $path, '/' ) ? $path : '/' . $path );
+	}
+}
+
+if ( ! function_exists( 'get_permalink' ) ) {
+	/**
+	 * @param int|\WP_Post|null $post Post ID or object.
+	 * @return string|false
+	 */
+	function get_permalink( $post = 0 ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound
+		unset( $post );
+
+		return false;
+	}
+}
+
+if ( ! function_exists( 'add_query_arg' ) ) {
+	/**
+	 * Minimal query-arg helper for unit tests (not a full WP port).
+	 *
+	 * @param string|array<string, mixed> $key   Key or map of args.
+	 * @param string                      $value Value when $key is a string.
+	 * @param string|null                 $url   Base URL.
+	 */
+	function add_query_arg( $key, $value = '', $url = null ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound
+		if ( null === $url ) {
+			$url = home_url( '/' );
+		}
+
+		$args = is_array( $key ) ? $key : array( (string) $key => $value );
+		$parts = wp_parse_url( (string) $url );
+		if ( ! is_array( $parts ) ) {
+			$parts = array();
+		}
+
+		$query = array();
+		if ( ! empty( $parts['query'] ) && is_string( $parts['query'] ) ) {
+			parse_str( $parts['query'], $query );
+		}
+
+		foreach ( $args as $arg_key => $arg_value ) {
+			$query[ (string) $arg_key ] = $arg_value;
+		}
+
+		$scheme = isset( $parts['scheme'] ) ? $parts['scheme'] . '://' : '';
+		$host   = $parts['host'] ?? '';
+		$port   = isset( $parts['port'] ) ? ':' . $parts['port'] : '';
+		$path   = $parts['path'] ?? '';
+		$built  = $scheme . $host . $port . $path;
+		$qs     = http_build_query( $query );
+
+		return '' === $qs ? $built : $built . '?' . $qs;
+	}
+}
+
+if ( ! function_exists( 'wp_parse_url' ) ) {
+	/**
+	 * @param string $url       URL.
+	 * @param int    $component Component.
+	 * @return mixed
+	 */
+	function wp_parse_url( $url, $component = -1 ) { // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound
+		return parse_url( (string) $url, $component );
+	}
+}
+
 if ( ! defined( 'OBJECT' ) ) {
 	define( 'OBJECT', 'OBJECT' );
 }

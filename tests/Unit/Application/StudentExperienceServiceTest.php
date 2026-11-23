@@ -5,9 +5,9 @@ namespace MintLMS\Tests\Unit\Application;
 
 use MintLMS\Application\Exception\ForbiddenException;
 use MintLMS\Application\Exception\NotFoundException;
+use MintLMS\Application\Contract\QuizStudentQueryInterface;
 use MintLMS\Application\Quiz\Dto\QuizDto;
 use MintLMS\Application\Quiz\Dto\QuizQuestionDto;
-use MintLMS\Application\Quiz\QuizService;
 use MintLMS\Application\Student\StudentExperienceService;
 use MintLMS\Domain\Course\Course;
 use MintLMS\Domain\Course\CourseRepositoryInterface;
@@ -295,10 +295,6 @@ final class StudentExperienceServiceTest extends TestCase
 
     public function test_player_context_includes_quiz_when_present(): void
     {
-        $this->markTestSkipped(
-            'QuizService is final and cannot be doubled in PHPUnit 10; needs a QuizLifecycle/QuizQuery interface for unit doubles.'
-        );
-
         $userId = 7;
         $course = $this->sampleCourse(10, 'Sample Course');
 
@@ -308,7 +304,7 @@ final class StudentExperienceServiceTest extends TestCase
         $this->progressRepository->method('getSummary')->willReturn(null);
         $this->progressRepository->method('getCompletedLessonIds')->willReturn([]);
 
-        $quizService = $this->createMock(QuizService::class);
+        $quizQuery = $this->createMock(QuizStudentQueryInterface::class);
         $quizDto = new QuizDto(
             55,
             100,
@@ -320,8 +316,9 @@ final class StudentExperienceServiceTest extends TestCase
                 new QuizQuestionDto(1, 'mcq', 'Pick one', ['A', 'B'], null, 0),
             ],
         );
-        $quizService->method('getByLessonId')->with(100, $userId, true)->willReturn($quizDto);
-        $quizService->method('hasPassed')->with($userId, 55)->willReturn(false);
+        $quizQuery->method('getByLessonId')->with(100, $userId, true, false)->willReturn($quizDto);
+        $quizQuery->method('hasPassed')->with($userId, 55)->willReturn(false);
+        $quizQuery->method('countUserAttempts')->with(55, $userId)->willReturn(0);
 
         $service = new StudentExperienceService(
             $this->courseRepository,
@@ -329,7 +326,7 @@ final class StudentExperienceServiceTest extends TestCase
             $this->enrollmentRepository,
             $this->progressRepository,
             $this->clock,
-            $quizService,
+            $quizQuery,
         );
 
         $context = $service->getPlayerContext(10, 100, $userId);

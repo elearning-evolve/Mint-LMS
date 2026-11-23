@@ -109,7 +109,8 @@ function mintlms_uninstall_delete_options(): void {
 		PageSettings::OPTION_EMAIL_ENROLL,
 		PageSettings::OPTION_EMAIL_COMPLETE,
 		PageSettings::OPTION_DELETE_DATA_ON_UNINSTALL,
-		'mintlms_uninstall_delete_pages', // Legacy unused flag.
+		// Legacy unused flag.
+		'mintlms_uninstall_delete_pages',
 		'mintlms_wc_cancel_on_refund',
 		'mintlms_wc_enroll_statuses',
 	);
