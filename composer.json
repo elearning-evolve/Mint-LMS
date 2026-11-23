@@ -38,7 +38,7 @@
         "arch": "phpunit -c phpunit.xml.dist --testsuite architecture",
         "test:unit": "phpunit -c phpunit.xml.dist --testsuite unit",
         "test:ci": "phpunit -c phpunit.xml.dist --testsuite ci",
-        "test:integ": "phpunit -c phpunit.xml.dist --testsuite integration",
+        "test:integ": "bash dev/run-integration-tests.sh",
         "stan": "phpstan analyse --memory-limit=2G",
         "sniff": "phpcs",
         "fix": "phpcbf",

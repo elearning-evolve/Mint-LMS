@@ -5,19 +5,15 @@ namespace MintLMS\Tests\Integration\Setup;
 
 use MintLMS\Infrastructure\Setup\PageInstaller;
 use MintLMS\Infrastructure\Setup\PageSettings;
-use PHPUnit\Framework\TestCase;
+use MintLMS\Tests\Integration\IntegrationTestCase;
 
-final class PageInstallerTest extends TestCase
+/**
+ * @group integration
+ */
+final class PageInstallerTest extends IntegrationTestCase
 {
     /** @var list<int> */
     private array $createdPageIds = [];
-
-    protected function setUp(): void
-    {
-        if (!defined('ABSPATH') || !function_exists('wp_insert_post')) {
-            $this->markTestSkipped('WordPress test environment not available.');
-        }
-    }
 
     protected function tearDown(): void
     {
