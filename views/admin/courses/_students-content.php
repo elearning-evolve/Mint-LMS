@@ -61,7 +61,7 @@ if ( $courseId > 0 ) {
 
 			$progressPct = (int) round( $student->progressPct );
 			$hueIdx      = ( $index % 6 ) + 1;
-			$parts = preg_split( '/\s+/', trim( $name ) );
+			$parts       = preg_split( '/\s+/', trim( $name ) );
 			if ( ! is_array( $parts ) ) {
 				$parts = array();
 			}

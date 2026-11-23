@@ -854,7 +854,7 @@ final class WpPostQuizRepository implements QuizRepositoryInterface {
 	}
 
 	private function mapPostToQuiz( \WP_Post $post ): Quiz {
-		$rawPass = get_post_meta( $post->ID, PostTypes::META_PASS_PERCENT, true );
+		$rawPass     = get_post_meta( $post->ID, PostTypes::META_PASS_PERCENT, true );
 		$passPercent = ( '' === $rawPass || false === $rawPass )
 			? 80
 			: max( 0, min( 100, (int) $rawPass ) );

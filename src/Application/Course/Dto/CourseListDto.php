@@ -26,18 +26,18 @@ final readonly class CourseListDto {
 	 */
 	public function toArray(): array {
 		return array(
-			'items'           => array_map(
+			'items'          => array_map(
 				static fn( CourseDto $course ): array => $course->toArray(),
 				$this->courses
 			),
-			'total'           => $this->total,
-			'page'            => $this->page,
-			'perPage'         => $this->perPage,
-			'trashTotal'      => $this->trashTotal,
-			'allTotal'        => $this->allTotal,
-			'publishedTotal'  => $this->publishedTotal,
-			'draftTotal'      => $this->draftTotal,
-			'archivedTotal'   => $this->archivedTotal,
+			'total'          => $this->total,
+			'page'           => $this->page,
+			'perPage'        => $this->perPage,
+			'trashTotal'     => $this->trashTotal,
+			'allTotal'       => $this->allTotal,
+			'publishedTotal' => $this->publishedTotal,
+			'draftTotal'     => $this->draftTotal,
+			'archivedTotal'  => $this->archivedTotal,
 		);
 	}
 }

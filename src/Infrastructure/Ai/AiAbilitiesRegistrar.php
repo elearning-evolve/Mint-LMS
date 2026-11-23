@@ -326,7 +326,7 @@ final class AiAbilitiesRegistrar {
 				);
 
 				if ( $result['id'] > 0 ) {
-					$edit = get_edit_post_link( $result['id'], 'raw' );
+					$edit               = get_edit_post_link( $result['id'], 'raw' );
 					$result['edit_url'] = is_string( $edit ) ? $edit : '';
 				}
 
@@ -390,7 +390,7 @@ final class AiAbilitiesRegistrar {
 	private function withEditUrl( array $result ): array {
 		$id = (int) ( $result['id'] ?? 0 );
 		if ( $id > 0 ) {
-			$edit = get_edit_post_link( $id, 'raw' );
+			$edit               = get_edit_post_link( $id, 'raw' );
 			$result['edit_url'] = is_string( $edit ) ? $edit : '';
 		}
 		$result['scope'] = 'mintlms_only';

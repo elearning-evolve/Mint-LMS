@@ -146,7 +146,7 @@ final class ContentPostListController {
 			)
 		);
 
-		$all = new \WP_Query(
+		$all       = new \WP_Query(
 			array_merge(
 				$base,
 				array( 'post_status' => $this->wpStatusesForFilter( 'all' ) )
@@ -158,19 +158,19 @@ final class ContentPostListController {
 				array( 'post_status' => $this->wpStatusesForFilter( 'published' ) )
 			)
 		);
-		$draft = new \WP_Query(
+		$draft     = new \WP_Query(
 			array_merge(
 				$base,
 				array( 'post_status' => $this->wpStatusesForFilter( 'draft' ) )
 			)
 		);
-		$archived = new \WP_Query(
+		$archived  = new \WP_Query(
 			array_merge(
 				$base,
 				array( 'post_status' => $this->wpStatusesForFilter( 'archived' ) )
 			)
 		);
-		$trash = new \WP_Query(
+		$trash     = new \WP_Query(
 			array_merge(
 				$base,
 				array( 'post_status' => 'trash' )
@@ -256,7 +256,7 @@ final class ContentPostListController {
 			);
 		}
 
-		$incomplete = 0;
+		$incomplete  = 0;
 		$readyDrafts = array();
 
 		foreach ( $rows as $row ) {
@@ -470,7 +470,7 @@ final class ContentPostListController {
 
 		$modified = get_post_modified_time( 'c', true, $post );
 		if ( ! is_string( $modified ) || '' === $modified ) {
-			$created = get_post_time( 'c', true, $post );
+			$created  = get_post_time( 'c', true, $post );
 			$modified = is_string( $created ) && '' !== $created ? $created : '';
 		}
 

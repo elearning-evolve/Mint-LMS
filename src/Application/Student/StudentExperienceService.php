@@ -293,7 +293,7 @@ final class StudentExperienceService {
 			}
 		}
 
-		$quizzes = $this->buildQuizOutlineForLesson( $lessonId, $userId, true );
+		$quizzes   = $this->buildQuizOutlineForLesson( $lessonId, $userId, true );
 		$quizCount = count( $quizzes );
 		$meta      = 0 === $quizCount
 			? __( 'No quiz yet', 'mint-lms' )
@@ -658,9 +658,9 @@ final class StudentExperienceService {
 			$this->assertCourseAccessWindow( $course, $userId );
 		}
 
-		$structure  = $this->loadGatedStructure( $courseId, $isEnrolled || $publicBrowse, $userId, $isEditorPreview, $isEnrolled );
-		$flat       = $this->flattenLessons( $structure );
-		$current    = $this->findLessonInStructure( $structure, $lessonId );
+		$structure = $this->loadGatedStructure( $courseId, $isEnrolled || $publicBrowse, $userId, $isEditorPreview, $isEnrolled );
+		$flat      = $this->flattenLessons( $structure );
+		$current   = $this->findLessonInStructure( $structure, $lessonId );
 
 		if ( null === $current ) {
 			throw new NotFoundException( 'Lesson not found.' );
@@ -674,7 +674,7 @@ final class StudentExperienceService {
 
 		if ( $current->isDripLocked ) {
 			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Plain-text drip/progression copy; stripped below before reaching clients.
-			$message = preg_replace(
+			$message   = preg_replace(
 				'/[\r\n\t\x00-\x08\x0B\x0C\x0E-\x1F<>]/',
 				'',
 				(string) ( $current->dripMessage ?? '' )
@@ -861,8 +861,8 @@ final class StudentExperienceService {
 		$reallyEnrolled = null !== $isReallyEnrolled ? $isReallyEnrolled : $canBrowseContent;
 		$enrolledAt     = $this->resolveEnrollmentDate( $userId, $courseId, $reallyEnrolled );
 		// Students: published lessons only. Instructor preview ($skipDrip): include drafts.
-		$publishedOnly  = ! $skipDrip;
-		$rows           = $this->sectionRepository->loadStructureRows( $courseId, $publishedOnly );
+		$publishedOnly = ! $skipDrip;
+		$rows          = $this->sectionRepository->loadStructureRows( $courseId, $publishedOnly );
 		// Same order as LessonAccessService / curriculum display (ungrouped first).
 		$orderedLessonIds = CourseLessonSequence::orderedLessonIds( $rows );
 

@@ -15,12 +15,12 @@ final class Roles {
 	public const INSTRUCTOR    = 'mintlms_instructor';
 	public const STUDENT       = 'mintlms_student';
 
-	public const CAP_MANAGE       = 'manage_mintlms';
-	public const CAP_EDIT         = 'edit_mintlms_courses';
-	public const CAP_EDIT_OTHERS  = 'edit_others_mintlms_courses';
-	public const CAP_ENROLL       = 'enroll_mintlms_students';
-	public const CAP_REPORTS      = 'view_mintlms_reports';
-	public const CAP_TAKE         = 'take_mintlms_courses';
+	public const CAP_MANAGE      = 'manage_mintlms';
+	public const CAP_EDIT        = 'edit_mintlms_courses';
+	public const CAP_EDIT_OTHERS = 'edit_others_mintlms_courses';
+	public const CAP_ENROLL      = 'enroll_mintlms_students';
+	public const CAP_REPORTS     = 'view_mintlms_reports';
+	public const CAP_TAKE        = 'take_mintlms_courses';
 
 	/**
 	 * @return list<string>

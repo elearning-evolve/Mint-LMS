@@ -108,7 +108,7 @@ final class FirstRunRedirect {
 			return;
 		}
 
-		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( (string) $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$page          = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( (string) $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$onCoursesList = $this->isCoursesListScreen();
 
 		// Legacy guided wizard URL — always send users back to the dashboard.

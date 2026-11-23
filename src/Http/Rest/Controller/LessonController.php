@@ -454,34 +454,34 @@ final class LessonController {
 	 */
 	private function updateArgs(): array {
 		return array(
-			'title'         => array(
+			'title'                => array(
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 			),
-			'slug'          => array(
+			'slug'                 => array(
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_title',
 			),
-			'content'       => array(
+			'content'              => array(
 				'type'              => 'string',
 				'sanitize_callback' => array( RestContentSanitizer::class, 'richText' ),
 			),
-			'video_url'     => array(
+			'video_url'            => array(
 				'type'              => 'string',
 				'sanitize_callback' => 'esc_url_raw',
 			),
-			'attachment_id' => array(
+			'attachment_id'        => array(
 				'type'              => 'integer',
 				'sanitize_callback' => 'absint',
 			),
-			'is_preview'    => array(
+			'is_preview'           => array(
 				'type' => 'boolean',
 			),
 			'available_after_days' => array(
 				'type'              => 'integer',
 				'sanitize_callback' => 'absint',
 			),
-			'featured_image_id' => array(
+			'featured_image_id'    => array(
 				'type'              => array( 'integer', 'null' ),
 				'sanitize_callback' => static function ( mixed $value ): ?int {
 					if ( null === $value || '' === $value || false === $value ) {

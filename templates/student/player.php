@@ -10,17 +10,17 @@ use MintLMS\Application\Student\Dto\StudentPlayerContextDto;
 
 /** @var StudentPlayerContextDto $context */
 /** @var callable(int): string $lessonUrl */
-$context        = $context;
-$lessonUrl      = $lessonUrl;
-$dashboardUrl   = $dashboardUrl ?? home_url( '/' );
-$attachmentUrl  = $attachmentUrl ?? null;
-$videoEmbed     = $videoEmbed ?? '';
-$quizPreviewUrl = is_string( $quizPreviewUrl ?? null ) ? $quizPreviewUrl : '';
-$lessonSettings = is_array( $lessonSettings ?? null ) ? $lessonSettings : array();
-$videoTiming    = ( $lessonSettings['videoTiming'] ?? 'before' ) === 'after' ? 'after' : 'before';
-$showVideoBefore = '' !== $videoEmbed && 'before' === $videoTiming;
-$showVideoAfter  = '' !== $videoEmbed && 'after' === $videoTiming;
-$materialsHtml   = ! empty( $lessonSettings['materialsEnabled'] )
+$context          = $context;
+$lessonUrl        = $lessonUrl;
+$dashboardUrl     = $dashboardUrl ?? home_url( '/' );
+$attachmentUrl    = $attachmentUrl ?? null;
+$videoEmbed       = $videoEmbed ?? '';
+$quizPreviewUrl   = is_string( $quizPreviewUrl ?? null ) ? $quizPreviewUrl : '';
+$lessonSettings   = is_array( $lessonSettings ?? null ) ? $lessonSettings : array();
+$videoTiming      = ( $lessonSettings['videoTiming'] ?? 'before' ) === 'after' ? 'after' : 'before';
+$showVideoBefore  = '' !== $videoEmbed && 'before' === $videoTiming;
+$showVideoAfter   = '' !== $videoEmbed && 'after' === $videoTiming;
+$materialsHtml    = ! empty( $lessonSettings['materialsEnabled'] )
 	? (string) ( $lessonSettings['materialsContent'] ?? '' )
 	: '';
 $videoProgression = ! empty( $lessonSettings['videoProgression'] ) && str_contains( $videoEmbed, '<video' );

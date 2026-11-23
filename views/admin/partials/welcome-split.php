@@ -26,11 +26,11 @@ $current_roles = is_user_logged_in() ? (array) wp_get_current_user()->roles : ar
 // Instructors (own content only) get a 2-step classroom welcome.
 $is_instructor_welcome = ContentOwnership::currentUserMustOwnContent();
 // Mint LMS Manager (not WP Administrator) gets a 2-step manage welcome — same pattern as Instructor.
-$is_manager_welcome    = ! $is_instructor_welcome
+$is_manager_welcome  = ! $is_instructor_welcome
 	&& in_array( Roles::MANAGER, $current_roles, true )
 	&& ! in_array( Roles::ADMINISTRATOR, $current_roles, true );
-$is_two_step_welcome   = $is_instructor_welcome || $is_manager_welcome;
-$max_steps             = $is_two_step_welcome ? 2 : 3;
+$is_two_step_welcome = $is_instructor_welcome || $is_manager_welcome;
+$max_steps           = $is_two_step_welcome ? 2 : 3;
 
 $welcome_mod_class = '';
 if ( $is_instructor_welcome ) {
