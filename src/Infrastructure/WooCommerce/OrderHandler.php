@@ -5,6 +5,8 @@ namespace MintLMS\Infrastructure\WooCommerce;
 
 defined( 'ABSPATH' ) || exit;
 
+use MintLMS\Logger;
+
 final class OrderHandler {
 
 	public function __construct(
@@ -220,10 +222,6 @@ final class OrderHandler {
 	}
 
 	private function log( string $level, string $message ): void {
-		if ( ! function_exists( 'wc_get_logger' ) ) {
-			return;
-		}
-
-		wc_get_logger()->log( $level, $message, array( 'source' => 'mint-lms' ) );
+		Logger::log( $level, $message );
 	}
 }

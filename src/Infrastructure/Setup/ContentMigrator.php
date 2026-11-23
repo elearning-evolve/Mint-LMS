@@ -9,6 +9,7 @@ use MintLMS\Infrastructure\Database\Schema;
 use MintLMS\Infrastructure\PostType\PostTypeRegistrar;
 use MintLMS\Infrastructure\PostType\PostTypes;
 use MintLMS\Infrastructure\WooCommerce\EnrollmentBridge;
+use MintLMS\Logger;
 
 /**
  * One-shot legacy custom-table → CPT content migration.
@@ -44,8 +45,7 @@ final class ContentMigrator {
 			$this->migrate();
 			update_option( self::OPTION_MIGRATED, '1', false );
 		} catch ( \Throwable $e ) {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log -- Migration failure must not break boot.
-			error_log( 'Mint LMS CPT content migration failed: ' . $e->getMessage() );
+			Logger::error( 'Mint LMS CPT content migration failed: ' . $e->getMessage() );
 		}
 	}
 
