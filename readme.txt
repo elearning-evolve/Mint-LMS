@@ -5,7 +5,7 @@ Tags: lms, learning, courses, quizzes, elearning
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 8.2
-Stable tag: 1.1.19
+Stable tag: 1.1.20
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -60,6 +60,9 @@ Must-watch progression is enforced for self-hosted HTML5 video only. YouTube, Vi
 When quiz saving is enabled, answers are kept in the student’s browser tab (session storage) so they can continue in the same tab. Progress is not stored on the server, and clearing the tab or switching devices loses unfinished answers. Submitted attempts are stored normally.
 
 == Changelog ==
+
+= 1.1.20 =
+* Ship composer.json (+ lock) through .distignore so staging/wp.org packages that exclude vendor rebuild steps still satisfy Plugin Check.
 
 = 1.1.19 =
 * Plugin Check: rewrite readme short description in plain English so language detection passes (no MCP/Claude acronyms in the tagline).
