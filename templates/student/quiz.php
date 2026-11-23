@@ -39,13 +39,15 @@ $viewQsDefault  = array_key_exists( 'viewQuestionsButton', $storedSettings ) ? !
 $showOverall    = array_key_exists( 'showOverallScore', $storedSettings ) ? ! empty( $storedSettings['showOverallScore'] ) : true;
 $showCorrect    = array_key_exists( 'showCorrectCount', $storedSettings ) ? ! empty( $storedSettings['showCorrectCount'] ) : true;
 $showTimeSpent  = array_key_exists( 'showTimeSpent', $storedSettings ) ? ! empty( $storedSettings['showTimeSpent'] ) : true;
-$quizBoot       = wp_json_encode(
+$attemptsUsed = absint( $attemptsUsed ?? 0 );
+$quizBoot     = wp_json_encode(
 	array(
 		'quizId'          => (int) $quiz->id,
 		'quizTitle'       => (string) $quiz->title,
 		'passPercent'     => (int) $quiz->passPercent,
 		'hasPassed'       => (bool) $hasPassedQuiz,
 		'previewMode'     => (bool) $isReviewMode,
+		'attemptsUsed'    => $attemptsUsed,
 		'focusQuestionId' => (int) ( $focusQuestionId ?? 0 ),
 		'settings'        => array(
 			'timeLimitEnabled'          => ! empty( $storedSettings['timeLimitEnabled'] ),

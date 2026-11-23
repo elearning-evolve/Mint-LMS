@@ -162,6 +162,7 @@ document.addEventListener('alpine:init', () => {
     answers: {},
     hasPassed: config.hasPassed || false,
     previewMode: !!config.previewMode,
+    attemptsUsed: Math.max(0, Number(config.attemptsUsed || 0)),
     submitted: false,
     submitting: false,
     scorePercent: 0,
@@ -366,8 +367,14 @@ document.addEventListener('alpine:init', () => {
     },
 
     canRestart() {
-      if (this.settings.restrictRetakes && !this.previewMode) return false;
-      return this.settings.restartButton !== false;
+      if (this.settings.restartButton === false) return false;
+      // Instructor preview is ungraded — always allow restart when the button is on.
+      if (this.previewMode) return true;
+      // Mirror QuizService: maxAttempts = retriesAllowed + 1 (initial attempt).
+      if (!this.settings.restrictRetakes) return true;
+      const retriesAllowed = Math.max(0, Number(this.settings.retriesAllowed || 0));
+      const maxAttempts = retriesAllowed + 1;
+      return this.attemptsUsed < maxAttempts;
     },
 
     canViewQuestions() {
@@ -755,6 +762,10 @@ document.addEventListener('alpine:init', () => {
         const grade = data.review && Array.isArray(data.review.questions) ? data.review : data;
         this.applyGrade(grade);
 
+        if (!this.previewMode) {
+          this.attemptsUsed = Math.max(0, Number(this.attemptsUsed || 0)) + 1;
+        }
+
         if (!this.previewMode && data.passed) {
           this.hasPassed = true;
           const playerEl = document.querySelector('[x-data*="mintCoursePlayer"]');
@@ -771,6 +782,7 @@ document.addEventListener('alpine:init', () => {
     },
 
     retry() {
+      if (!this.canRestart()) return;
       if (this.timerId) window.clearInterval(this.timerId);
       if (this.saveTimerId) window.clearInterval(this.saveTimerId);
       this.timerId = null;

@@ -507,19 +507,26 @@ final class ShortcodeRegistrar {
 		if ( $resolvedLessonId > 0 && PostTypes::isDisposableHostLesson( $resolvedLessonId ) ) {
 			$resolvedLessonId = 0;
 		}
-		$previewMode   = isset( $_GET['mint_preview'] ) ? sanitize_key( (string) wp_unslash( $_GET['mint_preview'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$isEditor      = $this->studentExperience->isEditorPreviewing( $resolvedCourseId, $userId );
-		$isEnrolled    = $this->studentExperience->isUserEnrolledInCourse( $userId, $resolvedCourseId );
+		$previewMode     = isset( $_GET['mint_preview'] ) ? sanitize_key( (string) wp_unslash( $_GET['mint_preview'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$isEditor        = $this->studentExperience->isEditorPreviewing( $resolvedCourseId, $userId );
+		$isEnrolled      = $this->studentExperience->isUserEnrolledInCourse( $userId, $resolvedCourseId );
 		$explicitPreview = in_array( $previewMode, array( 'quiz', 'question' ), true );
-		$isReviewMode  = $isEditor && ( $explicitPreview || ! $isEnrolled );
+		$isReviewMode    = $isEditor && ( $explicitPreview || ! $isEnrolled );
 		$focusQuestionId = $this->queryInt( 'mint_question' );
-		$courseTitle   = $this->publicPostTitle( $resolvedCourseId );
-		$lessonTitle   = $resolvedLessonId > 0 ? $this->publicPostTitle( $resolvedLessonId ) : '';
-		$lessonUrl     = '';
+		$courseTitle     = $this->publicPostTitle( $resolvedCourseId );
+		$lessonTitle     = $resolvedLessonId > 0 ? $this->publicPostTitle( $resolvedLessonId ) : '';
+		$lessonUrl       = '';
 		if ( $resolvedLessonId > 0 ) {
 			$lessonUrl = $isReviewMode
 				? $this->previewLessonUrl( $resolvedCourseId, $resolvedLessonId )
 				: $this->lessonUrl( $resolvedCourseId, $resolvedLessonId );
+		}
+
+		$hasPassedQuiz = false;
+		$attemptsUsed  = 0;
+		if ( ! $isReviewMode && $isEnrolled && $userId > 0 && $quizId > 0 ) {
+			$hasPassedQuiz = $this->studentExperience->hasPassedQuiz( $userId, $quizId );
+			$attemptsUsed  = $this->studentExperience->countQuizAttempts( $userId, $quizId );
 		}
 
 		return $this->wrap(
@@ -533,7 +540,8 @@ final class ShortcodeRegistrar {
 					'lessonTitle'      => $lessonTitle,
 					'isReviewMode'     => $isReviewMode,
 					'isEnrolled'       => $isEnrolled || $isReviewMode,
-					'hasPassedQuiz'    => false,
+					'hasPassedQuiz'    => $hasPassedQuiz,
+					'attemptsUsed'     => $attemptsUsed,
 					'focusQuestionId'  => $focusQuestionId,
 				)
 			)

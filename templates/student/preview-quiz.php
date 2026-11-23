@@ -21,14 +21,15 @@ $lessonUrl   = is_string( $lessonUrl ?? null ) ? $lessonUrl : '';
 $courseTitle = trim( (string) ( $courseTitle ?? '' ) );
 $lessonTitle = trim( (string) ( $lessonTitle ?? '' ) );
 
-$quizRequired     = true;
-$isReviewMode     = ! empty( $isReviewMode );
-$isEnrolled       = ! empty( $isEnrolled ) || $isReviewMode;
-$hasPassedQuiz    = false;
-$quizHeading      = false;
-$focusQuestionId  = (int) ( $focusQuestionId ?? 0 );
+$quizRequired    = true;
+$isReviewMode    = ! empty( $isReviewMode );
+$isEnrolled      = ! empty( $isEnrolled ) || $isReviewMode;
+$hasPassedQuiz   = ! empty( $hasPassedQuiz );
+$attemptsUsed    = absint( $attemptsUsed ?? 0 );
+$quizHeading     = false;
+$focusQuestionId = (int) ( $focusQuestionId ?? 0 );
 
-$displayQuiz = $quiz instanceof QuizDto && '' !== trim( $quiz->title )
+$displayQuiz   = $quiz instanceof QuizDto && '' !== trim( $quiz->title )
 	? trim( $quiz->title )
 	: __( 'Untitled quiz', 'mint-lms' );
 $questions     = $quiz instanceof QuizDto ? $quiz->questions : array();
@@ -164,7 +165,7 @@ if ( ! is_string( $previewBoot ) ) {
 						printf(
 							/* translators: %d: passing percentage */
 							esc_html__( 'Answer each question. Passing score: %d%%.', 'mint-lms' ),
-							$passPercent
+							absint( $passPercent )
 						);
 					} else {
 						esc_html_e( 'Answer each question, then submit the quiz.', 'mint-lms' );
