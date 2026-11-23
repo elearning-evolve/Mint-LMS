@@ -1,46 +1,35 @@
-# Development and CI
+# Development and CI (not shipped)
 /.git
 /.gitignore
 /.github
 /.githooks
-/.gitignore
 /.distignore
 /.phpunit.cache
+/.wp-qa
 /phpcs.xml
 /phpstan.neon
+/phpunit.xml.dist
 /composer.json
 /composer.lock
 /package.json
 /package-lock.json
 /tailwind.config.js
 /postcss.config.js
-/scripts
 /dev
-
-# Design handoff (not shipped)
-/Mint LMS Designs
-/Mint LMS Designs.zip
+/wp-qa-check.sh
+/README.md
+/readme.md
 
 # Source assets (built files in assets/dist are included)
 /assets/src
 /node_modules
 
-# Tests (not shipped to wordpress.org)
+# Tests
 /tests
 
-# Dev-only vendor tools (run composer install --no-dev before packaging)
-/vendor/bin
-/vendor/phpunit
-/vendor/phpstan
-/vendor/squizlabs
-/vendor/dealerdirect
-/vendor/phpcsstandards
-/vendor/wp-coding-standards
-/vendor/php-stubs
-/vendor/szepeviktor
-/vendor/sebastian
-/vendor/nikic
-/vendor/myclabs
-/vendor/theseer
-/vendor/phar-io
-wp-qa-check.sh
+# Working-tree vendor is replaced by `composer install --no-dev` in the release build.
+# Do not ship a partial/dev vendor via .distignore surgery.
+/vendor
+
+# Local build output
+/dist
