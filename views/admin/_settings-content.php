@@ -8,15 +8,16 @@ use MintLMS\Infrastructure\Setup\PageSettings;
 /** @var PageSettings $pageSettings */
 /** @var list<array{key: string, label: string, done: bool, detail: string}> $checklist */
 
-$dashboardId   = $pageSettings->getDashboardPageId();
-$catalogId     = $pageSettings->getCatalogPageId();
-$playerId      = $pageSettings->getPlayerPageId();
-$certTemplate  = (string) get_option( 'mintlms_certificate_template', '' );
-$doneCount     = count( array_filter( $checklist, static fn( array $item ): bool => $item['done'] ) );
-$totalCount    = count( $checklist );
-$progressPct   = $totalCount > 0 ? (int) round( ( $doneCount / $totalCount ) * 100 ) : 0;
-$pagesCreated  = isset( $_GET['mintlms_pages'] ) && '1' === sanitize_text_field( wp_unslash( (string) $_GET['mintlms_pages'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-$settingsSaved = isset( $_GET['settings-updated'] ) && 'true' === sanitize_text_field( wp_unslash( (string) $_GET['settings-updated'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+$dashboardId           = $pageSettings->getDashboardPageId();
+$catalogId             = $pageSettings->getCatalogPageId();
+$playerId              = $pageSettings->getPlayerPageId();
+$certTemplate          = (string) get_option( 'mintlms_certificate_template', '' );
+$deleteDataOnUninstall = (bool) get_option( PageSettings::OPTION_DELETE_DATA_ON_UNINSTALL, false );
+$doneCount             = count( array_filter( $checklist, static fn( array $item ): bool => $item['done'] ) );
+$totalCount            = count( $checklist );
+$progressPct           = $totalCount > 0 ? (int) round( ( $doneCount / $totalCount ) * 100 ) : 0;
+$pagesCreated          = isset( $_GET['mintlms_pages'] ) && '1' === sanitize_text_field( wp_unslash( (string) $_GET['mintlms_pages'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+$settingsSaved         = isset( $_GET['settings-updated'] ) && 'true' === sanitize_text_field( wp_unslash( (string) $_GET['settings-updated'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 $wp_pages     = get_pages(
 	array(
@@ -67,15 +68,16 @@ $enrollment_modes = array(
 $cert_tags = array( 'student_name', 'course_name', 'completion_date' );
 
 $boot = array(
-	'enrollment'    => $pageSettings->getDefaultEnrollment(),
-	'emailEnroll'   => $pageSettings->isEmailEnrollEnabled(),
-	'emailComplete' => $pageSettings->isEmailCompleteEnabled(),
-	'pages'         => $page_options,
-	'dashboardId'   => $dashboardId,
-	'catalogId'     => $catalogId,
-	'playerId'      => $playerId,
-	'certTemplate'  => $certTemplate,
-	'i18n'          => array(
+	'enrollment'            => $pageSettings->getDefaultEnrollment(),
+	'emailEnroll'           => $pageSettings->isEmailEnrollEnabled(),
+	'emailComplete'         => $pageSettings->isEmailCompleteEnabled(),
+	'deleteDataOnUninstall' => $deleteDataOnUninstall,
+	'pages'                 => $page_options,
+	'dashboardId'           => $dashboardId,
+	'catalogId'             => $catalogId,
+	'playerId'              => $playerId,
+	'certTemplate'          => $certTemplate,
+	'i18n'                  => array(
 		'selectPage' => __( '— Select —', 'mint-lms' ),
 	),
 );
@@ -119,6 +121,7 @@ $checklist_subtitle = $doneCount === $totalCount && $totalCount > 0
 		<input type="hidden" name="<?php echo esc_attr( PageSettings::OPTION_DEFAULT_ENROLLMENT ); ?>" :value="enrollment" />
 		<input type="hidden" name="<?php echo esc_attr( PageSettings::OPTION_EMAIL_ENROLL ); ?>" :value="emailEnroll ? '1' : '0'" />
 		<input type="hidden" name="<?php echo esc_attr( PageSettings::OPTION_EMAIL_COMPLETE ); ?>" :value="emailComplete ? '1' : '0'" />
+		<input type="hidden" name="<?php echo esc_attr( PageSettings::OPTION_DELETE_DATA_ON_UNINSTALL ); ?>" :value="deleteDataOnUninstall ? '1' : '0'" />
 
 		<div class="mint-settings__footer">
 			<p class="mint-settings__footer-note"><?php esc_html_e( 'Changes apply to your whole site once saved.', 'mint-lms' ); ?></p>
@@ -344,6 +347,31 @@ $checklist_subtitle = $doneCount === $totalCount && $totalCount > 0
 									</span>
 								</button>
 							<?php endforeach; ?>
+						</div>
+					</div>
+				</section>
+
+				<section class="mint-settings-card">
+					<header class="mint-settings-card__head">
+						<h2 class="mint-settings-card__title"><?php esc_html_e( 'Data & uninstall', 'mint-lms' ); ?></h2>
+						<p class="mint-settings-card__desc"><?php esc_html_e( 'By default, deleting the plugin keeps your courses and student data so you can reinstall safely.', 'mint-lms' ); ?></p>
+					</header>
+					<div class="mint-settings-card__body mint-settings-card__body--tight">
+						<div class="mint-settings-toggle-row">
+							<div>
+								<div class="mint-settings-toggle-row__title"><?php esc_html_e( 'Delete all Mint LMS data on uninstall', 'mint-lms' ); ?></div>
+								<div class="mint-settings-toggle-row__help"><?php esc_html_e( 'Removes courses, lessons, quizzes, enrollments, progress, settings, and related meta. This cannot be undone.', 'mint-lms' ); ?></div>
+							</div>
+							<button
+								type="button"
+								class="mint-settings-switch"
+								role="switch"
+								:aria-checked="deleteDataOnUninstall ? 'true' : 'false'"
+								:class="{ 'is-on': deleteDataOnUninstall }"
+								@click="toggleDeleteDataOnUninstall()"
+							>
+								<span class="mint-settings-switch__knob" aria-hidden="true"></span>
+							</button>
 						</div>
 					</div>
 				</section>
