@@ -121,6 +121,7 @@ $pct          = (int) round( $context->progressPct );
 				$quizRequired  = $context->quizRequired;
 				$hasPassedQuiz = $context->hasPassedQuiz;
 				$isEnrolled    = $context->isEnrolled;
+				$attemptsUsed  = $context->quizAttemptsUsed;
 				require MINTLMS_PATH . 'templates/student/quiz.php';
 			endif;
 			?>

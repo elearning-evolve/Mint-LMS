@@ -413,6 +413,14 @@ final class StudentExperienceService {
 		return $userId > 0 && $quizId > 0 && null !== $this->quizService && $this->quizService->hasPassed( $userId, $quizId );
 	}
 
+	public function countQuizAttempts( int $userId, int $quizId ): int {
+		if ( $userId <= 0 || $quizId <= 0 || null === $this->quizService ) {
+			return 0;
+		}
+
+		return $this->quizService->countUserAttempts( $quizId, $userId );
+	}
+
 	/**
 	 * Instructor live quiz runner (does not persist student attempts).
 	 */
@@ -705,9 +713,10 @@ final class StudentExperienceService {
 
 		$index = $this->lessonIndex( $flat, $lessonId );
 
-		$quiz           = null;
-		$quizRequired   = false;
-		$hasPassedQuiz  = true;
+		$quiz             = null;
+		$quizRequired     = false;
+		$hasPassedQuiz    = true;
+		$quizAttemptsUsed = 0;
 
 		if ( null !== $this->quizService && $userId > 0 ) {
 			$quizDto = $this->quizService->getByLessonId( $lessonId, $userId, true, $isEditorPreview );
@@ -719,8 +728,9 @@ final class StudentExperienceService {
 					$quizRequired  = false;
 					$hasPassedQuiz = false;
 				} else {
-					$quizRequired  = true;
-					$hasPassedQuiz = $this->quizService->hasPassed( $userId, $quizDto->id );
+					$quizRequired     = true;
+					$hasPassedQuiz    = $this->quizService->hasPassed( $userId, $quizDto->id );
+					$quizAttemptsUsed = $this->quizService->countUserAttempts( $quizDto->id, $userId );
 				}
 			}
 		}
@@ -744,6 +754,7 @@ final class StudentExperienceService {
 			$hasPassedQuiz,
 			$course->settings->studentComplete && $reallyEnrolled && ! $isEditorPreview,
 			$isEditorPreview,
+			$quizAttemptsUsed,
 		);
 	}
 
