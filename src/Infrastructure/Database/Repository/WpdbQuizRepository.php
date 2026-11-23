@@ -449,6 +449,25 @@ final class WpdbQuizRepository implements QuizRepositoryInterface {
 		);
 	}
 
+	public function countAttemptsByQuizAndUser( int $quizId, int $userId ): int {
+		if ( $quizId <= 0 || $userId <= 0 ) {
+			return 0;
+		}
+
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::quizAttemptsTable( $wpdb->prefix ), $wpdb->prefix );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT COUNT(*) FROM %i WHERE quiz_id = %d AND user_id = %d',
+				$table,
+				$quizId,
+				$userId
+			)
+		);
+	}
+
 	public function findAttemptsByQuizId( int $quizId ): array {
 		$wpdb  = $this->wpdb;
 		$table = Schema::validateTable( Schema::quizAttemptsTable( $wpdb->prefix ), $wpdb->prefix );

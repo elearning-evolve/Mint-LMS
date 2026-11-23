@@ -16,6 +16,10 @@ final class CourseBuilderPage {
 	public function register(): void {
 		add_action( 'admin_menu', array( $this, 'registerPages' ) );
 		add_action( 'load-admin_page_mint-lms-course-new', array( $this, 'createAndRedirect' ) );
+		// Redirect before admin chrome prints (avoid headers-already-sent without output buffering).
+		add_action( 'load-admin_page_mint-lms-builder', array( $this, 'maybeRedirectBuilder' ) );
+		add_action( 'load-admin_page_mint-lms-course-edit', array( $this, 'maybeRedirectEdit' ) );
+		add_action( 'load-admin_page_mint-lms-lesson-edit', array( $this, 'maybeRedirectLessonEdit' ) );
 	}
 
 	/**
@@ -117,16 +121,71 @@ final class CourseBuilderPage {
 		$this->createAndRedirect();
 	}
 
+	public function maybeRedirectBuilder(): void {
+		if ( ! current_user_can( 'edit_mintlms_courses' ) ) {
+			return;
+		}
+
+		$courseId = isset( $_GET['course_id'] ) ? absint( $_GET['course_id'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( $courseId <= 0 ) {
+			wp_safe_redirect( PostTypes::listUrl( PostTypes::COURSE ) );
+			exit;
+		}
+	}
+
+	public function maybeRedirectEdit(): void {
+		if ( ! current_user_can( 'edit_mintlms_courses' ) ) {
+			return;
+		}
+
+		$courseId = isset( $_GET['course_id'] ) ? absint( $_GET['course_id'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( $courseId <= 0 ) {
+			wp_safe_redirect( PostTypes::listUrl( PostTypes::COURSE ) );
+			exit;
+		}
+	}
+
+	public function maybeRedirectLessonEdit(): void {
+		if ( ! current_user_can( 'edit_mintlms_courses' ) ) {
+			return;
+		}
+
+		$lessonId = isset( $_GET['lesson_id'] ) ? absint( $_GET['lesson_id'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( $lessonId <= 0 ) {
+			wp_safe_redirect( PostTypes::listUrl( PostTypes::LESSON ) );
+			exit;
+		}
+
+		$courseId = (int) get_post_meta( $lessonId, PostTypes::META_COURSE_ID, true );
+		if ( $courseId <= 0 ) {
+			return;
+		}
+
+		$from = isset( $_GET['from'] ) ? sanitize_key( wp_unslash( (string) $_GET['from'] ) ) : 'lessons'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$url  = 'admin.php?page=mint-lms-builder&course_id=' . $courseId
+			. '&lesson_id=' . $lessonId
+			. '&from=' . ( $from ?: 'lessons' );
+		if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$url .= '&tab=' . sanitize_key( wp_unslash( (string) $_GET['tab'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		}
+		if ( isset( $_GET['quiz_id'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$url .= '&quiz_id=' . absint( $_GET['quiz_id'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		}
+		if ( isset( $_GET['question_id'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$url .= '&question_id=' . absint( $_GET['question_id'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		}
+		wp_safe_redirect( admin_url( $url ) );
+		exit;
+	}
+
 	public function renderBuilder(): void {
 		if ( ! current_user_can( 'edit_mintlms_courses' ) ) {
 			wp_die( esc_html__( 'You do not have permission to access the course builder.', 'mint-lms' ) );
 		}
 
 		$courseId = isset( $_GET['course_id'] ) ? absint( $_GET['course_id'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-
 		if ( $courseId <= 0 ) {
-			wp_safe_redirect( PostTypes::listUrl( PostTypes::COURSE ) );
-			exit;
+			wp_die( esc_html__( 'Course not found.', 'mint-lms' ) );
 		}
 
 		$renderer = new ViewRenderer();
@@ -145,10 +204,8 @@ final class CourseBuilderPage {
 		}
 
 		$courseId = isset( $_GET['course_id'] ) ? absint( $_GET['course_id'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-
 		if ( $courseId <= 0 ) {
-			wp_safe_redirect( PostTypes::listUrl( PostTypes::COURSE ) );
-			exit;
+			wp_die( esc_html__( 'Course not found.', 'mint-lms' ) );
 		}
 
 		$renderer = new ViewRenderer();
@@ -167,31 +224,11 @@ final class CourseBuilderPage {
 		}
 
 		$lessonId = isset( $_GET['lesson_id'] ) ? absint( $_GET['lesson_id'] ) : 0; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-
 		if ( $lessonId <= 0 ) {
-			wp_safe_redirect( PostTypes::listUrl( PostTypes::LESSON ) );
-			exit;
+			wp_die( esc_html__( 'Lesson not found.', 'mint-lms' ) );
 		}
 
-		$courseId = (int) get_post_meta( $lessonId, \MintLMS\Infrastructure\PostType\PostTypes::META_COURSE_ID, true );
-		if ( $courseId > 0 ) {
-			$from = isset( $_GET['from'] ) ? sanitize_key( wp_unslash( (string) $_GET['from'] ) ) : 'lessons'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$url  = 'admin.php?page=mint-lms-builder&course_id=' . $courseId
-				. '&lesson_id=' . $lessonId
-				. '&from=' . ( $from ?: 'lessons' );
-			if ( isset( $_GET['tab'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				$url .= '&tab=' . sanitize_key( wp_unslash( (string) $_GET['tab'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			}
-			if ( isset( $_GET['quiz_id'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				$url .= '&quiz_id=' . absint( $_GET['quiz_id'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			}
-			if ( isset( $_GET['question_id'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				$url .= '&question_id=' . absint( $_GET['question_id'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			}
-			wp_safe_redirect( admin_url( $url ) );
-			exit;
-		}
-
+		// Linked lessons redirect on load-*; standalone lessons render here.
 		$renderer = new ViewRenderer();
 		$renderer->echo(
 			'admin/layout-builder',

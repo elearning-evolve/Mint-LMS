@@ -352,6 +352,16 @@ final class QuizController {
 			return ApiResponse::error( 'validation_error', 'Invalid course id.', 400 );
 		}
 
+		$userId = $this->authorization->getCurrentUserId();
+		$course = get_post( $courseId );
+		if ( ! $course instanceof \WP_Post || PostTypes::COURSE !== $course->post_type ) {
+			return ApiResponse::error( 'not_found', 'Course not found.', 404 );
+		}
+
+		if ( ! $this->authorization->canEditCourse( $userId, (int) $course->post_author ) ) {
+			return ApiResponse::error( 'forbidden', 'You cannot manage quizzes for this course.', 403 );
+		}
+
 		$query = new \WP_Query(
 			array(
 				'post_type'              => PostTypes::QUIZ,

@@ -6,7 +6,9 @@ namespace MintLMS\Infrastructure\Certificate;
 defined( 'ABSPATH' ) || exit;
 
 use MintLMS\Application\Certificate\CertificateService;
+use MintLMS\Application\Contract\AuthorizationInterface;
 use MintLMS\Application\Exception\ForbiddenException;
+use MintLMS\Domain\Course\CourseRepositoryInterface;
 use MintLMS\Frontend\TemplateLoader;
 
 final class CertificateDownloadHandler {
@@ -14,6 +16,8 @@ final class CertificateDownloadHandler {
 	public function __construct(
 		private CertificateService $certificateService,
 		private TemplateLoader $templateLoader,
+		private ?AuthorizationInterface $authorization = null,
+		private ?CourseRepositoryInterface $courseRepository = null,
 	) {
 	}
 
@@ -35,7 +39,7 @@ final class CertificateDownloadHandler {
 
 		$currentUserId = get_current_user_id();
 
-		if ( $currentUserId !== $userId && ! current_user_can( 'manage_options' ) ) {
+		if ( $currentUserId !== $userId && ! $this->canViewOthersCertificate( $currentUserId, $courseId ) ) {
 			wp_die( esc_html__( 'You are not allowed to view this certificate.', 'mint-lms' ), '', array( 'response' => 403 ) );
 		}
 
@@ -55,5 +59,23 @@ final class CertificateDownloadHandler {
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Certificate HTML is generated from trusted admin template.
 		echo $output;
 		exit;
+	}
+
+	private function canViewOthersCertificate( int $actorUserId, int $courseId ): bool {
+		if ( $actorUserId <= 0 ) {
+			return false;
+		}
+
+		if ( current_user_can( 'manage_options' ) || current_user_can( 'manage_mintlms' ) ) {
+			return true;
+		}
+
+		if ( null === $this->authorization || null === $this->courseRepository ) {
+			return false;
+		}
+
+		$course = $this->courseRepository->findById( $courseId );
+
+		return null !== $course && $this->authorization->canEditCourse( $actorUserId, $course->authorId );
 	}
 }

@@ -12,7 +12,8 @@ final class WpUserLookup implements UserLookupInterface {
 	public function searchUsers( string $query, int $limit = 10 ): array {
 		$query = trim( $query );
 
-		if ( '' === $query ) {
+		// Require a real search term so instructors cannot dump the full user directory.
+		if ( strlen( $query ) < 2 && ! ctype_digit( $query ) ) {
 			return array();
 		}
 
@@ -63,6 +64,14 @@ final class WpUserLookup implements UserLookupInterface {
 		$perPage = max( 1, min( 200, $perPage ) );
 		$search  = trim( $search );
 
+		// Unscoped directory listing leaks emails; enroll UI must search.
+		if ( strlen( $search ) < 2 && ! ctype_digit( $search ) ) {
+			return array(
+				'users' => array(),
+				'total' => 0,
+			);
+		}
+
 		$args = array(
 			'number'  => $perPage,
 			'paged'   => $page,
@@ -71,15 +80,13 @@ final class WpUserLookup implements UserLookupInterface {
 			'fields'  => 'all',
 		);
 
-		if ( '' !== $search ) {
-			$wpdb = mintlms_wpdb();
-			$like = null !== $wpdb
-				? '*' . $wpdb->esc_like( $search ) . '*'
-				: '*' . $search . '*';
+		$wpdb = mintlms_wpdb();
+		$like = null !== $wpdb
+			? '*' . $wpdb->esc_like( $search ) . '*'
+			: '*' . $search . '*';
 
-			$args['search']         = $like;
-			$args['search_columns'] = array( 'user_login', 'user_email', 'user_nicename', 'display_name' );
-		}
+		$args['search']         = $like;
+		$args['search_columns'] = array( 'user_login', 'user_email', 'user_nicename', 'display_name' );
 
 		$query = new \WP_User_Query( $args );
 		$users = array();
@@ -109,14 +116,15 @@ final class WpUserLookup implements UserLookupInterface {
 	}
 
 	/**
-	 * @return array{id: int, email: string, display_name: string, user_login: string}
+	 * Minimal fields for enroll pickers (no user_login dump).
+	 *
+	 * @return array{id: int, email: string, display_name: string}
 	 */
 	private function mapUser( \WP_User $user ): array {
 		return array(
 			'id'           => (int) $user->ID,
 			'email'        => (string) $user->user_email,
 			'display_name' => (string) $user->display_name,
-			'user_login'   => (string) $user->user_login,
 		);
 	}
 }

@@ -5,7 +5,7 @@ Tags: lms, learning, courses, quizzes, elearning
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 8.2
-Stable tag: 1.1.7
+Stable tag: 1.1.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,6 +48,9 @@ LMS features (courses, lessons, quizzes, progress) do not require any third-part
 WordPress 6.2 or later and **PHP 8.2** or later. Optional AI Assistance also needs the MCP Adapter plugin and a compatible MCP client (e.g. Claude Desktop).
 
 == Changelog ==
+
+= 1.1.8 =
+* Security/reliability: course-scoped student/quiz lists; users API requires search; strip correct answers from student submit; SQL attempt counts; early admin redirects; enrollment gates on all intake; async publish emails; MintLMS caps for certificates; Avada strip only when Fusion active.
 
 = 1.1.7 =
 * Settings hygiene: hide unfinished admin toggles (SettingsSurface); server-enforce quiz time limit and video progression; auto-complete when mark-complete is off; write EnrollmentStatus::Completed on course finish.
