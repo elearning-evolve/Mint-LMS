@@ -717,8 +717,10 @@ final class ShortcodeRegistrar {
 
 		$settings = $this->settings();
 
+		$preferredQuizId = $this->queryInt( 'mint_quiz' );
+
 		try {
-			$context = $this->studentExperience->getPlayerContext( $courseId, $lessonId, $userId );
+			$context = $this->studentExperience->getPlayerContext( $courseId, $lessonId, $userId, $preferredQuizId );
 		} catch ( NotFoundException $exception ) {
 			return $this->wrap(
 				$this->errorMessage( __( 'Lesson not found.', 'mint-lms' ) )
@@ -870,10 +872,11 @@ final class ShortcodeRegistrar {
 	}
 
 	private function renderLessonPlayerPreview( int $courseId, int $lessonId, int $userId ): string {
-		$settings = $this->settings();
+		$settings        = $this->settings();
+		$preferredQuizId = $this->queryInt( 'mint_quiz' );
 
 		try {
-			$context = $this->studentExperience->getPlayerContext( $courseId, $lessonId, $userId );
+			$context = $this->studentExperience->getPlayerContext( $courseId, $lessonId, $userId, $preferredQuizId );
 		} catch ( NotFoundException $exception ) {
 			return $this->wrap(
 				$this->errorMessage( __( 'Lesson not found.', 'mint-lms' ) )

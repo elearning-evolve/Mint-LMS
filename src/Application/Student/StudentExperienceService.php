@@ -641,7 +641,7 @@ final class StudentExperienceService {
 		return $this->quizzesOutlineForLesson( $lessonId, $userId, $isEditorPreview );
 	}
 
-	public function getPlayerContext( int $courseId, int $lessonId, int $userId ): StudentPlayerContextDto {
+	public function getPlayerContext( int $courseId, int $lessonId, int $userId, int $preferredQuizId = 0 ): StudentPlayerContextDto {
 		$course = $this->courseRepository->findById( $courseId );
 
 		if ( null === $course ) {
@@ -721,18 +721,27 @@ final class StudentExperienceService {
 		$quizAttemptsUsed = 0;
 
 		if ( null !== $this->quizService && $userId > 0 ) {
-			$quizDto = $this->quizService->getByLessonId( $lessonId, $userId, true, $isEditorPreview );
+			// Builder allows multiple quizzes per lesson; completion requires all published ones.
+			$quizDtos = $this->quizService->listByLessonId( $lessonId, $userId, true, $isEditorPreview );
+			$withQuestions = array();
+			foreach ( $quizDtos as $quizDto ) {
+				if ( array() !== $quizDto->questions ) {
+					$withQuestions[] = $quizDto;
+				}
+			}
 
-			if ( null !== $quizDto && array() !== $quizDto->questions ) {
-				$quiz = $quizDto;
+			if ( array() !== $withQuestions ) {
+				$selected = $this->selectPlayerQuiz( $withQuestions, $preferredQuizId, $userId, $isEditorPreview );
+				$quiz     = $selected;
+
 				if ( $isEditorPreview ) {
 					// Review mode: show the live quiz, but don't block navigation / completion.
 					$quizRequired  = false;
 					$hasPassedQuiz = false;
 				} else {
 					$quizRequired     = true;
-					$hasPassedQuiz    = $this->quizService->hasPassed( $userId, $quizDto->id );
-					$quizAttemptsUsed = $this->quizService->countUserAttempts( $quizDto->id, $userId );
+					$hasPassedQuiz    = $this->quizService->hasPassedLessonQuiz( $userId, $lessonId );
+					$quizAttemptsUsed = $this->quizService->countUserAttempts( $selected->id, $userId );
 				}
 			}
 		}
@@ -758,6 +767,36 @@ final class StudentExperienceService {
 			$isEditorPreview,
 			$quizAttemptsUsed,
 		);
+	}
+
+	/**
+	 * Prefer mint_quiz when it belongs to the lesson; else first incomplete; else first.
+	 *
+	 * @param list<QuizDto> $withQuestions
+	 */
+	private function selectPlayerQuiz(
+		array $withQuestions,
+		int $preferredQuizId,
+		int $userId,
+		bool $isEditorPreview,
+	): QuizDto {
+		if ( $preferredQuizId > 0 ) {
+			foreach ( $withQuestions as $quizDto ) {
+				if ( $quizDto->id === $preferredQuizId ) {
+					return $quizDto;
+				}
+			}
+		}
+
+		if ( ! $isEditorPreview && null !== $this->quizService ) {
+			foreach ( $withQuestions as $quizDto ) {
+				if ( ! $this->quizService->hasPassed( $userId, $quizDto->id ) ) {
+					return $quizDto;
+				}
+			}
+		}
+
+		return $withQuestions[0];
 	}
 
 	/**

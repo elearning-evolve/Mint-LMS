@@ -4,9 +4,9 @@ declare(strict_types=1);
 defined( 'ABSPATH' ) || exit;
 
 use MintLMS\Application\Exception\ForbiddenException;
-use MintLMS\Frontend\StudentCopy;
-
+use MintLMS\Application\Progress\VideoWatchNonce;
 use MintLMS\Application\Student\Dto\StudentPlayerContextDto;
+use MintLMS\Frontend\StudentCopy;
 
 /** @var StudentPlayerContextDto $context */
 /** @var callable(int): string $lessonUrl */
@@ -40,6 +40,7 @@ $pct          = (int) round( $context->progressPct );
 		quizRequired: <?php echo $context->quizRequired ? 'true' : 'false'; ?>,
 		hasPassedQuiz: <?php echo $context->hasPassedQuiz ? 'true' : 'false'; ?>,
 		videoProgression: <?php echo $videoProgression ? 'true' : 'false'; ?>,
+		watchNonce: <?php echo $videoProgression ? wp_json_encode( wp_create_nonce( VideoWatchNonce::action( (int) $lesson->id ) ) ) : 'null'; ?>,
 		autoComplete: <?php echo ( $context->isEnrolled && ! $context->canMarkComplete && empty( $context->isReviewMode ) ) ? 'true' : 'false'; ?>
 	})"
 >
