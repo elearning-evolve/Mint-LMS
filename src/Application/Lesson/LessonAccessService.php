@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Application\Lesson;
 
+defined( 'ABSPATH' ) || exit;
+
 use MintLMS\Application\Exception\ForbiddenException;
 use MintLMS\Application\Exception\NotFoundException;
 use MintLMS\Domain\Course\CourseAccessRules;

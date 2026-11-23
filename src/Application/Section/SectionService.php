@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Application\Section;
 
+defined( 'ABSPATH' ) || exit;
+
 use MintLMS\Application\Contract\AuthorizationInterface;
 use MintLMS\Application\Contract\QuizLifecycleInterface;
 use MintLMS\Application\Exception\ForbiddenException;

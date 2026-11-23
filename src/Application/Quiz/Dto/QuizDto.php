@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Application\Quiz\Dto;
 
+defined( 'ABSPATH' ) || exit;
+
 use MintLMS\Domain\Quiz\Quiz;
 use MintLMS\Domain\Quiz\QuizQuestion;
 

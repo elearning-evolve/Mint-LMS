@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Domain\Event;
 
+defined( 'ABSPATH' ) || exit;
+
 use MintLMS\Domain\Shared\UserId;
 
 final readonly class EnrollmentCreated implements DomainEvent {

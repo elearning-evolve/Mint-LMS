@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Application\Quiz;
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Essay answers may be plain text or JSON {"text":"...","attachmentId":123}.
  */

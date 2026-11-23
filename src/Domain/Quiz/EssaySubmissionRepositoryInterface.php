@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Domain\Quiz;
 
+defined( 'ABSPATH' ) || exit;
+
 interface EssaySubmissionRepositoryInterface {
 
 	public function save( EssaySubmission $submission ): EssaySubmission;

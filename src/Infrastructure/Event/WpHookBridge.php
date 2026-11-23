@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Infrastructure\Event;
 
+defined( 'ABSPATH' ) || exit;
+
 use MintLMS\Domain\Event\CourseCompleted;
 use MintLMS\Domain\Event\DomainEvent;
 use MintLMS\Domain\Event\EnrollmentCancelled;

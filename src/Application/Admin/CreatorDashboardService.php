@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Application\Admin;
 
+defined( 'ABSPATH' ) || exit;
+
 use MintLMS\Application\Admin\Dto\CreatorDashboardDto;
 use MintLMS\Application\Admin\Dto\DashboardActivityItemDto;
 use MintLMS\Application\Admin\Dto\DashboardCourseRowDto;

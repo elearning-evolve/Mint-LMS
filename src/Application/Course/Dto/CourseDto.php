@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace MintLMS\Application\Course\Dto;
 
-use MintLMS\Domain\Course\Course;
-
 defined( 'ABSPATH' ) || exit;
+
+use MintLMS\Domain\Course\Course;
 
 final readonly class CourseDto {
 

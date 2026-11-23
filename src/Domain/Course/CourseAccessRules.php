@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Domain\Course;
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Pure helpers for course access / enrollment gates.
  */

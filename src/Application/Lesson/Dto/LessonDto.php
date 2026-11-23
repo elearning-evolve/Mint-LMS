@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Application\Lesson\Dto;
 
+defined( 'ABSPATH' ) || exit;
+
 use MintLMS\Domain\Lesson\Lesson;
 
 final readonly class LessonDto {

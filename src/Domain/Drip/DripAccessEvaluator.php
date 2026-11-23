@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Domain\Drip;
 
+defined( 'ABSPATH' ) || exit;
+
 final class DripAccessEvaluator {
 
 	public static function isLocked(

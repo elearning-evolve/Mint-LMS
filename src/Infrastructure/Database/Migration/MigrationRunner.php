@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Infrastructure\Database\Migration;
 
+defined( 'ABSPATH' ) || exit;
+
 final class MigrationRunner {
 
 	private const OPTION_KEY = 'mintlms_db_version';

@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Infrastructure\Database\Migration;
 
+defined( 'ABSPATH' ) || exit;
+
 use MintLMS\Infrastructure\Database\Schema;
 
 final class Migration_002_Quizzes implements MigrationInterface {

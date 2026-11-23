@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Domain\Section;
 
+defined( 'ABSPATH' ) || exit;
+
 interface SectionRepositoryInterface {
 
 	public function findById( int $id ): ?Section;

@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Application\Event;
 
+defined( 'ABSPATH' ) || exit;
+
 use MintLMS\Application\Contract\EventDispatcherInterface;
 use MintLMS\Domain\Event\DomainEvent;
 

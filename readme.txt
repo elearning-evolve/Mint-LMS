@@ -5,7 +5,7 @@ Tags: lms, learning, courses, quizzes, elearning
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 8.2
-Stable tag: 1.1.13
+Stable tag: 1.1.14
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,6 +48,9 @@ LMS features (courses, lessons, quizzes, progress) do not require any third-part
 WordPress 6.2 or later and **PHP 8.2** or later. Optional AI Assistance also needs the MCP Adapter plugin and a compatible MCP client (e.g. Claude Desktop).
 
 == Changelog ==
+
+= 1.1.14 =
+* Add `defined( 'ABSPATH' ) || exit` to all `src/**/*.php` class files (wp.org direct-access guard). Keep `src/Api/V1/functions.php` without the guard (Composer autoload.files / CLI). Architecture test no longer treats ABSPATH as a pure-layer violation.
 
 = 1.1.13 =
 * PHPStan: add php-stubs/woocommerce-stubs for soft-dep WC; fix non-WC level-6 issues (iterable PHPDocs, dead SectionService progress dep, null compares, AI normalizer shapes). Stan stays local (`composer stan`), not a CI merge blocker.

@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Infrastructure\Cache;
 
+defined( 'ABSPATH' ) || exit;
+
 use MintLMS\Application\Contract\CacheInterface;
 
 /**
