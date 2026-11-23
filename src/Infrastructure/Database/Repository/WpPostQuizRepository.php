@@ -182,7 +182,8 @@ final class WpPostQuizRepository implements QuizRepositoryInterface {
 		);
 
 		if ( 0 === $quiz->id ) {
-			$postarr['post_status'] = 'publish';
+			// New quizzes start as draft; author publishes via Live / publish endpoint.
+			$postarr['post_status'] = 'draft';
 			$postId                 = wp_insert_post( $postarr, true );
 
 			if ( is_wp_error( $postId ) ) {
@@ -232,7 +233,7 @@ final class WpPostQuizRepository implements QuizRepositoryInterface {
 			$postId = wp_insert_post(
 				array(
 					'post_type'    => PostTypes::QUESTION,
-					'post_status'  => 'publish',
+					'post_status'  => 'draft',
 					'post_title'   => $titleContent['title'],
 					'post_content' => $titleContent['content'],
 				),

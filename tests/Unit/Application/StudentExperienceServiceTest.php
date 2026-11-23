@@ -169,7 +169,7 @@ final class StudentExperienceServiceTest extends TestCase
         $course = $this->sampleCourse(10, 'Sample Course', EnrollmentType::Free);
 
         $this->courseRepository->method('findById')->with(10)->willReturn($course);
-        $this->sectionRepository->method('loadStructureRows')->with(10)->willReturn($this->sampleStructureRows());
+        $this->sectionRepository->method('loadStructureRows')->with(10, $this->anything())->willReturn($this->sampleStructureRows());
 
         $overview = $this->service->getCourseOverview(10, 0);
 
@@ -189,7 +189,7 @@ final class StudentExperienceServiceTest extends TestCase
         $course = $this->sampleCourse(10, 'Free Course', EnrollmentType::Free);
 
         $this->courseRepository->method('findById')->with(10)->willReturn($course);
-        $this->sectionRepository->method('loadStructureRows')->with(10)->willReturn($this->sampleStructureRows());
+        $this->sectionRepository->method('loadStructureRows')->with(10, $this->anything())->willReturn($this->sampleStructureRows());
 
         $overview = $this->service->getCourseOverview(10, 0);
 
@@ -205,7 +205,7 @@ final class StudentExperienceServiceTest extends TestCase
         $course   = $this->sampleCourse(10, 'Hidden List', EnrollmentType::Free, $settings);
 
         $this->courseRepository->method('findById')->with(10)->willReturn($course);
-        $this->sectionRepository->method('loadStructureRows')->with(10)->willReturn($this->sampleStructureRows());
+        $this->sectionRepository->method('loadStructureRows')->with(10, $this->anything())->willReturn($this->sampleStructureRows());
 
         $overview = $this->service->getCourseOverview(10, 0);
 
@@ -219,7 +219,7 @@ final class StudentExperienceServiceTest extends TestCase
         $course = $this->sampleCourse(10, 'Sample Course', EnrollmentType::Free);
 
         $this->courseRepository->method('findById')->with(10)->willReturn($course);
-        $this->sectionRepository->method('loadStructureRows')->with(10)->willReturn($this->sampleStructureRows());
+        $this->sectionRepository->method('loadStructureRows')->with(10, $this->anything())->willReturn($this->sampleStructureRows());
         $this->progressRepository->method('isUserEnrolled')->willReturn(false);
 
         $this->expectException(ForbiddenException::class);
@@ -232,7 +232,7 @@ final class StudentExperienceServiceTest extends TestCase
         $course = $this->sampleCourse(10, 'Sample Course');
 
         $this->courseRepository->method('findById')->with(10)->willReturn($course);
-        $this->sectionRepository->method('loadStructureRows')->with(10)->willReturn($this->sampleStructureRows());
+        $this->sectionRepository->method('loadStructureRows')->with(10, $this->anything())->willReturn($this->sampleStructureRows());
         $this->progressRepository->method('isUserEnrolled')->willReturn(false);
 
         $context = $this->service->getPlayerContext(10, 101, 0);
@@ -249,7 +249,7 @@ final class StudentExperienceServiceTest extends TestCase
         $enrolledAt = new \DateTimeImmutable('2026-01-01 00:00:00');
 
         $this->courseRepository->method('findById')->with(10)->willReturn($course);
-        $this->sectionRepository->method('loadStructureRows')->with(10)->willReturn($this->dripStructureRows());
+        $this->sectionRepository->method('loadStructureRows')->with(10, $this->anything())->willReturn($this->dripStructureRows());
         $this->progressRepository->method('isUserEnrolled')->willReturn(true);
         $this->enrollmentRepository
             ->method('findByUserAndCourse')
@@ -268,7 +268,7 @@ final class StudentExperienceServiceTest extends TestCase
         $course = $this->sampleCourse(10, 'Sample Course');
 
         $this->courseRepository->method('findById')->with(10)->willReturn($course);
-        $this->sectionRepository->method('loadStructureRows')->with(10)->willReturn($this->sampleStructureRows());
+        $this->sectionRepository->method('loadStructureRows')->with(10, $this->anything())->willReturn($this->sampleStructureRows());
         $this->progressRepository->method('isUserEnrolled')->willReturn(true);
         $this->progressRepository->method('getSummary')->willReturn(null);
         $this->progressRepository->method('getCompletedLessonIds')->willReturn([]);
@@ -285,7 +285,7 @@ final class StudentExperienceServiceTest extends TestCase
         $course = $this->sampleCourse(10, 'Sample Course', EnrollmentType::Free);
 
         $this->courseRepository->method('findById')->with(10)->willReturn($course);
-        $this->sectionRepository->method('loadStructureRows')->with(10)->willReturn($this->sampleStructureRows());
+        $this->sectionRepository->method('loadStructureRows')->with(10, $this->anything())->willReturn($this->sampleStructureRows());
         $this->progressRepository->method('isUserEnrolled')->willReturn(false);
 
         $this->expectException(ForbiddenException::class);
@@ -303,7 +303,7 @@ final class StudentExperienceServiceTest extends TestCase
         $course = $this->sampleCourse(10, 'Sample Course');
 
         $this->courseRepository->method('findById')->with(10)->willReturn($course);
-        $this->sectionRepository->method('loadStructureRows')->with(10)->willReturn($this->sampleStructureRows());
+        $this->sectionRepository->method('loadStructureRows')->with(10, $this->anything())->willReturn($this->sampleStructureRows());
         $this->progressRepository->method('isUserEnrolled')->willReturn(true);
         $this->progressRepository->method('getSummary')->willReturn(null);
         $this->progressRepository->method('getCompletedLessonIds')->willReturn([]);

@@ -50,8 +50,8 @@ final class QuizService implements QuizLifecycleInterface {
 	}
 
 	/**
-	 * Quizzes attached to a lesson. Visibility is enrollment / editor access,
-	 * not CPT publish — builder creates quizzes and questions as draft.
+	 * Quizzes attached to a lesson. Students only see published quizzes/questions;
+	 * builder / editor review includes drafts (each item publishes via Live).
 	 *
 	 * @return list<QuizDto>
 	 */
@@ -78,9 +78,10 @@ final class QuizService implements QuizLifecycleInterface {
 			$this->assertCanManageLessonContent( $userId, $lesson );
 		}
 
-		$out = array();
-		foreach ( $this->quizRepository->findAllByLessonId( $lessonId, false ) as $quiz ) {
-			$questions = $this->quizRepository->findQuestionsByQuizId( $quiz->id, false );
+		$publishedOnly = $forStudent && ! $editorReview;
+		$out           = array();
+		foreach ( $this->quizRepository->findAllByLessonId( $lessonId, $publishedOnly ) as $quiz ) {
+			$questions = $this->quizRepository->findQuestionsByQuizId( $quiz->id, $publishedOnly );
 			$out[]     = QuizDto::fromQuiz( $quiz, $questions, ! $forStudent );
 		}
 
@@ -106,7 +107,15 @@ final class QuizService implements QuizLifecycleInterface {
 			$this->assertCanManageLessonContent( $userId, $lesson );
 		}
 
-		$questions = $this->quizRepository->findQuestionsByQuizId( $quiz->id, false );
+		$publishedOnly = $forStudent && ! $editorReview;
+		if ( $publishedOnly ) {
+			$status = function_exists( 'get_post_status' ) ? get_post_status( $quiz->id ) : 'publish';
+			if ( is_string( $status ) && 'publish' !== $status ) {
+				throw new NotFoundException( 'Quiz not found.' );
+			}
+		}
+
+		$questions = $this->quizRepository->findQuestionsByQuizId( $quiz->id, $publishedOnly );
 
 		return QuizDto::fromQuiz( $quiz, $questions, ! $forStudent );
 	}

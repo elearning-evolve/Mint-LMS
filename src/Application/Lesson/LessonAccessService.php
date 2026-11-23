@@ -35,6 +35,14 @@ final class LessonAccessService {
 			throw new NotFoundException( 'Lesson not found.' );
 		}
 
+		// Front-end / progress: only published lessons (WP post_status), matching student outline.
+		if ( function_exists( 'get_post_status' ) ) {
+			$status = get_post_status( $lessonId );
+			if ( false === $status || ( is_string( $status ) && 'publish' !== $status ) ) {
+				throw new NotFoundException( 'Lesson not found.' );
+			}
+		}
+
 		$course       = null !== $this->courseRepository ? $this->courseRepository->findById( $lesson->courseId ) : null;
 		$publicBrowse = null !== $course && $course->enrollmentType->allowsPublicBrowse();
 		$isEnrolled   = $userId > 0 && $this->progressRepository->isUserEnrolled( $userId, $lesson->courseId );
@@ -121,7 +129,7 @@ final class LessonAccessService {
 		}
 
 		return CourseLessonSequence::orderedLessonIds(
-			$this->sectionRepository->loadStructureRows( $courseId )
+			$this->sectionRepository->loadStructureRows( $courseId, true )
 		);
 	}
 }
