@@ -6,6 +6,7 @@ namespace MintLMS\Application\Lesson;
 use MintLMS\Application\Exception\ForbiddenException;
 use MintLMS\Application\Exception\NotFoundException;
 use MintLMS\Domain\Course\CourseAccessRules;
+use MintLMS\Domain\Course\CourseLessonSequence;
 use MintLMS\Domain\Course\CourseRepositoryInterface;
 use MintLMS\Domain\Drip\DripAccessEvaluator;
 use MintLMS\Domain\Enrollment\EnrollmentRepositoryInterface;
@@ -119,53 +120,8 @@ final class LessonAccessService {
 			return array();
 		}
 
-		$rows = $this->sectionRepository->loadStructureRows( $courseId );
-
-		/** @var array<int, list<\MintLMS\Domain\Lesson\Lesson>> $bySection */
-		$bySection = array();
-		$sectionMeta = array();
-
-		foreach ( $rows as $row ) {
-			$section = $row['section'];
-			$lesson  = $row['lesson'] ?? null;
-			$sectionMeta[ $section->id ] = $section;
-			if ( ! isset( $bySection[ $section->id ] ) ) {
-				$bySection[ $section->id ] = array();
-			}
-			if ( null !== $lesson ) {
-				$bySection[ $section->id ][] = $lesson;
-			}
-		}
-
-		$sectionIds = array_keys( $bySection );
-		usort(
-			$sectionIds,
-			static function ( int $a, int $b ) use ( $sectionMeta ): int {
-				if ( 0 === $a && 0 !== $b ) {
-					return -1;
-				}
-				if ( 0 !== $a && 0 === $b ) {
-					return 1;
-				}
-				$sa = $sectionMeta[ $a ]->sortOrder ?? 0;
-				$sb = $sectionMeta[ $b ]->sortOrder ?? 0;
-
-				return $sa <=> $sb;
-			}
+		return CourseLessonSequence::orderedLessonIds(
+			$this->sectionRepository->loadStructureRows( $courseId )
 		);
-
-		$ids = array();
-		foreach ( $sectionIds as $sectionId ) {
-			$lessons = $bySection[ $sectionId ];
-			usort(
-				$lessons,
-				static fn( $a, $b ): int => $a->sortOrder <=> $b->sortOrder
-			);
-			foreach ( $lessons as $lesson ) {
-				$ids[] = (int) $lesson->id;
-			}
-		}
-
-		return $ids;
 	}
 }

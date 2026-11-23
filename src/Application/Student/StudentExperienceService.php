@@ -18,6 +18,7 @@ use MintLMS\Application\Student\Dto\StudentCourseOverviewDto;
 use MintLMS\Application\Student\Dto\StudentPlayerContextDto;
 use MintLMS\Domain\Course\Course;
 use MintLMS\Domain\Course\CourseAccessRules;
+use MintLMS\Domain\Course\CourseLessonSequence;
 use MintLMS\Domain\Course\CourseRepositoryInterface;
 use MintLMS\Domain\Course\CourseStatus;
 use MintLMS\Domain\Course\EnrollmentType;
@@ -832,14 +833,8 @@ final class StudentExperienceService {
 		$reallyEnrolled = null !== $isReallyEnrolled ? $isReallyEnrolled : $canBrowseContent;
 		$enrolledAt     = $this->resolveEnrollmentDate( $userId, $courseId, $reallyEnrolled );
 		$rows           = $this->sectionRepository->loadStructureRows( $courseId );
-
-		$orderedLessonIds = array();
-		foreach ( $rows as $row ) {
-			$lesson = $row['lesson'];
-			if ( null !== $lesson ) {
-				$orderedLessonIds[] = $lesson->id;
-			}
-		}
+		// Same order as LessonAccessService / curriculum display (ungrouped first).
+		$orderedLessonIds = CourseLessonSequence::orderedLessonIds( $rows );
 
 		$completedLessonIds = ( $reallyEnrolled && $userId > 0 )
 			? $this->progressRepository->getCompletedLessonIds( $userId, $courseId )

@@ -165,8 +165,8 @@ final class ShortcodeRegistrar {
 	}
 
 	/**
-	 * Start course / lesson player links (?mint_course=&mint_lesson=) must use the
-	 * same Mint LMS lesson canvas as builder preview — not the theme Course Player page.
+	 * Student lesson links (?mint_course=&mint_lesson=) use the real lesson player
+	 * (mark complete / video / attachments) inside a chrome-free canvas — not builder preview.
 	 */
 	public function interceptStudentLessonCanvas(): void {
 		$previewMode = isset( $_GET['mint_preview'] ) ? sanitize_key( (string) wp_unslash( $_GET['mint_preview'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -175,24 +175,14 @@ final class ShortcodeRegistrar {
 			return;
 		}
 
+		// Builder-only surfaces — leave alone.
+		if ( $this->queryInt( 'mint_question' ) > 0 ) {
+			return;
+		}
+
 		$courseId = $this->queryInt( PageSettings::COURSE_QUERY_ARG );
 		if ( $courseId <= 0 ) {
 			$courseId = $this->queryInt( 'mint_course' );
-		}
-
-		$quizId = $this->queryInt( 'mint_quiz' );
-		if ( $quizId > 0 ) {
-			$html = $this->renderS3QuizHtml( $courseId, $this->queryInt( 'mint_lesson' ), $quizId );
-			if ( '' === $html ) {
-				return;
-			}
-			$this->sendStudentCanvas( $html, 'quiz' );
-
-			return;
-		}
-
-		if ( $this->queryInt( 'mint_question' ) > 0 ) {
-			return;
 		}
 
 		$lessonId = $this->queryInt( 'mint_lesson' );
@@ -200,27 +190,35 @@ final class ShortcodeRegistrar {
 			return;
 		}
 
-		$html = $this->renderS3LessonHtml( $courseId, $lessonId );
-		if ( '' === $html ) {
+		// Quizzes live inside the lesson player for enrolled students (not S3 builder preview).
+		$html = $this->renderLessonPlayerPreview( $courseId, $lessonId, get_current_user_id() );
+		if ( null === $html || '' === $html ) {
 			return;
 		}
 
-		$this->sendStudentCanvas( $html, 'lesson' );
+		$this->sendStudentCanvas( $html, 'lesson', false );
 	}
 
 	/**
-	 * Render preview without the theme header/footer (avoids blog chrome and raw Fusion CTA).
+	 * Render lesson/quiz canvas without the theme header/footer (avoids blog chrome and raw Fusion CTA).
+	 *
+	 * @param bool $isBuilderPreview True for instructor mint_preview=* surfaces.
 	 */
-	private function sendStudentCanvas( string $html, string $mode ): void {
+	private function sendStudentCanvas( string $html, string $mode, bool $isBuilderPreview = true ): void {
 		status_header( 200 );
 		nocache_headers();
 
 		add_filter(
 			'body_class',
-			static function ( array $classes ) use ( $mode ): array {
+			static function ( array $classes ) use ( $mode, $isBuilderPreview ): array {
 				$classes[] = 'mint-lms-canvas';
-				$classes[] = 'mint-lms-builder-preview';
-				$classes[] = 'mint-lms-builder-preview--' . sanitize_html_class( $mode );
+				if ( $isBuilderPreview ) {
+					$classes[] = 'mint-lms-builder-preview';
+					$classes[] = 'mint-lms-builder-preview--' . sanitize_html_class( $mode );
+				} else {
+					$classes[] = 'mint-lms-student-canvas';
+					$classes[] = 'mint-lms-student-canvas--' . sanitize_html_class( $mode );
+				}
 
 				return $classes;
 			}
@@ -228,10 +226,14 @@ final class ShortcodeRegistrar {
 
 		add_filter(
 			'document_title_parts',
-			static function ( array $parts ) use ( $mode ): array {
-				$parts['title'] = 'lesson' === $mode
-					? __( 'Lesson preview', 'mint-lms' )
-					: __( 'Quiz preview', 'mint-lms' );
+			static function ( array $parts ) use ( $mode, $isBuilderPreview ): array {
+				if ( $isBuilderPreview ) {
+					$parts['title'] = 'lesson' === $mode
+						? __( 'Lesson preview', 'mint-lms' )
+						: __( 'Quiz preview', 'mint-lms' );
+				} else {
+					$parts['title'] = __( 'Lesson', 'mint-lms' );
+				}
 
 				return $parts;
 			}
@@ -855,13 +857,28 @@ final class ShortcodeRegistrar {
 	}
 
 	private function renderLessonPlayerPreview( int $courseId, int $lessonId, int $userId ): ?string {
+		$settings = $this->settings();
+
 		try {
 			$context = $this->studentExperience->getPlayerContext( $courseId, $lessonId, $userId );
-		} catch ( NotFoundException | ForbiddenException $exception ) {
-			return null;
+		} catch ( NotFoundException $exception ) {
+			return $this->wrap(
+				$this->errorMessage( __( 'Lesson not found.', 'mint-lms' ) )
+			);
+		} catch ( ForbiddenException $exception ) {
+			return $this->wrap(
+				$this->templateLoader->render(
+					'student/gated-lesson.php',
+					array(
+						'message'     => $exception->getMessage(),
+						'overviewUrl' => $this->overviewUrl( $courseId, '' ),
+						'isLoggedIn'  => $userId > 0,
+						'loginUrl'    => wp_login_url( $this->currentPageUrl() ),
+					)
+				)
+			);
 		}
 
-		$settings       = $this->settings();
 		$attachmentUrl  = $this->attachmentUrl( $context->currentLesson->attachmentId );
 		$isReview       = ! empty( $context->isReviewMode );
 		$lessonUrl      = $isReview
