@@ -177,19 +177,19 @@ unset( $nextQuizUrl ); // Quizzes are started from the list below — not a sing
 									<div class="mint-text-[13px] mint-text-[#5C5C77]"><?php esc_html_e( 'No questions yet.', 'mint-lms' ); ?></div>
 								</div>
 							<?php else : ?>
-							<?php foreach ( $questions as $question ) : ?>
-								<div class="mint-s3-row mint-s3-row--nested">
-									<span class="mint-s3b-stack__icon mint-s3b-stack__icon--quiz" aria-hidden="true">
-										<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-									</span>
-									<div class="mint-s3b-stack__quiz-copy">
-										<div class="mint-s3b-stack__quiz-title"><?php echo esc_html( (string) ( $question['text'] ?? '' ) ); ?></div>
-										<div class="mint-s3b-stack__quiz-meta">
-											<span class="mint-s3b-badge mint-s3b-badge--sm"><?php esc_html_e( 'Question', 'mint-lms' ); ?></span>
+								<?php foreach ( $questions as $question ) : ?>
+									<div class="mint-s3-row mint-s3-row--nested">
+										<span class="mint-s3b-stack__icon mint-s3b-stack__icon--quiz" aria-hidden="true">
+											<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+										</span>
+										<div class="mint-s3b-stack__quiz-copy">
+											<div class="mint-s3b-stack__quiz-title"><?php echo esc_html( (string) ( $question['text'] ?? '' ) ); ?></div>
+											<div class="mint-s3b-stack__quiz-meta">
+												<span class="mint-s3b-badge mint-s3b-badge--sm"><?php esc_html_e( 'Question', 'mint-lms' ); ?></span>
+											</div>
 										</div>
 									</div>
-								</div>
-							<?php endforeach; ?>
+								<?php endforeach; ?>
 							<?php endif; ?>
 						</div>
 					</details>

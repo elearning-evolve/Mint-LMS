@@ -84,7 +84,7 @@ $content = $renderer->render(
 	'admin/dashboard/_dashboard-content',
 	array(
 		'dashboard'   => $dashboard,
-		'firstName'   => $user->first_name ?: $user->display_name,
+		'firstName'   => '' !== $user->first_name ? $user->first_name : $user->display_name,
 		'showDetails' => $showDetails,
 		'userId'      => $userId,
 	)

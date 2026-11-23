@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace MintLMS\Application\Student;
 
 use MintLMS\Application\Contract\AuthorizationInterface;
+use MintLMS\Application\Contract\QuizStudentQueryInterface;
 use MintLMS\Application\Course\Dto\CourseStructureDto;
 use MintLMS\Application\Course\Dto\CourseStructureLessonDto;
 use MintLMS\Application\Course\Dto\CourseStructureSectionDto;
@@ -11,7 +12,6 @@ use MintLMS\Application\Exception\ForbiddenException;
 use MintLMS\Application\Exception\NotFoundException;
 use MintLMS\Application\Quiz\Dto\QuizDto;
 use MintLMS\Application\Quiz\QuestionAnswerCodec;
-use MintLMS\Application\Quiz\QuizService;
 use MintLMS\Application\Student\Dto\StudentCatalogCourseDto;
 use MintLMS\Application\Student\Dto\StudentCourseItemDto;
 use MintLMS\Application\Student\Dto\StudentCourseOverviewDto;
@@ -43,7 +43,7 @@ final class StudentExperienceService {
 		private EnrollmentRepositoryInterface $enrollmentRepository,
 		private ProgressRepositoryInterface $progressRepository,
 		private Clock $clock,
-		private ?QuizService $quizService = null,
+		private ?QuizStudentQueryInterface $quizService = null,
 		private ?AuthorizationInterface $authorization = null,
 		private ?LessonRepositoryInterface $lessonRepository = null,
 	) {

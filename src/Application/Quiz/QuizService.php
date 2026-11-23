@@ -5,6 +5,7 @@ namespace MintLMS\Application\Quiz;
 
 use MintLMS\Application\Contract\AuthorizationInterface;
 use MintLMS\Application\Contract\QuizLifecycleInterface;
+use MintLMS\Application\Contract\QuizStudentQueryInterface;
 use MintLMS\Application\Contract\UserLookupInterface;
 use MintLMS\Application\Exception\ForbiddenException;
 use MintLMS\Application\Exception\NotFoundException;
@@ -32,7 +33,7 @@ use MintLMS\Domain\Quiz\QuizQuestion;
 use MintLMS\Domain\Quiz\QuizRepositoryInterface;
 use MintLMS\Domain\Shared\Clock;
 
-final class QuizService implements QuizLifecycleInterface {
+final class QuizService implements QuizLifecycleInterface, QuizStudentQueryInterface {
 
 	public function __construct(
 		private QuizRepositoryInterface $quizRepository,
