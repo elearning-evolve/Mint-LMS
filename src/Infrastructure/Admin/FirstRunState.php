@@ -12,31 +12,15 @@ final class FirstRunState {
 	public const OPTION_FIRST_RUN_COMPLETE     = 'mintlms_first_run_complete';
 	public const OPTION_GUIDED_COURSE_COMPLETE = 'mintlms_guided_course_complete';
 	public const USER_META_WELCOME_DISMISSED   = 'mintlms_welcome_dismissed';
-	/** Temporary testing flag — remove after welcome QA. */
 	public const PREVIEW_WELCOME_QUERY         = 'mintlms_preview_welcome';
 
 	/**
-	 * TEMP testing switch: force first-run welcome on admin.php?page=mint-lms.
-	 * Does not delete courses. Set to false (or remove) when QA is done.
-	 */
-	public const TEMP_FORCE_WELCOME_FOR_TESTING = false;
-
-	public static function isFirstRunComplete(): bool {
-		return (bool) get_option( self::OPTION_FIRST_RUN_COMPLETE, false );
-	}
-
-	/**
 	 * Admin-only force preview of the first-run welcome (keeps existing courses).
-	 * Enabled while TEMP_FORCE_WELCOME_FOR_TESTING is true, or via
-	 * admin.php?page=mint-lms&mintlms_preview_welcome=1
+	 * Enable via admin.php?page=mint-lms&mintlms_preview_welcome=1
 	 */
 	public static function isWelcomePreviewRequested(): bool {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			return false;
-		}
-
-		if ( self::TEMP_FORCE_WELCOME_FOR_TESTING ) {
-			return true;
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only preview toggle for admins.
@@ -48,15 +32,6 @@ final class FirstRunState {
 		$flag = sanitize_text_field( wp_unslash( (string) $_GET[ self::PREVIEW_WELCOME_QUERY ] ) );
 
 		return '1' === $flag || 'true' === $flag;
-	}
-
-	public static function isGuidedCourseComplete(): bool {
-		return (bool) get_option( self::OPTION_GUIDED_COURSE_COMPLETE, false );
-	}
-
-	public static function markFirstRunStarted(): void {
-		update_option( self::OPTION_FIRST_RUN_COMPLETE, true, false );
-		self::dismissWelcomeForUser( get_current_user_id() );
 	}
 
 	public static function markOnboardingComplete(): void {
@@ -124,14 +99,5 @@ final class FirstRunState {
 		}
 
 		return true;
-	}
-
-	/**
-	 * Legacy helper — guided wizard removed; kept for option/meta compatibility.
-	 */
-	public static function shouldOfferGuidedFlow( int $userId ): bool {
-		unset( $userId );
-
-		return false;
 	}
 }

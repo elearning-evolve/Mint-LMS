@@ -5,7 +5,7 @@ Tags: lms, learning, courses, quizzes, elearning
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 8.2
-Stable tag: 1.1.9
+Stable tag: 1.1.10
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,6 +48,9 @@ LMS features (courses, lessons, quizzes, progress) do not require any third-part
 WordPress 6.2 or later and **PHP 8.2** or later. Optional AI Assistance also needs the MCP Adapter plugin and a compatible MCP client (e.g. Claude Desktop).
 
 == Changelog ==
+
+= 1.1.10 =
+* Remove obsolete admin list views/JS, dead Ajax handler, unused Wpdb repos, orphan media accessors, unused UI components, and unused builder helpers. Keep migrations, REST API routes, and live student lesson preview.
 
 = 1.1.9 =
 * Fix critical boot: recreate QuizService inside Bootstrap::registerRestApi (undefined $quizService white-screen).

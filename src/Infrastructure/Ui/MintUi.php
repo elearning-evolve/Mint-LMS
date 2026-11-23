@@ -91,10 +91,6 @@ final class MintUi {
 		return __( 'Good evening', 'mint-lms' );
 	}
 
-	public static function relativeTime( \DateTimeInterface $date ): string {
-		return human_time_diff( $date->getTimestamp(), time() ) . ' ' . __( 'ago', 'mint-lms' );
-	}
-
 	public static function relativeTimeShort( \DateTimeInterface $date ): string {
 		$diff = time() - $date->getTimestamp();
 

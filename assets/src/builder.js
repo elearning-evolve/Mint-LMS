@@ -4190,20 +4190,7 @@ function courseBuilder(courseId, opts = {}) {
       return (this.sections || []).filter((s) => Number(s.id) > 0);
     },
 
-    /**
-     * Newest-first slice by post id (higher id = more recently created).
-     * Kept for any legacy callers; navbar menus no longer list latest items.
-     * @param {array} rows
-     * @param {number} limit
-     * @return {array}
-     */
-    navLatestById(rows, limit = 2) {
-      return [...(rows || [])]
-        .filter((row) => Number(row?.id) > 0)
-        .sort((a, b) => Number(b.id) - Number(a.id))
-        .slice(0, Math.max(0, Number(limit) || 0));
-    },
-
+    
     /** Total count for a navbar type key (section|lesson|quiz|question). */
     navTypeTotal(kind) {
       if (kind === 'section') return this.navSectionList().length;
@@ -4286,31 +4273,7 @@ function courseBuilder(courseId, opts = {}) {
       return rows;
     },
 
-    /**
-     * Lessons grouped by parent section — used by the Lesson navbar menu.
-     * @return {list<{sectionId:number, sectionTitle:string, lessons:array}>}
-     */
-    navLessonGroups() {
-      const groups = [];
-      for (const section of this.sections || []) {
-        const lessons = Array.isArray(section.lessons) ? section.lessons : [];
-        if (!lessons.length) continue;
-        const sectionId = Number(section.id) || 0;
-        groups.push({
-          sectionId,
-          sectionTitle:
-            sectionId > 0
-              ? section.title || 'Untitled lesson group'
-              : 'No lesson group',
-          lessons: lessons.map((lesson) => ({
-            ...lesson,
-            sectionId,
-          })),
-        });
-      }
-      return groups;
-    },
-
+    
     navQuizList() {
       return Array.isArray(this.courseQuizzes) ? this.courseQuizzes : [];
     },
@@ -4322,95 +4285,7 @@ function courseBuilder(courseId, opts = {}) {
       );
     },
 
-    /**
-     * Quizzes nested Section → Lesson → Quiz — kept for any legacy callers.
-     * Navbar menus are flat; hierarchy lives only in Course Hierarchy.
-     * @return {list<{sectionId:number, sectionTitle:string, unlinked?:boolean, lessons?:array, quizzes?:array}>}
-     */
-    navQuizGroups() {
-      const sectionMap = new Map();
-      const unlinkedQuizzes = [];
-
-      const ensureSection = (sectionId, sectionTitle) => {
-        const sid = Number(sectionId) || 0;
-        if (!sectionMap.has(sid)) {
-          sectionMap.set(sid, {
-            sectionId: sid,
-            sectionTitle:
-              sid > 0 ? String(sectionTitle || '').trim() || 'Untitled lesson group' : '',
-            lessons: new Map(),
-          });
-        }
-        return sectionMap.get(sid);
-      };
-
-      const ensureLesson = (sectionGroup, lessonId, lessonTitle) => {
-        const lid = Number(lessonId) || 0;
-        if (!sectionGroup.lessons.has(lid)) {
-          sectionGroup.lessons.set(lid, {
-            lessonId: lid,
-            lessonTitle: String(lessonTitle || '').trim() || 'Untitled lesson',
-            quizzes: [],
-          });
-        }
-        return sectionGroup.lessons.get(lid);
-      };
-
-      for (const quiz of this.navQuizList()) {
-        // Question-only shells stay out of the Quiz menu until attached/edited as a quiz.
-        if (quiz.questionShell && !this.isLinkedCourseQuiz(quiz)) {
-          continue;
-        }
-        if (!this.isLinkedCourseQuiz(quiz)) {
-          unlinkedQuizzes.push({ ...quiz });
-          continue;
-        }
-        const lessonId = Number(quiz.lessonId) || 0;
-        if (lessonId <= 0) continue;
-        let sectionId = Number(quiz.sectionId) || 0;
-        if (!sectionId) {
-          sectionId = this.resolveSectionIdForLesson(lessonId);
-        }
-        let sectionTitle = '';
-        if (sectionId > 0) {
-          const section = (this.sections || []).find((s) => Number(s.id) === sectionId);
-          sectionTitle = String(section?.title || '').trim();
-        }
-        const sectionGroup = ensureSection(sectionId, sectionTitle);
-        const lessonGroup = ensureLesson(
-          sectionGroup,
-          lessonId,
-          quiz.lessonTitle || this.quizParentLessonTitle(quiz)
-        );
-        lessonGroup.quizzes.push({
-          ...quiz,
-          lessonId,
-          sectionId,
-          linked: true,
-        });
-      }
-
-      const groups = Array.from(sectionMap.values()).map((sectionGroup) => ({
-        sectionId: sectionGroup.sectionId,
-        sectionTitle: sectionGroup.sectionTitle,
-        unlinked: false,
-        lessons: Array.from(sectionGroup.lessons.values()),
-        quizzes: [],
-      }));
-
-      if (unlinkedQuizzes.length) {
-        groups.unshift({
-          sectionId: -1,
-          sectionTitle: '',
-          unlinked: true,
-          lessons: [],
-          quizzes: unlinkedQuizzes,
-        });
-      }
-
-      return groups;
-    },
-
+    
     navQuestionList() {
       if (Array.isArray(this.courseQuestions) && this.courseQuestions.length) {
         return this.courseQuestions;
@@ -4431,162 +4306,7 @@ function courseBuilder(courseId, opts = {}) {
       return rows;
     },
 
-    /**
-     * Questions nested Section → Lesson → Quiz → Question — Question navbar menu.
-     * Unlinked questions (host quiz not attached to a course lesson) are listed flat.
-     * @return {list<{sectionId:number, sectionTitle:string, unlinked?:boolean, lessons?:array, questions?:array}>}
-     */
-    navQuestionGroups() {
-      const sectionMap = new Map();
-      const unlinkedQuestions = [];
-
-      const ensureSection = (sectionId, sectionTitle) => {
-        const sid = Number(sectionId) || 0;
-        if (!sectionMap.has(sid)) {
-          sectionMap.set(sid, {
-            sectionId: sid,
-            sectionTitle:
-              sid > 0 ? String(sectionTitle || '').trim() || 'Untitled lesson group' : '',
-            lessons: new Map(),
-          });
-        }
-        return sectionMap.get(sid);
-      };
-
-      const ensureLesson = (sectionGroup, lessonId, lessonTitle) => {
-        const lid = Number(lessonId) || 0;
-        if (!sectionGroup.lessons.has(lid)) {
-          sectionGroup.lessons.set(lid, {
-            lessonId: lid,
-            lessonTitle: String(lessonTitle || '').trim() || 'Untitled lesson',
-            quizzes: new Map(),
-          });
-        }
-        return sectionGroup.lessons.get(lid);
-      };
-
-      const ensureQuiz = (lessonGroup, quizId, quizTitle) => {
-        const qid = Number(quizId) || 0;
-        if (!lessonGroup.quizzes.has(qid)) {
-          lessonGroup.quizzes.set(qid, {
-            quizId: qid,
-            quizTitle: String(quizTitle || '').trim() || 'Untitled quiz',
-            questions: [],
-          });
-        }
-        return lessonGroup.quizzes.get(qid);
-      };
-
-      const ingestQuestion = (question, quizFallback = null) => {
-        const quizId = Number(question.quizId || quizFallback?.id || 0);
-        if (quizId <= 0) return;
-        const quizMeta =
-          quizFallback ||
-          (this.courseQuizzes || []).find((row) => Number(row.id) === quizId) ||
-          null;
-        const linked =
-          question.linked === true ||
-          (question.linked !== false && this.isLinkedCourseQuiz(quizMeta || question));
-
-        if (!linked) {
-          unlinkedQuestions.push({
-            ...question,
-            quizId,
-            linked: false,
-          });
-          return;
-        }
-
-        const lessonId = Number(question.lessonId || quizFallback?.lessonId || 0);
-        let sectionId = Number(question.sectionId || quizFallback?.sectionId || 0);
-        if (!sectionId && lessonId) {
-          sectionId = this.resolveSectionIdForLesson(lessonId);
-        }
-        let sectionTitle = '';
-        if (sectionId > 0) {
-          const section = (this.sections || []).find((s) => Number(s.id) === sectionId);
-          sectionTitle = String(section?.title || '').trim();
-        }
-        const sectionGroup = ensureSection(sectionId, sectionTitle);
-        const lessonGroup = ensureLesson(
-          sectionGroup,
-          lessonId,
-          question.lessonTitle ||
-            quizFallback?.lessonTitle ||
-            this.quizParentLessonTitle({ lessonId, lessonTitle: quizFallback?.lessonTitle })
-        );
-        const quizGroup = ensureQuiz(
-          lessonGroup,
-          quizId,
-          question.quizTitle || quizFallback?.title || this.questionParentQuizTitle(question)
-        );
-        quizGroup.questions.push({
-          ...question,
-          quizId,
-          lessonId,
-          sectionId,
-          linked: true,
-        });
-      };
-
-      for (const question of this.navQuestionList()) {
-        ingestQuestion(question);
-      }
-
-      // Fill gaps from live quiz → question lists (active editor / missing courseQuestions rows).
-      for (const quiz of this.courseQuizzes || []) {
-        const quizId = Number(quiz.id) || 0;
-        if (quizId <= 0) continue;
-        for (const question of this.sidebarQuestionsForQuiz(quiz)) {
-          const already =
-            unlinkedQuestions.some((row) => Number(row.id) === Number(question.id)) ||
-            Array.from(sectionMap.values()).some((sectionGroup) =>
-              Array.from(sectionGroup.lessons.values()).some((lessonGroup) => {
-                const qz = lessonGroup.quizzes.get(quizId);
-                return qz && qz.questions.some((row) => Number(row.id) === Number(question.id));
-              })
-            );
-          if (already) continue;
-          ingestQuestion(
-            {
-              ...question,
-              quizId,
-              quizTitle: quiz.title || 'Untitled quiz',
-              lessonId: quiz.lessonId,
-              lessonTitle: quiz.lessonTitle || '',
-              sectionId: quiz.sectionId || 0,
-              linked: quiz.linked,
-            },
-            quiz
-          );
-        }
-      }
-
-      const groups = Array.from(sectionMap.values()).map((sectionGroup) => ({
-        sectionId: sectionGroup.sectionId,
-        sectionTitle: sectionGroup.sectionTitle,
-        unlinked: false,
-        questions: [],
-        lessons: Array.from(sectionGroup.lessons.values()).map((lessonGroup) => ({
-          lessonId: lessonGroup.lessonId,
-          lessonTitle: lessonGroup.lessonTitle,
-          quizzes: Array.from(lessonGroup.quizzes.values()),
-        })),
-      }));
-
-      if (unlinkedQuestions.length) {
-        groups.unshift({
-          sectionId: -1,
-          sectionTitle: '',
-          unlinked: true,
-          lessons: [],
-          questions: unlinkedQuestions,
-        });
-      }
-
-      return groups;
-    },
-
+    
     /** True when quiz is attached to a real course lesson (not a disposable host). */
     isLinkedCourseQuiz(quiz) {
       if (!quiz) return false;
@@ -8997,11 +8717,7 @@ function courseBuilder(courseId, opts = {}) {
       }
     },
 
-    /** @deprecated Prefer createCourseLesson — kept for any leftover template refs. */
-    async createSectionWithLesson() {
-      await this.createCourseLesson();
-    },
-
+    
     startEdit(type, id, value) {
       this.editingKey = `${type}-${id}`;
       this.editingValue = value;

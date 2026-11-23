@@ -21,8 +21,6 @@ $userId      = get_current_user_id();
 $user        = wp_get_current_user();
 $showDetails = MintUi::showDetailsPreference( $userId );
 
-// Must use CPT repository (same source as All Courses). Legacy WpdbCourseRepository
-// only had a partial mirror and showed stale rows like "Untitled Course".
 $dashboardService = new CreatorDashboardService(
 	new WpPostCourseRepository(),
 	new WpdbAdminDashboardRepository( $wpdb ),

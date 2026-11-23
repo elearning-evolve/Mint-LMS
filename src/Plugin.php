@@ -5,9 +5,7 @@ namespace MintLMS;
 
 use MintLMS\Application\Certificate\CertificateService;
 use MintLMS\Application\Contract\AuthorizationInterface;
-use MintLMS\Application\Contract\CacheInterface;
 use MintLMS\Application\Contract\EventDispatcherInterface;
-use MintLMS\Application\Contract\MediaInterface;
 use MintLMS\Api\V1\Courses as CoursesFacade;
 use MintLMS\Api\V1\Enrollment as EnrollmentFacade;
 use MintLMS\Api\V1\Progress as ProgressFacade;
@@ -19,20 +17,14 @@ use MintLMS\Application\Enrollment\EnrollmentService;
 use MintLMS\Application\Event\DomainEventPublisher;
 use MintLMS\Application\Progress\ProgressService;
 use MintLMS\Infrastructure\Auth\WpAuthorization;
-use MintLMS\Infrastructure\Cache\WpObjectCache;
 use MintLMS\Infrastructure\Event\SimpleEventDispatcher;
 use MintLMS\Infrastructure\Event\WpHookBridge;
-use MintLMS\Infrastructure\Media\WpMedia;
 
 final class Plugin {
 
 	private static ?SimpleEventDispatcher $dispatcher = null;
 
 	private static ?AuthorizationInterface $authorization = null;
-
-	private static ?CacheInterface $cache = null;
-
-	private static ?MediaInterface $media = null;
 
 	private static ?DomainEventPublisher $eventPublisher = null;
 
@@ -53,8 +45,6 @@ final class Plugin {
 
 		self::$dispatcher     = new SimpleEventDispatcher();
 		self::$authorization  = new WpAuthorization();
-		self::$cache          = new WpObjectCache();
-		self::$media          = new WpMedia();
 		self::$eventPublisher = new DomainEventPublisher( self::$dispatcher );
 
 		( new WpHookBridge() )->register( self::$dispatcher );
@@ -76,18 +66,6 @@ final class Plugin {
 		self::requireBoot();
 
 		return self::$authorization;
-	}
-
-	public static function cache(): CacheInterface {
-		self::requireBoot();
-
-		return self::$cache;
-	}
-
-	public static function media(): MediaInterface {
-		self::requireBoot();
-
-		return self::$media;
 	}
 
 	public static function enrollmentService(): EnrollmentService {
