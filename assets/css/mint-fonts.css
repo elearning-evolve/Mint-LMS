@@ -1,32 +1,33 @@
-/* Self-hosted General Sans (Fontshare license) — no CDN at runtime. */
+/* Self-hosted Inter (SIL Open Font License) — no CDN at runtime.
+   License: assets/fonts/inter/OFL.txt */
 
 @font-face {
-  font-family: "General Sans";
-  src: url("../fonts/general-sans/GeneralSans-Regular.woff2") format("woff2");
+  font-family: "Inter";
+  src: url("../fonts/inter/Inter-Regular.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: "General Sans";
-  src: url("../fonts/general-sans/GeneralSans-Medium.woff2") format("woff2");
+  font-family: "Inter";
+  src: url("../fonts/inter/Inter-Medium.woff2") format("woff2");
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: "General Sans";
-  src: url("../fonts/general-sans/GeneralSans-Semibold.woff2") format("woff2");
+  font-family: "Inter";
+  src: url("../fonts/inter/Inter-SemiBold.woff2") format("woff2");
   font-weight: 600;
   font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: "General Sans";
-  src: url("../fonts/general-sans/GeneralSans-Bold.woff2") format("woff2");
+  font-family: "Inter";
+  src: url("../fonts/inter/Inter-Bold.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
   font-display: swap;
