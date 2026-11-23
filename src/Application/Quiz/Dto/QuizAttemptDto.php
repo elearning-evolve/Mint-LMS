@@ -42,13 +42,13 @@ final readonly class QuizAttemptDto {
 	 */
 	public function toArray(): array {
 		$data = array(
-			'id'            => $this->id,
-			'userId'        => $this->userId,
-			'quizId'        => $this->quizId,
-			'scorePercent'  => $this->scorePercent,
-			'passed'        => $this->passed,
-			'answers'       => $this->answers,
-			'completedAt'   => $this->completedAt,
+			'id'           => $this->id,
+			'userId'       => $this->userId,
+			'quizId'       => $this->quizId,
+			'scorePercent' => $this->scorePercent,
+			'passed'       => $this->passed,
+			'answers'      => $this->answers,
+			'completedAt'  => $this->completedAt,
 		);
 
 		if ( null !== $this->userDisplayName ) {

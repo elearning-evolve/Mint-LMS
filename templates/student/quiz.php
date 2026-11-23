@@ -27,7 +27,7 @@ if ( ! $quizRequired && ! $isReviewMode ) {
 	return;
 }
 
-$questionCount = count( $quiz->questions );
+$questionCount  = count( $quiz->questions );
 $storedSettings = get_post_meta( (int) $quiz->id, PostTypes::META_QUIZ_SETTINGS, true );
 $storedSettings = is_array( $storedSettings ) ? $storedSettings : array();
 $showQuizTitle  = array_key_exists( 'showQuizTitle', $storedSettings ) ? ! empty( $storedSettings['showQuizTitle'] ) : true;
@@ -41,38 +41,38 @@ $showCorrect    = array_key_exists( 'showCorrectCount', $storedSettings ) ? ! em
 $showTimeSpent  = array_key_exists( 'showTimeSpent', $storedSettings ) ? ! empty( $storedSettings['showTimeSpent'] ) : true;
 $quizBoot       = wp_json_encode(
 	array(
-		'quizId'      => (int) $quiz->id,
-		'quizTitle'   => (string) $quiz->title,
-		'passPercent' => (int) $quiz->passPercent,
-		'hasPassed'   => (bool) $hasPassedQuiz,
-		'previewMode'      => (bool) $isReviewMode,
-		'focusQuestionId'  => (int) ( $focusQuestionId ?? 0 ),
-		'settings'    => array(
-			'timeLimitEnabled'           => ! empty( $storedSettings['timeLimitEnabled'] ),
-			'timeLimitHours'             => (string) ( $storedSettings['timeLimitHours'] ?? '00' ),
-			'timeLimitMinutes'           => (string) ( $storedSettings['timeLimitMinutes'] ?? '00' ),
-			'timeLimitSeconds'           => (string) ( $storedSettings['timeLimitSeconds'] ?? '00' ),
-			'questionCompletion'         => ! empty( $storedSettings['questionCompletion'] ),
-			'questionDisplay'            => ( $storedSettings['questionDisplay'] ?? 'one' ) === 'all' ? 'all' : 'one',
-			'displayBackButton'          => ! empty( $storedSettings['displayBackButton'] ),
-			'skipQuestion'               => ! empty( $storedSettings['skipQuestion'] ),
-			'resultsMode'                => sanitize_key( (string) ( $storedSettings['resultsMode'] ?? 'end' ) ),
-			'restrictRetakes'            => ! empty( $storedSettings['restrictRetakes'] ),
-			'retriesAllowed'             => absint( $storedSettings['retriesAllowed'] ?? 0 ),
-			'quizSavingEnabled'          => ! empty( $storedSettings['quizSavingEnabled'] ),
-			'quizSavingIntervalSeconds'  => max( 5, absint( $storedSettings['quizSavingIntervalSeconds'] ?? 20 ) ),
-			'restartButton'              => $restartDefault,
-			'randomizeOrder'             => ! empty( $storedSettings['randomizeOrder'] ),
-			'randomizeAnswers'           => ! empty( $storedSettings['randomizeAnswers'] ),
-			'showOverallScore'           => $showOverall,
-			'showCorrectCount'           => $showCorrect,
-			'showTimeSpent'              => $showTimeSpent,
-			'customAnswerFeedback'       => array_key_exists( 'customAnswerFeedback', $storedSettings ) ? ! empty( $storedSettings['customAnswerFeedback'] ) : true,
-			'correctIncorrectMessages'   => array_key_exists( 'correctIncorrectMessages', $storedSettings ) ? ! empty( $storedSettings['correctIncorrectMessages'] ) : true,
-			'correctIncorrectMarks'      => array_key_exists( 'correctIncorrectMarks', $storedSettings ) ? ! empty( $storedSettings['correctIncorrectMarks'] ) : true,
-			'viewQuestionsButton'        => $viewQsDefault,
+		'quizId'          => (int) $quiz->id,
+		'quizTitle'       => (string) $quiz->title,
+		'passPercent'     => (int) $quiz->passPercent,
+		'hasPassed'       => (bool) $hasPassedQuiz,
+		'previewMode'     => (bool) $isReviewMode,
+		'focusQuestionId' => (int) ( $focusQuestionId ?? 0 ),
+		'settings'        => array(
+			'timeLimitEnabled'          => ! empty( $storedSettings['timeLimitEnabled'] ),
+			'timeLimitHours'            => (string) ( $storedSettings['timeLimitHours'] ?? '00' ),
+			'timeLimitMinutes'          => (string) ( $storedSettings['timeLimitMinutes'] ?? '00' ),
+			'timeLimitSeconds'          => (string) ( $storedSettings['timeLimitSeconds'] ?? '00' ),
+			'questionCompletion'        => ! empty( $storedSettings['questionCompletion'] ),
+			'questionDisplay'           => ( $storedSettings['questionDisplay'] ?? 'one' ) === 'all' ? 'all' : 'one',
+			'displayBackButton'         => ! empty( $storedSettings['displayBackButton'] ),
+			'skipQuestion'              => ! empty( $storedSettings['skipQuestion'] ),
+			'resultsMode'               => sanitize_key( (string) ( $storedSettings['resultsMode'] ?? 'end' ) ),
+			'restrictRetakes'           => ! empty( $storedSettings['restrictRetakes'] ),
+			'retriesAllowed'            => absint( $storedSettings['retriesAllowed'] ?? 0 ),
+			'quizSavingEnabled'         => ! empty( $storedSettings['quizSavingEnabled'] ),
+			'quizSavingIntervalSeconds' => max( 5, absint( $storedSettings['quizSavingIntervalSeconds'] ?? 20 ) ),
+			'restartButton'             => $restartDefault,
+			'randomizeOrder'            => ! empty( $storedSettings['randomizeOrder'] ),
+			'randomizeAnswers'          => ! empty( $storedSettings['randomizeAnswers'] ),
+			'showOverallScore'          => $showOverall,
+			'showCorrectCount'          => $showCorrect,
+			'showTimeSpent'             => $showTimeSpent,
+			'customAnswerFeedback'      => array_key_exists( 'customAnswerFeedback', $storedSettings ) ? ! empty( $storedSettings['customAnswerFeedback'] ) : true,
+			'correctIncorrectMessages'  => array_key_exists( 'correctIncorrectMessages', $storedSettings ) ? ! empty( $storedSettings['correctIncorrectMessages'] ) : true,
+			'correctIncorrectMarks'     => array_key_exists( 'correctIncorrectMarks', $storedSettings ) ? ! empty( $storedSettings['correctIncorrectMarks'] ) : true,
+			'viewQuestionsButton'       => $viewQsDefault,
 		),
-		'questions'   => array_map(
+		'questions'       => array_map(
 			static function ( $question ): array {
 				$row = $question->toArray();
 				unset( $row['correctAnswer'], $row['correctAnswers'] );

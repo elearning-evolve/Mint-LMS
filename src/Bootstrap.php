@@ -339,7 +339,7 @@ final class Bootstrap {
 			new WpUserLookup(),
 			$authorization,
 		);
-		$routeRegistrar = new RouteRegistrar(
+		$routeRegistrar       = new RouteRegistrar(
 			$courseController,
 			$sectionController,
 			$lessonController,

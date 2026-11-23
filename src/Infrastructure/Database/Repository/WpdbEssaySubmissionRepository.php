@@ -18,11 +18,12 @@ final class WpdbEssaySubmissionRepository implements EssaySubmissionRepositoryIn
 	}
 
 	public function save( EssaySubmission $submission ): EssaySubmission {
-		$table = Schema::validateTable( Schema::essaySubmissionsTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::essaySubmissionsTable( $wpdb->prefix ), $wpdb->prefix );
 
 		if ( $submission->id > 0 ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$this->wpdb->update(
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+			$wpdb->update(
 				$table,
 				array(
 					'status'          => $submission->status,
@@ -46,8 +47,8 @@ final class WpdbEssaySubmissionRepository implements EssaySubmissionRepositoryIn
 			return $saved;
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
-		$inserted = $this->wpdb->insert(
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Custom LMS table insert.
+		$inserted = $wpdb->insert(
 			$table,
 			array(
 				'attempt_id'      => $submission->attemptId,
@@ -71,7 +72,7 @@ final class WpdbEssaySubmissionRepository implements EssaySubmissionRepositoryIn
 		}
 
 		return new EssaySubmission(
-			(int) $this->wpdb->insert_id,
+			(int) $wpdb->insert_id,
 			$submission->attemptId,
 			$submission->questionId,
 			$submission->userId,
@@ -88,11 +89,12 @@ final class WpdbEssaySubmissionRepository implements EssaySubmissionRepositoryIn
 	}
 
 	public function findById( int $id ): ?EssaySubmission {
-		$table = Schema::validateTable( Schema::essaySubmissionsTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::essaySubmissionsTable( $wpdb->prefix ), $wpdb->prefix );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$row = $this->wpdb->get_row(
-			$this->wpdb->prepare(
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
 				'SELECT * FROM %i WHERE id = %d LIMIT 1',
 				$table,
 				$id
@@ -103,11 +105,12 @@ final class WpdbEssaySubmissionRepository implements EssaySubmissionRepositoryIn
 	}
 
 	public function findByAttemptAndQuestion( int $attemptId, int $questionId ): ?EssaySubmission {
-		$table = Schema::validateTable( Schema::essaySubmissionsTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::essaySubmissionsTable( $wpdb->prefix ), $wpdb->prefix );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$row = $this->wpdb->get_row(
-			$this->wpdb->prepare(
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$row = $wpdb->get_row(
+			$wpdb->prepare(
 				'SELECT * FROM %i WHERE attempt_id = %d AND question_id = %d LIMIT 1',
 				$table,
 				$attemptId,
@@ -119,11 +122,12 @@ final class WpdbEssaySubmissionRepository implements EssaySubmissionRepositoryIn
 	}
 
 	public function findByAttemptId( int $attemptId ): array {
-		$table = Schema::validateTable( Schema::essaySubmissionsTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb  = $this->wpdb;
+		$table = Schema::validateTable( Schema::essaySubmissionsTable( $wpdb->prefix ), $wpdb->prefix );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-		$rows = $this->wpdb->get_results(
-			$this->wpdb->prepare(
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
 				'SELECT * FROM %i WHERE attempt_id = %d ORDER BY id ASC',
 				$table,
 				$attemptId
@@ -141,7 +145,8 @@ final class WpdbEssaySubmissionRepository implements EssaySubmissionRepositoryIn
 	}
 
 	public function listForGrading( ?string $status = null, ?int $quizId = null, ?int $authorId = null, int $limit = 100 ): array {
-		$table  = Schema::validateTable( Schema::essaySubmissionsTable( $this->wpdb->prefix ), $this->wpdb->prefix );
+		$wpdb   = $this->wpdb;
+		$table  = Schema::validateTable( Schema::essaySubmissionsTable( $wpdb->prefix ), $wpdb->prefix );
 		$limit  = max( 1, min( 500, $limit ) );
 		$where  = array( '1=1' );
 		$params = array( $table );
@@ -159,7 +164,7 @@ final class WpdbEssaySubmissionRepository implements EssaySubmissionRepositoryIn
 				SELECT 1 FROM %i p
 				WHERE p.ID = e.quiz_id AND p.post_type = %s AND p.post_author = %d
 			)';
-			$params[] = $this->wpdb->posts;
+			$params[] = $wpdb->posts;
 			$params[] = PostTypes::QUIZ;
 			$params[] = $authorId;
 		}
@@ -167,8 +172,8 @@ final class WpdbEssaySubmissionRepository implements EssaySubmissionRepositoryIn
 		$params[] = $limit;
 		$sql      = 'SELECT e.* FROM %i e WHERE ' . implode( ' AND ', $where ) . ' ORDER BY e.created_at DESC LIMIT %d';
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
-		$rows = $this->wpdb->get_results( $this->wpdb->prepare( $sql, ...$params ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared -- Dynamic WHERE; IDs/status bound via prepare.
+		$rows = $wpdb->get_results( $wpdb->prepare( $sql, ...$params ) );
 
 		$out = array();
 		if ( is_array( $rows ) ) {

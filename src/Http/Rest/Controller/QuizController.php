@@ -375,7 +375,7 @@ final class QuizController {
 
 			$items[] = array(
 				'id'             => (int) $post->ID,
-				'title'          => $post->post_title !== '' ? $post->post_title : __( 'New Quiz', 'mint-lms' ),
+				'title'          => '' !== $post->post_title ? $post->post_title : __( 'New Quiz', 'mint-lms' ),
 				'lessonId'       => $lessonId,
 				'lessonTitle'    => $linked ? (string) get_the_title( $lessonId ) : '',
 				'sectionId'      => $linked ? $sectionId : 0,
@@ -815,7 +815,11 @@ final class QuizController {
 			$attachmentId = (int) $attachmentId;
 			$encoded      = $this->quizService->encodeEssayUploadAnswer( $attachmentId );
 			$url          = wp_get_attachment_url( $attachmentId );
-			$name         = basename( (string) ( get_attached_file( $attachmentId ) ?: $url ) );
+			$attachedFile = get_attached_file( $attachmentId );
+			$nameSource   = ( is_string( $attachedFile ) && '' !== $attachedFile )
+				? $attachedFile
+				: ( is_string( $url ) ? $url : '' );
+			$name         = basename( $nameSource );
 
 			return ApiResponse::success(
 				array(
@@ -852,7 +856,7 @@ final class QuizController {
 			foreach ( $rows as $index => $row ) {
 				$attachmentId = (int) ( $row['attachmentId'] ?? 0 );
 				if ( $attachmentId > 0 ) {
-					$url = wp_get_attachment_url( $attachmentId );
+					$url                             = wp_get_attachment_url( $attachmentId );
 					$rows[ $index ]['attachmentUrl'] = is_string( $url ) ? $url : null;
 				}
 			}
@@ -1455,16 +1459,16 @@ final class QuizController {
 	}
 
 	/**
-	 * @param mixed $list
+	 * @param mixed $extraTf
 	 * @return list<array<string, mixed>>
 	 */
-	private function sanitizeExtraTfList( mixed $list ): array {
-		if ( ! is_array( $list ) ) {
+	private function sanitizeExtraTfList( mixed $extraTf ): array {
+		if ( ! is_array( $extraTf ) ) {
 			return array();
 		}
 
 		$clean = array();
-		foreach ( $list as $item ) {
+		foreach ( $extraTf as $item ) {
 			if ( ! is_array( $item ) ) {
 				continue;
 			}
@@ -1472,8 +1476,9 @@ final class QuizController {
 			if ( ! in_array( $answer, array( 'true', 'false', '' ), true ) ) {
 				$answer = '';
 			}
+			$rowId   = absint( $item['id'] ?? 0 );
 			$clean[] = array(
-				'id'             => absint( $item['id'] ?? 0 ) ?: null,
+				'id'             => $rowId > 0 ? $rowId : null,
 				'prompt'         => RestContentSanitizer::richText( (string) ( $item['prompt'] ?? '' ) ),
 				'correctAnswer'  => $answer,
 				'freePreview'    => ! empty( $item['freePreview'] ),

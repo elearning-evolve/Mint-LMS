@@ -813,15 +813,15 @@ final class QuizService implements QuizLifecycleInterface {
 			if ( is_array( $submitted ) ) {
 				$submitted = QuestionAnswerCodec::encodeMulti( array_map( 'strval', $submitted ) );
 			}
-			$given  = (string) $submitted;
-			$points = (float) $question->pointsPossible();
+			$given           = (string) $submitted;
+			$points          = (float) $question->pointsPossible();
 			$pointsPossible += $points;
 
 			if ( QuizQuestion::TYPE_ESSAY === $question->type ) {
-				$mode     = EssayGradingMode::normalize( $question->gradingMode );
-				$awards   = EssayGradingMode::awardsPointsOnSubmit( $mode );
-				$pending  = EssayGradingMode::requiresManualGrade( $mode );
-				$earned   = $awards ? $points : 0.0;
+				$mode          = EssayGradingMode::normalize( $question->gradingMode );
+				$awards        = EssayGradingMode::awardsPointsOnSubmit( $mode );
+				$pending       = EssayGradingMode::requiresManualGrade( $mode );
+				$earned        = $awards ? $points : 0.0;
 				$pointsEarned += $earned;
 				if ( $pending ) {
 					$pendingEssay = true;
@@ -842,8 +842,8 @@ final class QuizService implements QuizLifecycleInterface {
 			}
 
 			++$gradedCount;
-			$isCorrect = $this->isAnswerCorrect( $question, $given );
-			$earned    = $isCorrect ? $points : 0.0;
+			$isCorrect     = $this->isAnswerCorrect( $question, $given );
+			$earned        = $isCorrect ? $points : 0.0;
 			$pointsEarned += $earned;
 			if ( $isCorrect ) {
 				++$correctCount;
@@ -950,9 +950,9 @@ final class QuizService implements QuizLifecycleInterface {
 	 * @param array<string, mixed> $data
 	 */
 	private function createQuestionFromArray( int $quizId, array $data, int $sortOrder ): void {
-		$type = (string) ( $data['type'] ?? QuizQuestion::TYPE_MCQ );
-		$prompt = (string) ( $data['prompt'] ?? '' );
-		$options = isset( $data['options'] ) && is_array( $data['options'] )
+		$type          = (string) ( $data['type'] ?? QuizQuestion::TYPE_MCQ );
+		$prompt        = (string) ( $data['prompt'] ?? '' );
+		$options       = isset( $data['options'] ) && is_array( $data['options'] )
 			? array_values( array_map( 'strval', $data['options'] ) )
 			: array();
 		$correctAnswer = QuestionAnswerCodec::normalizeForType(
@@ -1355,7 +1355,7 @@ final class QuizService implements QuizLifecycleInterface {
 		$pointsEarned   = 0.0;
 
 		foreach ( $questions as $question ) {
-			$points = (float) $question->pointsPossible();
+			$points          = (float) $question->pointsPossible();
 			$pointsPossible += $points;
 
 			if ( QuizQuestion::TYPE_ESSAY === $question->type ) {
