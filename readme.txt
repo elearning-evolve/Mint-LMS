@@ -5,11 +5,11 @@ Tags: lms, learning, courses, quizzes, elearning
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 8.2
-Stable tag: 1.1.17
+Stable tag: 1.1.18
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-WordPress LMS for courses, lessons, quizzes, and progress tracking. Optional AI drafts via Claude Desktop (MCP) — no third-party API keys in WordPress.
+WordPress LMS for courses, lessons, quizzes, and progress. Optional AI drafts via Claude Desktop (MCP).
 
 == Description ==
 
@@ -60,6 +60,9 @@ Must-watch progression is enforced for self-hosted HTML5 video only. YouTube, Vi
 When quiz saving is enabled, answers are kept in the student’s browser tab (session storage) so they can continue in the same tab. Progress is not stored on the server, and clearing the tab or switching devices loses unfinished answers. Submitted attempts are stored normally.
 
 == Changelog ==
+
+= 1.1.18 =
+* Plugin Check: fix strip_tags / suppress_filters / ABSPATH on autoload helpers; keep composer.json in release zip; trim short description; quiet legitimate DB/migration and view-template PCP warnings.
 
 = 1.1.17 =
 * wp.org readiness: honest quiz-saving copy (browser tab only); FAQ notes for WooCommerce guest checkout, HTML5-only must-watch video, and mid-quiz save limits.

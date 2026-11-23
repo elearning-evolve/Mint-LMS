@@ -5,6 +5,8 @@ namespace MintLMS\Infrastructure\Database\Migration;
 
 defined( 'ABSPATH' ) || exit;
 
+// phpcs:disable WordPress.DB.DirectDatabaseQuery.SchemaChange,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Schema migrations on install/upgrade.
+
 use MintLMS\Infrastructure\Database\Schema;
 
 final class Migration_003_Drip implements MigrationInterface {

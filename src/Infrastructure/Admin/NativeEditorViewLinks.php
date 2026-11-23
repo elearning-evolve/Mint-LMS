@@ -249,12 +249,11 @@ final class NativeEditorViewLinks {
 
 		$posts = get_posts(
 			array(
-				'name'             => $slug,
-				'post_type'        => PostTypes::COURSE,
-				'post_status'      => array( 'publish', 'draft', 'private', 'pending', 'future' ),
-				'posts_per_page'   => 1,
-				'no_found_rows'    => true,
-				'suppress_filters' => true,
+				'name'           => $slug,
+				'post_type'      => PostTypes::COURSE,
+				'post_status'    => array( 'publish', 'draft', 'private', 'pending', 'future' ),
+				'posts_per_page' => 1,
+				'no_found_rows'  => true,
 			)
 		);
 

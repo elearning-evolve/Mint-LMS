@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- View/template variables scoped to this file.
+
 $content = isset( $args['content'] ) && is_string( $args['content'] ) ? $args['content'] : '';
 ?><!DOCTYPE html>
 <html <?php language_attributes(); ?>>

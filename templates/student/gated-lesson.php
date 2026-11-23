@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- View/template variables scoped to this file.
+
 use MintLMS\Application\Exception\ForbiddenException;
 
 $message     = is_string( $message ?? null ) ? $message : '';

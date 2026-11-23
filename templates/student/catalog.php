@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
+// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- View/template variables scoped to this file.
+
 use MintLMS\Application\Student\Dto\StudentCatalogCourseDto;
 use MintLMS\Infrastructure\Ui\MintUi;
 

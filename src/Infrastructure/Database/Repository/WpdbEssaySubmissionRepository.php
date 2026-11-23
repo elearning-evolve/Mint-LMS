@@ -172,8 +172,9 @@ final class WpdbEssaySubmissionRepository implements EssaySubmissionRepositoryIn
 		$params[] = $limit;
 		$sql      = 'SELECT e.* FROM %i e WHERE ' . implode( ' AND ', $where ) . ' ORDER BY e.created_at DESC LIMIT %d';
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared -- Dynamic WHERE; IDs/status bound via prepare.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Dynamic WHERE; IDs/status bound via $wpdb->prepare().
 		$rows = $wpdb->get_results( $wpdb->prepare( $sql, ...$params ) );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		$out = array();
 		if ( is_array( $rows ) ) {

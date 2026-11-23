@@ -76,8 +76,7 @@ echo "== composer install --no-dev (stage)"
 	cd "$STAGE"
 	COMPOSER_ALLOW_SUPERUSER="${COMPOSER_ALLOW_SUPERUSER:-0}" \
 		composer install --no-dev --optimize-autoloader --prefer-dist --no-interaction --no-progress
-	# Manifests are for packaging only; do not ship them in the zip.
-	rm -f composer.json composer.lock
+	# Keep composer.json (+ lock) in the zip: Plugin Check requires it when /vendor exists.
 )
 
 AUTOLOAD_FILES="$STAGE/vendor/composer/autoload_files.php"

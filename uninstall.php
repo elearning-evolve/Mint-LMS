@@ -149,7 +149,7 @@ function mintlms_uninstall_delete_meta( \wpdb $wpdb ): void {
 			EnrollmentBridge::ORDER_META_PROCESSED,
 		);
 		foreach ( $hpos_keys as $meta_key ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Uninstall cleanup of HPOS meta.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Uninstall cleanup of known HPOS meta keys only.
 			$wpdb->delete( $orders_meta_table, array( 'meta_key' => $meta_key ), array( '%s' ) );
 		}
 	}

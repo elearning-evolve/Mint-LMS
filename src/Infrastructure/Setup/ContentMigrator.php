@@ -511,6 +511,7 @@ final class ContentMigrator {
 			);
 
 			if ( false === $linked ) {
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Rollback orphan CPT row after failed junction migrate.
 				$wpdb->delete( $dataTable, array( 'post_id' => $postId ), array( '%d' ) );
 				wp_delete_post( $postId, true );
 				throw new \RuntimeException( 'Question junction migrate failed for #' . absint( $legacyId ) );
