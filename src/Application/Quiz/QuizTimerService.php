@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Application\Quiz;
 
+defined( 'ABSPATH' ) || exit;
+
 use MintLMS\Application\Exception\ForbiddenException;
 use MintLMS\Domain\Shared\Clock;
 

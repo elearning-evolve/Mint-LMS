@@ -15,6 +15,9 @@ use RecursiveIteratorIterator;
  * running these tests. After that guard was fixed, these known legacy
  * violations surfaced. They are allowlisted so CI stays honest about *new*
  * debt; remove entries as files are cleaned up.
+ *
+ * `defined( 'ABSPATH' ) || exit` is allowed in every plugin PHP file (wp.org
+ * direct-access guard). It is not treated as WordPress API coupling.
  */
 final class LayerBoundaryTest extends TestCase
 {
@@ -36,7 +39,6 @@ final class LayerBoundaryTest extends TestCase
         '/\b_n\s*\(/'                       => '_n() translation',
         '/\bget_userdata\s*\(/'             => 'get_userdata()',
         '/\besc_html__\s*\(/'               => 'esc_html__()',
-        '/\bABSPATH\b/'                     => 'ABSPATH',
         '/\bplugin_dir_(path|url)\s*\(/'    => 'plugin_dir_*',
     ];
 
@@ -55,9 +57,7 @@ final class LayerBoundaryTest extends TestCase
         'tests/Architecture/../../src/Application/Admin/SampleCourseSeeder.php uses $wpdb',
         'tests/Architecture/../../src/Application/Admin/SampleCourseSeeder.php uses __() translation',
         'tests/Architecture/../../src/Application/Admin/SampleCourseSeeder.php uses esc_html__()',
-        'tests/Architecture/../../src/Application/Admin/SampleCourseSeeder.php uses ABSPATH',
         'tests/Architecture/../../src/Application/Admin/CreatorDashboardService.php uses __() translation',
-        'tests/Architecture/../../src/Application/Course/Dto/CourseDto.php uses ABSPATH',
         'tests/Architecture/../../src/Application/Student/StudentExperienceService.php uses wp_* function',
         'tests/Architecture/../../src/Application/Student/StudentExperienceService.php uses WP_* class',
         'tests/Architecture/../../src/Application/Student/StudentExperienceService.php uses __() translation',

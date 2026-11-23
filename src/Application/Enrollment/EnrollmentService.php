@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Application\Enrollment;
 
+defined( 'ABSPATH' ) || exit;
+
 use MintLMS\Application\Contract\AuthorizationInterface;
 use MintLMS\Application\Enrollment\Dto\EnrolledCourseDto;
 use MintLMS\Application\Enrollment\Dto\EnrolledCourseListDto;

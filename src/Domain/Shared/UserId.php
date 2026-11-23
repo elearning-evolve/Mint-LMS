@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Domain\Shared;
 
+defined( 'ABSPATH' ) || exit;
+
 final readonly class UserId {
 
 	private function __construct(

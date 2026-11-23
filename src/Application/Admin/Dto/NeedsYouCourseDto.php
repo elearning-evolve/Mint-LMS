@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Application\Admin\Dto;
 
+defined( 'ABSPATH' ) || exit;
+
 final class NeedsYouCourseDto {
 
 	public function __construct(

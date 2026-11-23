@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Application\Ai;
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Hard boundary for AI features: Mint LMS content only.
  *

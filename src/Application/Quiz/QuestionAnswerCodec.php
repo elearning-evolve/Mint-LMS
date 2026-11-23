@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Application\Quiz;
 
+defined( 'ABSPATH' ) || exit;
+
 /**
  * Encodes / decodes multi-correct answers stored in the correct_answer TEXT column.
  * Domain stays a plain string; Application owns the JSON convention.

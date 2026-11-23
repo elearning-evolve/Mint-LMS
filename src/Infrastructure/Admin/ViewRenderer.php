@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Infrastructure\Admin;
 
+defined( 'ABSPATH' ) || exit;
+
 use MintLMS\Infrastructure\View\ScopedPhpTemplate;
 
 final class ViewRenderer {

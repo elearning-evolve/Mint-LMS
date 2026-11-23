@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Domain\Lesson;
 
+defined( 'ABSPATH' ) || exit;
+
 interface LessonRepositoryInterface {
 
 	public function findById( int $id ): ?Lesson;

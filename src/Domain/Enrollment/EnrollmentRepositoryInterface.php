@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Domain\Enrollment;
 
+defined( 'ABSPATH' ) || exit;
+
 interface EnrollmentRepositoryInterface {
 
 	public function findById( int $id ): ?Enrollment;

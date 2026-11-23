@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS;
 
+defined( 'ABSPATH' ) || exit;
+
 use MintLMS\Application\Certificate\CertificateService;
 use MintLMS\Application\Course\CourseService;
 use MintLMS\Application\Course\CourseStructureService;

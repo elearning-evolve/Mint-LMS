@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Domain\Progress;
 
+defined( 'ABSPATH' ) || exit;
+
 interface ProgressRepositoryInterface {
 
 	public function findLessonCourseId( int $lessonId ): ?int;

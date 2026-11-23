@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Api\V1;
 
+defined( 'ABSPATH' ) || exit;
+
 use MintLMS\Application\Course\Dto\CourseDto;
 use MintLMS\Application\Course\Dto\CourseStructureDto;
 

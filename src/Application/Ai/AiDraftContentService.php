@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Application\Ai;
 
+defined( 'ABSPATH' ) || exit;
+
 use MintLMS\Application\Course\CourseService;
 use MintLMS\Application\Course\Dto\CreateCourseDto;
 use MintLMS\Application\Exception\ValidationException;

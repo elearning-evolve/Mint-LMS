@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Domain\Lesson;
 
+defined( 'ABSPATH' ) || exit;
+
 final readonly class Lesson {
 
 	public function __construct(

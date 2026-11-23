@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Application\Progress;
 
+defined( 'ABSPATH' ) || exit;
+
 use MintLMS\Application\Contract\LessonVideoProgressInterface;
 use MintLMS\Application\Exception\ForbiddenException;
 use MintLMS\Application\Quiz\QuizService;

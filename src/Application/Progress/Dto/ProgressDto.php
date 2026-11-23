@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Application\Progress\Dto;
 
+defined( 'ABSPATH' ) || exit;
+
 use MintLMS\Domain\Progress\ProgressSummary;
 
 final readonly class ProgressDto {

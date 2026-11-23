@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Application\Exception;
 
+defined( 'ABSPATH' ) || exit;
+
 final class ValidationException extends \RuntimeException {
 
 	/**

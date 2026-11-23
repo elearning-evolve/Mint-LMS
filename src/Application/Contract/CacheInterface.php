@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Application\Contract;
 
+defined( 'ABSPATH' ) || exit;
+
 interface CacheInterface {
 
 	public function get( string $key ): mixed;

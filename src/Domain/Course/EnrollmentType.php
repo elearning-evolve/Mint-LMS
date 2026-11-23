@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Domain\Course;
 
+defined( 'ABSPATH' ) || exit;
+
 enum EnrollmentType: string {
 
 	/** Anyone can browse lessons without joining. Logged-in students may still join to track progress. */

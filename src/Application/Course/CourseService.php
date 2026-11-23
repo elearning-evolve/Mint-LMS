@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Application\Course;
 
+defined( 'ABSPATH' ) || exit;
+
 use MintLMS\Application\Contract\AdminDashboardRepositoryInterface;
 use MintLMS\Application\Contract\AuthorizationInterface;
 use MintLMS\Application\Contract\UserLookupInterface;

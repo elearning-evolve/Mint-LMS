@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Infrastructure\Database;
 
+defined( 'ABSPATH' ) || exit;
+
 final class Schema {
 
 	public static function coursesTable( string $prefix ): string {

@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Domain\Quiz;
 
+defined( 'ABSPATH' ) || exit;
+
 final readonly class QuizAttempt {
 
 	/**

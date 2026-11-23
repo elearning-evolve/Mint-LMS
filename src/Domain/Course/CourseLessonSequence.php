@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Domain\Course;
 
+defined( 'ABSPATH' ) || exit;
+
 use MintLMS\Domain\Lesson\Lesson;
 use MintLMS\Domain\Section\Section;
 

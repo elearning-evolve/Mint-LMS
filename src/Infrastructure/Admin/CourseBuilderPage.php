@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Infrastructure\Admin;
 
+defined( 'ABSPATH' ) || exit;
+
 use MintLMS\Application\Course\Dto\CreateCourseDto;
 use MintLMS\Domain\Course\EnrollmentType;
 use MintLMS\Infrastructure\PostType\PostTypes;

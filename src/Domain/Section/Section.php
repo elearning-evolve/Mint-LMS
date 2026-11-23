@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace MintLMS\Domain\Section;
 
+defined( 'ABSPATH' ) || exit;
+
 final readonly class Section {
 
 	public function __construct(
