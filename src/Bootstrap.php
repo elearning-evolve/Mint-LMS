@@ -304,6 +304,19 @@ final class Bootstrap {
 			$sectionRepo,
 		);
 		$essayRepo           = new WpdbEssaySubmissionRepository( $wpdb );
+		$quizTimer           = new QuizTimerService( $clock );
+		$quizService         = new QuizService(
+			$quizRepo,
+			$lessonRepo,
+			$courseRepo,
+			$authorization,
+			$clock,
+			$progressRepo,
+			$userLookup,
+			$lessonAccessService,
+			$essayRepo,
+			$quizTimer
+		);
 		$lessonRequirements  = new LessonRequirementService( new WpLessonVideoProgress(), $quizService );
 		$progressService     = new ProgressService( $progressRepo, Plugin::eventPublisher(), $clock, $quizService, $lessonAccessService, $courseRepo, $lessonRequirements );
 		$enrollmentService   = new EnrollmentService(
