@@ -52,9 +52,26 @@ final class LessonAccessServiceTest extends TestCase
             ->with(3, 5)
             ->willReturn(new Enrollment(1, 3, 5, EnrollmentStatus::Active, new \DateTimeImmutable('2026-01-01 00:00:00'), null, null));
 
-        $this->expectException(ForbiddenException::class);
+        try {
+            $this->service->assertCanAccessLesson(3, 10);
+            $this->fail('Expected ForbiddenException for drip lock.');
+        } catch (ForbiddenException $exception) {
+            $this->assertSame(ForbiddenException::REASON_DRIP, $exception->reason());
+        }
+    }
 
-        $this->service->assertCanAccessLesson(3, 10);
+    public function test_blocks_unenrolled_access_with_enrollment_reason(): void
+    {
+        $lesson = $this->sampleLesson(10, 5, null);
+        $this->lessonRepository->method('findById')->with(10)->willReturn($lesson);
+        $this->progressRepository->method('isUserEnrolled')->with(3, 5)->willReturn(false);
+
+        try {
+            $this->service->assertCanAccessLesson(3, 10, false);
+            $this->fail('Expected ForbiddenException for enrollment gate.');
+        } catch (ForbiddenException $exception) {
+            $this->assertSame(ForbiddenException::REASON_ENROLLMENT, $exception->reason());
+        }
     }
 
     public function test_allows_preview_without_enrollment(): void
@@ -67,7 +84,7 @@ final class LessonAccessServiceTest extends TestCase
         $this->assertTrue(true);
     }
 
-    private function sampleLesson(int $id, int $courseId, int $dripDays, bool $isPreview = false): Lesson
+    private function sampleLesson(int $id, int $courseId, ?int $dripDays = null, bool $isPreview = false): Lesson
     {
         $now = new \DateTimeImmutable('2026-01-01 00:00:00');
 
