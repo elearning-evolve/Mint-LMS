@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace MintLMS\Tests\Unit\Application;
 
 use MintLMS\Application\Contract\AuthorizationInterface;
-use MintLMS\Application\Contract\ProgressLifecycleInterface;
 use MintLMS\Application\Exception\ForbiddenException;
 use MintLMS\Application\Exception\NotFoundException;
 use MintLMS\Application\Exception\ValidationException;
@@ -36,8 +35,6 @@ final class SectionServiceTest extends TestCase
 
     private Clock $clock;
 
-    private ProgressLifecycleInterface $progressLifecycle;
-
     private QuizLifecycleInterface $quizLifecycle;
 
     private SectionService $service;
@@ -49,7 +46,6 @@ final class SectionServiceTest extends TestCase
         $this->courseRepository = $this->createMock(CourseRepositoryInterface::class);
         $this->authorization = $this->createMock(AuthorizationInterface::class);
         $this->clock = $this->createMock(Clock::class);
-        $this->progressLifecycle = $this->createMock(ProgressLifecycleInterface::class);
         $this->quizLifecycle = $this->createMock(QuizLifecycleInterface::class);
         $this->service = new SectionService(
             $this->sectionRepository,
@@ -57,7 +53,6 @@ final class SectionServiceTest extends TestCase
             $this->courseRepository,
             $this->authorization,
             $this->clock,
-            $this->progressLifecycle,
             $this->quizLifecycle,
         );
 
@@ -146,7 +141,6 @@ final class SectionServiceTest extends TestCase
         $this->lessonRepository->method('findBySectionId')->with(10)->willReturn($lessons);
 
         $this->lessonRepository->expects($this->never())->method('deleteBySectionId');
-        $this->progressLifecycle->expects($this->never())->method('onLessonDeleted');
         $this->lessonRepository->expects($this->never())->method('delete');
 
         $trashedQuizLessons = [];

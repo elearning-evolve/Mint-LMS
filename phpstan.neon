@@ -7,6 +7,8 @@ parameters:
         - src
     bootstrapFiles:
         - tests/phpstan-bootstrap.php
+        # Soft-dep WooCommerce: stubs only (plugin may run without WC installed).
+        - vendor/php-stubs/woocommerce-stubs/woocommerce-stubs.php
     treatPhpDocTypesAsCertain: false
     checkMissingIterableValueType: true
     ignoreErrors: []

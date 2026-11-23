@@ -104,7 +104,7 @@ final class AdminContentListScope {
 		}
 
 		$screen   = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-		$postType = ( null !== $screen && isset( $screen->post_type ) ) ? (string) $screen->post_type : '';
+		$postType = null !== $screen ? (string) $screen->post_type : '';
 
 		if ( ! PostTypes::isContentType( $postType ) ) {
 			return $views;

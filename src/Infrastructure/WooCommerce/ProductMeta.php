@@ -62,9 +62,9 @@ final class ProductMeta {
 	}
 
 	/**
-	 * @param int      $loop          Variation loop index.
-	 * @param array    $variationData Variation data.
-	 * @param \WP_Post $variation     Variation post.
+	 * @param int                  $loop          Variation loop index.
+	 * @param array<string, mixed> $variationData Variation data.
+	 * @param \WP_Post             $variation     Variation post.
 	 */
 	public function renderVariationField( int $loop, array $variationData, \WP_Post $variation ): void {
 		$courseId  = $this->getCourseIdForProduct( (int) $variation->ID );
@@ -183,7 +183,7 @@ final class ProductMeta {
 		}
 
 		if ( $courseId > 0 ) {
-			$product->update_meta_data( EnrollmentBridge::META_COURSE_ID, $courseId );
+			$product->update_meta_data( EnrollmentBridge::META_COURSE_ID, (string) $courseId );
 		} else {
 			$product->delete_meta_data( EnrollmentBridge::META_COURSE_ID );
 		}

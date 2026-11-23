@@ -192,7 +192,7 @@ final class ShortcodeRegistrar {
 
 		// Quizzes live inside the lesson player for enrolled students (not S3 builder preview).
 		$html = $this->renderLessonPlayerPreview( $courseId, $lessonId, get_current_user_id() );
-		if ( null === $html || '' === $html ) {
+		if ( '' === $html ) {
 			return;
 		}
 
@@ -869,7 +869,7 @@ final class ShortcodeRegistrar {
 		return UiRoot::open( 'student' ) . $content . UiRoot::close();
 	}
 
-	private function renderLessonPlayerPreview( int $courseId, int $lessonId, int $userId ): ?string {
+	private function renderLessonPlayerPreview( int $courseId, int $lessonId, int $userId ): string {
 		$settings = $this->settings();
 
 		try {

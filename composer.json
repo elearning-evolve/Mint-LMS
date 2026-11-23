@@ -8,6 +8,7 @@
     },
     "require-dev": {
         "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+        "php-stubs/woocommerce-stubs": "^11.3",
         "php-stubs/wordpress-stubs": "^6.4",
         "phpstan/phpstan": "^1.10",
         "phpunit/phpunit": "^10.5",
@@ -38,7 +39,7 @@
         "test:unit": "phpunit -c phpunit.xml.dist --testsuite unit",
         "test:ci": "phpunit -c phpunit.xml.dist --testsuite ci",
         "test:integ": "phpunit -c phpunit.xml.dist --testsuite integration",
-        "stan": "phpstan analyse --memory-limit=512M",
+        "stan": "phpstan analyse --memory-limit=2G",
         "sniff": "phpcs",
         "fix": "phpcbf",
         "plugin-check": "bash dev/plugin-check.sh",
