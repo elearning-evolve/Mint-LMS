@@ -832,7 +832,9 @@ final class StudentExperienceService {
 
 		$reallyEnrolled = null !== $isReallyEnrolled ? $isReallyEnrolled : $canBrowseContent;
 		$enrolledAt     = $this->resolveEnrollmentDate( $userId, $courseId, $reallyEnrolled );
-		$rows           = $this->sectionRepository->loadStructureRows( $courseId );
+		// Students: published lessons only. Instructor preview ($skipDrip): include drafts.
+		$publishedOnly  = ! $skipDrip;
+		$rows           = $this->sectionRepository->loadStructureRows( $courseId, $publishedOnly );
 		// Same order as LessonAccessService / curriculum display (ungrouped first).
 		$orderedLessonIds = CourseLessonSequence::orderedLessonIds( $rows );
 
