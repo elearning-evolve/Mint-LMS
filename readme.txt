@@ -5,7 +5,7 @@ Tags: lms, learning, courses, quizzes, elearning
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 8.2
-Stable tag: 1.1.0
+Stable tag: 1.1.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,6 +48,10 @@ LMS features (courses, lessons, quizzes, progress) do not require any third-part
 WordPress 6.2 or later and **PHP 8.2** or later. Optional AI Assistance also needs the MCP Adapter plugin and a compatible MCP client (e.g. Claude Desktop).
 
 == Changelog ==
+
+= 1.1.1 =
+* WooCommerce: enroll from purchase via order proof (admin self-purchase of Paid courses works).
+* WooCommerce: mark order enrollment processed only when every linked course succeeds (or is already enrolled); failures stay retryable with an order note.
 
 = 1.1.0 =
 * Official production packaging release (version continues past internal 1.0.x builds so existing installs are not treated as a downgrade).

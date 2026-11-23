@@ -20,26 +20,13 @@ final class EnrollmentBridge {
 	public const ORDER_META_PROCESSED = '_mintlms_wc_enrollment_processed';
 
 	/**
-	 * @return EnrollmentDto|null Null when enrollment could not be created.
+	 * Enroll a customer from a paid order. Uses purchase proof (order ID), not a staff actor —
+	 * so the first/only administrator can buy their own Paid course successfully.
+	 *
+	 * @return EnrollmentDto|null Null when enrollment could not be created or returned.
 	 */
 	public function enrollUser( int $userId, int $courseId, int $orderId, int $productId ): ?EnrollmentDto {
-		if ( $userId <= 0 || $courseId <= 0 ) {
-			return null;
-		}
-
-		$actorId = $this->resolveActorUserId();
-
-		if ( $actorId <= 0 ) {
-			$this->log(
-				'error',
-				sprintf(
-					'No enrollment actor found for order #%1$d (user %2$d, course %3$d).',
-					$orderId,
-					$userId,
-					$courseId
-				)
-			);
-
+		if ( $userId <= 0 || $courseId <= 0 || $orderId <= 0 ) {
 			return null;
 		}
 
@@ -54,28 +41,12 @@ final class EnrollmentBridge {
 		do_action( 'mintlms_wc_before_enroll', $userId, $courseId, $orderId, $productId );
 
 		try {
-			$service = Plugin::enrollmentService();
-
-			if ( $service->isEnrolled( $userId, $courseId ) ) {
-				$this->log(
-					'info',
-					sprintf(
-						'User %1$d is already enrolled in course %2$d (order #%3$d).',
-						$userId,
-						$courseId,
-						$orderId
-					)
-				);
-
-				return null;
-			}
-
-			$enrollment = $service->manualEnroll( $userId, $courseId, $actorId );
+			$enrollment = Plugin::enrollmentService()->enrollFromPurchase( $userId, $courseId, $orderId );
 
 			/**
-			 * Fires after Mint LMS enrollment is created for a WooCommerce purchase.
+			 * Fires after Mint LMS enrollment is created (or confirmed active) for a WooCommerce purchase.
 			 *
-			 * @param EnrollmentDto $enrollment Created enrollment.
+			 * @param EnrollmentDto $enrollment Created or existing active enrollment.
 			 * @param int           $orderId    WooCommerce order ID.
 			 * @param int           $productId  WooCommerce product ID.
 			 */
@@ -107,11 +78,10 @@ final class EnrollmentBridge {
 			$this->log(
 				'error',
 				sprintf(
-					'Forbidden enrolling user %1$d in course %2$d (order #%3$d, actor %4$d): %5$s',
+					'Forbidden enrolling user %1$d in course %2$d (order #%3$d): %4$s',
 					$userId,
 					$courseId,
 					$orderId,
-					$actorId,
 					$exception->getMessage()
 				)
 			);
@@ -150,22 +120,6 @@ final class EnrollmentBridge {
 			return false;
 		}
 
-		$actorId = $this->resolveActorUserId();
-
-		if ( $actorId <= 0 ) {
-			$this->log(
-				'error',
-				sprintf(
-					'No enrollment actor found to cancel course %1$d for user %2$d (order #%3$d).',
-					$courseId,
-					$userId,
-					$orderId
-				)
-			);
-
-			return false;
-		}
-
 		/**
 		 * Fires before Mint LMS enrollment is cancelled for a WooCommerce refund/cancel.
 		 *
@@ -176,7 +130,8 @@ final class EnrollmentBridge {
 		do_action( 'mintlms_wc_before_cancel_enrollment', $userId, $courseId, $orderId );
 
 		try {
-			$cancelled = Plugin::enrollmentService()->cancelByUserAndCourse( $userId, $courseId, $actorId );
+			// Customer is a valid cancel actor for their own enrollment — no staff actor required.
+			$cancelled = Plugin::enrollmentService()->cancelByUserAndCourse( $userId, $courseId, $userId );
 
 			if ( $cancelled ) {
 				/**
@@ -228,6 +183,9 @@ final class EnrollmentBridge {
 		return 'yes' === get_option( 'mintlms_wc_cancel_on_refund', $default ? 'yes' : 'no' );
 	}
 
+	/**
+	 * Optional staff actor for legacy filters / tooling. Purchase enroll no longer requires this.
+	 */
 	public function resolveActorUserId(): int {
 		/**
 		 * Filter the WordPress user ID used as the Mint LMS enrollment actor.

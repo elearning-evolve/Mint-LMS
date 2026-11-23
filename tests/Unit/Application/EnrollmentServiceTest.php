@@ -119,6 +119,61 @@ final class EnrollmentServiceTest extends TestCase
         $this->service->enroll(5, 1, 5);
     }
 
+    public function test_enroll_from_purchase_enrolls_paid_course_for_buyer_without_staff_actor(): void
+    {
+        $course = $this->sampleCourse(EnrollmentType::Paid, CourseStatus::Published);
+
+        $this->courseRepository->method('findById')->with(1)->willReturn($course);
+        $this->enrollmentRepository->method('findByUserAndCourse')->with(5, 1)->willReturn(null);
+        $this->authorization->expects($this->never())->method('canEnrollStudents');
+        $this->authorization->expects($this->never())->method('canEditCourse');
+
+        $this->dispatcher->expects($this->once())->method('dispatch');
+
+        $this->enrollmentRepository
+            ->expects($this->once())
+            ->method('save')
+            ->willReturnCallback(static function (Enrollment $enrollment): Enrollment {
+                return new Enrollment(
+                    42,
+                    $enrollment->userId,
+                    $enrollment->courseId,
+                    $enrollment->status,
+                    $enrollment->enrolledAt,
+                    $enrollment->expiresAt,
+                    $enrollment->completedAt,
+                );
+            });
+
+        // Same user as typical first-admin self-purchase; order proof authorizes enrollment.
+        $result = $this->service->enrollFromPurchase(5, 1, 9001);
+
+        $this->assertSame(42, $result->id);
+        $this->assertSame(5, $result->userId);
+        $this->assertSame('active', $result->status);
+    }
+
+    public function test_enroll_from_purchase_returns_existing_active_enrollment(): void
+    {
+        $course = $this->sampleCourse(EnrollmentType::Paid, CourseStatus::Published);
+        $active = $this->sampleEnrollment();
+
+        $this->courseRepository->method('findById')->with(1)->willReturn($course);
+        $this->enrollmentRepository->method('findByUserAndCourse')->with(5, 1)->willReturn($active);
+        $this->enrollmentRepository->expects($this->never())->method('save');
+
+        $result = $this->service->enrollFromPurchase(5, 1, 9001);
+
+        $this->assertSame(10, $result->id);
+    }
+
+    public function test_enroll_from_purchase_requires_order_id(): void
+    {
+        $this->expectException(ValidationException::class);
+
+        $this->service->enrollFromPurchase(5, 1, 0);
+    }
+
     public function test_manual_enroll_requires_enroll_students_capability(): void
     {
         $course = $this->sampleCourse(EnrollmentType::Manual, CourseStatus::Published);
