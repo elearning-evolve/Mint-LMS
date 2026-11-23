@@ -15,6 +15,9 @@ use MintLMS\Infrastructure\Setup\PageSettings;
  * Types stay non-public (no theme singles, search, or rewrite). They are
  * publicly_queryable so WP treats them as viewable, and all permalinks map
  * to Mint student preview / player URLs.
+ *
+ * Also catches legacy front-end probes like `?mint-course={slug}` (CPT has
+ * query_var disabled, so WP would otherwise render the site homepage).
  */
 final class NativeEditorViewLinks {
 
@@ -35,6 +38,7 @@ final class NativeEditorViewLinks {
 			add_filter( 'rest_prepare_' . $postType, array( $this, 'filterRestPost' ), 10, 2 );
 		}
 
+		add_action( 'template_redirect', array( $this, 'redirectLegacyCourseQuery' ), 3 );
 		add_action( 'template_redirect', array( $this, 'redirectSingularToStudentView' ), 4 );
 	}
 
@@ -147,6 +151,52 @@ final class NativeEditorViewLinks {
 		return $response;
 	}
 
+	/**
+	 * Legacy / mistaken front URLs: /?mint-course={slug|id}
+	 *
+	 * Mint course CPTs do not register a query_var, so WordPress ignores the
+	 * arg and shows the homepage. Map it to the catalog student URL instead
+	 * of enabling CPT rewrites or theme singles.
+	 */
+	public function redirectLegacyCourseQuery(): void {
+		if ( is_admin() || wp_doing_ajax() || wp_is_json_request() ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Public front redirect; read-only query arg.
+		if ( ! isset( $_GET['mint-course'] ) ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$raw = sanitize_text_field( wp_unslash( (string) $_GET['mint-course'] ) );
+
+		if ( '' === $raw ) {
+			return;
+		}
+
+		$post = $this->resolveCourseFromLegacyParam( $raw );
+
+		if ( ! $post instanceof \WP_Post ) {
+			return;
+		}
+
+		$url = $this->pages->getCourseUrl( $post->ID );
+
+		if ( '' === $url ) {
+			return;
+		}
+
+		$current = $this->currentRequestUrl();
+
+		if ( '' !== $current && untrailingslashit( $current ) === untrailingslashit( $url ) ) {
+			return;
+		}
+
+		wp_safe_redirect( $url, 301 );
+		exit;
+	}
+
 	public function redirectSingularToStudentView(): void {
 		if ( is_admin() || wp_doing_ajax() || wp_is_json_request() ) {
 			return;
@@ -172,6 +222,50 @@ final class NativeEditorViewLinks {
 
 		wp_safe_redirect( $url, 302 );
 		exit;
+	}
+
+	/**
+	 * @return \WP_Post|null mint-course post when found.
+	 */
+	private function resolveCourseFromLegacyParam( string $raw ): ?\WP_Post {
+		$raw = trim( $raw );
+
+		if ( '' === $raw ) {
+			return null;
+		}
+
+		if ( ctype_digit( $raw ) ) {
+			$post = get_post( (int) $raw );
+
+			return $this->isMintCoursePost( $post ) ? $post : null;
+		}
+
+		$slug = sanitize_title( $raw );
+
+		if ( '' === $slug ) {
+			return null;
+		}
+
+		$posts = get_posts(
+			array(
+				'name'             => $slug,
+				'post_type'        => PostTypes::COURSE,
+				'post_status'      => array( 'publish', 'draft', 'private', 'pending', 'future' ),
+				'posts_per_page'   => 1,
+				'no_found_rows'    => true,
+				'suppress_filters' => true,
+			)
+		);
+
+		$post = $posts[0] ?? null;
+
+		return $this->isMintCoursePost( $post ) ? $post : null;
+	}
+
+	private function isMintCoursePost( mixed $post ): bool {
+		return $post instanceof \WP_Post
+			&& $post->ID > 0
+			&& PostTypes::COURSE === $post->post_type;
 	}
 
 	private function studentViewUrl( ?\WP_Post $post ): string {
