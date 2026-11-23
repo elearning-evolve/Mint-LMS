@@ -200,16 +200,20 @@ final class PostTypeRegistrar {
 	}
 
 	public function registerPostTypes(): void {
+		// Content is learner-gated by enrollment, never by "published" alone:
+		// - No front-end queries / feeds for these types (student URLs are Mint pages).
+		// - REST stays on for the block editor, but reads require edit access.
 		$common = array(
-			'public'              => false,
-			'publicly_queryable'  => true,
-			'show_in_rest'        => true,
-			'exclude_from_search' => true,
-			'has_archive'         => false,
-			'rewrite'             => false,
-			'query_var'           => false,
-			'capability_type'     => 'post',
-			'map_meta_cap'        => true,
+			'public'                => false,
+			'publicly_queryable'    => false,
+			'show_in_rest'          => true,
+			'rest_controller_class' => ContentPostsRestController::class,
+			'exclude_from_search'   => true,
+			'has_archive'           => false,
+			'rewrite'               => false,
+			'query_var'             => false,
+			'capability_type'       => 'post',
+			'map_meta_cap'          => true,
 		);
 
 		// Native WP list + edit UI. Menu links live under Mint LMS (see MenuRegistrar).

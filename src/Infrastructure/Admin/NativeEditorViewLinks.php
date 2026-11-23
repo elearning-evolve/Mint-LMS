@@ -12,9 +12,10 @@ use MintLMS\Infrastructure\Setup\PageSettings;
 /**
  * Gutenberg / list-table "View" for Mint CPTs.
  *
- * Types stay non-public (no theme singles, search, or rewrite). They are
- * publicly_queryable so WP treats them as viewable, and all permalinks map
- * to Mint student preview / player URLs.
+ * Types stay non-public and not publicly queryable (no theme singles, lists,
+ * feeds, search, or rewrite). The `is_post_type_viewable` filter below makes
+ * WP treat them as viewable, and all permalinks map to Mint student preview /
+ * player URLs.
  *
  * Also catches legacy front-end probes like `?mint-course={slug}` (CPT has
  * query_var disabled, so WP would otherwise render the site homepage).
