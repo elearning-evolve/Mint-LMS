@@ -15,8 +15,10 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: [
-          'General Sans',
-          'Aeonik',
+          'Inter',
+          'system-ui',
+          '-apple-system',
+          'Segoe UI',
           'sans-serif',
         ],
       },

@@ -5,7 +5,7 @@ Tags: lms, learning, courses, quizzes, elearning
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 8.2
-Stable tag: 1.1.20
+Stable tag: 1.1.21
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -33,6 +33,8 @@ Mint LMS is a learning management system for WordPress. Create courses with less
 
 Development checkouts need `composer install` and `npm run build`. Release packages already include a production Composer autoload (`composer install --no-dev`) and built assets — use `dev/build-release.sh` to produce the zip.
 
+Source code, unminified assets, and build tools: https://github.com/elearning-evolve/Mint-LMS
+
 == Frequently Asked Questions ==
 
 = Does Mint LMS replace Pages and Posts? =
@@ -59,7 +61,22 @@ Must-watch progression is enforced for self-hosted HTML5 video only. YouTube, Vi
 
 When quiz saving is enabled, answers are kept in the student’s browser tab (session storage) so they can continue in the same tab. Progress is not stored on the server, and clearing the tab or switching devices loses unfinished answers. Submitted attempts are stored normally.
 
+= What third-party fonts are included? =
+
+Mint LMS self-hosts the [Inter](https://github.com/rsms/inter) typeface (SIL Open Font License 1.1). The license text ships at `assets/fonts/inter/OFL.txt`. No font CDN is used at runtime.
+
+== Privacy ==
+
+Mint LMS stores course content, enrollments, quiz attempts, and learning progress on **this WordPress site**. It does not phone home or send LMS data to Evolve servers.
+
+Optional AI Assistance uses your own connection from **Claude Desktop** (or another MCP client) to this site through the WordPress [MCP Adapter](https://wordpress.org/plugins/mcp-adapter/) and an Application Password. In that flow, Mint LMS does not call OpenAI or Anthropic APIs from the WordPress admin and does not store those API keys. Review your AI client’s privacy policy; you can disconnect the client or revoke the Application Password at any time.
+
+Suggested privacy-policy text is also offered under **Settings → Privacy** when the plugin is active.
+
 == Changelog ==
+
+= 1.1.21 =
+* Replace General Sans with self-hosted Inter (SIL OFL); add GitHub source link (Guideline 4) and a readme Privacy section for MCP/external honesty.
 
 = 1.1.20 =
 * Ship composer.json (+ lock) through .distignore so staging/wp.org packages that exclude vendor rebuild steps still satisfy Plugin Check.

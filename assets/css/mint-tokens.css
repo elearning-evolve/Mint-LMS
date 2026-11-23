@@ -7,8 +7,8 @@
    that genuinely float (menus, modals, toasts). */
 
 #mint-lms-root {
-  /* Type — General Sans self-hosted; Aeonik as named fallback */
-  --mint-font: "General Sans", "Aeonik", sans-serif;
+  /* Type — Inter self-hosted (SIL OFL); system UI as fallback */
+  --mint-font: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
 
   /* Brand purple — focus rings, progress, selected chrome (not primary buttons). */
   --mint-accent: #3F00FF;
@@ -24,7 +24,7 @@
   --mint-cta-focus: 0 0 0 3px rgba(152, 251, 203, 0.55);
 
   /* Global button design system */
-  --mint-btn-font: "General Sans", "Aeonik", sans-serif;
+  --mint-btn-font: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
   --mint-btn-size: 14px;
   --mint-btn-weight: 700;
   --mint-btn-height: 38px;
