@@ -69,8 +69,8 @@ final class ShortcodeRegistrar {
 	}
 
 	/**
-	 * Course overview (?mintlms_course=) — keep theme "Courses" title visible,
-	 * but tighten Kadence hero spacing so the large empty gap under the header shrinks.
+	 * Course overview (?mintlms_course=) — keep theme page title visible,
+	 * but compress oversized hero/title padding on common theme wrappers.
 	 */
 	public function interceptCourseOverviewChrome(): void {
 		$previewMode = isset( $_GET['mint_preview'] ) ? sanitize_key( (string) wp_unslash( $_GET['mint_preview'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -267,6 +267,11 @@ final class ShortcodeRegistrar {
 	}
 
 	private function stripForeignFooterMarkup( string $html ): string {
+		// Only when Avada / Fusion Builder is active — avoid theme-specific hacks otherwise.
+		if ( ! defined( 'FUSION_BUILDER_VERSION' ) && ! class_exists( '\FusionBuilder', false ) ) {
+			return $html;
+		}
+
 		$stripped = preg_replace( '/\[fusion_builder_container\b[\s\S]*?\[\/fusion_builder_container\]/i', '', $html );
 		$stripped = is_string( $stripped ) ? $stripped : $html;
 		$stripped = preg_replace( '/\[\/?fusion_[^\]]+\]/i', '', $stripped );

@@ -44,7 +44,6 @@ final class EnrollmentService {
 
 	public function enroll( int $userId, int $courseId, int $actorUserId ): EnrollmentDto {
 		$course = $this->findCourseOrFail( $courseId );
-		$isSelf = $userId === $actorUserId;
 		$this->assertCanEnroll( $userId, $courseId, $actorUserId, $course->enrollmentType, $course->status, $course->authorId );
 
 		if ( $userId <= 0 ) {
@@ -52,10 +51,7 @@ final class EnrollmentService {
 		}
 
 		$now = $this->clock->now();
-
-		if ( $isSelf ) {
-			$this->assertSelfEnrollmentGates( $course, $userId, $now );
-		}
+		$this->assertEnrollmentGates( $course, $userId, $now );
 
 		return $this->activateOrCreateEnrollment( $userId, $courseId, $course, $now );
 	}
@@ -79,7 +75,10 @@ final class EnrollmentService {
 			throw new ForbiddenException( 'This course is not available for enrollment.' );
 		}
 
-		return $this->activateOrCreateEnrollment( $userId, $courseId, $course, $this->clock->now() );
+		$now = $this->clock->now();
+		$this->assertEnrollmentGates( $course, $userId, $now );
+
+		return $this->activateOrCreateEnrollment( $userId, $courseId, $course, $now );
 	}
 
 	public function manualEnroll( int $userId, int $courseId, int $actorUserId ): EnrollmentDto {
@@ -135,8 +134,8 @@ final class EnrollmentService {
 	public function listStudentsForCourse( int $courseId, int $page, int $perPage, int $actorUserId ): StudentListDto {
 		$course = $this->findCourseOrFail( $courseId );
 
-		if ( ! $this->authorization->canEnrollStudents( $actorUserId )
-			&& ! $this->authorization->canEditCourse( $actorUserId, $course->authorId ) ) {
+		// Course-scoped: enroll capability alone must not list another instructor's roster.
+		if ( ! $this->authorization->canEditCourse( $actorUserId, $course->authorId ) ) {
 			throw new ForbiddenException();
 		}
 
@@ -340,7 +339,7 @@ final class EnrollmentService {
 		return EnrollmentDto::fromEnrollment( $saved );
 	}
 
-	private function assertSelfEnrollmentGates( \MintLMS\Domain\Course\Course $course, int $userId, \DateTimeImmutable $now ): void {
+	private function assertEnrollmentGates( \MintLMS\Domain\Course\Course $course, int $userId, \DateTimeImmutable $now ): void {
 		if ( CourseAccessRules::isAfterAccessEnd( $course->settings, $now ) ) {
 			throw new ForbiddenException( 'This course is no longer accepting students.' );
 		}

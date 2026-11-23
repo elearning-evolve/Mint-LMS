@@ -601,7 +601,7 @@ final class QuizService implements QuizLifecycleInterface {
 			throw new ValidationException( 'Validation failed.', array( 'quiz' => 'Quiz has no questions.' ) );
 		}
 
-		return $this->evaluateAttempt( $questions, $dto->answers, $quiz->passPercent, false );
+		return $this->evaluateAttempt( $questions, $dto->answers, $quiz->passPercent, false, true );
 	}
 
 	public function submitAttempt( int $quizId, SubmitQuizAttemptDto $dto, int $userId, array $runtimeSettings = array() ): QuizAttemptDto {
@@ -647,7 +647,8 @@ final class QuizService implements QuizLifecycleInterface {
 			$this->quizTimer->assertWithinLimit( $userId, $quizId, $runtimeSettings );
 		}
 
-		$grade = $this->evaluateAttempt( $questions, $dto->answers, $quiz->passPercent, true );
+		// Never ship answer keys to students in the submit payload (UI may show right/wrong only).
+		$grade = $this->evaluateAttempt( $questions, $dto->answers, $quiz->passPercent, true, false );
 
 		$attempt = $this->quizRepository->saveAttempt(
 			new QuizAttempt(
@@ -718,7 +719,8 @@ final class QuizService implements QuizLifecycleInterface {
 	}
 
 	/**
-	 * Clear all attempt history for a quiz (admin “reset user identification”).
+	 * Clear every learner's attempt history for a quiz (admin “reset identification”).
+	 * Intentional quiz-wide wipe — confirm in the builder UI before calling.
 	 */
 	public function resetAttempts( int $quizId, int $userId ): void {
 		$quiz   = $this->findQuizOrFail( $quizId );
@@ -836,8 +838,15 @@ final class QuizService implements QuizLifecycleInterface {
 	/**
 	 * @param list<QuizQuestion>   $questions
 	 * @param array<int, string>   $answers
+	 * @param bool                 $revealCorrectAnswers When false, correctAnswer is omitted (student submit).
 	 */
-	public function evaluateAttempt( array $questions, array $answers, int $passPercent, bool $persisted ): QuizGradeDto {
+	public function evaluateAttempt(
+		array $questions,
+		array $answers,
+		int $passPercent,
+		bool $persisted,
+		bool $revealCorrectAnswers = false,
+	): QuizGradeDto {
 		$items          = array();
 		$correctCount   = 0;
 		$gradedCount    = 0;
@@ -902,7 +911,7 @@ final class QuizService implements QuizLifecycleInterface {
 				'pending'        => false,
 				'correct'        => $isCorrect,
 				'given'          => $givenOut,
-				'correctAnswer'  => $correctAnswer,
+				'correctAnswer'  => $revealCorrectAnswers ? $correctAnswer : null,
 				'pointsPossible' => $points,
 				'pointsEarned'   => $earned,
 			);
@@ -925,14 +934,7 @@ final class QuizService implements QuizLifecycleInterface {
 	}
 
 	public function countUserAttempts( int $quizId, int $userId ): int {
-		$count = 0;
-		foreach ( $this->quizRepository->findAttemptsByQuizId( $quizId ) as $attempt ) {
-			if ( $attempt->userId === $userId ) {
-				++$count;
-			}
-		}
-
-		return $count;
+		return $this->quizRepository->countAttemptsByQuizAndUser( $quizId, $userId );
 	}
 
 	public function isAnswerCorrect( QuizQuestion $question, string $submitted ): bool {

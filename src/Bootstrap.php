@@ -193,7 +193,12 @@ final class Bootstrap {
 
 		Plugin::registerCertificateService( $service );
 
-		( new CertificateDownloadHandler( $service, new TemplateLoader() ) )->register();
+		( new CertificateDownloadHandler(
+			$service,
+			new TemplateLoader(),
+			Plugin::authorization(),
+			new WpPostCourseRepository()
+		) )->register();
 	}
 
 	private static function createCertificateService( \wpdb $wpdb, SystemClock $clock ): CertificateService {

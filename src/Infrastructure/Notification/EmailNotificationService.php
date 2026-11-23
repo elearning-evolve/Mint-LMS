@@ -24,10 +24,13 @@ final class EmailNotificationService {
 	) {
 	}
 
+	public const CRON_PUBLISH_EMAILS = 'mintlms_send_course_published_emails';
+
 	public function register(): void {
 		add_action( 'mintlms_enrollment_created', array( $this, 'onEnrollmentCreated' ) );
 		add_action( 'mintlms_course_completed', array( $this, 'onCourseCompleted' ) );
-		add_action( 'mintlms_course_published', array( $this, 'onCoursePublished' ) );
+		add_action( 'mintlms_course_published', array( $this, 'queueCoursePublishedEmails' ) );
+		add_action( self::CRON_PUBLISH_EMAILS, array( $this, 'sendCoursePublishedEmails' ) );
 	}
 
 	public function onEnrollmentCreated( EnrollmentCreated $event ): void {
@@ -105,12 +108,35 @@ final class EmailNotificationService {
 		$this->send( $user->user_email, $subject, $body );
 	}
 
-	public function onCoursePublished( CoursePublished $event ): void {
-		if ( null === $this->enrollmentRepository ) {
+	/**
+	 * Queue publish emails so the publish request is not blocked by mass wp_mail.
+	 */
+	public function queueCoursePublishedEmails( CoursePublished $event ): void {
+		$course = $this->courseRepository->findById( $event->courseId );
+
+		if ( null === $course || ! $course->settings->emailOnPublish || null === $this->enrollmentRepository ) {
 			return;
 		}
 
-		$course = $this->courseRepository->findById( $event->courseId );
+		$courseId = (int) $event->courseId;
+
+		if ( function_exists( 'as_enqueue_async_action' ) ) {
+			as_enqueue_async_action( self::CRON_PUBLISH_EMAILS, array( $courseId ), 'mint-lms' );
+
+			return;
+		}
+
+		if ( ! wp_next_scheduled( self::CRON_PUBLISH_EMAILS, array( $courseId ) ) ) {
+			wp_schedule_single_event( time() + 1, self::CRON_PUBLISH_EMAILS, array( $courseId ) );
+		}
+	}
+
+	public function sendCoursePublishedEmails( int $courseId ): void {
+		if ( null === $this->enrollmentRepository || $courseId <= 0 ) {
+			return;
+		}
+
+		$course = $this->courseRepository->findById( $courseId );
 
 		if ( null === $course || ! $course->settings->emailOnPublish ) {
 			return;
@@ -122,7 +148,7 @@ final class EmailNotificationService {
 
 		do {
 			$result = $this->enrollmentRepository->listByCourse(
-				$event->courseId,
+				$courseId,
 				$page,
 				$perPage,
 				EnrollmentStatus::Active
