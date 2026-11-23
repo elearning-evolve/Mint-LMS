@@ -418,21 +418,21 @@ final class CourseController {
 			$post = get_post( $courseId );
 			if ( $post instanceof \WP_Post ) {
 				if ( empty( $course['authorName'] ) ) {
-					$author = get_userdata( (int) $post->post_author );
+					$author               = get_userdata( (int) $post->post_author );
 					$course['authorName'] = $author instanceof \WP_User
 						? (string) $author->user_nicename
 						: '';
 					$course['instructor'] = $course['authorName'];
 				}
 
-				$publishedTs = 'publish' === $post->post_status
+				$publishedTs           = 'publish' === $post->post_status
 					? (int) get_post_time( 'U', true, $post )
 					: (int) get_post_modified_time( 'U', true, $post );
 				$course['publishedAt'] = $publishedTs > 0
 					? gmdate( 'c', $publishedTs )
 					: (string) ( $course['updatedAt'] ?? '' );
 
-				$revisions = wp_get_post_revisions( $courseId, array( 'numberposts' => -1 ) );
+				$revisions               = wp_get_post_revisions( $courseId, array( 'numberposts' => -1 ) );
 				$course['revisionCount'] = is_array( $revisions ) ? count( $revisions ) : 0;
 			}
 		}
@@ -606,19 +606,19 @@ final class CourseController {
 	 */
 	private function updateArgs(): array {
 		return array(
-			'title'             => array(
+			'title'                   => array(
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 			),
-			'slug'              => array(
+			'slug'                    => array(
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_title',
 			),
-			'description'       => array(
+			'description'             => array(
 				'type'              => 'string',
 				'sanitize_callback' => array( RestContentSanitizer::class, 'richText' ),
 			),
-			'featured_image_id' => array(
+			'featured_image_id'       => array(
 				'validate_callback' => static function ( $value ): bool {
 					return null === $value || is_numeric( $value ) || '' === $value;
 				},
@@ -632,42 +632,42 @@ final class CourseController {
 					return $id > 0 ? $id : null;
 				},
 			),
-			'enrollment_type'   => array(
+			'enrollment_type'         => array(
 				'type'              => 'string',
 				'enum'              => array( 'open', 'free', 'manual', 'paid' ),
 				'sanitize_callback' => 'sanitize_text_field',
 			),
-			'status'            => array(
+			'status'                  => array(
 				'type'              => 'string',
 				'enum'              => array( 'draft', 'published', 'archived', 'trashed' ),
 				'sanitize_callback' => 'sanitize_text_field',
 			),
-			'email_on_publish'  => array(
+			'email_on_publish'        => array(
 				'type'              => 'boolean',
 				'sanitize_callback' => static fn( $value ): bool => (bool) $value,
 			),
-			'student_complete'  => array(
+			'student_complete'        => array(
 				'type'              => 'boolean',
 				'sanitize_callback' => static fn( $value ): bool => (bool) $value,
 			),
-			'certificate'       => array(
+			'certificate'             => array(
 				'type'              => 'boolean',
 				'sanitize_callback' => static fn( $value ): bool => (bool) $value,
 			),
-			'progression'       => array(
+			'progression'             => array(
 				'type'              => 'string',
 				'enum'              => array( 'linear', 'freeform' ),
 				'sanitize_callback' => 'sanitize_text_field',
 			),
-			'expire_access'     => array(
+			'expire_access'           => array(
 				'type'              => 'boolean',
 				'sanitize_callback' => static fn( $value ): bool => (bool) $value,
 			),
-			'expire_access_days' => array(
+			'expire_access_days'      => array(
 				'type'              => 'integer',
 				'sanitize_callback' => 'absint',
 			),
-			'prerequisites_enabled' => array(
+			'prerequisites_enabled'   => array(
 				'type'              => 'boolean',
 				'sanitize_callback' => static fn( $value ): bool => (bool) $value,
 			),
@@ -675,52 +675,52 @@ final class CourseController {
 				'type'  => 'array',
 				'items' => array( 'type' => 'integer' ),
 			),
-			'prerequisite_compare' => array(
+			'prerequisite_compare'    => array(
 				'type'              => 'string',
 				'enum'              => array( 'ANY', 'ALL' ),
 				'sanitize_callback' => 'sanitize_text_field',
 			),
-			'access_start_at'   => array(
+			'access_start_at'         => array(
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 			),
-			'access_end_at'     => array(
+			'access_end_at'           => array(
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 			),
-			'seat_limit'        => array(
+			'seat_limit'              => array(
 				'type'              => 'integer',
 				'sanitize_callback' => 'absint',
 			),
-			'materials_enabled' => array(
+			'materials_enabled'       => array(
 				'type'              => 'boolean',
 				'sanitize_callback' => static fn( $value ): bool => (bool) $value,
 			),
-			'materials_content' => array(
+			'materials_content'       => array(
 				'type'              => 'string',
 				'sanitize_callback' => array( RestContentSanitizer::class, 'richText' ),
 			),
-			'lesson_list_visibility' => array(
+			'lesson_list_visibility'  => array(
 				'type'              => 'string',
 				'sanitize_callback' => 'sanitize_text_field',
 			),
-			'pagination_enabled' => array(
+			'pagination_enabled'      => array(
 				'type'              => 'boolean',
 				'sanitize_callback' => static fn( $value ): bool => (bool) $value,
 			),
-			'lessons_per_page'  => array(
+			'lessons_per_page'        => array(
 				'type'              => 'integer',
 				'sanitize_callback' => 'absint',
 			),
-			'groups_per_page'   => array(
+			'groups_per_page'         => array(
 				'type'              => 'integer',
 				'sanitize_callback' => 'absint',
 			),
-			'completion_redirect' => array(
+			'completion_redirect'     => array(
 				'type'              => 'string',
 				'sanitize_callback' => 'esc_url_raw',
 			),
-			'points_on_complete' => array(
+			'points_on_complete'      => array(
 				'type'              => 'integer',
 				'sanitize_callback' => 'absint',
 			),

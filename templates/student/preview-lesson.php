@@ -21,7 +21,7 @@ $previousUrl         = is_string( $previousUrl ?? null ) ? $previousUrl : '';
 $nextLessonUrl       = is_string( $nextLessonUrl ?? null ) ? $nextLessonUrl : '';
 $nextQuizUrl         = is_string( $nextQuizUrl ?? null ) ? $nextQuizUrl : '';
 $quizUrls            = is_array( $quizUrls ?? null ) ? $quizUrls : array();
-$displayLesson = '' !== $lessonTitle ? $lessonTitle : __( 'Untitled lesson', 'mint-lms' );
+$displayLesson       = '' !== $lessonTitle ? $lessonTitle : __( 'Untitled lesson', 'mint-lms' );
 unset( $nextQuizUrl ); // Quizzes are started from the list below — not a single "Next Quiz".
 ?>
 

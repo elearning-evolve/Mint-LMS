@@ -141,9 +141,9 @@ final class NativeEditorViewLinks {
 			return $response;
 		}
 
-		$data                         = $response->get_data();
-		$data['link']                 = $url;
-		$data['permalink_template']   = $url;
+		$data                       = $response->get_data();
+		$data['link']               = $url;
+		$data['permalink_template'] = $url;
 		if ( '' !== (string) $post->post_name ) {
 			$data['generated_slug'] = (string) $post->post_name;
 		}

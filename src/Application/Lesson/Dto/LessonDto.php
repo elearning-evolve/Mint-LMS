@@ -49,20 +49,20 @@ final readonly class LessonDto {
 	 */
 	public function toArray(): array {
 		return array(
-			'id'                  => $this->id,
-			'sectionId'           => $this->sectionId,
-			'courseId'            => $this->courseId,
-			'title'               => $this->title,
-			'slug'                => $this->slug,
-			'content'             => $this->content,
-			'videoUrl'            => $this->videoUrl,
-			'attachmentId'        => $this->attachmentId,
-			'featuredImageId'     => $this->featuredImageId,
-			'isPreview'           => $this->isPreview,
-			'availableAfterDays'  => $this->availableAfterDays,
-			'sortOrder'           => $this->sortOrder,
-			'createdAt'           => $this->createdAt,
-			'updatedAt'           => $this->updatedAt,
+			'id'                 => $this->id,
+			'sectionId'          => $this->sectionId,
+			'courseId'           => $this->courseId,
+			'title'              => $this->title,
+			'slug'               => $this->slug,
+			'content'            => $this->content,
+			'videoUrl'           => $this->videoUrl,
+			'attachmentId'       => $this->attachmentId,
+			'featuredImageId'    => $this->featuredImageId,
+			'isPreview'          => $this->isPreview,
+			'availableAfterDays' => $this->availableAfterDays,
+			'sortOrder'          => $this->sortOrder,
+			'createdAt'          => $this->createdAt,
+			'updatedAt'          => $this->updatedAt,
 		);
 	}
 }

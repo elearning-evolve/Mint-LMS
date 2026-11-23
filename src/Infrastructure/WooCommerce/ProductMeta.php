@@ -67,9 +67,9 @@ final class ProductMeta {
 	 * @param \WP_Post $variation     Variation post.
 	 */
 	public function renderVariationField( int $loop, array $variationData, \WP_Post $variation ): void {
-		$courseId = $this->getCourseIdForProduct( (int) $variation->ID );
-		$options  = $this->courseOptions( $courseId );
-		$fieldId  = EnrollmentBridge::META_COURSE_ID . "_{$loop}";
+		$courseId  = $this->getCourseIdForProduct( (int) $variation->ID );
+		$options   = $this->courseOptions( $courseId );
+		$fieldId   = EnrollmentBridge::META_COURSE_ID . "_{$loop}";
 		$fieldName = EnrollmentBridge::META_COURSE_ID . "[{$loop}]";
 
 		echo '<div class="form-row form-row-full">';

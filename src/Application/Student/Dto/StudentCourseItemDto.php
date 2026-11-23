@@ -25,16 +25,16 @@ final readonly class StudentCourseItemDto {
 	 */
 	public function toArray(): array {
 		return array(
-			'courseId'        => $this->courseId,
-			'title'           => $this->title,
-			'slug'            => $this->slug,
-			'progressPct'     => $this->progressPct,
-			'lastLessonId'    => $this->lastLessonId,
-			'firstLessonId'   => $this->firstLessonId,
-			'isComplete'      => $this->isComplete,
-			'featuredImageId' => $this->featuredImageId,
-			'enrollmentType'  => $this->enrollmentType,
-			'totalLessons'    => $this->totalLessons,
+			'courseId'         => $this->courseId,
+			'title'            => $this->title,
+			'slug'             => $this->slug,
+			'progressPct'      => $this->progressPct,
+			'lastLessonId'     => $this->lastLessonId,
+			'firstLessonId'    => $this->firstLessonId,
+			'isComplete'       => $this->isComplete,
+			'featuredImageId'  => $this->featuredImageId,
+			'enrollmentType'   => $this->enrollmentType,
+			'totalLessons'     => $this->totalLessons,
 			'completedLessons' => $this->completedLessons,
 		);
 	}

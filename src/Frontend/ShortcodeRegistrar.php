@@ -382,7 +382,7 @@ final class ShortcodeRegistrar {
 			);
 		}
 
-		$courses = $this->studentExperience->getPublishedCatalogCourses();
+		$courses  = $this->studentExperience->getPublishedCatalogCourses();
 		$settings = $this->settings();
 
 		return $this->wrap(
@@ -538,16 +538,16 @@ final class ShortcodeRegistrar {
 			$this->templateLoader->render(
 				'student/preview-quiz.php',
 				array(
-					'quiz'             => $quiz,
-					'courseUrl'        => $resolvedCourseId > 0 ? $settings->getCourseUrl( $resolvedCourseId ) : '',
-					'lessonUrl'        => $lessonUrl,
-					'courseTitle'      => $courseTitle,
-					'lessonTitle'      => $lessonTitle,
-					'isReviewMode'     => $isReviewMode,
-					'isEnrolled'       => $isEnrolled || $isReviewMode,
-					'hasPassedQuiz'    => $hasPassedQuiz,
-					'attemptsUsed'     => $attemptsUsed,
-					'focusQuestionId'  => $focusQuestionId,
+					'quiz'            => $quiz,
+					'courseUrl'       => $resolvedCourseId > 0 ? $settings->getCourseUrl( $resolvedCourseId ) : '',
+					'lessonUrl'       => $lessonUrl,
+					'courseTitle'     => $courseTitle,
+					'lessonTitle'     => $lessonTitle,
+					'isReviewMode'    => $isReviewMode,
+					'isEnrolled'      => $isEnrolled || $isReviewMode,
+					'hasPassedQuiz'   => $hasPassedQuiz,
+					'attemptsUsed'    => $attemptsUsed,
+					'focusQuestionId' => $focusQuestionId,
 				)
 			)
 		);
@@ -617,9 +617,9 @@ final class ShortcodeRegistrar {
 
 		$settings = $this->settings();
 
-		$purchaseUrl   = '';
-		$productPrice  = '';
-		$wc            = WooCommerceIntegration::instance();
+		$purchaseUrl  = '';
+		$productPrice = '';
+		$wc           = WooCommerceIntegration::instance();
 		if ( null !== $wc && 'paid' === $overview->enrollmentType ) {
 			$purchaseUrl  = $wc->productSync()->getPurchaseUrl( $courseId );
 			$productId    = $wc->productSync()->findProductIdForCourse( $courseId );
@@ -632,16 +632,16 @@ final class ShortcodeRegistrar {
 			$this->templateLoader->render(
 				'student/course-overview.php',
 				array(
-					'overview'      => $overview,
+					'overview'       => $overview,
 					'contentOutline' => $contentOutline,
-					'playerUrl'     => $settings->resolvePlayerUrl( $atts['player_page'] ),
-					'dashboardUrl'  => $settings->resolveDashboardUrl( $atts['dashboard_page'] ),
-					'catalogUrl'    => $settings->getCatalogUrl(),
-					'enrollUrl'     => $this->enrollActionUrl( $courseId ),
-					'enrollMessage' => $enrollMessage,
-					'featuredUrl'   => $this->attachmentUrl( $overview->featuredImageId ),
-					'purchaseUrl'   => $purchaseUrl,
-					'productPrice'  => $productPrice,
+					'playerUrl'      => $settings->resolvePlayerUrl( $atts['player_page'] ),
+					'dashboardUrl'   => $settings->resolveDashboardUrl( $atts['dashboard_page'] ),
+					'catalogUrl'     => $settings->getCatalogUrl(),
+					'enrollUrl'      => $this->enrollActionUrl( $courseId ),
+					'enrollMessage'  => $enrollMessage,
+					'featuredUrl'    => $this->attachmentUrl( $overview->featuredImageId ),
+					'purchaseUrl'    => $purchaseUrl,
+					'productPrice'   => $productPrice,
 				)
 			)
 		);

@@ -34,8 +34,8 @@ final class DripAccessEvaluator {
 			return null;
 		}
 
-		$availableAt        = $enrolledAt->modify( '+' . $availableAfterDays . ' days' );
-		$secondsRemaining   = $availableAt->getTimestamp() - $now->getTimestamp();
+		$availableAt      = $enrolledAt->modify( '+' . $availableAfterDays . ' days' );
+		$secondsRemaining = $availableAt->getTimestamp() - $now->getTimestamp();
 
 		return max( 1, (int) ceil( $secondsRemaining / 86400 ) );
 	}

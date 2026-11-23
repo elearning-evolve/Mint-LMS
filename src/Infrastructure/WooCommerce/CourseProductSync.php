@@ -80,7 +80,7 @@ final class CourseProductSync {
 			throw new NotFoundException( 'Course not found.' );
 		}
 
-		$price = $this->normalizePrice( $price );
+		$price      = $this->normalizePrice( $price );
 		$existingId = $this->findProductIdForCourse( $courseId );
 
 		if ( $existingId > 0 ) {

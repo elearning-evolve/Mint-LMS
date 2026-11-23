@@ -87,7 +87,7 @@ final class CourseService {
 		$imageId     = $dto->updateFeaturedImage ? $dto->featuredImageId : $course->featuredImageId;
 		$enrollment  = null !== $dto->enrollmentType ? $dto->enrollmentType : $course->enrollmentType;
 		$status      = null !== $dto->status ? $dto->status : $course->status;
-		$settings = $course->settings->with(
+		$settings    = $course->settings->with(
 			$dto->emailOnPublish,
 			$dto->studentComplete,
 			$dto->certificate,
@@ -317,7 +317,7 @@ final class CourseService {
 			$stats = $this->dashboardRepository->getCourseStatsBatch( $courseIds );
 		}
 
-		$users = $this->users;
+		$users   = $this->users;
 		$courses = array_map(
 			static function ( Course $course ) use ( $stats, $users ): CourseDto {
 				$authorName = '';

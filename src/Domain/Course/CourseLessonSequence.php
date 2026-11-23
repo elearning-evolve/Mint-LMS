@@ -24,8 +24,8 @@ final class CourseLessonSequence {
 		$sectionMeta = array();
 
 		foreach ( $rows as $row ) {
-			$section = $row['section'];
-			$lesson  = $row['lesson'] ?? null;
+			$section                     = $row['section'];
+			$lesson                      = $row['lesson'] ?? null;
 			$sectionMeta[ $section->id ] = $section;
 			if ( ! isset( $bySection[ $section->id ] ) ) {
 				$bySection[ $section->id ] = array();

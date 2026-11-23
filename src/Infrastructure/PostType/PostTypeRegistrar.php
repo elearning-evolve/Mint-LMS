@@ -137,7 +137,7 @@ final class PostTypeRegistrar {
 			exit;
 		}
 
-		$url  = 'admin.php?page=mint-lms-builder&course_id=' . $target['course_id']
+		$url = 'admin.php?page=mint-lms-builder&course_id=' . $target['course_id']
 			. '&lesson_id=' . $target['lesson_id']
 			. '&quiz_id=' . $quizId
 			. '&from=' . $from
@@ -449,10 +449,10 @@ final class PostTypeRegistrar {
 		);
 
 		return array(
-			'course_id'    => $created['course_id'],
-			'lesson_id'    => $created['lesson_id'],
-			'quiz_id'      => $created['quiz_id'],
-			'question_id'  => $question->id,
+			'course_id'   => $created['course_id'],
+			'lesson_id'   => $created['lesson_id'],
+			'quiz_id'     => $created['quiz_id'],
+			'question_id' => $question->id,
 		);
 	}
 

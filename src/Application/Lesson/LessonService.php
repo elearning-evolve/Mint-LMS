@@ -295,16 +295,16 @@ final class LessonService {
 		$lesson = $this->findLessonOrFail( $id );
 		$this->assertCanManageLesson( $userId, $lesson );
 
-		$title      = null !== $dto->title ? trim( $dto->title ) : $lesson->title;
-		$slug       = null !== $dto->slug ? $this->normalizeSlug( $dto->slug ) : $lesson->slug;
-		$content    = null !== $dto->content ? $dto->content : $lesson->content;
-		$videoUrl   = null !== $dto->videoUrl ? $dto->videoUrl : $lesson->videoUrl;
-		$attachment = null !== $dto->attachmentId ? $dto->attachmentId : $lesson->attachmentId;
+		$title              = null !== $dto->title ? trim( $dto->title ) : $lesson->title;
+		$slug               = null !== $dto->slug ? $this->normalizeSlug( $dto->slug ) : $lesson->slug;
+		$content            = null !== $dto->content ? $dto->content : $lesson->content;
+		$videoUrl           = null !== $dto->videoUrl ? $dto->videoUrl : $lesson->videoUrl;
+		$attachment         = null !== $dto->attachmentId ? $dto->attachmentId : $lesson->attachmentId;
 		$isPreview          = null !== $dto->isPreview ? $dto->isPreview : $lesson->isPreview;
 		$availableAfterDays = $dto->hasAvailableAfterDays
 			? $this->normalizeAvailableAfterDays( $dto->availableAfterDays )
 			: $lesson->availableAfterDays;
-		$featuredImageId = $dto->updateFeaturedImage ? $dto->featuredImageId : $lesson->featuredImageId;
+		$featuredImageId    = $dto->updateFeaturedImage ? $dto->featuredImageId : $lesson->featuredImageId;
 
 		if ( '' === $title ) {
 			throw new ValidationException( 'Validation failed.', array( 'title' => 'Title is required.' ) );

@@ -47,17 +47,17 @@ final class SampleCourseSeeder {
 			throw new \RuntimeException( 'Database unavailable.' );
 		}
 
-		$clock         = new SystemClock();
-		$authorization = Plugin::authorization();
-		$userLookup    = new WpUserLookup();
-		$courseRepo    = new WpPostCourseRepository();
-		$lessonRepo    = new WpPostLessonRepository();
-		$sectionRepo   = new WpdbSectionRepository( $wpdb, $lessonRepo );
+		$clock          = new SystemClock();
+		$authorization  = Plugin::authorization();
+		$userLookup     = new WpUserLookup();
+		$courseRepo     = new WpPostCourseRepository();
+		$lessonRepo     = new WpPostLessonRepository();
+		$sectionRepo    = new WpdbSectionRepository( $wpdb, $lessonRepo );
 		$enrollmentRepo = new WpdbEnrollmentRepository( $wpdb );
-		$progressRepo  = new WpdbProgressRepository( $wpdb );
-		$quizRepo      = new WpPostQuizRepository( $wpdb );
+		$progressRepo   = new WpdbProgressRepository( $wpdb );
+		$quizRepo       = new WpPostQuizRepository( $wpdb );
 
-		$courseService = new CourseService(
+		$courseService     = new CourseService(
 			$courseRepo,
 			$authorization,
 			$clock,
@@ -65,7 +65,7 @@ final class SampleCourseSeeder {
 			$userLookup,
 			Plugin::eventPublisher()
 		);
-		$lessonAccess = new LessonAccessService(
+		$lessonAccess      = new LessonAccessService(
 			$lessonRepo,
 			$enrollmentRepo,
 			$progressRepo,
@@ -73,7 +73,7 @@ final class SampleCourseSeeder {
 			$courseRepo,
 			$sectionRepo
 		);
-		$quizService = new QuizService(
+		$quizService       = new QuizService(
 			$quizRepo,
 			$lessonRepo,
 			$courseRepo,
@@ -98,7 +98,7 @@ final class SampleCourseSeeder {
 			$progressLifecycle,
 			$quizService
 		);
-		$lessonService = new LessonService(
+		$lessonService  = new LessonService(
 			$lessonRepo,
 			$sectionRepo,
 			$courseRepo,
