@@ -26,7 +26,7 @@ final class OrderHandler {
 	 * @return list<string>
 	 */
 	public function enrollStatuses(): array {
-		$raw = (string) get_option( 'mintlms_wc_enroll_statuses', 'processing,completed' );
+		$raw   = (string) get_option( 'mintlms_wc_enroll_statuses', 'processing,completed' );
 		$parts = array_filter( array_map( 'trim', explode( ',', $raw ) ) );
 
 		/**
@@ -72,7 +72,8 @@ final class OrderHandler {
 			return;
 		}
 
-		$records = array();
+		/** @var array<int, int> $courseProductMap course_id => product_id */
+		$courseProductMap = array();
 
 		foreach ( $order->get_items( 'line_item' ) as $item ) {
 			if ( ! $item instanceof \WC_Order_Item_Product ) {
@@ -84,22 +85,56 @@ final class OrderHandler {
 			$lookupId    = $variationId > 0 ? $variationId : $productId;
 
 			foreach ( $this->productMeta->getCourseIdsForProduct( $lookupId ) as $courseId ) {
-				$enrollment = $this->bridge->enrollUser( $userId, $courseId, $order->get_id(), $lookupId );
-
-				if ( null === $enrollment ) {
-					continue;
-				}
-
-				$records[] = array(
-					'course_id'     => $courseId,
-					'product_id'    => $lookupId,
-					'enrollment_id' => $enrollment->id,
-				);
+				$courseProductMap[ (int) $courseId ] = $lookupId;
 			}
+		}
+
+		// No Mint courses on this order — nothing to enroll; mark processed so we do not re-run forever.
+		if ( array() === $courseProductMap ) {
+			$order->update_meta_data( EnrollmentBridge::ORDER_META_PROCESSED, 'yes' );
+			$order->save();
+
+			return;
+		}
+
+		$records = array();
+		$failed  = array();
+
+		foreach ( $courseProductMap as $courseId => $lookupId ) {
+			$enrollment = $this->bridge->enrollUser( $userId, $courseId, $order->get_id(), $lookupId );
+
+			if ( null === $enrollment ) {
+				$failed[] = $courseId;
+				continue;
+			}
+
+			$records[] = array(
+				'course_id'     => $courseId,
+				'product_id'    => $lookupId,
+				'enrollment_id' => $enrollment->id,
+			);
 		}
 
 		if ( array() !== $records ) {
 			$order->update_meta_data( EnrollmentBridge::ORDER_META_ENROLLMENTS, $records );
+		}
+
+		if ( array() !== $failed ) {
+			$note = sprintf(
+				/* translators: 1: comma-separated course IDs, 2: order ID */
+				__( 'Mint LMS: enrollment failed for course ID(s) %1$s on order #%2$d. Left unprocessed so it can retry on the next qualifying status.', 'mint-lms' ),
+				implode( ', ', array_map( 'strval', $failed ) ),
+				$order->get_id()
+			);
+
+			if ( method_exists( $order, 'add_order_note' ) ) {
+				$order->add_order_note( $note );
+			}
+
+			$this->log( 'error', $note );
+			$order->save();
+
+			return;
 		}
 
 		$order->update_meta_data( EnrollmentBridge::ORDER_META_PROCESSED, 'yes' );

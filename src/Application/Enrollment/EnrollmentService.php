@@ -57,56 +57,29 @@ final class EnrollmentService {
 			$this->assertSelfEnrollmentGates( $course, $userId, $now );
 		}
 
-		$existing = $this->enrollmentRepository->findByUserAndCourse( $userId, $courseId );
+		return $this->activateOrCreateEnrollment( $userId, $courseId, $course, $now );
+	}
 
-		if ( null !== $existing && EnrollmentStatus::Active === $existing->status ) {
-			return EnrollmentDto::fromEnrollment( $existing );
+	/**
+	 * Enroll after a paid commerce order. Auth is the order proof, not staff/self-enroll caps —
+	 * so a site admin buying their own Paid course still gets enrolled (WooCommerce / LMS practice).
+	 */
+	public function enrollFromPurchase( int $userId, int $courseId, int $orderId ): EnrollmentDto {
+		if ( $userId <= 0 ) {
+			throw new ValidationException( 'Validation failed.', array( 'userId' => 'User ID is required.' ) );
 		}
 
-		$expiresAt = CourseAccessRules::resolveExpiresAt( $course->settings, $now );
-
-		if ( null !== $existing && EnrollmentStatus::Cancelled === $existing->status ) {
-			$reactivated = new Enrollment(
-				$existing->id,
-				$existing->userId,
-				$existing->courseId,
-				EnrollmentStatus::Active,
-				$now,
-				$expiresAt,
-				null,
-			);
-
-			$saved = $this->enrollmentRepository->save( $reactivated );
-			$this->events->publish(
-				new EnrollmentCreated( UserId::fromInt( $userId ), $courseId, $saved->id, $now )
-			);
-
-			return EnrollmentDto::fromEnrollment( $saved );
+		if ( $orderId <= 0 ) {
+			throw new ValidationException( 'Validation failed.', array( 'orderId' => 'Order ID is required.' ) );
 		}
 
-		if ( null !== $existing && EnrollmentStatus::Completed === $existing->status ) {
-			throw new ValidationException(
-				'Validation failed.',
-				array( 'enrollment' => 'User has already completed this course.' )
-			);
+		$course = $this->findCourseOrFail( $courseId );
+
+		if ( CourseStatus::Trashed === $course->status ) {
+			throw new ForbiddenException( 'This course is not available for enrollment.' );
 		}
 
-		$enrollment = new Enrollment(
-			0,
-			$userId,
-			$courseId,
-			EnrollmentStatus::Active,
-			$now,
-			$expiresAt,
-			null,
-		);
-
-		$saved = $this->enrollmentRepository->save( $enrollment );
-		$this->events->publish(
-			new EnrollmentCreated( UserId::fromInt( $userId ), $courseId, $saved->id, $now )
-		);
-
-		return EnrollmentDto::fromEnrollment( $saved );
+		return $this->activateOrCreateEnrollment( $userId, $courseId, $course, $this->clock->now() );
 	}
 
 	public function manualEnroll( int $userId, int $courseId, int $actorUserId ): EnrollmentDto {
@@ -306,6 +279,64 @@ final class EnrollmentService {
 		if ( ! $this->authorization->canEditCourse( $actorUserId, $authorId ) ) {
 			throw new ForbiddenException();
 		}
+	}
+
+	private function activateOrCreateEnrollment(
+		int $userId,
+		int $courseId,
+		\MintLMS\Domain\Course\Course $course,
+		\DateTimeImmutable $now,
+	): EnrollmentDto {
+		$existing = $this->enrollmentRepository->findByUserAndCourse( $userId, $courseId );
+
+		if ( null !== $existing && EnrollmentStatus::Active === $existing->status ) {
+			return EnrollmentDto::fromEnrollment( $existing );
+		}
+
+		$expiresAt = CourseAccessRules::resolveExpiresAt( $course->settings, $now );
+
+		if ( null !== $existing && EnrollmentStatus::Cancelled === $existing->status ) {
+			$reactivated = new Enrollment(
+				$existing->id,
+				$existing->userId,
+				$existing->courseId,
+				EnrollmentStatus::Active,
+				$now,
+				$expiresAt,
+				null,
+			);
+
+			$saved = $this->enrollmentRepository->save( $reactivated );
+			$this->events->publish(
+				new EnrollmentCreated( UserId::fromInt( $userId ), $courseId, $saved->id, $now )
+			);
+
+			return EnrollmentDto::fromEnrollment( $saved );
+		}
+
+		if ( null !== $existing && EnrollmentStatus::Completed === $existing->status ) {
+			throw new ValidationException(
+				'Validation failed.',
+				array( 'enrollment' => 'User has already completed this course.' )
+			);
+		}
+
+		$enrollment = new Enrollment(
+			0,
+			$userId,
+			$courseId,
+			EnrollmentStatus::Active,
+			$now,
+			$expiresAt,
+			null,
+		);
+
+		$saved = $this->enrollmentRepository->save( $enrollment );
+		$this->events->publish(
+			new EnrollmentCreated( UserId::fromInt( $userId ), $courseId, $saved->id, $now )
+		);
+
+		return EnrollmentDto::fromEnrollment( $saved );
 	}
 
 	private function assertSelfEnrollmentGates( \MintLMS\Domain\Course\Course $course, int $userId, \DateTimeImmutable $now ): void {
