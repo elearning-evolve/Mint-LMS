@@ -178,6 +178,28 @@ final class QuizServiceTest extends TestCase
         $this->assertTrue($this->service->hasPassed(3, 8));
     }
 
+    public function test_start_timed_attempt_rejects_when_retakes_exhausted(): void
+    {
+        $quiz = new Quiz(5, 10, 1, 'Quiz', 70, 0);
+
+        $this->quizRepository->method('findById')->with(5)->willReturn($quiz);
+        $this->lessonRepository->method('findById')->with(10)->willReturn($this->sampleLesson(10, false));
+        $this->progressRepository->method('isUserEnrolled')->with(7, 1)->willReturn(true);
+        $this->quizRepository->method('countAttemptsByQuizAndUser')->with(5, 7)->willReturn(2);
+
+        $this->expectException(ForbiddenException::class);
+        $this->expectExceptionMessage('No quiz retries remain.');
+
+        // Retake budget is checked before the timer service runs.
+        $this->service->startTimedAttempt(5, 7, [
+            'restrictRetakes' => true,
+            'retriesAllowed'  => 1,
+            'timeLimitEnabled' => true,
+            'timeLimitValue'  => 10,
+            'timeLimitUnit'   => 'minutes',
+        ]);
+    }
+
     public function test_submit_attempt_requires_login(): void
     {
         $this->expectException(ForbiddenException::class);

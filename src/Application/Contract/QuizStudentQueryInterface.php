@@ -37,5 +37,10 @@ interface QuizStudentQueryInterface {
 
 	public function hasPassed( int $userId, int $quizId ): bool;
 
+	/**
+	 * True when every published lesson quiz with questions is passed.
+	 */
+	public function hasPassedLessonQuiz( int $userId, int $lessonId ): bool;
+
 	public function countUserAttempts( int $quizId, int $userId ): int;
 }

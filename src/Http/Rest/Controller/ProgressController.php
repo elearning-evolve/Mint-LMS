@@ -9,6 +9,7 @@ use MintLMS\Application\Contract\AuthorizationInterface;
 use MintLMS\Application\Exception\ForbiddenException;
 use MintLMS\Application\Exception\NotFoundException;
 use MintLMS\Application\Progress\ProgressService;
+use MintLMS\Application\Progress\VideoWatchNonce;
 use MintLMS\Http\Rest\Response\ApiResponse;
 
 final class ProgressController {
@@ -47,6 +48,18 @@ final class ProgressController {
 					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'videoWatched' ),
 					'permission_callback' => array( $this, 'canTrackProgress' ),
+					'args'                => array(
+						'course_id'   => array(
+							'required'          => false,
+							'type'              => 'integer',
+							'sanitize_callback' => 'absint',
+						),
+						'watch_nonce' => array(
+							'required'          => true,
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+					),
 				),
 			)
 		);
@@ -108,6 +121,12 @@ final class ProgressController {
 			$userId   = $this->authorization->getCurrentUserId();
 			$lessonId = (int) $request->get_param( 'id' );
 			$courseId = $this->nullableInt( $request->get_param( 'course_id' ) );
+			$nonce    = (string) $request->get_param( 'watch_nonce' );
+
+			// Lesson-scoped nonce from the player page — blocks bare REST attestation.
+			if ( ! wp_verify_nonce( $nonce, VideoWatchNonce::action( $lessonId ) ) ) {
+				return ApiResponse::error( 'forbidden', 'Invalid video watch nonce.', 403 );
+			}
 
 			$result = $this->progressService->markVideoWatched( $userId, $lessonId, $courseId );
 

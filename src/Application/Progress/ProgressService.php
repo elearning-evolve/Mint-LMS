@@ -106,9 +106,16 @@ final class ProgressService implements ProgressLifecycleInterface {
 			$this->lessonAccessService->assertCanAccessLesson( $userId, $lessonId );
 		}
 
-		if ( null !== $this->lessonRequirements ) {
-			$this->lessonRequirements->markVideoWatched( $userId, $lessonId );
+		if ( null === $this->lessonRequirements ) {
+			return $this->tryAutoCompleteLesson( $userId, $lessonId, $courseId );
 		}
+
+		// Refuse attestation when progression is not enforceable (setting off / oEmbed).
+		if ( ! $this->lessonRequirements->isVideoProgressionRequired( $lessonId ) ) {
+			throw new ForbiddenException( 'Video watch progress is not required for this lesson.' );
+		}
+
+		$this->lessonRequirements->markVideoWatched( $userId, $lessonId );
 
 		return $this->tryAutoCompleteLesson( $userId, $lessonId, $courseId );
 	}

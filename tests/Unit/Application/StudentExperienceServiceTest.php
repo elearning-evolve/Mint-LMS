@@ -316,8 +316,9 @@ final class StudentExperienceServiceTest extends TestCase
                 new QuizQuestionDto(1, 'mcq', 'Pick one', ['A', 'B'], null, 0),
             ],
         );
-        $quizQuery->method('getByLessonId')->with(100, $userId, true, false)->willReturn($quizDto);
+        $quizQuery->method('listByLessonId')->with(100, $userId, true, false)->willReturn([$quizDto]);
         $quizQuery->method('hasPassed')->with($userId, 55)->willReturn(false);
+        $quizQuery->method('hasPassedLessonQuiz')->with($userId, 100)->willReturn(false);
         $quizQuery->method('countUserAttempts')->with(55, $userId)->willReturn(0);
 
         $service = new StudentExperienceService(
@@ -335,6 +336,63 @@ final class StudentExperienceServiceTest extends TestCase
         $this->assertFalse($context->hasPassedQuiz);
         $this->assertNotNull($context->quiz);
         $this->assertSame(55, $context->quiz->id);
+    }
+
+    public function test_player_context_honors_preferred_quiz_and_lesson_pass_gate(): void
+    {
+        $userId = 7;
+        $course = $this->sampleCourse(10, 'Sample Course');
+
+        $this->courseRepository->method('findById')->with(10)->willReturn($course);
+        $this->sectionRepository->method('loadStructureRows')->with(10, $this->anything())->willReturn($this->sampleStructureRows());
+        $this->progressRepository->method('isUserEnrolled')->willReturn(true);
+        $this->progressRepository->method('getSummary')->willReturn(null);
+        $this->progressRepository->method('getCompletedLessonIds')->willReturn([]);
+
+        $first = new QuizDto(
+            55,
+            100,
+            10,
+            'Quiz A',
+            70,
+            0,
+            [new QuizQuestionDto(1, 'mcq', 'Pick one', ['A', 'B'], null, 0)],
+        );
+        $second = new QuizDto(
+            66,
+            100,
+            10,
+            'Quiz B',
+            70,
+            1,
+            [new QuizQuestionDto(2, 'true_false', 'True?', ['True', 'False'], null, 0)],
+        );
+
+        $quizQuery = $this->createMock(QuizStudentQueryInterface::class);
+        $quizQuery->method('listByLessonId')->with(100, $userId, true, false)->willReturn([$first, $second]);
+        $quizQuery->method('hasPassed')->willReturnMap([
+            [$userId, 55, true],
+            [$userId, 66, false],
+        ]);
+        // Completion gate is lesson-wide (all quizzes), not the displayed one only.
+        $quizQuery->method('hasPassedLessonQuiz')->with($userId, 100)->willReturn(false);
+        $quizQuery->method('countUserAttempts')->with(66, $userId)->willReturn(1);
+
+        $service = new StudentExperienceService(
+            $this->courseRepository,
+            $this->sectionRepository,
+            $this->enrollmentRepository,
+            $this->progressRepository,
+            $this->clock,
+            $quizQuery,
+        );
+
+        $context = $service->getPlayerContext(10, 100, $userId, 66);
+
+        $this->assertSame(66, $context->quiz?->id);
+        $this->assertTrue($context->quizRequired);
+        $this->assertFalse($context->hasPassedQuiz);
+        $this->assertSame(1, $context->quizAttemptsUsed);
     }
 
     public function test_unpublished_course_is_not_found(): void

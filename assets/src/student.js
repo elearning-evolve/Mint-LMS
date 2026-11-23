@@ -37,6 +37,7 @@ document.addEventListener('alpine:init', () => {
     hasPassedQuiz: config.hasPassedQuiz || false,
     videoProgression: !!config.videoProgression,
     videoWatched: !config.videoProgression,
+    watchNonce: config.watchNonce || null,
     autoComplete: !!config.autoComplete,
     sidebarOpen: false,
     marking: false,
@@ -50,7 +51,7 @@ document.addEventListener('alpine:init', () => {
 
     async onVideoEnded() {
       this.videoWatched = true;
-      if (!this.isEnrolled || this.isComplete) {
+      if (!this.isEnrolled || this.isComplete || !this.watchNonce) {
         return;
       }
       try {
@@ -62,7 +63,10 @@ document.addEventListener('alpine:init', () => {
               'Content-Type': 'application/json',
               'X-WP-Nonce': mintLmsStudent.nonce,
             },
-            body: JSON.stringify({ course_id: this.courseId }),
+            body: JSON.stringify({
+              course_id: this.courseId,
+              watch_nonce: this.watchNonce,
+            }),
           }
         );
         const payload = await response.json();

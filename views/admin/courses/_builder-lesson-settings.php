@@ -44,7 +44,7 @@ use MintLMS\Infrastructure\Admin\SettingsSurface;
 			<div class="mint-settings-nested" x-show="selectedLesson.settings.materialsEnabled" x-cloak>
 				<div class="mint-settings-editor">
 					<textarea class="mint-settings-editor__textarea" x-model="selectedLesson.settings.materialsContent" placeholder="<?php echo esc_attr__( 'Add downloads, notes or links for this lesson…', 'mint-lms' ); ?>" rows="6"></textarea>
-					<p class="mint-settings-hint-text"><?php esc_html_e( 'Plain text or HTML is fine. A visual toolbar will return when the materials editor is wired.', 'mint-lms' ); ?></p>
+					<p class="mint-settings-hint-text"><?php esc_html_e( 'Plain text or HTML is fine.', 'mint-lms' ); ?></p>
 				</div>
 			</div>
 			<div class="mint-settings-divider"></div>
@@ -54,7 +54,7 @@ use MintLMS\Infrastructure\Admin\SettingsSurface;
 				<div class="mint-settings-row__control">
 					<span class="mint-settings-hint" title="<?php echo esc_attr__( 'Tie a video to course progress', 'mint-lms' ); ?>">?</span>
 					<button type="button" role="switch" class="mint-lesson-preview-toggle" :class="selectedLesson.settings.videoProgression ? 'is-on' : ''" :aria-pressed="selectedLesson.settings.videoProgression ? 'true' : 'false'" @click="selectedLesson.settings.videoProgression = !selectedLesson.settings.videoProgression"><span class="mint-lesson-preview-toggle__knob"></span></button>
-					<span class="mint-settings-hint-text" x-show="selectedLesson.settings.videoProgression" x-cloak><?php esc_html_e( 'Students must watch this video to progress', 'mint-lms' ); ?></span>
+					<span class="mint-settings-hint-text" x-show="selectedLesson.settings.videoProgression" x-cloak><?php esc_html_e( 'Students must watch this self-hosted HTML5 video to progress (YouTube/Vimeo embeds are not tracked).', 'mint-lms' ); ?></span>
 				</div>
 			</div>
 			<div class="mint-settings-nested" x-show="selectedLesson.settings.videoProgression" x-cloak>

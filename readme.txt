@@ -5,7 +5,7 @@ Tags: lms, learning, courses, quizzes, elearning
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 8.2
-Stable tag: 1.1.15
+Stable tag: 1.1.16
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,6 +48,9 @@ LMS features (courses, lessons, quizzes, progress) do not require any third-part
 WordPress 6.2 or later and **PHP 8.2** or later. Optional AI Assistance also needs the MCP Adapter plugin and a compatible MCP client (e.g. Claude Desktop).
 
 == Changelog ==
+
+= 1.1.16 =
+* Student path: enforce video must-watch only for HTML5 (fix oEmbed soft-lock), require lesson watch nonce on video-watched REST, check quiz retakes on /start, honor mint_quiz in player with lesson-wide pass gate, remove unfinished materials toolbar copy.
 
 = 1.1.15 =
 * Tests: make integration suite explicitly not-in-CI (IntegrationTestCase + tests/README + composer test:integ wrapper); skips without WP PHPUnit scaffold. Debug leftovers re-checked clean (no console.log / var_dump / print_r in product paths).

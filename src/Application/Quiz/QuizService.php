@@ -698,6 +698,15 @@ final class QuizService implements QuizLifecycleInterface, QuizStudentQueryInter
 			$this->lessonAccessService->assertCanAccessLesson( $userId, $lesson->id );
 		}
 
+		// Same retake budget as submitAttempt — exhausted learners must not start a timer.
+		if ( ! empty( $settings['restrictRetakes'] ) ) {
+			$used = $this->countUserAttempts( $quizId, $userId );
+			$max  = max( 1, (int) ( $settings['retriesAllowed'] ?? 0 ) + 1 );
+			if ( $used >= $max ) {
+				throw new ForbiddenException( 'No quiz retries remain.' );
+			}
+		}
+
 		if ( null === $this->quizTimer ) {
 			return null;
 		}
@@ -760,7 +769,8 @@ final class QuizService implements QuizLifecycleInterface, QuizStudentQueryInter
 	}
 
 	public function hasPassedLessonQuiz( int $userId, int $lessonId ): bool {
-		foreach ( $this->quizRepository->findAllByLessonId( $lessonId ) as $quiz ) {
+		// Students only need published quizzes; drafts never gate completion.
+		foreach ( $this->quizRepository->findAllByLessonId( $lessonId, true ) as $quiz ) {
 			$questions = $this->quizRepository->findQuestionsByQuizId( $quiz->id );
 			if ( array() === $questions ) {
 				continue;
