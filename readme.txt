@@ -5,7 +5,7 @@ Tags: lms, learning, courses, quizzes, elearning
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 8.2
-Stable tag: 1.1.16
+Stable tag: 1.1.17
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -47,7 +47,22 @@ LMS features (courses, lessons, quizzes, progress) do not require any third-part
 
 WordPress 6.2 or later and **PHP 8.2** or later. Optional AI Assistance also needs the MCP Adapter plugin and a compatible MCP client (e.g. Claude Desktop).
 
+= Do WooCommerce guest checkouts enroll students? =
+
+No. Mint LMS enrollment requires a WordPress user account. Guest orders (no customer account) are skipped until the order is linked to a user. For paid courses, require account creation / login at checkout so the purchaser can be enrolled.
+
+= Does “must watch video” work with YouTube or Vimeo? =
+
+Must-watch progression is enforced for self-hosted HTML5 video only. YouTube, Vimeo, and other oEmbed providers cannot reliably report when playback ends, so those embeds do not block lesson completion. Use a direct video file URL when you need the watch gate.
+
+= Is mid-quiz progress saved on the server? =
+
+When quiz saving is enabled, answers are kept in the student’s browser tab (session storage) so they can continue in the same tab. Progress is not stored on the server, and clearing the tab or switching devices loses unfinished answers. Submitted attempts are stored normally.
+
 == Changelog ==
+
+= 1.1.17 =
+* wp.org readiness: honest quiz-saving copy (browser tab only); FAQ notes for WooCommerce guest checkout, HTML5-only must-watch video, and mid-quiz save limits.
 
 = 1.1.16 =
 * Student path: enforce video must-watch only for HTML5 (fix oEmbed soft-lock), require lesson watch nonce on video-watched REST, check quiz retakes on /start, honor mint_quiz in player with lesson-wide pass gate, remove unfinished materials toolbar copy.

@@ -3372,11 +3372,11 @@ msgid "Enable quiz saving"
 msgstr ""
 
 #: views/admin/courses/_builder-quiz-settings.php:136
-msgid "Students can leave and come back to where they stopped"
+msgid "Answers are kept in this browser tab only (not on the server). Clearing the tab or switching devices loses progress."
 msgstr ""
 
-#: views/admin/courses/_builder-quiz-settings.php:138
-msgid "Progress is saved as students go"
+#: views/admin/courses/_builder-quiz-settings.php:144
+msgid "Progress is kept in this browser tab only"
 msgstr ""
 
 #: views/admin/courses/_builder-quiz-settings.php:143

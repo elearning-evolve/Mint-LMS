@@ -139,9 +139,9 @@ use MintLMS\Infrastructure\Admin\SettingsSurface;
 			<div class="mint-settings-row">
 				<div class="mint-settings-row__label"><?php esc_html_e( 'Enable quiz saving', 'mint-lms' ); ?></div>
 				<div class="mint-settings-row__control">
-					<span class="mint-settings-hint" title="<?php echo esc_attr__( 'Students can leave and come back to where they stopped', 'mint-lms' ); ?>">?</span>
+					<span class="mint-settings-hint" title="<?php echo esc_attr__( 'Answers are kept in this browser tab only (not on the server). Clearing the tab or switching devices loses progress.', 'mint-lms' ); ?>">?</span>
 					<button type="button" role="switch" class="mint-lesson-preview-toggle" :class="lessonQuiz.settings.quizSavingEnabled ? 'is-on' : ''" :aria-pressed="lessonQuiz.settings.quizSavingEnabled ? 'true' : 'false'" @click="lessonQuiz.settings.quizSavingEnabled = !lessonQuiz.settings.quizSavingEnabled"><span class="mint-lesson-preview-toggle__knob"></span></button>
-					<span class="mint-settings-hint-text" x-show="lessonQuiz.settings.quizSavingEnabled" x-cloak><?php esc_html_e( 'Progress is saved as students go', 'mint-lms' ); ?></span>
+					<span class="mint-settings-hint-text" x-show="lessonQuiz.settings.quizSavingEnabled" x-cloak><?php esc_html_e( 'Progress is kept in this browser tab only', 'mint-lms' ); ?></span>
 				</div>
 			</div>
 			<div class="mint-settings-nested" x-show="lessonQuiz.settings.quizSavingEnabled" x-cloak>
