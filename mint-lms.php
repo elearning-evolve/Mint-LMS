@@ -1,3 +1,4 @@
+
 <?php
 /**
  * Plugin Name:       Mint LMS
@@ -6,14 +7,15 @@
  * Version:           1.0.604
  * Requires at least: 6.2
  * Requires PHP:      8.2
- * Author:            Evolve 
- * Author URI:        https://elearningevolve.com/ 
+ * Author:            Evolve
+ * Author URI:        https://elearningevolve.com/
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       mint-lms
  *
  * @package MintLMS
  */
+
 
 defined( 'ABSPATH' ) || exit;
 
