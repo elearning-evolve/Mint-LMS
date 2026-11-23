@@ -34,7 +34,6 @@ use MintLMS\Infrastructure\Ai\AiAbilitiesRegistrar;
 use MintLMS\Infrastructure\Ai\AiStructureDraftNormalizer;
 use MintLMS\Infrastructure\Ai\McpAdapterNotice;
 use MintLMS\Infrastructure\Privacy\PrivacyPolicyContent;
-use MintLMS\Infrastructure\Admin\AdminAjaxHandler;
 use MintLMS\Infrastructure\Admin\AssetLoader;
 use MintLMS\Infrastructure\Admin\CourseBuilderPage;
 use MintLMS\Infrastructure\Admin\CoursePostEditUi;
@@ -161,7 +160,6 @@ final class Bootstrap {
 		( new FirstRunRedirect() )->register();
 		( new UserProfileEnrollment() )->register();
 		( new AssetLoader() )->register();
-		( new AdminAjaxHandler() )->register();
 		( new StudentAssetLoader() )->register();
 		( new PrivacyPolicyContent() )->register();
 

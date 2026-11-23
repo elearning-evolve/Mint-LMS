@@ -1,8 +1,6 @@
 import Alpine from 'alpinejs';
 import Sortable from 'sortablejs';
 import { courseBuilder, courseEdit } from './builder.js';
-import { coursesList } from './courses-list.js';
-import { lessonsList, quizzesList, questionsList } from './content-list.js';
 import { mintCourseStudents, mintCourseSettingsEnroll, mintUserCourseEnroll } from './students-admin.js';
 import './students-admin.js';
 import { mintReports } from './reports-admin.js';
@@ -85,10 +83,6 @@ document.addEventListener('alpine:init', () => {
 
   Alpine.data('courseBuilder', courseBuilder);
   Alpine.data('courseEdit', courseEdit);
-  Alpine.data('coursesList', coursesList);
-  Alpine.data('lessonsList', lessonsList);
-  Alpine.data('quizzesList', quizzesList);
-  Alpine.data('questionsList', questionsList);
 
   Alpine.data('mintCourseStudents', (config = {}) => mintCourseStudents(config));
   Alpine.data('mintCourseSettingsEnroll', (courseId) => mintCourseSettingsEnroll(courseId));
@@ -96,21 +90,6 @@ document.addEventListener('alpine:init', () => {
   Alpine.data('mintReports', (config = {}) => mintReports(config));
   Alpine.data('mintEssayGrading', (config = {}) => mintEssayGrading(config));
   Alpine.data('mintSettings', (config = {}) => mintSettings(config));
-
-  Alpine.data('mintWelcomeDashboard', (steps = []) => ({
-    steps: Array.isArray(steps) ? steps : [],
-    activeStep: 'course',
-    selectStep(key) {
-      this.activeStep = key;
-    },
-    isActive(key) {
-      return this.activeStep === key;
-    },
-    stepDesc() {
-      const step = this.steps.find((s) => s.key === this.activeStep);
-      return step ? step.desc : '';
-    },
-  }));
 
   Alpine.data('mintWelcomeOnboarding', (config = {}) => {
     const maxStep = Math.min(3, Math.max(1, Number(config.maxStep) || 3));
