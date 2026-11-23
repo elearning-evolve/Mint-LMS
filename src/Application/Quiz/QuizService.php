@@ -44,6 +44,7 @@ final class QuizService implements QuizLifecycleInterface {
 		private UserLookupInterface $userLookup,
 		private ?LessonAccessService $lessonAccessService = null,
 		private ?EssaySubmissionRepositoryInterface $essaySubmissionRepository = null,
+		private ?QuizTimerService $quizTimer = null,
 	) {
 	}
 
@@ -642,6 +643,10 @@ final class QuizService implements QuizLifecycleInterface {
 			}
 		}
 
+		if ( null !== $this->quizTimer ) {
+			$this->quizTimer->assertWithinLimit( $userId, $quizId, $runtimeSettings );
+		}
+
 		$grade = $this->evaluateAttempt( $questions, $dto->answers, $quiz->passPercent, true );
 
 		$attempt = $this->quizRepository->saveAttempt(
@@ -658,7 +663,39 @@ final class QuizService implements QuizLifecycleInterface {
 
 		$this->persistEssaySubmissions( $attempt, $questions, $dto->answers, $grade );
 
+		if ( null !== $this->quizTimer ) {
+			$this->quizTimer->clear( $userId, $quizId );
+		}
+
 		return QuizAttemptDto::fromAttempt( $attempt, null, $grade );
+	}
+
+	/**
+	 * @param array<string, mixed> $settings
+	 * @return array{startedAt:int, deadlineAt:int, remainingSeconds:int, limitSeconds:int}|null
+	 */
+	public function startTimedAttempt( int $quizId, int $userId, array $settings ): ?array {
+		if ( $userId <= 0 ) {
+			throw new ForbiddenException( 'You must be logged in to start a quiz.' );
+		}
+
+		$quiz     = $this->findQuizOrFail( $quizId );
+		$lesson   = $this->findLessonOrFail( $quiz->lessonId );
+		$enrolled = $quiz->courseId > 0 && $this->progressRepository->isUserEnrolled( $userId, $quiz->courseId );
+
+		if ( ! $enrolled && ! $lesson->isPreview ) {
+			throw new ForbiddenException( 'You must be enrolled to start this quiz.' );
+		}
+
+		if ( null !== $this->lessonAccessService ) {
+			$this->lessonAccessService->assertCanAccessLesson( $userId, $lesson->id );
+		}
+
+		if ( null === $this->quizTimer ) {
+			return null;
+		}
+
+		return $this->quizTimer->start( $userId, $quizId, $settings );
 	}
 
 	/**

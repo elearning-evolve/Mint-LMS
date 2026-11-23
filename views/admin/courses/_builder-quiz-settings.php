@@ -6,6 +6,8 @@
  */
 
 defined( 'ABSPATH' ) || exit;
+
+use MintLMS\Infrastructure\Admin\SettingsSurface;
 ?>
 <div class="mint-settings-page" x-show="quizSettingsView && lessonQuiz && lessonQuiz.settings" x-cloak>
 	<button type="button" class="mint-settings-page__back" @click="closeQuizSettings()">
@@ -15,6 +17,7 @@ defined( 'ABSPATH' ) || exit;
 	<h1 class="mint-settings-page__title"><?php esc_html_e( 'Quiz Settings', 'mint-lms' ); ?></h1>
 	<div class="mint-settings-page__subtitle" x-text="lessonQuiz.title || t('newQuiz')"></div>
 
+	<?php if ( SettingsSurface::enabled( 'quiz.access_card' ) ) : ?>
 	<div class="mint-settings-card">
 		<button type="button" class="mint-settings-card__head" :class="settingsAccordion.quizAccess ? 'is-open' : ''" @click="settingsAccordion.quizAccess = !settingsAccordion.quizAccess" :aria-expanded="settingsAccordion.quizAccess ? 'true' : 'false'">
 			<div>
@@ -93,6 +96,7 @@ defined( 'ABSPATH' ) || exit;
 
 		</div>
 	</div>
+	<?php endif; ?>
 
 	<div class="mint-settings-card">
 		<button type="button" class="mint-settings-card__head" :class="settingsAccordion.quizProgression ? 'is-open' : ''" @click="settingsAccordion.quizProgression = !settingsAccordion.quizProgression" :aria-expanded="settingsAccordion.quizProgression ? 'true' : 'false'">
@@ -112,6 +116,7 @@ defined( 'ABSPATH' ) || exit;
 					<span class="mint-settings-hint-text"><?php esc_html_e( '%', 'mint-lms' ); ?></span>
 				</div>
 			</div>
+			<?php if ( SettingsSurface::enabled( 'quiz.certificate' ) ) : ?>
 			<div class="mint-settings-divider"></div>
 			<div class="mint-settings-row">
 				<div class="mint-settings-row__label"><?php esc_html_e( 'Quiz certificate', 'mint-lms' ); ?></div>
@@ -129,6 +134,7 @@ defined( 'ABSPATH' ) || exit;
 					</div>
 				</div>
 			</div>
+			<?php endif; ?>
 			<div class="mint-settings-divider"></div>
 			<div class="mint-settings-row">
 				<div class="mint-settings-row__label"><?php esc_html_e( 'Enable quiz saving', 'mint-lms' ); ?></div>
@@ -341,6 +347,7 @@ defined( 'ABSPATH' ) || exit;
 					</div>
 				</div>
 			</div>
+			<?php if ( SettingsSurface::enabled( 'quiz.autostart' ) ) : ?>
 			<div class="mint-settings-divider"></div>
 			<div class="mint-settings-row">
 				<div class="mint-settings-row__label"><?php esc_html_e( 'Autostart', 'mint-lms' ); ?></div>
@@ -354,6 +361,7 @@ defined( 'ABSPATH' ) || exit;
 					</button>
 				</div>
 			</div>
+			<?php endif; ?>
 			<div class="mint-settings-divider"></div>
 			<div class="mint-settings-row mint-settings-row--top">
 				<div class="mint-settings-row__label mint-settings-row__label--pad"><?php esc_html_e( 'Question display', 'mint-lms' ); ?></div>
@@ -388,90 +396,27 @@ defined( 'ABSPATH' ) || exit;
 			</div>
 			<div class="mint-settings-divider"></div>
 			<div class="mint-settings-row">
-				<div class="mint-settings-row__label"><?php esc_html_e( 'Question overview table', 'mint-lms' ); ?></div>
+				<div class="mint-settings-row__label"><?php esc_html_e( 'Skip question', 'mint-lms' ); ?></div>
 				<div class="mint-settings-row__control">
-					<span class="mint-settings-hint mint-settings-hint--spacer" aria-hidden="true">?</span>
-					<button type="button" role="switch" class="mint-lesson-preview-toggle" :class="lessonQuiz.settings.questionOverview ? 'is-on' : ''" :aria-pressed="lessonQuiz.settings.questionOverview ? 'true' : 'false'" @click="lessonQuiz.settings.questionOverview = !lessonQuiz.settings.questionOverview"><span class="mint-lesson-preview-toggle__knob"></span></button>
-					<span class="mint-settings-hint-text" x-show="lessonQuiz.settings.questionOverview" x-cloak><?php esc_html_e( 'An overview table will be shown for all questions', 'mint-lms' ); ?></span>
-				</div>
-			</div>
-			<div class="mint-settings-nested" x-show="lessonQuiz.settings.questionOverview" x-cloak>
-				<div class="mint-settings-subrow">
-					<div class="mint-settings-subrow__label"><?php esc_html_e( 'Quiz summary', 'mint-lms' ); ?></div>
-					<div class="mint-settings-row__control">
-						<span class="mint-settings-hint mint-settings-hint--spacer" aria-hidden="true">?</span>
-						<button type="button" role="switch" class="mint-lesson-preview-toggle" :class="lessonQuiz.settings.quizSummary ? 'is-on' : ''" :aria-pressed="lessonQuiz.settings.quizSummary ? 'true' : 'false'" @click="lessonQuiz.settings.quizSummary = !lessonQuiz.settings.quizSummary"><span class="mint-lesson-preview-toggle__knob"></span></button>
-						<span class="mint-settings-hint-text"><?php esc_html_e( 'Show a summary table before submitting', 'mint-lms' ); ?></span>
-					</div>
-				</div>
-				<div class="mint-settings-subrow">
-					<div class="mint-settings-subrow__label"><?php esc_html_e( 'Skip question', 'mint-lms' ); ?></div>
-					<div class="mint-settings-row__control">
-						<span class="mint-settings-hint" title="<?php echo esc_attr__( 'Students can skip a question and come back', 'mint-lms' ); ?>">?</span>
-						<button type="button" role="switch" class="mint-lesson-preview-toggle" :class="lessonQuiz.settings.skipQuestion ? 'is-on' : ''" :aria-pressed="lessonQuiz.settings.skipQuestion ? 'true' : 'false'" @click="lessonQuiz.settings.skipQuestion = !lessonQuiz.settings.skipQuestion"><span class="mint-lesson-preview-toggle__knob"></span></button>
-					</div>
+					<span class="mint-settings-hint" title="<?php echo esc_attr__( 'Students can skip a question and come back', 'mint-lms' ); ?>">?</span>
+					<button type="button" role="switch" class="mint-lesson-preview-toggle" :class="lessonQuiz.settings.skipQuestion ? 'is-on' : ''" :aria-pressed="lessonQuiz.settings.skipQuestion ? 'true' : 'false'" @click="lessonQuiz.settings.skipQuestion = !lessonQuiz.settings.skipQuestion"><span class="mint-lesson-preview-toggle__knob"></span></button>
 				</div>
 			</div>
 			<div class="mint-settings-divider"></div>
 			<div class="mint-settings-row">
-				<div class="mint-settings-row__label"><?php esc_html_e( 'Custom question ordering', 'mint-lms' ); ?></div>
+				<div class="mint-settings-row__label"><?php esc_html_e( 'Randomize order', 'mint-lms' ); ?></div>
 				<div class="mint-settings-row__control">
-					<span class="mint-settings-hint mint-settings-hint--spacer" aria-hidden="true">?</span>
-					<button type="button" role="switch" class="mint-lesson-preview-toggle" :class="lessonQuiz.settings.customOrdering ? 'is-on' : ''" :aria-pressed="lessonQuiz.settings.customOrdering ? 'true' : 'false'" @click="lessonQuiz.settings.customOrdering = !lessonQuiz.settings.customOrdering"><span class="mint-lesson-preview-toggle__knob"></span></button>
-				</div>
-			</div>
-			<div class="mint-settings-nested" x-show="lessonQuiz.settings.customOrdering" x-cloak>
-				<div class="mint-settings-subrow">
-					<div class="mint-settings-subrow__label"><?php esc_html_e( 'Sort by category', 'mint-lms' ); ?></div>
-					<div class="mint-settings-row__control">
-						<button type="button" class="mint-settings-check" @click="lessonQuiz.settings.sortByCategory = !lessonQuiz.settings.sortByCategory">
-							<span class="mint-settings-check__box" :class="lessonQuiz.settings.sortByCategory ? 'is-checked' : ''" aria-hidden="true">
-								<svg x-show="lessonQuiz.settings.sortByCategory" width="13" height="13" viewBox="0 0 20 20" fill="none" stroke="#0F0E1A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 10.5 8.5 14 15 6.5"/></svg>
-							</span>
-						</button>
-					</div>
-				</div>
-				<div class="mint-settings-subrow">
-					<div class="mint-settings-subrow__label"><?php esc_html_e( 'Randomize order', 'mint-lms' ); ?></div>
-					<div class="mint-settings-row__control">
-						<button type="button" role="switch" class="mint-lesson-preview-toggle" :class="lessonQuiz.settings.randomizeOrder ? 'is-on' : ''" :aria-pressed="lessonQuiz.settings.randomizeOrder ? 'true' : 'false'" @click="lessonQuiz.settings.randomizeOrder = !lessonQuiz.settings.randomizeOrder"><span class="mint-lesson-preview-toggle__knob"></span></button>
-					</div>
-				</div>
-				<div x-show="lessonQuiz.settings.randomizeOrder" x-cloak style="padding-left:30px;display:grid;gap:10px">
-					<button type="button" class="mint-settings-radio-inline" :class="lessonQuiz.settings.randomizeMode === 'all' ? 'is-selected' : ''" @click="lessonQuiz.settings.randomizeMode = 'all'">
-						<span class="mint-settings-radio-inline__dot" aria-hidden="true"><span class="mint-settings-radio-inline__dot-inner"></span></span>
-						<span class="mint-settings-radio-inline__label"><?php esc_html_e( 'Show all questions', 'mint-lms' ); ?></span>
-					</button>
-					<button type="button" class="mint-settings-radio-inline" :class="lessonQuiz.settings.randomizeMode === 'subset' ? 'is-selected' : ''" @click="lessonQuiz.settings.randomizeMode = 'subset'">
-						<span class="mint-settings-radio-inline__dot" aria-hidden="true"><span class="mint-settings-radio-inline__dot-inner"></span></span>
-						<span class="mint-settings-radio-inline__label"><?php esc_html_e( 'Show only some questions', 'mint-lms' ); ?></span>
-					</button>
-					<div x-show="lessonQuiz.settings.randomizeMode === 'subset'" x-cloak style="display:flex;align-items:center;gap:10px">
-						<input type="number" min="0" class="mint-settings-input" style="width:72px" x-model.number="lessonQuiz.settings.randomizeCount" />
-						<span class="mint-settings-hint-text" x-text="t('outOf') + ' ' + (lessonQuiz.questions?.length || 0) + ' ' + t('questions')"></span>
-					</div>
+					<span class="mint-settings-hint" title="<?php echo esc_attr__( 'Shuffle question order for each student', 'mint-lms' ); ?>">?</span>
+					<button type="button" role="switch" class="mint-lesson-preview-toggle" :class="lessonQuiz.settings.randomizeOrder ? 'is-on' : ''" :aria-pressed="lessonQuiz.settings.randomizeOrder ? 'true' : 'false'" @click="lessonQuiz.settings.randomizeOrder = !lessonQuiz.settings.randomizeOrder"><span class="mint-lesson-preview-toggle__knob"></span></button>
 				</div>
 			</div>
 			<div class="mint-settings-divider"></div>
 			<div class="mint-settings-row">
-				<div class="mint-settings-row__label"><?php esc_html_e( 'Custom question elements', 'mint-lms' ); ?></div>
+				<div class="mint-settings-row__label"><?php esc_html_e( 'Randomize answers', 'mint-lms' ); ?></div>
 				<div class="mint-settings-row__control">
-					<span class="mint-settings-hint" title="<?php echo esc_attr__( 'Choose what students see with each question', 'mint-lms' ); ?>">?</span>
-					<button type="button" role="switch" class="mint-lesson-preview-toggle" :class="lessonQuiz.settings.customElements ? 'is-on' : ''" :aria-pressed="lessonQuiz.settings.customElements ? 'true' : 'false'" @click="lessonQuiz.settings.customElements = !lessonQuiz.settings.customElements"><span class="mint-lesson-preview-toggle__knob"></span></button>
-					<span class="mint-settings-hint-text" x-show="lessonQuiz.settings.customElements" x-cloak><?php esc_html_e( 'Pick what shows with each question', 'mint-lms' ); ?></span>
+					<span class="mint-settings-hint" title="<?php echo esc_attr__( 'Shuffle the answer choices for each student', 'mint-lms' ); ?>">?</span>
+					<button type="button" role="switch" class="mint-lesson-preview-toggle" :class="lessonQuiz.settings.randomizeAnswers ? 'is-on' : ''" :aria-pressed="lessonQuiz.settings.randomizeAnswers ? 'true' : 'false'" @click="lessonQuiz.settings.randomizeAnswers = !lessonQuiz.settings.randomizeAnswers"><span class="mint-lesson-preview-toggle__knob"></span></button>
 				</div>
-			</div>
-			<div class="mint-settings-nested" x-show="lessonQuiz.settings.customElements" x-cloak>
-				<template x-for="el in quizCustomElementToggles()" :key="el.key">
-					<div class="mint-settings-subrow">
-						<div class="mint-settings-subrow__label" x-text="el.label"></div>
-						<div class="mint-settings-row__control">
-							<span class="mint-settings-hint" x-show="el.hint" :title="el.hint || ''">?</span>
-							<span class="mint-settings-hint mint-settings-hint--spacer" x-show="!el.hint" aria-hidden="true">?</span>
-							<button type="button" role="switch" class="mint-lesson-preview-toggle" :class="lessonQuiz.settings[el.key] ? 'is-on' : ''" :aria-pressed="lessonQuiz.settings[el.key] ? 'true' : 'false'" @click="lessonQuiz.settings[el.key] = !lessonQuiz.settings[el.key]"><span class="mint-lesson-preview-toggle__knob"></span></button>
-						</div>
-					</div>
-				</template>
 			</div>
 			<div class="mint-settings-divider"></div>
 			<div class="mint-settings-row">
@@ -496,6 +441,7 @@ defined( 'ABSPATH' ) || exit;
 		</button>
 		<div class="mint-settings-card__body" x-show="settingsAccordion.quizResults" x-cloak>
 
+			<?php if ( SettingsSurface::enabled( 'quiz.result_messages' ) ) : ?>
 			<div class="mint-settings-row">
 				<div class="mint-settings-row__label"><?php esc_html_e( 'Result message(s)', 'mint-lms' ); ?></div>
 				<div class="mint-settings-row__control">
@@ -611,6 +557,7 @@ defined( 'ABSPATH' ) || exit;
 				</button>
 			</div>
 			<div class="mint-settings-divider"></div>
+			<?php endif; ?>
 			<div class="mint-settings-row">
 				<div class="mint-settings-row__label"><?php esc_html_e( 'Restart quiz button', 'mint-lms' ); ?></div>
 				<div class="mint-settings-row__control">

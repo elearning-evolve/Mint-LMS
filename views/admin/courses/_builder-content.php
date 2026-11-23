@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
+use MintLMS\Infrastructure\Admin\SettingsSurface;
+
 /** @var MintLMS\Infrastructure\Admin\ViewRenderer $renderer */
 /** @var int $courseId */
 /** @var int $lessonId */
@@ -3234,6 +3236,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 																</span>
 																<?php esc_html_e( 'Correct answer', 'mint-lms' ); ?>
 															</button>
+															<?php if ( SettingsSurface::enabled( 'question.allow_html' ) ) : ?>
 															<button
 																type="button"
 																class="mint-qeditor__answer-html"
@@ -3243,6 +3246,7 @@ $labelClass    = 'mint-mb-1.5 mint-block mint-text-[13px] mint-font-bold mint-up
 																<span class="mint-qeditor__html-box" :class="activeQuestion.settings.allowHtml && activeQuestion.settings.allowHtml[oIndex] ? 'is-checked' : ''"></span>
 																<?php esc_html_e( 'Allow HTML', 'mint-lms' ); ?>
 															</button>
+															<?php endif; ?>
 														</div>
 													</div>
 													<div class="mint-qeditor__option-actions">

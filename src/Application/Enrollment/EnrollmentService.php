@@ -237,7 +237,8 @@ final class EnrollmentService {
 	public function isEnrolled( int $userId, int $courseId ): bool {
 		$enrollment = $this->enrollmentRepository->findByUserAndCourse( $userId, $courseId );
 
-		return null !== $enrollment && EnrollmentStatus::Active === $enrollment->status;
+		return null !== $enrollment
+			&& ( EnrollmentStatus::Active === $enrollment->status || EnrollmentStatus::Completed === $enrollment->status );
 	}
 
 	/**

@@ -1201,7 +1201,7 @@ final class ShortcodeRegistrar {
 			'<video class="mint-w-full mint-rounded-lg" %s src="%s"%s></video>',
 			trim( $attrs ),
 			esc_url( $videoUrl ),
-			! empty( $settings['videoProgression'] ) ? ' x-on:ended="videoWatched = true"' : ''
+			! empty( $settings['videoProgression'] ) ? ' x-on:ended="onVideoEnded()"' : ''
 		);
 	}
 }

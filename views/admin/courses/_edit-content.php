@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
+use MintLMS\Infrastructure\Admin\SettingsSurface;
+
 /** @var MintLMS\Infrastructure\Admin\ViewRenderer $renderer */
 /** @var int $courseId */
 
@@ -393,6 +395,7 @@ $inputClass = 'mint-cs-input';
 						</div>
 					</div>
 
+					<?php if ( SettingsSurface::enabled( 'course.pagination' ) ) : ?>
 					<div class="mint-cs-divider"></div>
 
 					<div class="mint-cs-row">
@@ -426,7 +429,9 @@ $inputClass = 'mint-cs-input';
 							</div>
 						</div>
 					</div>
+					<?php endif; ?>
 
+					<?php if ( SettingsSurface::enabled( 'course.completion_redirect' ) ) : ?>
 					<div class="mint-cs-divider"></div>
 
 					<div class="mint-cs-row">
@@ -444,6 +449,7 @@ $inputClass = 'mint-cs-input';
 							</div>
 						</div>
 					</div>
+					<?php endif; ?>
 				</div>
 			</section>
 
@@ -618,6 +624,7 @@ $inputClass = 'mint-cs-input';
 						</div>
 					</div>
 
+					<?php if ( SettingsSurface::enabled( 'course.points_on_complete' ) ) : ?>
 					<div class="mint-cs-divider"></div>
 
 					<div class="mint-cs-row">
@@ -633,6 +640,7 @@ $inputClass = 'mint-cs-input';
 							</div>
 						</div>
 					</div>
+					<?php endif; ?>
 				</div>
 			</section>
 
@@ -682,7 +690,7 @@ $inputClass = 'mint-cs-input';
 										:aria-checked="optionOn('studentComplete') ? 'true' : 'false'"
 										@click="toggleStudentComplete()"
 									><span class="mint-cs-toggle__knob"></span></button>
-									<span class="mint-cs-toggle-hint"><?php esc_html_e( 'Students can mark each lesson complete from the lesson page', 'mint-lms' ); ?></span>
+									<span class="mint-cs-toggle-hint"><?php esc_html_e( 'On: students click Mark complete. Off: lessons complete automatically when video/quiz requirements are met.', 'mint-lms' ); ?></span>
 								</div>
 							</div>
 						</div>

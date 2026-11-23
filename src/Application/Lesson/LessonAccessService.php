@@ -76,7 +76,7 @@ final class LessonAccessService {
 
 		if (
 			null !== $enrollment
-			&& EnrollmentStatus::Active === $enrollment->status
+			&& ( EnrollmentStatus::Active === $enrollment->status || EnrollmentStatus::Completed === $enrollment->status )
 			&& CourseAccessRules::isEnrollmentExpired( $enrollment->expiresAt, $now )
 		) {
 			$exception = new ForbiddenException( 'Your access to this course has expired.' );

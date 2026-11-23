@@ -70,6 +70,7 @@ final class AssetLoader {
 					'catalogPage' => $pageSettings->getCatalogUrl(),
 				),
 				'i18n'              => AdminI18n::strings(),
+				'settingsSurface'   => SettingsSurface::all(),
 			)
 		);
 	}

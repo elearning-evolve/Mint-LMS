@@ -766,12 +766,16 @@ final class StudentExperienceService {
 			$userId,
 			1,
 			self::MAX_COURSES,
-			EnrollmentStatus::Active,
+			null,
 		);
 
 		$items = array();
 
 		foreach ( $result['enrollments'] as $enrollment ) {
+			if ( EnrollmentStatus::Cancelled === $enrollment->status ) {
+				continue;
+			}
+
 			$item = $this->buildCourseItemFromEnrollment( $enrollment, $userId );
 
 			if ( null !== $item ) {
@@ -838,7 +842,7 @@ final class StudentExperienceService {
 		$enrollment = $this->enrollmentRepository->findByUserAndCourse( $userId, $course->id );
 		if (
 			null !== $enrollment
-			&& EnrollmentStatus::Active === $enrollment->status
+			&& ( EnrollmentStatus::Active === $enrollment->status || EnrollmentStatus::Completed === $enrollment->status )
 			&& CourseAccessRules::isEnrollmentExpired( $enrollment->expiresAt, $now )
 		) {
 			$exception = new ForbiddenException( 'Your access to this course has expired.' );

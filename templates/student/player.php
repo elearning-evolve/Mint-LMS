@@ -39,7 +39,8 @@ $pct          = (int) round( $context->progressPct );
 		isEnrolled: <?php echo $context->isEnrolled ? 'true' : 'false'; ?>,
 		quizRequired: <?php echo $context->quizRequired ? 'true' : 'false'; ?>,
 		hasPassedQuiz: <?php echo $context->hasPassedQuiz ? 'true' : 'false'; ?>,
-		videoProgression: <?php echo $videoProgression ? 'true' : 'false'; ?>
+		videoProgression: <?php echo $videoProgression ? 'true' : 'false'; ?>,
+		autoComplete: <?php echo ( $context->isEnrolled && ! $context->canMarkComplete && empty( $context->isReviewMode ) ) ? 'true' : 'false'; ?>
 	})"
 >
 	<?php if ( ! empty( $context->isReviewMode ) ) : ?>
@@ -165,7 +166,8 @@ $pct          = (int) round( $context->progressPct );
 							<span x-text="marking ? mintLmsStudent.i18n.marking : (isComplete ? mintLmsStudent.i18n.completed : (<?php echo null !== $context->nextLessonId ? 'true' : 'false'; ?> ? '<?php echo esc_js( __( 'Mark complete & continue', 'mint-lms' ) ); ?>' : mintLmsStudent.i18n.markComplete))"></span>
 						</button>
 					<?php elseif ( $context->isEnrolled && ! $context->canMarkComplete && empty( $context->isReviewMode ) ) : ?>
-						<p class="mint-m-0 mint-text-sm mint-text-ink-3"><?php esc_html_e( 'Your instructor marks lessons complete.', 'mint-lms' ); ?></p>
+						<p class="mint-m-0 mint-text-sm mint-text-ink-3" x-show="!isComplete"><?php esc_html_e( 'This lesson completes automatically when the required video and quiz steps are done.', 'mint-lms' ); ?></p>
+						<p class="mint-m-0 mint-text-sm mint-font-medium mint-text-success" x-show="isComplete" x-cloak><?php esc_html_e( 'Completed', 'mint-lms' ); ?></p>
 					<?php endif; ?>
 				</div>
 			</div>

@@ -41,6 +41,30 @@ final class ProgressController {
 
 		register_rest_route(
 			self::NAMESPACE,
+			'/lessons/(?P<id>\d+)/video-watched',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'videoWatched' ),
+					'permission_callback' => array( $this, 'canTrackProgress' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/lessons/(?P<id>\d+)/auto-complete',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'autoComplete' ),
+					'permission_callback' => array( $this, 'canTrackProgress' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
 			'/courses/(?P<id>\d+)/progress',
 			array(
 				array(
@@ -70,6 +94,53 @@ final class ProgressController {
 					'was_newly_completed'   => $result->wasNewlyCompleted,
 					'course_just_completed' => $result->courseJustCompleted,
 					'progress'              => $result->summary->pctComplete,
+				)
+			);
+		} catch ( NotFoundException $exception ) {
+			return ApiResponse::error( 'not_found', $exception->getMessage(), 404 );
+		} catch ( ForbiddenException $exception ) {
+			return ApiResponse::error( 'forbidden', $exception->getMessage(), 403 );
+		}
+	}
+
+	public function videoWatched( \WP_REST_Request $request ): \WP_REST_Response {
+		try {
+			$userId   = $this->authorization->getCurrentUserId();
+			$lessonId = (int) $request->get_param( 'id' );
+			$courseId = $this->nullableInt( $request->get_param( 'course_id' ) );
+
+			$result = $this->progressService->markVideoWatched( $userId, $lessonId, $courseId );
+
+			return ApiResponse::success(
+				array(
+					'lesson_id'             => $lessonId,
+					'video_watched'         => true,
+					'was_newly_completed'   => null !== $result && $result->wasNewlyCompleted,
+					'course_just_completed' => null !== $result && $result->courseJustCompleted,
+					'progress'              => null !== $result ? $result->summary->pctComplete : null,
+				)
+			);
+		} catch ( NotFoundException $exception ) {
+			return ApiResponse::error( 'not_found', $exception->getMessage(), 404 );
+		} catch ( ForbiddenException $exception ) {
+			return ApiResponse::error( 'forbidden', $exception->getMessage(), 403 );
+		}
+	}
+
+	public function autoComplete( \WP_REST_Request $request ): \WP_REST_Response {
+		try {
+			$userId   = $this->authorization->getCurrentUserId();
+			$lessonId = (int) $request->get_param( 'id' );
+			$courseId = $this->nullableInt( $request->get_param( 'course_id' ) );
+
+			$result = $this->progressService->tryAutoCompleteLesson( $userId, $lessonId, $courseId );
+
+			return ApiResponse::success(
+				array(
+					'lesson_id'             => $lessonId,
+					'was_newly_completed'   => null !== $result && $result->wasNewlyCompleted,
+					'course_just_completed' => null !== $result && $result->courseJustCompleted,
+					'progress'              => null !== $result ? $result->summary->pctComplete : null,
 				)
 			);
 		} catch ( NotFoundException $exception ) {

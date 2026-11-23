@@ -37,11 +37,12 @@ final class WpdbProgressRepository implements ProgressRepositoryInterface {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom LMS table; request-scoped.
 		$found = $wpdb->get_var(
 			$wpdb->prepare(
-				'SELECT id FROM %i WHERE user_id = %d AND course_id = %d AND status = %s',
+				'SELECT id FROM %i WHERE user_id = %d AND course_id = %d AND status IN (%s, %s)',
 				$table,
 				$userId,
 				$courseId,
-				'active'
+				'active',
+				'completed'
 			)
 		);
 
@@ -419,12 +420,15 @@ final class WpdbProgressRepository implements ProgressRepositoryInterface {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->update(
 			$table,
-			array( 'completed_at' => $completedAt->format( 'Y-m-d H:i:s' ) ),
+			array(
+				'completed_at' => $completedAt->format( 'Y-m-d H:i:s' ),
+				'status'       => 'completed',
+			),
 			array(
 				'user_id'   => $userId,
 				'course_id' => $courseId,
 			),
-			array( '%s' ),
+			array( '%s', '%s' ),
 			array( '%d', '%d' )
 		);
 
@@ -438,12 +442,15 @@ final class WpdbProgressRepository implements ProgressRepositoryInterface {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->update(
 			$table,
-			array( 'completed_at' => null ),
+			array(
+				'completed_at' => null,
+				'status'       => 'active',
+			),
 			array(
 				'user_id'   => $userId,
 				'course_id' => $courseId,
 			),
-			array( '%s' ),
+			array( '%s', '%s' ),
 			array( '%d', '%d' )
 		);
 	}
