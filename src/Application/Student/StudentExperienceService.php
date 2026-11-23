@@ -659,24 +659,31 @@ final class StudentExperienceService {
 		}
 
 		if ( ! $isEnrolled && ! $current->isPreview && ! $publicBrowse ) {
-			throw new ForbiddenException( 'Enroll in this course to access this lesson.' );
+			$exception = new ForbiddenException( 'Enroll in this course to access this lesson.' );
+			$exception->forReason( ForbiddenException::REASON_ENROLLMENT );
+			throw $exception;
 		}
 
 		if ( $current->isDripLocked ) {
-			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Plain-text drip copy; stripped below before reaching clients.
+			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Plain-text drip/progression copy; stripped below before reaching clients.
 			$message = preg_replace(
 				'/[\r\n\t\x00-\x08\x0B\x0C\x0E-\x1F<>]/',
 				'',
 				(string) ( $current->dripMessage ?? '' )
 			);
-			throw new ForbiddenException(
-				'' !== $message ? $message : 'This lesson is not available yet.'
-			);
+			$reason    = is_string( $current->lockReason ) && '' !== $current->lockReason
+				? $current->lockReason
+				: ForbiddenException::REASON_DRIP;
+			$exception = new ForbiddenException( '' !== $message ? $message : 'This lesson is not available yet.' );
+			$exception->forReason( $reason );
+			throw $exception;
 			// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		if ( ! $this->lessonHasAccessibleContent( $current, $isEnrolled || $publicBrowse ) ) {
-			throw new ForbiddenException( 'This lesson is not available.' );
+			$exception = new ForbiddenException( 'This lesson is not available.' );
+			$exception->forReason( ForbiddenException::REASON_UNAVAILABLE );
+			throw $exception;
 		}
 
 		$progressPct        = 0.0;
@@ -806,11 +813,15 @@ final class StudentExperienceService {
 		$now = $this->clock->now();
 
 		if ( CourseAccessRules::isBeforeAccessStart( $course->settings, $now ) ) {
-			throw new ForbiddenException( 'This course has not opened yet.' );
+			$exception = new ForbiddenException( 'This course has not opened yet.' );
+			$exception->forReason( ForbiddenException::REASON_UNAVAILABLE );
+			throw $exception;
 		}
 
 		if ( CourseAccessRules::isAfterAccessEnd( $course->settings, $now ) ) {
-			throw new ForbiddenException( 'This course is no longer available.' );
+			$exception = new ForbiddenException( 'This course is no longer available.' );
+			$exception->forReason( ForbiddenException::REASON_UNAVAILABLE );
+			throw $exception;
 		}
 
 		$enrollment = $this->enrollmentRepository->findByUserAndCourse( $userId, $course->id );
@@ -819,7 +830,9 @@ final class StudentExperienceService {
 			&& EnrollmentStatus::Active === $enrollment->status
 			&& CourseAccessRules::isEnrollmentExpired( $enrollment->expiresAt, $now )
 		) {
-			throw new ForbiddenException( 'Your access to this course has expired.' );
+			$exception = new ForbiddenException( 'Your access to this course has expired.' );
+			$exception->forReason( ForbiddenException::REASON_EXPIRED );
+			throw $exception;
 		}
 	}
 
@@ -946,7 +959,7 @@ final class StudentExperienceService {
 			)
 			: $this->resolveDripState( $lesson, $reallyEnrolled, $enrolledAt );
 
-		$progressionLocked = false;
+		$progressionLocked  = false;
 		$progressionMessage = null;
 		if ( ! $skipDrip && $reallyEnrolled && null !== $course ) {
 			$progressionLocked = CourseAccessRules::isLessonBlockedByProgression(
@@ -956,12 +969,18 @@ final class StudentExperienceService {
 				$completedLessonIds
 			);
 			if ( $progressionLocked ) {
-				$progressionMessage = 'Finish the previous lesson first';
+				$progressionMessage = 'Finish the previous lesson first.';
 			}
 		}
 
-		$locked    = $dripState['locked'] || $progressionLocked;
-		$lockMsg   = $dripState['locked'] ? $dripState['message'] : $progressionMessage;
+		$locked     = $dripState['locked'] || $progressionLocked;
+		$lockMsg    = $dripState['locked'] ? $dripState['message'] : $progressionMessage;
+		$lockReason = null;
+		if ( $dripState['locked'] ) {
+			$lockReason = ForbiddenException::REASON_DRIP;
+		} elseif ( $progressionLocked ) {
+			$lockReason = ForbiddenException::REASON_PROGRESSION;
+		}
 		$canAccess = ( ( $canBrowseContent || $lesson->isPreview ) && ! $locked );
 
 		return new CourseStructureLessonDto(
@@ -981,6 +1000,7 @@ final class StudentExperienceService {
 			$lesson->updatedAt->format( 'c' ),
 			$canAccess ? $lesson->featuredImageId : null,
 			'',
+			$lockReason,
 		);
 	}
 

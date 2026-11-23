@@ -3,11 +3,43 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-$message     = $message ?? __( 'This lesson is part of a course that requires enrollment. Enroll to unlock all lessons.', 'mint-lms' );
+use MintLMS\Application\Exception\ForbiddenException;
+
+$message     = is_string( $message ?? null ) ? $message : '';
 $overviewUrl = $overviewUrl ?? home_url( '/' );
-$isLoggedIn  = $isLoggedIn ?? false;
+$isLoggedIn  = ! empty( $isLoggedIn );
 $loginUrl    = $loginUrl ?? wp_login_url();
 $enrollUrl   = $enrollUrl ?? $overviewUrl;
+$reason      = is_string( $reason ?? null ) && '' !== $reason
+	? $reason
+	: ForbiddenException::REASON_ENROLLMENT;
+
+$needsEnrollment = ForbiddenException::REASON_ENROLLMENT === $reason;
+
+if ( '' === $message ) {
+	switch ( $reason ) {
+		case ForbiddenException::REASON_PROGRESSION:
+			$message = __( 'Finish the previous lesson first.', 'mint-lms' );
+			break;
+		case ForbiddenException::REASON_DRIP:
+			$message = __( 'This lesson is not available yet.', 'mint-lms' );
+			break;
+		case ForbiddenException::REASON_EXPIRED:
+			$message = __( 'Your access to this course has expired.', 'mint-lms' );
+			break;
+		case ForbiddenException::REASON_UNAVAILABLE:
+			$message = __( 'This lesson is not available.', 'mint-lms' );
+			break;
+		default:
+			$message = __( 'This lesson is part of a course that requires enrollment. Enroll to unlock all lessons.', 'mint-lms' );
+			break;
+	}
+}
+
+$primaryUrl   = $needsEnrollment ? $enrollUrl : $overviewUrl;
+$primaryLabel = $needsEnrollment
+	? __( 'Enroll', 'mint-lms' )
+	: __( 'Back to course', 'mint-lms' );
 ?>
 <div class="mint-flex mint-min-h-[50vh] mint-items-center mint-justify-center mint-px-4 mint-py-16">
 	<div class="mint-w-full mint-max-w-md mint-rounded-xl mint-border mint-border-rule mint-bg-bg mint-p-8 mint-text-center mint-shadow-card">
@@ -17,10 +49,10 @@ $enrollUrl   = $enrollUrl ?? $overviewUrl;
 		<h1 class="mint-text-h2 mint-font-semibold mint-text-ink mint-tracking-tight"><?php esc_html_e( 'This lesson is locked', 'mint-lms' ); ?></h1>
 		<p class="mint-mt-3 mint-text-sm mint-leading-relaxed mint-text-ink-2" role="alert"><?php echo esc_html( $message ); ?></p>
 		<div class="mint-mt-6 mint-flex mint-flex-col mint-items-center mint-justify-center mint-gap-3 sm:mint-flex-row">
-			<a href="<?php echo esc_url( $enrollUrl ); ?>" class="mint-inline-flex mint-w-full sm:mint-w-auto mint-items-center mint-justify-center mint-h-control-md mint-px-5 mint-text-sm mint-font-medium mint-rounded-md mint-bg-accent mint-text-neutral-50 hover:mint-bg-accent-hover mint-transition-colors mint-duration-hover mint-no-underline">
-				<?php esc_html_e( 'Enroll', 'mint-lms' ); ?>
+			<a href="<?php echo esc_url( $primaryUrl ); ?>" class="mint-inline-flex mint-w-full sm:mint-w-auto mint-items-center mint-justify-center mint-h-control-md mint-px-5 mint-text-sm mint-font-medium mint-rounded-md mint-bg-accent mint-text-neutral-50 hover:mint-bg-accent-hover mint-transition-colors mint-duration-hover mint-no-underline">
+				<?php echo esc_html( $primaryLabel ); ?>
 			</a>
-			<?php if ( ! $isLoggedIn ) : ?>
+			<?php if ( $needsEnrollment && ! $isLoggedIn ) : ?>
 				<a href="<?php echo esc_url( $loginUrl ); ?>" class="mint-inline-flex mint-w-full sm:mint-w-auto mint-items-center mint-justify-center mint-h-control-md mint-px-5 mint-text-sm mint-font-medium mint-rounded-md mint-border mint-border-control mint-bg-bg mint-text-ink hover:mint-bg-bg-hover mint-transition-colors mint-duration-hover mint-no-underline">
 					<?php esc_html_e( 'Sign in', 'mint-lms' ); ?>
 				</a>

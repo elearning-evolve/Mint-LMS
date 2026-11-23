@@ -52,7 +52,9 @@ final class LessonAccessService {
 				return;
 			}
 
-			throw new ForbiddenException( 'You must be enrolled to access this lesson.' );
+			$exception = new ForbiddenException( 'You must be enrolled to access this lesson.' );
+			$exception->forReason( ForbiddenException::REASON_ENROLLMENT );
+			throw $exception;
 		}
 
 		$enrollment = $this->enrollmentRepository->findByUserAndCourse( $userId, $lesson->courseId );
@@ -60,11 +62,15 @@ final class LessonAccessService {
 
 		if ( null !== $course ) {
 			if ( CourseAccessRules::isBeforeAccessStart( $course->settings, $now ) ) {
-				throw new ForbiddenException( 'This course has not opened yet.' );
+				$exception = new ForbiddenException( 'This course has not opened yet.' );
+				$exception->forReason( ForbiddenException::REASON_UNAVAILABLE );
+				throw $exception;
 			}
 
 			if ( CourseAccessRules::isAfterAccessEnd( $course->settings, $now ) ) {
-				throw new ForbiddenException( 'This course is no longer available.' );
+				$exception = new ForbiddenException( 'This course is no longer available.' );
+				$exception->forReason( ForbiddenException::REASON_UNAVAILABLE );
+				throw $exception;
 			}
 		}
 
@@ -73,15 +79,21 @@ final class LessonAccessService {
 			&& EnrollmentStatus::Active === $enrollment->status
 			&& CourseAccessRules::isEnrollmentExpired( $enrollment->expiresAt, $now )
 		) {
-			throw new ForbiddenException( 'Your access to this course has expired.' );
+			$exception = new ForbiddenException( 'Your access to this course has expired.' );
+			$exception->forReason( ForbiddenException::REASON_EXPIRED );
+			throw $exception;
 		}
 
 		if ( $this->isDripLocked( $userId, $lessonId ) ) {
-			throw new ForbiddenException( 'This lesson is not available yet.' );
+			$exception = new ForbiddenException( 'This lesson is not available yet.' );
+			$exception->forReason( ForbiddenException::REASON_DRIP );
+			throw $exception;
 		}
 
 		if ( null !== $course && $this->isProgressionLocked( $userId, $lesson->courseId, $lessonId, $course->settings ) ) {
-			throw new ForbiddenException( 'Finish the previous lesson first.' );
+			$exception = new ForbiddenException( 'Finish the previous lesson first.' );
+			$exception->forReason( ForbiddenException::REASON_PROGRESSION );
+			throw $exception;
 		}
 	}
 

@@ -22,6 +22,8 @@ final readonly class CourseStructureLessonDto {
 		public string $updatedAt,
 		public ?int $featuredImageId = null,
 		public string $featuredImageUrl = '',
+		/** @var string|null One of ForbiddenException::REASON_* when locked. */
+		public ?string $lockReason = null,
 	) {
 	}
 
@@ -43,6 +45,7 @@ final readonly class CourseStructureLessonDto {
 			'availableAfterDays' => $this->availableAfterDays,
 			'isDripLocked'       => $this->isDripLocked,
 			'dripMessage'        => $this->dripMessage,
+			'lockReason'         => $this->lockReason,
 			'sortOrder'          => $this->sortOrder,
 			'createdAt'          => $this->createdAt,
 			'updatedAt'          => $this->updatedAt,
