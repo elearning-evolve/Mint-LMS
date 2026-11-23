@@ -14,6 +14,9 @@ final class PageSettings {
 	public const OPTION_EMAIL_ENROLL       = 'mintlms_email_enroll_enabled';
 	public const OPTION_EMAIL_COMPLETE     = 'mintlms_email_complete_enabled';
 
+	/** When true, uninstall.php deletes courses, tables, options, and related meta. Default off. */
+	public const OPTION_DELETE_DATA_ON_UNINSTALL = 'mintlms_delete_data_on_uninstall';
+
 	public const COURSE_QUERY_ARG = 'mintlms_course';
 
 	/**

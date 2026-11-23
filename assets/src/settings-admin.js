@@ -10,6 +10,7 @@ export function mintSettings(config = {}) {
     enrollment: String(cfg.enrollment || 'free'),
     emailEnroll: !!cfg.emailEnroll,
     emailComplete: !!cfg.emailComplete,
+    deleteDataOnUninstall: !!cfg.deleteDataOnUninstall,
     openSelect: null,
     pages: Array.isArray(cfg.pages) ? cfg.pages : [],
     dashboardId: Number(cfg.dashboardId || 0),
@@ -60,6 +61,10 @@ export function mintSettings(config = {}) {
 
     toggleEmailComplete() {
       this.emailComplete = !this.emailComplete;
+    },
+
+    toggleDeleteDataOnUninstall() {
+      this.deleteDataOnUninstall = !this.deleteDataOnUninstall;
     },
 
     insertCertTag(tag) {

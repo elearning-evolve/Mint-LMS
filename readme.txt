@@ -5,7 +5,7 @@ Tags: lms, learning, courses, quizzes, elearning
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 8.2
-Stable tag: 1.1.3
+Stable tag: 1.1.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -48,6 +48,9 @@ LMS features (courses, lessons, quizzes, progress) do not require any third-part
 WordPress 6.2 or later and **PHP 8.2** or later. Optional AI Assistance also needs the MCP Adapter plugin and a compatible MCP client (e.g. Claude Desktop).
 
 == Changelog ==
+
+= 1.1.4 =
+* Uninstall: data wipe is opt-in (Settings → Data & uninstall, default off); multisite loops each site; removes WC/product meta and roles when wiping.
 
 = 1.1.3 =
 * Quiz: Restart respects retriesAllowed (mirrors server attempt limits); enrolled students keep hasPassedQuiz state on the quiz runner.

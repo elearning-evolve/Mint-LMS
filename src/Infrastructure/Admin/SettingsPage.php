@@ -101,6 +101,16 @@ final class SettingsPage {
 				'default'           => '',
 			)
 		);
+
+		register_setting(
+			self::OPTION_GROUP,
+			PageSettings::OPTION_DELETE_DATA_ON_UNINSTALL,
+			array(
+				'type'              => 'boolean',
+				'sanitize_callback' => array( $this, 'sanitizeCheckbox' ),
+				'default'           => false,
+			)
+		);
 	}
 
 	public function handleCreatePages(): void {

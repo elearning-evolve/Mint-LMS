@@ -2,66 +2,55 @@
 /**
  * Uninstall Mint LMS.
  *
+ * Data wipe is opt-in (Settings → Data & uninstall). Default keeps courses,
+ * enrollments, and options so a delete/reinstall does not destroy learning data.
+ *
  * @package MintLMS
  */
 
 defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 
-require_once __DIR__ . '/vendor/autoload.php';
+$mintlms_autoload = __DIR__ . '/vendor/autoload.php';
+if ( ! is_readable( $mintlms_autoload ) ) {
+	return;
+}
 
+require_once $mintlms_autoload;
+
+use MintLMS\Infrastructure\Admin\FirstRunState;
 use MintLMS\Infrastructure\Database\Schema;
 use MintLMS\Infrastructure\Setup\PageSettings;
+use MintLMS\Infrastructure\WooCommerce\EnrollmentBridge;
 
 /**
- * Run uninstall cleanup.
+ * Whether this site opted into deleting all Mint LMS data on uninstall.
  */
-function mintlms_run_uninstall(): void {
-	$wpdb = function_exists( 'mintlms_wpdb' ) ? mintlms_wpdb() : null;
-	if ( null === $wpdb ) {
-		return;
-	}
+function mintlms_uninstall_should_delete_data(): bool {
+	return (bool) get_option( PageSettings::OPTION_DELETE_DATA_ON_UNINSTALL, false );
+}
 
+/**
+ * Drop Mint LMS custom tables for the current blog prefix.
+ *
+ * @param \wpdb $wpdb WordPress database.
+ */
+function mintlms_uninstall_drop_tables( \wpdb $wpdb ): void {
 	foreach ( Schema::allTables( $wpdb->prefix ) as $mintlms_table ) {
-		$mintlms_table = Schema::validateTable( $mintlms_table, $wpdb->prefix );
+		try {
+			$mintlms_table = Schema::validateTable( $mintlms_table, $wpdb->prefix );
+		} catch ( \InvalidArgumentException $exception ) {
+			continue;
+		}
+
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Uninstall drops validated custom LMS tables.
 		$wpdb->query( $wpdb->prepare( 'DROP TABLE IF EXISTS %i', $mintlms_table ) );
 	}
+}
 
-	delete_option( 'mintlms_db_version' );
-	delete_option( 'mintlms_cpt_content_migrated' );
-	delete_option( 'mintlms_first_run_complete' );
-	delete_option( 'mintlms_guided_course_complete' );
-	delete_option( 'mintlms_certificate_template' );
-
-	// Legacy BYOK options (removed in favour of Claude Desktop / MCP).
-	delete_option( 'mintlms_ai_enabled' );
-	delete_option( 'mintlms_ai_provider' );
-	delete_option( 'mintlms_ai_model' );
-	delete_option( 'mintlms_ai_api_key_enc' );
-	delete_option( 'mintlms_ai_api_key_hint' );
-
-	$mintlms_page_ids = array(
-		(int) get_option( PageSettings::OPTION_DASHBOARD, 0 ),
-		(int) get_option( PageSettings::OPTION_CATALOG, 0 ),
-		(int) get_option( PageSettings::OPTION_PLAYER, 0 ),
-	);
-
-	$mintlms_delete_pages = (bool) get_option( 'mintlms_uninstall_delete_pages', false );
-
-	delete_option( PageSettings::OPTION_DASHBOARD );
-	delete_option( PageSettings::OPTION_CATALOG );
-	delete_option( PageSettings::OPTION_PLAYER );
-	delete_option( PageSettings::OPTION_DEFAULT_ENROLLMENT );
-	delete_option( PageSettings::OPTION_EMAIL_ENROLL );
-	delete_option( PageSettings::OPTION_EMAIL_COMPLETE );
-	delete_option( 'mintlms_uninstall_delete_pages' );
-
-	if ( $mintlms_delete_pages ) {
-		foreach ( array_unique( array_filter( $mintlms_page_ids ) ) as $mintlms_page_id ) {
-			wp_delete_post( $mintlms_page_id, true );
-		}
-	}
-
+/**
+ * Delete Mint LMS CPT posts (courses, lessons, quizzes, questions).
+ */
+function mintlms_uninstall_delete_content_posts(): void {
 	$mintlms_cpt_ids = get_posts(
 		array(
 			'post_type'              => array( 'mint-course', 'mint-lesson', 'mint-quiz', 'mint-question' ),
@@ -77,12 +66,103 @@ function mintlms_run_uninstall(): void {
 	foreach ( $mintlms_cpt_ids as $mintlms_post_id ) {
 		wp_delete_post( (int) $mintlms_post_id, true );
 	}
+}
 
+/**
+ * Delete configured student pages when wiping data.
+ */
+function mintlms_uninstall_delete_student_pages(): void {
+	$page_ids = array_unique(
+		array_filter(
+			array(
+				(int) get_option( PageSettings::OPTION_DASHBOARD, 0 ),
+				(int) get_option( PageSettings::OPTION_CATALOG, 0 ),
+				(int) get_option( PageSettings::OPTION_PLAYER, 0 ),
+			)
+		)
+	);
+
+	foreach ( $page_ids as $page_id ) {
+		wp_delete_post( $page_id, true );
+	}
+}
+
+/**
+ * Remove plugin options for the current site.
+ */
+function mintlms_uninstall_delete_options(): void {
+	$options = array(
+		'mintlms_db_version',
+		'mintlms_cpt_content_migrated',
+		FirstRunState::OPTION_FIRST_RUN_COMPLETE,
+		FirstRunState::OPTION_GUIDED_COURSE_COMPLETE,
+		'mintlms_certificate_template',
+		'mintlms_ai_enabled',
+		'mintlms_ai_provider',
+		'mintlms_ai_model',
+		'mintlms_ai_api_key_enc',
+		'mintlms_ai_api_key_hint',
+		PageSettings::OPTION_DASHBOARD,
+		PageSettings::OPTION_CATALOG,
+		PageSettings::OPTION_PLAYER,
+		PageSettings::OPTION_DEFAULT_ENROLLMENT,
+		PageSettings::OPTION_EMAIL_ENROLL,
+		PageSettings::OPTION_EMAIL_COMPLETE,
+		PageSettings::OPTION_DELETE_DATA_ON_UNINSTALL,
+		'mintlms_uninstall_delete_pages', // Legacy unused flag.
+		'mintlms_wc_cancel_on_refund',
+		'mintlms_wc_enroll_statuses',
+	);
+
+	foreach ( $options as $option ) {
+		delete_option( $option );
+	}
+}
+
+/**
+ * Remove Mint LMS post/user meta left outside CPT deletion (products, pages, WC orders).
+ *
+ * @param \wpdb $wpdb WordPress database.
+ */
+function mintlms_uninstall_delete_meta( \wpdb $wpdb ): void {
+	$post_meta_keys = array(
+		EnrollmentBridge::META_COURSE_ID,
+		EnrollmentBridge::ORDER_META_ENROLLMENTS,
+		EnrollmentBridge::ORDER_META_PROCESSED,
+		'_mintlms_page_role',
+	);
+
+	foreach ( $post_meta_keys as $meta_key ) {
+		delete_metadata( 'post', 0, $meta_key, '', true );
+	}
+
+	delete_metadata( 'user', 0, FirstRunState::USER_META_WELCOME_DISMISSED, '', true );
+
+	// WooCommerce HPOS order meta (when present).
+	$orders_meta_table = $wpdb->prefix . 'wc_orders_meta';
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Uninstall inspects optional WC table.
+	$table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $orders_meta_table ) );
+	if ( $orders_meta_table === $table_exists ) {
+		$hpos_keys = array(
+			EnrollmentBridge::ORDER_META_ENROLLMENTS,
+			EnrollmentBridge::ORDER_META_PROCESSED,
+		);
+		foreach ( $hpos_keys as $meta_key ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Uninstall cleanup of HPOS meta.
+			$wpdb->delete( $orders_meta_table, array( 'meta_key' => $meta_key ), array( '%s' ) );
+		}
+	}
+}
+
+/**
+ * Remove Mint LMS roles and capabilities from remaining roles.
+ */
+function mintlms_uninstall_remove_roles_and_caps(): void {
 	remove_role( 'mintlms_manager' );
 	remove_role( 'mintlms_instructor' );
 	remove_role( 'mintlms_student' );
 
-	$mintlms_caps = array(
+	$caps = array(
 		'manage_mintlms',
 		'edit_mintlms_courses',
 		'edit_others_mintlms_courses',
@@ -91,16 +171,62 @@ function mintlms_run_uninstall(): void {
 		'take_mintlms_courses',
 	);
 
-	foreach ( array( 'administrator', 'mintlms_manager', 'mintlms_instructor', 'mintlms_student' ) as $mintlms_role_slug ) {
-		$mintlms_role = get_role( $mintlms_role_slug );
-		if ( null === $mintlms_role ) {
+	foreach ( array( 'administrator', 'editor' ) as $role_slug ) {
+		$role = get_role( $role_slug );
+		if ( null === $role ) {
 			continue;
 		}
 
-		foreach ( $mintlms_caps as $mintlms_cap ) {
-			$mintlms_role->remove_cap( $mintlms_cap );
+		foreach ( $caps as $cap ) {
+			$role->remove_cap( $cap );
 		}
 	}
+}
+
+/**
+ * Full wipe for the current blog (only when opted in).
+ */
+function mintlms_uninstall_site(): void {
+	if ( ! mintlms_uninstall_should_delete_data() ) {
+		return;
+	}
+
+	global $wpdb;
+
+	if ( ! $wpdb instanceof \wpdb ) {
+		return;
+	}
+
+	mintlms_uninstall_delete_student_pages();
+	mintlms_uninstall_delete_content_posts();
+	mintlms_uninstall_drop_tables( $wpdb );
+	mintlms_uninstall_delete_meta( $wpdb );
+	mintlms_uninstall_delete_options();
+	mintlms_uninstall_remove_roles_and_caps();
+}
+
+/**
+ * Entry: run per-site on multisite, once on single site.
+ */
+function mintlms_run_uninstall(): void {
+	if ( is_multisite() ) {
+		$site_ids = get_sites(
+			array(
+				'fields' => 'ids',
+				'number' => 0,
+			)
+		);
+
+		foreach ( $site_ids as $site_id ) {
+			switch_to_blog( (int) $site_id );
+			mintlms_uninstall_site();
+			restore_current_blog();
+		}
+
+		return;
+	}
+
+	mintlms_uninstall_site();
 }
 
 mintlms_run_uninstall();
