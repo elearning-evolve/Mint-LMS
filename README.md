@@ -4,8 +4,8 @@
 **Tags:** lms, elearning, courses, lessons, quizzes, education, learning management  
 **Requires at least:** WordPress 6.2  
 **Tested up to:** 7.1  
-**Requires PHP:** 8.1  
-**Stable tag:** 1.0.130  
+**Requires PHP:** 8.2  
+**Stable tag:** 1.1.25  
 **License:** [GPLv2 or later](https://www.gnu.org/licenses/gpl-2.0.html)
 
 A clean, modern WordPress LMS for teachers and students — course builder, lessons, quizzes, progress tracking, and a polished student experience.
@@ -112,6 +112,27 @@ Core Mint LMS handles learning. Paid checkout can be connected via WooCommerce i
 
 ## Changelog
 
+### 1.1.25
+
+- Students course desk: Enrolled / Finished pills stay on the right when the course title is very long (hero flex no-wrap + title clamp).
+
+### 1.1.24
+
+- Students course picker: side-by-side layout in WP admin (stack only below 960px); model-matched card size; progress fill mint-blue `#98FBCB`; compact Across all courses / Recently joined aside.
+- Admin CSS enqueue uses `filemtime` for reliable cache-busting after UI asset updates.
+
+### 1.1.23
+
+- Students picker denser card spacing; asset version refresh.
+
+### 1.1.22
+
+- Students picker: fix course cards overlapping the Across all courses aside (`minmax(0,1fr)` + `min-width: 0`).
+
+### 1.1.21
+
+- Replace General Sans with self-hosted Inter (SIL OFL); GitHub source link and Privacy section in `readme.txt`.
+
 ### 1.0.130
 
 - Instructor previews aligned: lesson and quiz previews share the same student-style layout (hero, progress, expandable cards).
@@ -160,6 +181,14 @@ Core Mint LMS handles learning. Paid checkout can be connected via WooCommerce i
 ---
 
 ## Upgrade Notice
+
+### 1.1.25
+
+Recommended update: Students course hero keeps Enrolled / Finished pills on the right for long titles. Hard-refresh admin after updating.
+
+### 1.1.24
+
+Recommended update: Students course picker layout aligned with design (side-by-side cards + aside). Hard-refresh admin after updating.
 
 ### 1.0.130
 

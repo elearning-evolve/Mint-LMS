@@ -142,11 +142,14 @@ final class AssetLoader {
 	}
 
 	private function enqueueStyles( string $handle ): void {
+		$style   = MINTLMS_PATH . 'assets/dist/main.css';
+		$version = is_readable( $style ) ? (string) filemtime( $style ) : MINTLMS_VERSION;
+
 		wp_enqueue_style(
 			$handle,
 			MINTLMS_URL . 'assets/dist/main.css',
 			array(),
-			MINTLMS_VERSION
+			$version
 		);
 
 		wp_add_inline_style(

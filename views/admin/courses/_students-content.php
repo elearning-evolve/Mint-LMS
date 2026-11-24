@@ -334,7 +334,7 @@ $studentsPageUrl = admin_url( 'admin.php?page=mint-lms-course-students' );
 	</a>
 
 	<div class="mint-students-course__hero">
-		<div>
+		<div class="mint-students-course__hero-copy">
 			<h1 class="mint-students-course__title">
 				<?php echo esc_html( '' !== $courseTitle ? $courseTitle : __( 'Students', 'mint-lms' ) ); ?>
 			</h1>

@@ -5,7 +5,7 @@ Tags: lms, learning, courses, quizzes, elearning
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 8.2
-Stable tag: 1.1.21
+Stable tag: 1.1.25
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -74,6 +74,19 @@ Optional AI Assistance uses your own connection from **Claude Desktop** (or anot
 Suggested privacy-policy text is also offered under **Settings → Privacy** when the plugin is active.
 
 == Changelog ==
+
+= 1.1.25 =
+* Students course desk: keep Enrolled / Finished pills on the right when the course title is very long (hero flex no-wrap + title clamp).
+
+= 1.1.24 =
+* Students course picker: keep side-by-side layout in WP admin (stack only below 960px); match model card size; progress bar mint-blue `#98FBCB`; compact Across all courses / Recently joined aside.
+* Admin CSS enqueue uses `filemtime` for cache-busting so Students UI updates reliably.
+
+= 1.1.23 =
+* Students picker denser card spacing pass; version bump for asset refresh.
+
+= 1.1.22 =
+* Students picker: prevent course cards overlapping the Across all courses aside (`minmax(0,1fr)` grid + `min-width: 0`).
 
 = 1.1.21 =
 * Replace General Sans with self-hosted Inter (SIL OFL); add GitHub source link (Guideline 4) and a readme Privacy section for MCP/external honesty.
