@@ -1,4 +1,4 @@
-=== Mint LMS ===
+=== Mint LMS: A simpler LMS, fully manageable through your AI tool ===
 Contributors: elearningevolve
 Donate link: https://elearningevolve.com/products/mint-lms/
 Tags: lms, learning, courses, quizzes, elearning

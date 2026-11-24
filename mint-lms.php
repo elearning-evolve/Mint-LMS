@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name:       Mint LMS
+ * Plugin Name:       Mint LMS: A simpler LMS, fully manageable through your AI tool
  * Plugin URI:        https://wordpress.org/plugins/mint-lms/
  * Description:       A clean, fast WordPress LMS for teachers and students.
  * Version:           1.1.21
