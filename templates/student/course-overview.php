@@ -47,7 +47,7 @@ foreach ( $outline as $section ) {
 	}
 }
 
-$showCta = $overview->isEnrolled || $overview->canEnroll || ( 'paid' === $overview->enrollmentType && '' !== $purchaseUrl ) || ! $overview->isLoggedIn;
+$showCta = $overview->isEnrolled || $overview->isEditorPreview || $overview->canEnroll || ( 'paid' === $overview->enrollmentType && '' !== $purchaseUrl ) || ! $overview->isLoggedIn;
 ?>
 
 <?php if ( '' !== $enrollMessage ) : ?>
@@ -129,10 +129,10 @@ $showCta = $overview->isEnrolled || $overview->canEnroll || ( 'paid' === $overvi
 
 		<?php if ( $showCta ) : ?>
 			<div class="mint-mt-4 mint-flex mint-flex-wrap mint-gap-3">
-				<?php if ( $overview->isEnrolled ) : ?>
+				<?php if ( $overview->isEnrolled || $overview->isEditorPreview ) : ?>
 					<a href="<?php echo esc_url( $continueUrl ); ?>" class="mint-inline-flex mint-h-[42px] mint-items-center mint-justify-center mint-rounded-lg mint-border-0 mint-bg-cta mint-px-[18px] mint-text-sm mint-font-bold mint-text-ink mint-no-underline hover:mint-bg-cta-hover focus-visible:mint-outline-none focus-visible:mint-shadow-[0_0_0_3px_rgba(15,14,26,0.35)]">
 					<?php
-						echo null !== $overview->progressPct && $overview->progressPct > 0
+						echo $overview->isEnrolled && null !== $overview->progressPct && $overview->progressPct > 0
 							? esc_html__( 'Continue lesson', 'mint-lms' )
 							: esc_html__( 'Start course', 'mint-lms' );
 					?>

@@ -169,12 +169,19 @@ final class StudentExperienceService {
 			throw new NotFoundException( 'Course not found.' );
 		}
 
-		$isEditorPreview = $this->canEditorPreviewCourse( $userId, $course->status, $course->authorId );
-		$publicBrowse    = $course->enrollmentType->allowsPublicBrowse();
-		$isEnrolled      = ( $userId > 0 && $this->progressRepository->isUserEnrolled( $userId, $courseId ) ) || $isEditorPreview;
-		$canBrowse       = $isEnrolled || $publicBrowse;
-		$showCurriculum  = $canBrowse || $course->settings->lessonListVisibleToGuests();
-		$structure       = $this->loadGatedStructure( $courseId, $canBrowse, $userId, $isEditorPreview, $isEnrolled );
+		$canEdit        = $this->canEditorPreviewCourse( $userId, $course->status, $course->authorId );
+		$publicBrowse   = $course->enrollmentType->allowsPublicBrowse();
+		$isEnrolled     = $userId > 0 && $this->progressRepository->isUserEnrolled( $userId, $courseId );
+		$studentPreview = $canEdit && ! $isEnrolled;
+		$canBrowse      = $isEnrolled || $studentPreview || $publicBrowse;
+		$showCurriculum = $canBrowse || $course->settings->lessonListVisibleToGuests();
+		if ( $isEnrolled ) {
+			$structure = $this->loadGatedStructure( $courseId, true, $userId, false, true, false );
+		} elseif ( $studentPreview ) {
+			$structure = $this->loadGatedStructure( $courseId, true, $userId, false, false, true );
+		} else {
+			$structure = $this->loadGatedStructure( $courseId, $canBrowse, $userId, false, false, false );
+		}
 		$flat            = $this->flattenLessons( $structure );
 
 		$progressPct        = null;
@@ -218,8 +225,8 @@ final class StudentExperienceService {
 			$course->status->value,
 			$authorName,
 			$lastActivityLabel,
-			$isEditorPreview,
-			$showCurriculum ? $this->buildContentOutline( $structure, $userId, $isEditorPreview, $canBrowse ) : array(),
+			$studentPreview,
+			$showCurriculum ? $this->buildContentOutline( $structure, $userId, false, $canBrowse ) : array(),
 			$showCurriculum,
 		);
 	}
@@ -688,15 +695,26 @@ final class StudentExperienceService {
 			throw new NotFoundException( 'Course not found.' );
 		}
 
-		$isEditorPreview = $this->canEditorPreviewCourse( $userId, $course->status, $course->authorId );
-		$publicBrowse    = $course->enrollmentType->allowsPublicBrowse();
-		$isEnrolled      = ( $userId > 0 && $this->progressRepository->isUserEnrolled( $userId, $courseId ) ) || $isEditorPreview;
+		$canEdit        = $this->canEditorPreviewCourse( $userId, $course->status, $course->authorId );
+		$publicBrowse   = $course->enrollmentType->allowsPublicBrowse();
+		$enrolled       = $userId > 0 && $this->progressRepository->isUserEnrolled( $userId, $courseId );
+		// Enrolled staff learn for real. Unenrolled editors get a student preview:
+		// published lessons and the same locks, with nothing saved. Builder Preview
+		// (mint_preview) is a separate page and still shows drafts with locks off.
+		$studentPreview = $canEdit && ! $enrolled;
 
-		if ( $isEnrolled && ! $isEditorPreview ) {
+		if ( $enrolled || $studentPreview ) {
 			$this->assertCourseAccessWindow( $course, $userId );
 		}
 
-		$structure = $this->loadGatedStructure( $courseId, $isEnrolled || $publicBrowse, $userId, $isEditorPreview, $isEnrolled );
+		$structure = $this->loadGatedStructure(
+			$courseId,
+			$enrolled || $studentPreview || $publicBrowse,
+			$userId,
+			false,
+			$enrolled,
+			$studentPreview
+		);
 		$flat      = $this->flattenLessons( $structure );
 		$current   = $this->findLessonInStructure( $structure, $lessonId );
 
@@ -704,7 +722,7 @@ final class StudentExperienceService {
 			throw new NotFoundException( 'Lesson not found.' );
 		}
 
-		if ( ! $isEnrolled && ! $current->isPreview && ! $publicBrowse ) {
+		if ( ! $enrolled && ! $studentPreview && ! $current->isPreview && ! $publicBrowse ) {
 			$exception = new ForbiddenException( 'Enroll in this course to access this lesson.' );
 			$exception->forReason( ForbiddenException::REASON_ENROLLMENT );
 			throw $exception;
@@ -726,7 +744,7 @@ final class StudentExperienceService {
 			// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
-		if ( ! $this->lessonHasAccessibleContent( $current, $isEnrolled || $publicBrowse ) ) {
+		if ( ! $this->lessonHasAccessibleContent( $current, $enrolled || $studentPreview || $publicBrowse ) ) {
 			$exception = new ForbiddenException( 'This lesson is not available.' );
 			$exception->forReason( ForbiddenException::REASON_UNAVAILABLE );
 			throw $exception;
@@ -737,7 +755,7 @@ final class StudentExperienceService {
 		$completedLessonIds = array();
 		$isCurrentComplete  = false;
 
-		if ( $isEnrolled ) {
+		if ( $enrolled ) {
 			$summary = $this->progressRepository->getSummary( $userId, $courseId );
 
 			if ( null !== $summary ) {
@@ -757,8 +775,8 @@ final class StudentExperienceService {
 		$quizAttemptsUsed = 0;
 
 		if ( null !== $this->quizService && $userId > 0 ) {
-			// Builder allows multiple quizzes per lesson; completion requires all published ones.
-			$quizDtos = $this->quizService->listByLessonId( $lessonId, $userId, true, $isEditorPreview );
+			// Same published quizzes as a student. Builder preview passes editorReview separately.
+			$quizDtos      = $this->quizService->listByLessonId( $lessonId, $userId, true, false );
 			$withQuestions = array();
 			foreach ( $quizDtos as $quizDto ) {
 				if ( array() !== $quizDto->questions ) {
@@ -767,28 +785,19 @@ final class StudentExperienceService {
 			}
 
 			if ( array() !== $withQuestions ) {
-				$selected = $this->selectPlayerQuiz( $withQuestions, $preferredQuizId, $userId, $isEditorPreview );
-				$quiz     = $selected;
-
-				if ( $isEditorPreview ) {
-					// Review mode: show the live quiz, but don't block navigation / completion.
-					$quizRequired  = false;
-					$hasPassedQuiz = false;
-				} else {
-					$quizRequired     = true;
-					$hasPassedQuiz    = $this->quizService->hasPassedLessonQuiz( $userId, $lessonId );
-					$quizAttemptsUsed = $this->quizService->countUserAttempts( $selected->id, $userId );
-				}
+				$selected         = $this->selectPlayerQuiz( $withQuestions, $preferredQuizId, $userId, false );
+				$quiz             = $selected;
+				$quizRequired     = true;
+				$hasPassedQuiz    = $this->quizService->hasPassedLessonQuiz( $userId, $lessonId );
+				$quizAttemptsUsed = $this->quizService->countUserAttempts( $selected->id, $userId );
 			}
 		}
-
-		$reallyEnrolled = $userId > 0 && $this->progressRepository->isUserEnrolled( $userId, $courseId );
 
 		return new StudentPlayerContextDto(
 			$course->id,
 			$course->title,
 			$progressPct,
-			$isEnrolled,
+			$enrolled,
 			$isCourseComplete,
 			$structure,
 			$current,
@@ -799,9 +808,10 @@ final class StudentExperienceService {
 			$quiz,
 			$quizRequired,
 			$hasPassedQuiz,
-			$course->settings->studentComplete && $reallyEnrolled && ! $isEditorPreview,
-			$isEditorPreview,
+			$course->settings->studentComplete && $enrolled,
+			false,
 			$quizAttemptsUsed,
+			$studentPreview,
 		);
 	}
 
@@ -928,7 +938,7 @@ final class StudentExperienceService {
 		}
 	}
 
-	private function loadGatedStructure( int $courseId, bool $canBrowseContent, int $userId, bool $skipDrip = false, ?bool $isReallyEnrolled = null ): CourseStructureDto {
+	private function loadGatedStructure( int $courseId, bool $canBrowseContent, int $userId, bool $skipDrip = false, ?bool $isReallyEnrolled = null, bool $lockLikeLearner = false ): CourseStructureDto {
 		$course = $this->courseRepository->findById( $courseId );
 
 		if ( null === $course ) {
@@ -937,6 +947,12 @@ final class StudentExperienceService {
 
 		$reallyEnrolled = null !== $isReallyEnrolled ? $isReallyEnrolled : $canBrowseContent;
 		$enrolledAt     = $this->resolveEnrollmentDate( $userId, $courseId, $reallyEnrolled );
+		// Student preview has no enrollment row. Drip uses "enrolled just now",
+		// the same clock a new learner would have. Drafts stay hidden.
+		if ( null === $enrolledAt && $lockLikeLearner && ! $reallyEnrolled ) {
+			$enrolledAt = $this->clock->now();
+		}
+		$locksApply = $reallyEnrolled || $lockLikeLearner;
 		// Guests see published lessons only. An enrolled student must see lessons the
 		// author already attached, including drafts — otherwise Start course has no
 		// lesson id and the player opens with no course id. Instructor preview
@@ -983,7 +999,7 @@ final class StudentExperienceService {
 				$course,
 				$orderedLessonIds,
 				$completedLessonIds,
-				$reallyEnrolled,
+				$locksApply,
 			);
 
 			$sectionsById[ $section->id ] = new CourseStructureSectionDto(

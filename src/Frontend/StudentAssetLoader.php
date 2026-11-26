@@ -61,6 +61,7 @@ final class StudentAssetLoader {
 					'completed'           => __( 'Completed', 'mint-lms' ),
 					'marking'             => __( 'Saving…', 'mint-lms' ),
 					'completeError'       => __( 'Could not mark lesson complete.', 'mint-lms' ),
+					'studentPreviewNotSaved' => __( 'Student preview does not save progress.', 'mint-lms' ),
 					'courseComplete'      => __( 'Course complete!', 'mint-lms' ),
 					'quizRequired'        => __( 'Pass the quiz before marking this lesson complete.', 'mint-lms' ),
 					'watchVideo'          => __( 'Watch the lesson video first.', 'mint-lms' ),

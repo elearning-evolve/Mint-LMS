@@ -33,6 +33,7 @@ document.addEventListener('alpine:init', () => {
     isComplete: config.isComplete,
     completedIds: [...config.completedIds],
     isEnrolled: config.isEnrolled,
+    studentPreview: !!config.studentPreview,
     quizRequired: config.quizRequired || false,
     hasPassedQuiz: config.hasPassedQuiz || false,
     videoProgression: !!config.videoProgression,
@@ -127,6 +128,11 @@ document.addEventListener('alpine:init', () => {
     },
 
     async markComplete() {
+      if (this.studentPreview) {
+        this.error = mintLmsStudent.i18n.studentPreviewNotSaved || 'Student preview does not save progress.';
+        return;
+      }
+
       if (!this.isEnrolled || this.isComplete || this.marking) {
         return;
       }
@@ -434,6 +440,10 @@ document.addEventListener('alpine:init', () => {
     },
 
     async uploadEssayFile(question, event) {
+      if (this.previewMode) {
+        this.error = mintLmsStudent.i18n.quizPreviewNotSaved || 'Preview only. Results are not recorded.';
+        return;
+      }
       const file = event?.target?.files?.[0];
       if (!file || !question?.id) return;
       this.uploadingQuestionId = question.id;

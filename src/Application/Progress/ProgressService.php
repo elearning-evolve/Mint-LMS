@@ -205,8 +205,32 @@ final class ProgressService implements ProgressLifecycleInterface {
 	}
 
 	private function assertEnrolled( int $userId, int $courseId ): void {
-		if ( ! $this->repository->isUserEnrolled( $userId, $courseId ) ) {
-			throw new ForbiddenException( 'You must be enrolled in this course to track progress.' );
+		if ( $this->repository->isUserEnrolled( $userId, $courseId ) ) {
+			return;
 		}
+
+		if ( null !== $this->courseRepository ) {
+			$course = $this->courseRepository->findById( $courseId );
+			if ( null !== $course && $this->staffMayPreview( $userId, $course->authorId ) ) {
+				throw new ForbiddenException( 'Student preview does not save progress.' );
+			}
+		}
+
+		throw new ForbiddenException( 'You must be enrolled in this course to track progress.' );
+	}
+
+	/**
+	 * Admin, Manager, and the course's Instructor can open Start Course without enrolling.
+	 */
+	private function staffMayPreview( int $userId, int $authorId ): bool {
+		if ( $userId <= 0 || ! function_exists( 'user_can' ) ) {
+			return false;
+		}
+
+		if ( user_can( $userId, 'manage_mintlms' ) || user_can( $userId, 'edit_others_mintlms_courses' ) ) {
+			return true;
+		}
+
+		return $userId === $authorId && user_can( $userId, 'edit_mintlms_courses' );
 	}
 }

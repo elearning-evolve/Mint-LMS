@@ -381,6 +381,7 @@ final class QuizServiceTest extends TestCase
         $this->quizRepository->expects($this->never())->method('saveAttempt');
 
         $this->expectException(ForbiddenException::class);
+        $this->expectExceptionMessage('Student preview does not save quiz attempts.');
 
         $this->service->submitAttempt(5, new SubmitQuizAttemptDto([1 => 'A']), 7);
     }

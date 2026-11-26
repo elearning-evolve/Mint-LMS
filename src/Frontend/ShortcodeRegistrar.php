@@ -36,7 +36,6 @@ final class ShortcodeRegistrar {
 		add_shortcode( 'mint_lms_certificate', array( $this, 'renderCertificate' ) );
 		add_filter( 'request', array( $this, 'mapLmsPageRequest' ) );
 		add_action( 'template_redirect', array( $this, 'interceptBuilderPreview' ), 5 );
-		add_action( 'template_redirect', array( $this, 'interceptStudentLessonCanvas' ), 5 );
 		add_action( 'template_redirect', array( $this, 'interceptCourseOverviewChrome' ), 6 );
 	}
 
@@ -162,41 +161,6 @@ final class ShortcodeRegistrar {
 		}
 
 		$this->sendStudentCanvas( $html, $mode );
-	}
-
-	/**
-	 * Student lesson links (?mint_course=&mint_lesson=) use the real lesson player
-	 * (mark complete / video / attachments) inside a chrome-free canvas — not builder preview.
-	 */
-	public function interceptStudentLessonCanvas(): void {
-		$previewMode = isset( $_GET['mint_preview'] ) ? sanitize_key( (string) wp_unslash( $_GET['mint_preview'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-
-		if ( in_array( $previewMode, array( 'lesson', 'quiz', 'question' ), true ) ) {
-			return;
-		}
-
-		// Builder-only surfaces — leave alone.
-		if ( $this->queryInt( 'mint_question' ) > 0 ) {
-			return;
-		}
-
-		$courseId = $this->queryInt( PageSettings::COURSE_QUERY_ARG );
-		if ( $courseId <= 0 ) {
-			$courseId = $this->queryInt( 'mint_course' );
-		}
-
-		$lessonId = $this->queryInt( 'mint_lesson' );
-		if ( $lessonId <= 0 || $courseId <= 0 ) {
-			return;
-		}
-
-		// Quizzes live inside the lesson player for enrolled students (not S3 builder preview).
-		$html = $this->renderLessonPlayerPreview( $courseId, $lessonId, get_current_user_id() );
-		if ( '' === $html ) {
-			return;
-		}
-
-		$this->sendStudentCanvas( $html, 'lesson', false );
 	}
 
 	/**
@@ -777,6 +741,7 @@ final class ShortcodeRegistrar {
 					'attachmentUrl'  => $attachmentUrl,
 					'videoEmbed'     => $this->videoEmbed( $this->lessonVideoUrl( $context->currentLesson->videoUrl, $lessonSettings ), $lessonSettings ),
 					'lessonSettings' => $lessonSettings,
+					'leaveUrl'       => $this->overviewUrl( $courseId, (string) $atts['overview_page'] ),
 				)
 			)
 		);
@@ -875,51 +840,6 @@ final class ShortcodeRegistrar {
 
 	private function wrap( string $content ): string {
 		return UiRoot::open( 'student' ) . $content . UiRoot::close();
-	}
-
-	private function renderLessonPlayerPreview( int $courseId, int $lessonId, int $userId ): string {
-		$settings        = $this->settings();
-		$preferredQuizId = $this->queryInt( 'mint_quiz' );
-
-		try {
-			$context = $this->studentExperience->getPlayerContext( $courseId, $lessonId, $userId, $preferredQuizId );
-		} catch ( NotFoundException $exception ) {
-			return $this->wrap(
-				$this->errorMessage( __( 'Lesson not found.', 'mint-lms' ) )
-			);
-		} catch ( ForbiddenException $exception ) {
-			return $this->wrap(
-				$this->renderGatedLesson( $exception, $courseId, '', $userId )
-			);
-		}
-
-		$attachmentUrl  = $this->attachmentUrl( $context->currentLesson->attachmentId );
-		$isReview       = ! empty( $context->isReviewMode );
-		$lessonUrl      = $isReview
-			? fn( int $id ): string => $this->previewLessonUrl( $courseId, $id )
-			: fn( int $id ): string => $this->lessonUrl( $courseId, $id );
-		$quizPreviewUrl = '';
-		if ( $isReview && null !== $context->quiz ) {
-			$quizPreviewUrl = $this->previewQuizUrl( $courseId, $lessonId, (int) $context->quiz->id );
-		}
-
-		$lessonSettings = $this->lessonPlayerSettings( (int) $context->currentLesson->id );
-
-		return $this->wrap(
-			$this->templateLoader->render(
-				'student/player.php',
-				array(
-					'context'        => $context,
-					'playerBaseUrl'  => $settings->resolvePlayerUrl( '' ),
-					'dashboardUrl'   => $settings->resolveDashboardUrl( '' ),
-					'lessonUrl'      => $lessonUrl,
-					'attachmentUrl'  => $attachmentUrl,
-					'videoEmbed'     => $this->videoEmbed( $this->lessonVideoUrl( $context->currentLesson->videoUrl, $lessonSettings ), $lessonSettings ),
-					'quizPreviewUrl' => $quizPreviewUrl,
-					'lessonSettings' => $lessonSettings,
-				)
-			)
-		);
 	}
 
 	private function renderGatedLesson(

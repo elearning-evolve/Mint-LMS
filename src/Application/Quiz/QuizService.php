@@ -75,10 +75,8 @@ final class QuizService implements QuizLifecycleInterface, QuizStudentQueryInter
 				}
 				$this->assertCanManageLessonContent( $userId, $lesson );
 			} else {
-				$course = $this->findCourseOrFail( $lesson->courseId );
-				if ( $editorReview || $this->canEditorReviewCourse( $userId, $course->authorId ) ) {
-					$editorReview = true;
-				} else {
+				// editorReview is only the builder Preview button. Start Course uses the student list.
+				if ( ! $editorReview ) {
 					$this->assertStudentQuizAccess( $userId, $lesson->courseId, $lesson->isPreview, $lesson->id );
 				}
 			}
@@ -618,15 +616,13 @@ final class QuizService implements QuizLifecycleInterface, QuizStudentQueryInter
 		$quiz      = $this->findQuizOrFail( $quizId );
 		$questions = $this->quizRepository->findQuestionsByQuizId( $quizId );
 		$lesson    = $this->findLessonOrFail( $quiz->lessonId );
-		$enrolled  = $quiz->courseId > 0 && $this->progressRepository->isUserEnrolled( $userId, $quiz->courseId );
+		$enrolled = $quiz->courseId > 0 && $this->progressRepository->isUserEnrolled( $userId, $quiz->courseId );
 
-		if ( ! $enrolled ) {
+		if ( ! $enrolled && ! $lesson->isPreview ) {
 			if ( $this->isCourseEditor( $userId, $quiz ) ) {
-				throw new ForbiddenException( 'Preview attempts are not saved. Use quiz preview to try this quiz.' );
+				throw new ForbiddenException( 'Student preview does not save quiz attempts.' );
 			}
-			if ( ! $lesson->isPreview ) {
-				throw new ForbiddenException( 'You must be enrolled to submit this quiz.' );
-			}
+			throw new ForbiddenException( 'You must be enrolled to submit this quiz.' );
 		}
 
 		if ( null !== $this->lessonAccessService ) {
@@ -691,6 +687,9 @@ final class QuizService implements QuizLifecycleInterface, QuizStudentQueryInter
 		$enrolled = $quiz->courseId > 0 && $this->progressRepository->isUserEnrolled( $userId, $quiz->courseId );
 
 		if ( ! $enrolled && ! $lesson->isPreview ) {
+			if ( $this->isCourseEditor( $userId, $quiz ) ) {
+				throw new ForbiddenException( 'Student preview does not save quiz attempts.' );
+			}
 			throw new ForbiddenException( 'You must be enrolled to start this quiz.' );
 		}
 
@@ -1203,7 +1202,10 @@ final class QuizService implements QuizLifecycleInterface, QuizStudentQueryInter
 			throw new ForbiddenException( 'You must be logged in to access this quiz.' );
 		}
 
-		if ( ! $isPreview && ! $this->progressRepository->isUserEnrolled( $userId, $courseId ) ) {
+		$course = $this->courseRepository->findById( $courseId );
+		$staff  = null !== $course && $this->canEditorReviewCourse( $userId, $course->authorId );
+
+		if ( ! $isPreview && ! $this->progressRepository->isUserEnrolled( $userId, $courseId ) && ! $staff ) {
 			throw new ForbiddenException( 'You must be enrolled to access this quiz.' );
 		}
 
@@ -1320,6 +1322,9 @@ final class QuizService implements QuizLifecycleInterface, QuizStudentQueryInter
 		$lesson   = $this->findLessonOrFail( $quiz->lessonId );
 		$enrolled = $quiz->courseId > 0 && $this->progressRepository->isUserEnrolled( $userId, $quiz->courseId );
 		if ( ! $enrolled && ! $lesson->isPreview ) {
+			if ( $this->isCourseEditor( $userId, $quiz ) ) {
+				throw new ForbiddenException( 'Student preview does not save quiz attempts.' );
+			}
 			throw new ForbiddenException( 'You must be enrolled to upload.' );
 		}
 		if ( null !== $this->lessonAccessService ) {

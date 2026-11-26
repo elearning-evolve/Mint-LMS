@@ -40,9 +40,10 @@ final class LessonAccessService {
 		// Guests only get published lessons. Enrolled students can open a draft
 		// lesson that is already attached to their course (Start course).
 		if ( function_exists( 'get_post_status' ) ) {
-			$status  = get_post_status( $lessonId );
-			$allowed = array( 'publish' );
-			if ( $userId > 0 && $lesson->courseId > 0 && $this->progressRepository->isUserEnrolled( $userId, $lesson->courseId ) ) {
+			$status   = get_post_status( $lessonId );
+			$allowed  = array( 'publish' );
+			$enrolled = $userId > 0 && $lesson->courseId > 0 && $this->progressRepository->isUserEnrolled( $userId, $lesson->courseId );
+			if ( $enrolled ) {
 				$allowed[] = 'draft';
 			}
 			if ( false === $status || ( is_string( $status ) && ! in_array( $status, $allowed, true ) ) ) {
@@ -53,8 +54,9 @@ final class LessonAccessService {
 		$course       = null !== $this->courseRepository ? $this->courseRepository->findById( $lesson->courseId ) : null;
 		$publicBrowse = null !== $course && $course->enrollmentType->allowsPublicBrowse();
 		$isEnrolled   = $userId > 0 && $this->progressRepository->isUserEnrolled( $userId, $lesson->courseId );
+		$staffPreview = ! $isEnrolled && null !== $course && $this->staffMayPreview( $userId, $course->authorId );
 
-		if ( ! $isEnrolled ) {
+		if ( ! $isEnrolled && ! $staffPreview ) {
 			if ( $allowPreviewWithoutEnrollment && ( $lesson->isPreview || $publicBrowse ) ) {
 				return;
 			}
@@ -91,7 +93,13 @@ final class LessonAccessService {
 			throw $exception;
 		}
 
-		if ( $this->isDripLocked( $userId, $lessonId ) ) {
+		if ( $staffPreview && DripAccessEvaluator::isLocked( $lesson->availableAfterDays, $now, $now, true ) ) {
+			$exception = new ForbiddenException( 'This lesson is not available yet.' );
+			$exception->forReason( ForbiddenException::REASON_DRIP );
+			throw $exception;
+		}
+
+		if ( ! $staffPreview && $this->isDripLocked( $userId, $lessonId ) ) {
 			$exception = new ForbiddenException( 'This lesson is not available yet.' );
 			$exception->forReason( ForbiddenException::REASON_DRIP );
 			throw $exception;
@@ -150,5 +158,20 @@ final class LessonAccessService {
 		return CourseLessonSequence::orderedLessonIds(
 			$this->sectionRepository->loadStructureRows( $courseId, true )
 		);
+	}
+
+	/**
+	 * Admin, Manager, and the course's Instructor may open a student preview.
+	 */
+	private function staffMayPreview( int $userId, int $authorId ): bool {
+		if ( $userId <= 0 || ! function_exists( 'user_can' ) ) {
+			return false;
+		}
+
+		if ( user_can( $userId, 'manage_mintlms' ) || user_can( $userId, 'edit_others_mintlms_courses' ) ) {
+			return true;
+		}
+
+		return $userId === $authorId && user_can( $userId, 'edit_mintlms_courses' );
 	}
 }
