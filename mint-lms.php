@@ -3,7 +3,7 @@
  * Plugin Name:       Mint LMS - A simpler LMS, fully manageable through your AI tool
  * Plugin URI:        https://wordpress.org/plugins/mint-lms/
  * Description:       A clean, fast WordPress LMS for teachers and students.
- * Version:           1.1.26
+ * Version:           1.1.27
  * Requires at least: 6.2
  * Requires PHP:      8.2
  * Author:            Evolve
@@ -21,7 +21,7 @@ if ( defined( 'MINTLMS_VERSION' ) ) {
 	return;
 }
 
-define( 'MINTLMS_VERSION', '1.1.26' );
+define( 'MINTLMS_VERSION', '1.1.27' );
 define( 'MINTLMS_FILE', __FILE__ );
 define( 'MINTLMS_PATH', plugin_dir_path( __FILE__ ) );
 define( 'MINTLMS_URL', plugin_dir_url( __FILE__ ) );

@@ -27,9 +27,15 @@ $materialsHtml    = ! empty( $lessonSettings['materialsEnabled'] )
 	: '';
 $videoProgression = ! empty( $lessonSettings['videoProgression'] ) && str_contains( $videoEmbed, '<video' );
 
-$completedIds = $context->completedLessonIds;
-$lesson       = $context->currentLesson;
-$pct          = (int) round( $context->progressPct );
+$completedIds     = $context->completedLessonIds;
+$lesson           = $context->currentLesson;
+$pct              = (int) round( $context->progressPct );
+$orderedLessonIds = array();
+foreach ( $context->structure->sections as $section ) {
+	foreach ( $section->lessons as $sectionLesson ) {
+		$orderedLessonIds[] = (int) $sectionLesson->id;
+	}
+}
 ?>
 <div
 	x-data="mintCoursePlayer({
@@ -37,7 +43,8 @@ $pct          = (int) round( $context->progressPct );
 		lessonId: <?php echo (int) $lesson->id; ?>,
 		progressPct: <?php echo (float) $context->progressPct; ?>,
 		isComplete: <?php echo $context->isCurrentLessonComplete ? 'true' : 'false'; ?>,
-		completedIds: <?php echo wp_json_encode( $completedIds ); ?>,
+		completedIds: <?php echo wp_json_encode( array_map( 'intval', $completedIds ) ); ?>,
+		orderedLessonIds: <?php echo wp_json_encode( $orderedLessonIds ); ?>,
 		isEnrolled: <?php echo $context->isEnrolled ? 'true' : 'false'; ?>,
 		studentPreview: <?php echo ! empty( $context->isStudentPreview ) ? 'true' : 'false'; ?>,
 		quizRequired: <?php echo $context->quizRequired ? 'true' : 'false'; ?>,
@@ -243,8 +250,22 @@ $pct          = (int) round( $context->progressPct );
 									$lock_reason,
 									is_string( $sectionLesson->dripMessage ?? null ) ? (string) $sectionLesson->dripMessage : ''
 								);
+								$progression_lock = ForbiddenException::REASON_PROGRESSION === $lock_reason;
 								?>
-								<div class="mint-flex mint-items-start mint-gap-2.5 mint-rounded-md mint-px-2 mint-py-2 mint-opacity-60" title="<?php echo esc_attr( $lock_message ); ?>">
+								<?php if ( $progression_lock ) : ?>
+									<a
+										x-show="lessonUnlocked(<?php echo (int) $lessonId; ?>)"
+										x-cloak
+										href="<?php echo esc_url( $lessonUrl( $sectionLesson->id ) ); ?>"
+										class="mint-flex mint-items-center mint-gap-2.5 mint-rounded-md mint-px-2 mint-py-2 mint-text-sm mint-no-underline mint-text-ink-2 hover:mint-bg-bg-hover hover:mint-text-ink mint-transition-colors mint-duration-hover"
+									>
+										<div class="mint-flex mint-h-7 mint-w-7 mint-shrink-0 mint-items-center mint-justify-center mint-rounded-full mint-bg-bg-subtle mint-text-ink-3">
+											<svg class="mint-h-3 mint-w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+										</div>
+										<span class="mint-min-w-0 mint-truncate mint-font-medium"><?php echo esc_html( $sectionLesson->title ); ?></span>
+									</a>
+								<?php endif; ?>
+								<div class="mint-flex mint-items-start mint-gap-2.5 mint-rounded-md mint-px-2 mint-py-2 mint-opacity-60" <?php echo $progression_lock ? 'x-show="!lessonUnlocked(' . (int) $lessonId . ')"' : ''; ?> title="<?php echo esc_attr( $lock_message ); ?>">
 									<div class="mint-flex mint-h-7 mint-w-7 mint-shrink-0 mint-items-center mint-justify-center mint-rounded-full mint-bg-bg-subtle mint-text-ink-3">
 										<svg class="mint-h-3 mint-w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
 									</div>

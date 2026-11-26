@@ -5,7 +5,7 @@ Tags: lms, learning, courses, quizzes, elearning
 Requires at least: 6.2
 Tested up to: 7.1
 Requires PHP: 8.2
-Stable tag: 1.1.26
+Stable tag: 1.1.27
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -74,6 +74,9 @@ Optional AI Assistance uses your own connection from **Claude Desktop** (or anot
 Suggested privacy-policy text is also offered under **Settings → Privacy** when the plugin is active.
 
 == Changelog ==
+
+= 1.1.27 =
+* After Mark complete, the next lesson in a linear course becomes a link in the curriculum so the learner can open it without reloading.
 
 = 1.1.26 =
 * Start Course: enrolled Admin, Instructor, and Manager learn for real (progress saved, locks on). If they are not enrolled, Start Course is a student preview of published lessons with the same locks, and progress, quizzes, and certificates are not saved. Builder Preview still shows drafts with locks off.

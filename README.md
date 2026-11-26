@@ -5,7 +5,7 @@
 **Requires at least:** WordPress 6.2  
 **Tested up to:** 7.1  
 **Requires PHP:** 8.2  
-**Stable tag:** 1.1.26  
+**Stable tag:** 1.1.27  
 **License:** [GPLv2 or later](https://www.gnu.org/licenses/gpl-2.0.html)
 
 A clean, modern WordPress LMS for teachers and students — course builder, lessons, quizzes, progress tracking, and a polished student experience.
@@ -112,6 +112,10 @@ Core Mint LMS handles learning. Paid checkout can be connected via WooCommerce i
 
 ## Changelog
 
+### 1.1.27
+
+- After Mark complete, the next lesson in a linear course becomes a link in the curriculum so the learner can open it without reloading.
+
 ### 1.1.26
 
 - Start Course: enrolled Admin, Instructor, and Manager learn for real (progress saved, locks on). Unenrolled editors get a student preview of published lessons with the same locks. Progress, quizzes, and certificates are not saved. Builder Preview still shows drafts with locks off.
@@ -185,6 +189,10 @@ Core Mint LMS handles learning. Paid checkout can be connected via WooCommerce i
 ---
 
 ## Upgrade Notice
+
+### 1.1.27
+
+Recommended update: finishing a lesson unlocks the next lesson in the course player sidebar.
 
 ### 1.1.26
 

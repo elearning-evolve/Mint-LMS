@@ -31,7 +31,8 @@ document.addEventListener('alpine:init', () => {
     lessonId: config.lessonId,
     progressPct: config.progressPct,
     isComplete: config.isComplete,
-    completedIds: [...config.completedIds],
+    completedIds: [...(config.completedIds || [])].map(Number),
+    orderedLessonIds: [...(config.orderedLessonIds || [])].map(Number),
     isEnrolled: config.isEnrolled,
     studentPreview: !!config.studentPreview,
     quizRequired: config.quizRequired || false,
@@ -43,6 +44,19 @@ document.addEventListener('alpine:init', () => {
     sidebarOpen: false,
     marking: false,
     error: '',
+
+    lessonUnlocked(lessonId) {
+      const index = this.orderedLessonIds.indexOf(Number(lessonId));
+      if (index <= 0) {
+        return 0 === index;
+      }
+      for (let i = 0; i < index; i += 1) {
+        if (!this.completedIds.includes(this.orderedLessonIds[i])) {
+          return false;
+        }
+      }
+      return true;
+    },
 
     init() {
       if (this.autoComplete && this.isEnrolled && !this.isComplete) {
