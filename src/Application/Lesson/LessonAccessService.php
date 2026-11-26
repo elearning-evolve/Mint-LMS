@@ -37,10 +37,15 @@ final class LessonAccessService {
 			throw new NotFoundException( 'Lesson not found.' );
 		}
 
-		// Front-end / progress: only published lessons (WP post_status), matching student outline.
+		// Guests only get published lessons. Enrolled students can open a draft
+		// lesson that is already attached to their course (Start course).
 		if ( function_exists( 'get_post_status' ) ) {
-			$status = get_post_status( $lessonId );
-			if ( false === $status || ( is_string( $status ) && 'publish' !== $status ) ) {
+			$status  = get_post_status( $lessonId );
+			$allowed = array( 'publish' );
+			if ( $userId > 0 && $lesson->courseId > 0 && $this->progressRepository->isUserEnrolled( $userId, $lesson->courseId ) ) {
+				$allowed[] = 'draft';
+			}
+			if ( false === $status || ( is_string( $status ) && ! in_array( $status, $allowed, true ) ) ) {
 				throw new NotFoundException( 'Lesson not found.' );
 			}
 		}

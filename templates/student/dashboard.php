@@ -88,15 +88,15 @@ require MINTLMS_PATH . 'views/student/partials/student-header.php';
 	<?php
 	if ( null !== $continueCourse ) :
 		$continueLessonId = $continueCourse->lastLessonId ?? $continueCourse->firstLessonId;
-		$continueUrl      = $continueLessonId
-			? add_query_arg(
-				array(
-					'mint_course' => (string) $continueCourse->courseId,
-					'mint_lesson' => (string) $continueLessonId,
-				),
-				$playerUrl
-			)
-			: $playerUrl;
+		$continueArgs     = array();
+		if ( $continueCourse->courseId > 0 ) {
+			$continueArgs['mint_course']    = (string) $continueCourse->courseId;
+			$continueArgs['mintlms_course'] = (string) $continueCourse->courseId;
+		}
+		if ( $continueLessonId ) {
+			$continueArgs['mint_lesson'] = (string) $continueLessonId;
+		}
+		$continueUrl = array() === $continueArgs ? $playerUrl : add_query_arg( $continueArgs, $playerUrl );
 		$pct              = (int) round( $continueCourse->progressPct );
 		?>
 		<div class="mint-mb-10 mint-rounded-xl mint-bg-accent mint-p-6 sm:mint-p-7 mint-text-neutral-50 mint-shadow-card">
@@ -146,15 +146,15 @@ require MINTLMS_PATH . 'views/student/partials/student-header.php';
 				$targetLesson = $course->isComplete
 					? $course->firstLessonId
 					: ( $course->lastLessonId ?? $course->firstLessonId );
-				$actionUrl    = $targetLesson
-					? add_query_arg(
-						array(
-							'mint_course' => (string) $course->courseId,
-							'mint_lesson' => (string) $targetLesson,
-						),
-						$playerUrl
-					)
-					: $playerUrl;
+				$actionArgs   = array();
+				if ( $course->courseId > 0 ) {
+					$actionArgs['mint_course']    = (string) $course->courseId;
+					$actionArgs['mintlms_course'] = (string) $course->courseId;
+				}
+				if ( $targetLesson ) {
+					$actionArgs['mint_lesson'] = (string) $targetLesson;
+				}
+				$actionUrl = array() === $actionArgs ? $playerUrl : add_query_arg( $actionArgs, $playerUrl );
 				?>
 				<a href="<?php echo esc_url( $actionUrl ); ?>" class="mint-group mint-flex mint-flex-col mint-overflow-hidden mint-rounded-xl mint-border mint-border-rule mint-bg-bg mint-shadow-card hover:mint-border-control mint-transition-colors mint-duration-hover mint-no-underline">
 					<div class="mint-flex mint-h-28 mint-items-center mint-justify-center <?php echo esc_attr( $hue['bg'] ); ?>">

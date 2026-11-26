@@ -677,6 +677,14 @@ final class ShortcodeRegistrar {
 			$courseId = $this->queryInt( PageSettings::COURSE_QUERY_ARG );
 		}
 
+		$userId = get_current_user_id();
+
+		// Start course used to drop the query string when no lesson id was known.
+		// A learner with one enrollment can still open that course from /course-player/.
+		if ( $courseId <= 0 && $userId > 0 ) {
+			$courseId = $this->studentExperience->resolveEnrolledCourseId( $userId );
+		}
+
 		if ( $courseId > 0 ) {
 			$builderPreview = $this->renderBuilderPreview( $courseId );
 			if ( null !== $builderPreview ) {
@@ -689,8 +697,6 @@ final class ShortcodeRegistrar {
 		if ( $lessonId <= 0 ) {
 			$lessonId = $this->queryInt( 'mint_lesson' );
 		}
-
-		$userId = get_current_user_id();
 
 		if ( $courseId <= 0 ) {
 			return $this->wrap(

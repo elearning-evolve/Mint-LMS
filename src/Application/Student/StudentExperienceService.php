@@ -54,6 +54,42 @@ final class StudentExperienceService {
 	/**
 	 * @return list<StudentCourseItemDto>
 	 */
+	/**
+	 * Course to open when the player URL has no course id.
+	 * Only when the learner has exactly one visible enrollment, so we never
+	 * guess between courses.
+	 */
+	public function resolveEnrolledCourseId( int $userId ): int {
+		if ( $userId <= 0 ) {
+			return 0;
+		}
+
+		$result    = $this->enrollmentRepository->listByUser( $userId, 1, self::MAX_COURSES, null );
+		$courseIds = array();
+
+		foreach ( $result['enrollments'] as $enrollment ) {
+			if ( EnrollmentStatus::Cancelled === $enrollment->status ) {
+				continue;
+			}
+
+			$course = $this->courseRepository->findById( $enrollment->courseId );
+			if ( null === $course || ! $this->isCourseVisibleInStudentLibrary( $course->status ) ) {
+				continue;
+			}
+
+			$courseIds[ $course->id ] = $course->id;
+		}
+
+		if ( 1 !== count( $courseIds ) ) {
+			return 0;
+		}
+
+		return (int) array_key_first( $courseIds );
+	}
+
+	/**
+	 * @return list<StudentCourseItemDto>
+	 */
 	public function getDashboardCourses( int $userId ): array {
 		if ( $userId <= 0 ) {
 			return array();
@@ -838,7 +874,7 @@ final class StudentExperienceService {
 		$progressPct  = null !== $summary ? $summary->pctComplete : 0.0;
 		$lastLessonId = null !== $summary ? $summary->lastLessonId : null;
 		$isComplete   = null !== $summary && $summary->isCourseComplete();
-		$structure    = $this->loadGatedStructure( $course->id, true, $userId );
+		$structure    = $this->loadGatedStructure( $course->id, true, $userId, false, true );
 		$flat         = $this->flattenLessons( $structure );
 		$completedIds = $this->progressRepository->getCompletedLessonIds( $userId, $course->id );
 
@@ -901,9 +937,14 @@ final class StudentExperienceService {
 
 		$reallyEnrolled = null !== $isReallyEnrolled ? $isReallyEnrolled : $canBrowseContent;
 		$enrolledAt     = $this->resolveEnrollmentDate( $userId, $courseId, $reallyEnrolled );
-		// Students: published lessons only. Instructor preview ($skipDrip): include drafts.
-		$publishedOnly = ! $skipDrip;
-		$rows          = $this->sectionRepository->loadStructureRows( $courseId, $publishedOnly );
+		// Guests see published lessons only. An enrolled student must see lessons the
+		// author already attached, including drafts — otherwise Start course has no
+		// lesson id and the player opens with no course id. Instructor preview
+		// ($skipDrip) includes drafts as well. $isReallyEnrolled is the explicit
+		// enrollment flag; public browse must not be treated as enrolled.
+		$includeDraftLessons = $skipDrip || true === $isReallyEnrolled;
+		$publishedOnly       = ! $includeDraftLessons;
+		$rows                = $this->sectionRepository->loadStructureRows( $courseId, $publishedOnly );
 		// Same order as LessonAccessService / curriculum display (ungrouped first).
 		$orderedLessonIds = CourseLessonSequence::orderedLessonIds( $rows );
 

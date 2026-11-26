@@ -18,15 +18,15 @@ $featuredUrl   = is_string( $featuredUrl ?? null ) ? $featuredUrl : '';
 $categoryName  = is_string( $categoryName ?? null ) ? trim( $categoryName ) : '';
 
 $startLessonId = $overview->lastLessonId ?? $overview->firstLessonId;
-$continueUrl   = $startLessonId
-	? add_query_arg(
-		array(
-			'mint_course' => (string) $overview->courseId,
-			'mint_lesson' => (string) $startLessonId,
-		),
-		$playerUrl
-	)
-	: $playerUrl;
+$playerArgs    = array();
+if ( $overview->courseId > 0 ) {
+	$playerArgs['mint_course']    = (string) $overview->courseId;
+	$playerArgs['mintlms_course'] = (string) $overview->courseId;
+}
+if ( $startLessonId ) {
+	$playerArgs['mint_lesson'] = (string) $startLessonId;
+}
+$continueUrl = array() === $playerArgs ? $playerUrl : add_query_arg( $playerArgs, $playerUrl );
 
 $pct = null !== $overview->progressPct ? (int) round( $overview->progressPct ) : 0;
 // Prefer edge-localized outline from ShortcodeRegistrar; fall back to Application payload.

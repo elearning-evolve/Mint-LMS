@@ -110,15 +110,15 @@ require MINTLMS_PATH . 'views/student/partials/student-header.php';
 				$targetLesson = $isDone
 					? $course->firstLessonId
 					: ( $course->lastLessonId ?? $course->firstLessonId );
-				$actionUrl    = $targetLesson
-					? add_query_arg(
-						array(
-							'mint_course' => (string) $course->courseId,
-							'mint_lesson' => (string) $targetLesson,
-						),
-						$playerUrl
-					)
-					: $playerUrl;
+				$actionArgs   = array();
+				if ( $course->courseId > 0 ) {
+					$actionArgs['mint_course']    = (string) $course->courseId;
+					$actionArgs['mintlms_course'] = (string) $course->courseId;
+				}
+				if ( $targetLesson ) {
+					$actionArgs['mint_lesson'] = (string) $targetLesson;
+				}
+				$actionUrl = array() === $actionArgs ? $playerUrl : add_query_arg( $actionArgs, $playerUrl );
 
 				$ctaLabel = $isDone ? __( 'Review course', 'mint-lms' ) : __( 'Continue', 'mint-lms' );
 				$barTrack = $isDone
